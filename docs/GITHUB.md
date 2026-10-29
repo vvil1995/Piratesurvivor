@@ -50,3 +50,9 @@ El workflow `.github/workflows/ci.yml` ejecuta comprobación de tipos, pruebas, 
 Para generar una versión local: `npm run release`. Después de revisar, crea una etiqueta nueva con Git. No vuelvas a usar una etiqueta existente para contenido diferente.
 
 Los workflows usan permisos mínimos de lectura. GitHub Actions puede tener límites o costes según el plan; la ejecución del juego es totalmente estática y no depende de Actions. Si el plan de GitHub no permite Pages privado, conserva los ZIP o utiliza alojamiento privado; no cambies la visibilidad del código.
+
+## Estado actual y Netlify
+
+El remoto privado está en https://github.com/vvil1995/Piratesurvivor, rama `main`. El código ya se ha subido; los avisos anteriores sobre ausencia de remoto describen el estado inicial. No es necesario hacer público el repositorio para usar la integración autorizada de Netlify.
+
+`netlify.toml` establece Node 22.18.0, `npm run build` y carpeta de publicación `dist`. Netlify despliega después de un push si tiene los despliegues automáticos activos para `main`. Los cambios locales no aparecen mientras se editan. Si los despliegues están pausados, usar «Trigger deploy» y revisar el SHA del despliegue publicado.

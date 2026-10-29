@@ -71,7 +71,7 @@ export class BattleScene extends Phaser.Scene {
     }
     this.worldRenderer.update(run?.world ?? this.previewWorld, worldView, origin);
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
-    this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate);
+    this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate, delta / 1000);
     const pose = this.captainAnimation;
     this.captain.setTexture(`straw-hat-${pose.direction}-${pose.frame}`);
     this.captain.setPosition(worldX - origin.x, worldY - origin.y).setDepth(worldY - origin.y + 1000).setFlipX(false);
@@ -83,7 +83,7 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) continue;
       const animation = this.enemyAnimations[i];
-      animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate);
+      animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate, delta / 1000);
       sprite.setTexture(`marine-${animation.direction}-${animation.frame}`);
       sprite.setPosition(e.x - origin.x, e.y - origin.y).setDepth(e.y - origin.y + 1000).setFlipX(false);
       sprite.setTint(e.flash > 0 ? 0xffb689 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);

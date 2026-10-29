@@ -121,9 +121,8 @@ test('explorar coordenadas lejanas recicla chunks y conserva la geometría', asy
 test('animación direccional responde al movimiento y se detiene al soltar', async ({ page }) => {
   await page.locator('#start').click();
   await page.keyboard.down('w'); await page.keyboard.down('d'); await page.waitForTimeout(250);
-  const pose = await page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture);
-  expect(pose).toMatch(/^straw-hat-ne-[1-4]$/);
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(/^straw-hat-ne-[1-4]$/);
   await page.keyboard.up('w'); await page.keyboard.up('d'); await page.waitForTimeout(100);
-  const idle = await page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture);
-  expect(idle).toBe('straw-hat-ne-0');
+  // La última orientación puede ser axial por soltar teclas o deslizarse ante un obstáculo.
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(/^straw-hat-(n|ne|e)-0$/);
 });
