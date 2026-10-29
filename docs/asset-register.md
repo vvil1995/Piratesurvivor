@@ -1,0 +1,25 @@
+# Registro de recursos y licencias
+
+Estado inicial: 29-10-2026. Ningún recurso de PokéSurvivor ha sido copiado. La investigación anterior no se convirtió en importación de código, datos o archivos.
+
+| Recurso | Procedencia | Uso / derechos |
+| --- | --- | --- |
+| Simulación, interfaz, scripts y tests nuevos | Creados en este proyecto | Privados; no se ha elegido licencia pública para el código nuevo |
+| Dibujo grande del capitán | SVG original en index.html | Provisional, geometría propia; representa un personaje de terceros |
+| Personajes pequeños, cristales, suelo, hielo | Primitivas dibujadas en src/game/scenes/textures.ts | Originales de este prototipo; personajes sujetos a derechos de franquicia |
+| Escenario | Geometría original en BattleScene | Plaza genérica inspirada en Marineford; sin mapa o imagen copiados |
+| Tipografía | Arial/Helvetica/monospace del sistema | No se distribuyen archivos de fuente |
+| Iconos | Caracteres Unicode renderizados por el sistema | No se incorporan paquetes de iconos ni fuentes |
+| Música, voces y efectos sonoros | Ninguno | Motor configurado sin audio |
+| Phaser 3.90.0 | npm, paquete phaser | MIT, licencia leída y conservada en licenses/dependencies/phaser |
+| EventEmitter3 5.0.4 | Dependencia de Phaser | MIT, licencia leída y conservada en licenses/dependencies/eventemitter3 |
+| Vite 6.4.1 / esbuild 0.25.12 | npm, herramientas de compilación | MIT; avisos conservados |
+| TypeScript 5.9.3 / Playwright 1.56.1 | npm, desarrollo y pruebas | Apache-2.0; avisos conservados |
+
+`licenses/inventory.json` recoge versiones, SPDX, clasificación de ejecución y rutas de avisos de todos los paquetes instalados, incluidas dependencias transitivas. Los paquetes opcionales de otras plataformas figuran en package-lock.json; `npm run licenses` recoge y valida los que estén instalados en la plataforma de compilación. Un SPDX fuera de la lista permitida o un paquete sin texto de licencia detiene ese script y requiere revisión.
+
+La versión autónoma conserva dentro del HTML los textos completos MIT de Phaser y EventEmitter3. La compilación normal y los ZIP incluyen también el directorio de licencias. El motor precompilado conserva comentarios legales de su bundle, incluidos componentes internos.
+
+No debe atribuirse una licencia MIT a todo el fangame por contener Phaser. MIT no concede permisos sobre One Piece, personajes, nombres, escenarios, marcas o logotipos. El repositorio privado y la ausencia de monetización no sustituyen la autorización correspondiente.
+
+Para cada recurso nuevo: guardar autor, URL de origen, fecha, versión/hash, licencia comprobada, permisos adicionales, modificaciones y aviso que deba acompañarlo. No ejecutar descargadores de sprites ni incorporar recursos encontrados en buscadores sin esa revisión.

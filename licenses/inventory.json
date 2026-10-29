@@ -1,0 +1,195 @@
+[
+  {
+    "name": "@esbuild/linux-x64",
+    "version": "0.25.12",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/esbuild",
+    "notices": [
+      "licenses/dependencies/@esbuild__linux-x64/LICENSE.md"
+    ]
+  },
+  {
+    "name": "@playwright/test",
+    "version": "1.56.1",
+    "license": "Apache-2.0",
+    "runtime": false,
+    "noticeSource": "node_modules/@playwright/test",
+    "notices": [
+      "licenses/dependencies/@playwright__test/LICENSE",
+      "licenses/dependencies/@playwright__test/NOTICE"
+    ]
+  },
+  {
+    "name": "@rollup/rollup-linux-x64-gnu",
+    "version": "4.52.5",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/vite/node_modules/rollup",
+    "notices": [
+      "licenses/dependencies/@rollup__rollup-linux-x64-gnu/LICENSE.md"
+    ]
+  },
+  {
+    "name": "@types/estree",
+    "version": "1.0.8",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/vite/node_modules/@types/estree",
+    "notices": [
+      "licenses/dependencies/@types__estree/LICENSE"
+    ]
+  },
+  {
+    "name": "esbuild",
+    "version": "0.25.12",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/esbuild",
+    "notices": [
+      "licenses/dependencies/esbuild/LICENSE.md"
+    ]
+  },
+  {
+    "name": "eventemitter3",
+    "version": "5.0.4",
+    "license": "MIT",
+    "runtime": true,
+    "noticeSource": "node_modules/eventemitter3",
+    "notices": [
+      "licenses/dependencies/eventemitter3/LICENSE"
+    ]
+  },
+  {
+    "name": "fdir",
+    "version": "6.5.0",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/fdir",
+    "notices": [
+      "licenses/dependencies/fdir/LICENSE"
+    ]
+  },
+  {
+    "name": "nanoid",
+    "version": "3.3.20",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/nanoid",
+    "notices": [
+      "licenses/dependencies/nanoid/LICENSE"
+    ]
+  },
+  {
+    "name": "phaser",
+    "version": "3.90.0",
+    "license": "MIT",
+    "runtime": true,
+    "noticeSource": "node_modules/phaser",
+    "notices": [
+      "licenses/dependencies/phaser/LICENSE.md"
+    ]
+  },
+  {
+    "name": "picocolors",
+    "version": "1.1.1",
+    "license": "ISC",
+    "runtime": false,
+    "noticeSource": "node_modules/picocolors",
+    "notices": [
+      "licenses/dependencies/picocolors/LICENSE"
+    ]
+  },
+  {
+    "name": "picomatch",
+    "version": "4.0.7",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/picomatch",
+    "notices": [
+      "licenses/dependencies/picomatch/LICENSE"
+    ]
+  },
+  {
+    "name": "playwright",
+    "version": "1.56.1",
+    "license": "Apache-2.0",
+    "runtime": false,
+    "noticeSource": "node_modules/playwright",
+    "notices": [
+      "licenses/dependencies/playwright/LICENSE",
+      "licenses/dependencies/playwright/NOTICE"
+    ]
+  },
+  {
+    "name": "playwright-core",
+    "version": "1.56.1",
+    "license": "Apache-2.0",
+    "runtime": false,
+    "noticeSource": "node_modules/playwright-core",
+    "notices": [
+      "licenses/dependencies/playwright-core/LICENSE",
+      "licenses/dependencies/playwright-core/NOTICE"
+    ]
+  },
+  {
+    "name": "postcss",
+    "version": "8.5.32",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/postcss",
+    "notices": [
+      "licenses/dependencies/postcss/LICENSE"
+    ]
+  },
+  {
+    "name": "rollup",
+    "version": "4.52.5",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/vite/node_modules/rollup",
+    "notices": [
+      "licenses/dependencies/rollup/LICENSE.md"
+    ]
+  },
+  {
+    "name": "source-map-js",
+    "version": "1.2.2",
+    "license": "BSD-3-Clause",
+    "runtime": false,
+    "noticeSource": "node_modules/source-map-js",
+    "notices": [
+      "licenses/dependencies/source-map-js/LICENSE"
+    ]
+  },
+  {
+    "name": "tinyglobby",
+    "version": "0.2.17",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/tinyglobby",
+    "notices": [
+      "licenses/dependencies/tinyglobby/LICENSE"
+    ]
+  },
+  {
+    "name": "typescript",
+    "version": "5.9.3",
+    "license": "Apache-2.0",
+    "runtime": false,
+    "noticeSource": "node_modules/typescript",
+    "notices": [
+      "licenses/dependencies/typescript/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "vite",
+    "version": "6.4.1",
+    "license": "MIT",
+    "runtime": false,
+    "noticeSource": "node_modules/vite",
+    "notices": [
+      "licenses/dependencies/vite/LICENSE.md"
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "name": "one-piece-survivor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "check": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:browser": "playwright test",
+    "build": "npm run check && vite build && node scripts/portable.mjs",
+    "preview": "vite preview --host 0.0.0.0",
+    "licenses": "node scripts/licenses.mjs",
+    "release": "npm run test && npm run build && node scripts/package.mjs"
+  },
+  "dependencies": {
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3",
+    "vite": "6.4.1"
+  },
+  "overrides": {
+    "rollup": "4.52.5"
+  }
+}

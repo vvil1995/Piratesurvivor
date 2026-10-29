@@ -1,0 +1,3 @@
+* text=auto
+# Avisos originales: conservar bytes y espacios tal como los publica cada paquete.
+licenses/dependencies/** -text -whitespace
