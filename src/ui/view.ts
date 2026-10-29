@@ -2,6 +2,7 @@ import type { Run } from '../game/core/run.ts';
 import type { RunResult } from '../game/core/types.ts';
 import type { SaveStore } from '../platform/persistence/save.ts';
 import { TRAINING_COST, TRAINING_MAX } from '../content/catalog.ts';
+import { artUrl, pixelIcon, upgradeIcon } from './pixel-art.ts';
 export const el = <T extends HTMLElement = HTMLElement>(id: string): T => {
   const node = document.getElementById(id);
   if (!node) throw new Error(`Falta el elemento ${id}`);
@@ -44,11 +45,20 @@ export class View {
     el('starting-hp').textContent = (100 + p.training * 5).toString();
     const train = el<HTMLButtonElement>('train');
     train.disabled = p.training >= TRAINING_MAX || p.coins < TRAINING_COST(p.training);
-    train.textContent = p.training >= TRAINING_MAX ? 'MÁXIMO' : `${TRAINING_COST(p.training)} ◉`;
+    train.replaceChildren(document.createTextNode(p.training >= TRAINING_MAX ? 'MÁXIMO' : `${TRAINING_COST(p.training)} `));
+    if (artUrl('coin') && p.training < TRAINING_MAX) train.append(pixelIcon('coin'));
     train.setAttribute('aria-label', p.training >= TRAINING_MAX ? 'Entrenamiento al máximo' : `Entrenar por ${TRAINING_COST(p.training)} monedas`);
     el<HTMLInputElement>('reduced-motion').checked = p.reducedMotion;
     document.body.classList.toggle('reduced-motion', p.reducedMotion);
     this.warning(store.warning);
+  }
+  refreshArt(store: SaveStore): void {
+    el<HTMLImageElement>('captain-portrait').src = artUrl('straw-hat');
+    const avatar = document.createElement('img'); avatar.src = artUrl('straw-hat-face'); avatar.alt = '';
+    el('captain-avatar').replaceChildren(avatar);
+    el('ability-icon').replaceChildren(pixelIcon('fist'));
+    el('coin-icon').replaceChildren(pixelIcon('coin'));
+    this.home(store);
   }
   warning(message: string): void { el('storage-warning').hidden = !message; el('storage-warning').textContent = message; }
   setPlaying(playing: boolean): void {
@@ -72,7 +82,7 @@ export class View {
     const holder = el('upgrade-choices'); holder.replaceChildren();
     for (const upgrade of run.choices) {
       const button = document.createElement('button'); button.className = 'upgrade-card';
-      const symbol = document.createElement('span'); symbol.className = 'upgrade-symbol'; symbol.textContent = upgrade.symbol;
+      const symbol = document.createElement('span'); symbol.className = 'upgrade-symbol'; symbol.append(pixelIcon(upgradeIcon(upgrade.id)));
       const title = document.createElement('h3'); title.textContent = upgrade.name;
       const description = document.createElement('p'); description.textContent = upgrade.description;
       const tag = document.createElement('small'); tag.textContent = `ELEGIR MEJORA →  ·  NIVEL ${(run.taken[upgrade.id] || 0) + 1}`;

@@ -4,7 +4,7 @@ import { gzipSync } from 'node:zlib';
 import { Script } from 'node:vm';
 
 const bundled = await build({ entryPoints: ['src/main.ts'], bundle: true, minify: true,
-  format: 'iife', target: 'es2020', outfile: 'portable/app.js', write: false, legalComments: 'inline',
+  format: 'iife', target: 'es2020', outfile: 'portable/app.js', write: false, legalComments: 'inline', loader: { '.png': 'dataurl' },
   define: { 'import.meta.env.DEV': 'false', 'import.meta.env.VITE_QA': '"false"', 'process.env.NODE_ENV': '"production"' } });
 const js = bundled.outputFiles.find(file => file.path.endsWith('.js')).text;
 const css = bundled.outputFiles.find(file => file.path.endsWith('.css')).text;

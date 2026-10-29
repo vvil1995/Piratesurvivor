@@ -22,5 +22,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: one-piece-survivor-browser
-          path: release/one-piece-survivor-browser-v0.1.0.zip
+          path: release/one-piece-survivor-browser-*.zip
           retention-days: 14

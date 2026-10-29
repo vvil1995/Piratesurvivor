@@ -30,7 +30,8 @@ function zip(list) {
   const end = Buffer.alloc(22); end.writeUInt32LE(0x06054b50); end.writeUInt16LE(list.length, 8); end.writeUInt16LE(list.length, 10); end.writeUInt32LE(directorySize, 12); end.writeUInt32LE(offset, 16);
   return Buffer.concat([...chunks, ...directory, end]);
 }
+const { version } = JSON.parse(await readFile('package.json', 'utf8'));
 await mkdir('release', { recursive: true });
-await writeFile('release/one-piece-survivor-browser-v0.1.0.zip', zip(await files('dist')));
-await writeFile('release/one-piece-survivor-source-v0.1.0.zip', zip(await files('.', '', new Set(['.git', 'node_modules', 'release', 'dist', 'test-results', 'playwright-report', '.env', '.openai']))));
+await writeFile(`release/one-piece-survivor-browser-v${version}.zip`, zip(await files('dist')));
+await writeFile(`release/one-piece-survivor-source-v${version}.zip`, zip(await files('.', '', new Set(['.git', 'node_modules', 'release', 'dist', 'test-results', 'playwright-report', '.env', '.openai']))));
 console.log('Paquetes de navegador y código fuente creados en release/.');

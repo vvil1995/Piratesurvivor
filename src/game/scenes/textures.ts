@@ -1,7 +1,10 @@
 import Phaser from 'phaser';
+import { rasterizeArt } from '../../ui/pixel-art.ts';
 
 // Dibujos geométricos originales. Sustituibles por un atlas sin tocar la simulación.
 export function createTextures(scene: Phaser.Scene): void {
+  const art = rasterizeArt(scene.textures.get('source-atlas').getSourceImage() as HTMLImageElement);
+  for (const [name, canvas] of art) scene.textures.addCanvas(name, canvas);
   const g = scene.make.graphics({ x: 0, y: 0 });
   g.fillStyle(0x607780); g.fillRect(0, 0, 128, 128);
   const shades = [0x657d85, 0x6a8087, 0x637a82, 0x6b8188];
@@ -14,29 +17,6 @@ export function createTextures(scene: Phaser.Scene): void {
   g.generateTexture('floor', 128, 128); g.clear();
 
   g.fillStyle(0x142a33, 0.25); g.fillEllipse(16, 7, 27, 12); g.generateTexture('shadow', 32, 14); g.clear();
-
-  // Luffy: 32 × 40, paleta propia, sin sprites oficiales.
-  g.fillStyle(0x453a32); g.fillRect(8, 32, 7, 7); g.fillRect(19, 32, 7, 7);
-  g.fillStyle(0x253c4b); g.fillRect(8, 25, 18, 9); g.fillRect(15, 31, 4, 4);
-  g.fillStyle(0xe6b485); g.fillRect(7, 15, 20, 13); g.fillRect(5, 22, 4, 9); g.fillRect(26, 22, 4, 9);
-  g.fillStyle(0xc75d41); g.fillRect(8, 20, 7, 9); g.fillRect(20, 20, 6, 9);
-  g.fillStyle(0x232f33); g.fillRect(9, 10, 17, 7);
-  g.fillStyle(0xf0c398); g.fillRect(11, 13, 13, 9);
-  g.fillStyle(0x30373a); g.fillRect(13, 16, 2, 2); g.fillRect(21, 16, 2, 2);
-  g.fillStyle(0xd6ae61); g.fillRect(8, 2, 19, 9);
-  g.fillStyle(0xb34d38); g.fillRect(8, 8, 19, 4);
-  g.fillStyle(0xf0cb7c); g.fillRect(2, 11, 30, 5);
-  g.fillStyle(0xedcf8a); g.fillRect(11, 3, 13, 2);
-  g.generateTexture('straw-hat', 34, 40); g.clear();
-
-  g.fillStyle(0x233c50); g.fillRect(8, 29, 6, 9); g.fillRect(20, 29, 6, 9);
-  g.fillStyle(0x3988b1); g.fillRect(7, 23, 20, 10);
-  g.fillStyle(0xd7e5df); g.fillRect(7, 16, 20, 12); g.fillRect(3, 18, 5, 10); g.fillRect(26, 18, 5, 10);
-  g.fillStyle(0xd8b391); g.fillRect(11, 8, 13, 12); g.fillRect(3, 27, 5, 4); g.fillRect(26, 27, 5, 4);
-  g.fillStyle(0x245270); g.fillRect(15, 18, 5, 12); g.fillRect(13, 13, 2, 2); g.fillRect(21, 13, 2, 2);
-  g.fillStyle(0xe6eeea); g.fillRect(8, 3, 19, 8); g.fillRect(5, 9, 25, 3);
-  g.fillStyle(0x3b7997); g.fillRect(13, 4, 9, 3);
-  g.generateTexture('marine', 34, 40); g.clear();
 
   g.fillStyle(0x326b7c); g.fillPoints([{ x: 7, y: 0 }, { x: 14, y: 8 }, { x: 7, y: 17 }, { x: 0, y: 8 }], true);
   g.fillStyle(0x9ee1db); g.fillPoints([{ x: 7, y: 2 }, { x: 12, y: 8 }, { x: 7, y: 14 }, { x: 2, y: 8 }], true);

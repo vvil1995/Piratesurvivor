@@ -30,12 +30,17 @@ try {
     assert.equal(await page.evaluate(() => !!window.__OPS_QA__), false, 'El artefacto no expone QA');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: `test-results/screenshots/portable-${mobile ? 'mobile' : 'desktop'}-home.png`, fullPage: true });
+    if (mobile) await page.setViewportSize({ width: 844, height: 390 });
     await page.locator('#start').click();
     if (mobile) {
       const touch = await page.evaluate(() => ({ coarse: matchMedia('(pointer: coarse)').matches, points: navigator.maxTouchPoints, display: getComputedStyle(document.querySelector('#touch-zone')).display }));
       assert.equal(touch.display, 'block', `Joystick disponible: ${JSON.stringify(touch)}`);
     }
     await page.waitForTimeout(7000);
+    assert.ok(await page.evaluate(() => {
+      const canvas = document.querySelector('#game canvas');
+      return Math.abs(canvas.width / canvas.height - innerWidth / innerHeight) < 0.01;
+    }), 'El canvas conserva proporciones después del giro');
     await page.screenshot({ path: `test-results/screenshots/portable-${mobile ? 'mobile' : 'desktop'}-battle.png` });
     await page.locator('#pause').click();
     await page.locator('#paused').waitFor({ state: 'visible' });

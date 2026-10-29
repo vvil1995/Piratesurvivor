@@ -13,7 +13,7 @@
     <div class="grain" aria-hidden="true"></div>
     <header class="topbar" id="topbar">
       <a href="#" class="brand" aria-label="One Piece Survivor, inicio"><span class="brand-mark" aria-hidden="true">⚑</span><span>ONE PIECE <b>SURVIVOR</b></span></a>
-      <div class="top-meta"><span class="status-dot"></span> PROTOTIPO 0.1 <span class="separator">/</span> <span class="local-label">GUARDADO LOCAL</span></div>
+      <div class="top-meta"><span class="status-dot"></span> PROTOTIPO 0.2 <span class="separator">/</span> <span class="local-label">GUARDADO LOCAL</span></div>
       <button id="help-open" class="icon-button" aria-label="Cómo jugar">?</button>
     </header>
 
@@ -31,41 +31,25 @@
         <div class="panel-top"><span>TU CAPITÁN</span><span class="available">● DISPONIBLE</span></div>
         <div class="wanted-portrait" aria-hidden="true">
           <span class="portrait-ring"></span><span class="portrait-coordinates">MF / 001<br>GRAND LINE</span>
-          <svg class="captain-art" viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="161" cy="270" rx="85" ry="12" fill="#14272c" opacity=".17"/>
-            <path d="M126 215h32v44h-38v-13h6zm43 0h30l8 33v11h-38z" fill="#563b32"/>
-            <path d="M122 188h79v43h-36v-13h-9v13h-37z" fill="#263c49"/>
-            <path d="M121 127h82v74h-29v-60h-17v60h-36z" fill="#c6563b"/>
-            <path d="M151 134h27v61h-27z" fill="#e7b387"/>
-            <path d="M111 133h22v48h-13v29H98v-48h13zm85 0h22v26h17v49h-22v-36h-17z" fill="#e7b387"/>
-            <path d="M128 72h68v59h-13v14h-39v-14h-16z" fill="#efc49c"/>
-            <path d="M124 75h80v30h-13V90h-12v-8h-37v15h-18z" fill="#283033"/>
-            <path d="M142 106h7v7h-7zm35 0h7v7h-7z" fill="#29343a"/>
-            <path d="M151 122h24v5h-24z" fill="#a96e58"/>
-            <path d="M103 62h120v25H103zm25-31h69v32h-69z" fill="#d7b267"/>
-            <path d="M128 53h69v11h-69z" fill="#b74b35"/>
-            <path d="M91 77h144v12H91z" fill="#e8c47e"/>
-            <path d="M132 35h58v6h-58z" fill="#edd199"/>
-            <path d="M133 190h67v8h-67z" fill="#e4bb62"/>
-          </svg>
-          <span class="portrait-index">01</span><span class="art-caption">ESTUDIO DE PERSONAJE · ARTE PROVISIONAL ORIGINAL</span>
+          <img id="captain-portrait" class="captain-art" alt="" />
+          <span class="portrait-index">01</span><span class="art-caption">PIXEL ART · NUEVA DIRECCIÓN VISUAL</span>
         </div>
         <div class="character-details"><span class="small-label">SOMBRERO DE PAJA</span><h2>MONKEY D. LUFFY</h2><p>El futuro rey de los piratas.</p>
           <div class="character-stats"><div><small>VIDA</small><b id="starting-hp">100</b></div><div><small>ESTILO</small><b>CUERPO A CUERPO</b></div><div><small>HABILIDAD</small><b>PUÑO ELÁSTICO</b></div></div>
         </div>
         <div class="training-row"><div><small>ENTRENAMIENTO <b id="training-level">0/5</b></small><span>+5 de vida inicial por nivel</span></div><button id="train" class="training-button">30 <span aria-hidden="true">◉</span></button></div>
-        <div class="wallet"><span>BOTÍN DISPONIBLE</span><b><span id="coins">0</span> <span class="gold">◉</span></b></div>
+        <div class="wallet"><span>BOTÍN DISPONIBLE</span><b><span id="coins">0</span> <span class="gold" id="coin-icon"></span></b></div>
       </section>
     </main>
     <footer id="home-footer"><span>FANGAME NO OFICIAL · SIN ANUNCIOS NI COMPRAS</span><button id="credits-open">Créditos y recursos ↗</button></footer>
 
     <section id="hud" class="hud" hidden aria-label="Estado de la partida">
-      <div class="hud-top"><div class="player-status"><span class="mini-hat" aria-hidden="true">⚑</span><div><div class="hud-name">LUFFY <span id="level">NV. 1</span></div><div class="health-track" role="progressbar" aria-label="Vida" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="health-fill"></div></div><span id="health-text">100 / 100</span></div></div>
+      <div class="hud-top"><div class="player-status"><span class="mini-hat" aria-hidden="true" id="captain-avatar"></span><div><div class="hud-name">LUFFY <span id="level">NV. 1</span></div><div class="health-track" role="progressbar" aria-label="Vida" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="health-fill"></div></div><span id="health-text">100 / 100</span></div></div>
         <div class="run-clock"><span id="clock">00:00</span><small>RESISTE HASTA 10:00</small></div>
         <div class="hud-actions"><span class="kills"><span aria-hidden="true">✦</span> <b id="kills">0</b></span><button id="pause" class="icon-button" aria-label="Pausar partida"><span class="pause-bars" aria-hidden="true"></span></button></div>
       </div>
       <div class="xp-track" role="progressbar" aria-label="Experiencia" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="xp-fill"></div></div>
-      <div class="hud-bottom"><div class="ability-chip"><span aria-hidden="true">↯</span><div>PUÑO ELÁSTICO<small>ATAQUE AUTOMÁTICO</small></div></div><span id="area-label">MARINEFORD <span>·</span> PLAZA HELADA</span><button id="fullscreen" class="icon-button" aria-label="Pantalla completa">⛶</button></div>
+      <div class="hud-bottom"><div class="ability-chip"><span aria-hidden="true" id="ability-icon"></span><div>PUÑO ELÁSTICO<small>ATAQUE AUTOMÁTICO</small></div></div><span id="area-label">MARINEFORD <span>·</span> PLAZA HELADA</span><button id="fullscreen" class="icon-button" aria-label="Pantalla completa">⛶</button></div>
     </section>
     <div id="touch-zone" hidden aria-label="Área del joystick táctil"><div id="joystick"><div id="joystick-nub"></div></div><span class="touch-hint">ARRASTRA PARA MOVERTE</span></div>
 
@@ -73,8 +57,11 @@
     <section id="paused" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="dialog-card"><span class="eyebrow">RESPIRA, CAPITÁN</span><h2 id="pause-title">MAR EN CALMA.</h2><p>La partida está en pausa.</p><button id="resume" class="primary-button">VOLVER A LA BATALLA <span>→</span></button><button id="abandon" class="secondary-button">Abandonar partida</button><p class="fine-print">Al abandonar no se suma botín. Tu progreso anterior se conserva.</p></div></section>
     <section id="result" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="dialog-card result-card"><span id="result-eyebrow" class="eyebrow"></span><h2 id="result-title"></h2><p id="result-copy"></p><div class="result-stats"><div><small>TIEMPO</small><b id="result-time"></b></div><div><small>MARINES</small><b id="result-kills"></b></div><div><small>NIVEL</small><b id="result-level"></b></div></div><div class="reward-line">BOTÍN CONSEGUIDO <b id="result-coins"></b></div><button id="retry" class="primary-button">VOLVER A ZARPAR <span>↗</span></button><button id="return-home" class="secondary-button">Volver al puerto</button></div></section>
     <section id="help" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="help-title"><div class="dialog-card help-card"><button class="close-dialog icon-button" data-close="help" aria-label="Cerrar instrucciones">×</button><span class="eyebrow">BITÁCORA DEL CAPITÁN</span><h2 id="help-title">CÓMO SOBREVIVIR</h2><ol><li><b>Muévete.</b> Usa WASD, flechas o arrastra en la zona izquierda de la pantalla en móvil.</li><li><b>Acércate y golpea.</b> El puño ataca automáticamente al marine más cercano dentro de su alcance.</li><li><b>Recoge los cristales.</b> La experiencia desbloquea tres opciones de mejora. Elige una.</li><li><b>Resiste diez minutos.</b> Si tu vida llega a cero, termina la partida. El botín permite entrenar en el puerto.</li></ol><p>Esc o P para pausar. La partida se pausa al cambiar de aplicación. El progreso se guarda en este navegador; una batalla en curso no se recupera al cerrar.</p><label class="setting"><input type="checkbox" id="reduced-motion" /> Reducir movimiento decorativo</label><div class="save-actions"><button id="export-save" class="secondary-button">Exportar progreso</button><label class="secondary-button" for="import-save">Importar progreso</label><input type="file" accept="application/json,.json" id="import-save" hidden /></div><p id="import-status" role="status"></p></div></section>
-    <section id="credits" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="credits-title"><div class="dialog-card help-card"><button class="close-dialog icon-button" data-close="credits" aria-label="Cerrar créditos">×</button><span class="eyebrow">PROTOTIPO 0.1</span><h2 id="credits-title">HECHO DESDE CERO.</h2><p>Lógica, interfaz, dibujos geométricos y texturas creados para este prototipo. No contiene código ni recursos de PokéSurvivor, sprites oficiales, música ni fuentes descargadas.</p><p>Motor: Phaser 3.90.0 (MIT). Las licencias completas y el inventario de dependencias acompañan la compilación en <code>licenses/</code>.</p><p>One Piece y sus personajes pertenecen a sus respectivos titulares. Fangame no oficial, sin afiliación ni autorización implícita. El arte original no concede derechos sobre los personajes representados.</p><div id="license-notices"></div><p>Esta versión no usa backend, analítica, anuncios ni compras. No envía tu progreso a ningún servidor.</p></div></section>
+    <section id="credits" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="credits-title"><div class="dialog-card help-card"><button class="close-dialog icon-button" data-close="credits" aria-label="Cerrar créditos">×</button><span class="eyebrow">PROTOTIPO 0.2</span><h2 id="credits-title">HECHO DESDE CERO.</h2><p>Lógica e interfaz propias. Personajes e iconos pixel art generados para este proyecto; texturas de escenario geométricas originales. No contiene código ni recursos de PokéSurvivor, sprites oficiales, música ni fuentes descargadas.</p><p>Motor: Phaser 3.90.0 (MIT). Las licencias completas y el inventario de dependencias acompañan la compilación en <code>licenses/</code>.</p><p>One Piece y sus personajes pertenecen a sus respectivos titulares. Fangame no oficial, sin afiliación ni autorización implícita. El arte original no concede derechos sobre los personajes representados.</p><div id="license-notices"></div><p>Esta versión no usa backend, analítica, anuncios ni compras. No envía tu progreso a ningún servidor.</p></div></section>
     <div id="storage-warning" class="storage-warning" role="status" hidden></div>
+    <section id="rotate-screen" class="rotate-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="rotate-title">
+      <div class="rotate-card"><div class="phone-turn" aria-hidden="true">↻</div><span class="eyebrow">LA BATALLA SE JUEGA EN HORIZONTAL</span><h2 id="rotate-title">GIRA TU DISPOSITIVO</h2><p>Disfruta de una vista más amplia del campo de batalla.<br>La partida está en pausa mientras giras la pantalla.</p><button id="rotate-action" class="primary-button">PANTALLA COMPLETA Y GIRAR <span>↻</span></button><p id="rotate-tip" class="fine-print">Si no gira automáticamente, activa la rotación del dispositivo y colócalo en horizontal.</p><button id="rotate-home" class="secondary-button">Volver al puerto</button></div>
+    </section>
     <div id="loading" class="loading"><span class="brand-mark">⚑</span><p>PREPARANDO EL VIAJE…</p></div>
   </div>
   <script type="module" src="/src/main.ts"></script>

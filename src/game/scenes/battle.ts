@@ -3,6 +3,7 @@ import { MARINEFORD } from '../../content/catalog.ts';
 import type { Run } from '../core/run.ts';
 import type { Vector } from '../core/types.ts';
 import { createTextures } from './textures.ts';
+import atlasUrl from '../../assets/pixel-atlas-v2.png';
 
 export interface BattleBridge {
   run: () => Run | undefined; axis: () => Vector; tick: () => void;
@@ -16,9 +17,11 @@ export class BattleScene extends Phaser.Scene {
   private shadows: Phaser.GameObjects.Image[] = [];
   private crystals: Phaser.GameObjects.Image[] = [];
   private effects!: Phaser.GameObjects.Graphics;
+  private fists: Phaser.GameObjects.Image[] = [];
   private accumulator = 0;
   private previousRun?: Run;
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
+  preload(): void { this.load.image('source-atlas', atlasUrl); }
   create(): void {
     createTextures(this);
     this.add.tileSprite(0, 0, MARINEFORD.width, MARINEFORD.height, 'floor').setOrigin(0);
@@ -26,11 +29,12 @@ export class BattleScene extends Phaser.Scene {
     for (let i = 0; i < MARINEFORD.pickupCap; i++) this.crystals.push(this.add.image(0, 0, 'xp').setVisible(false).setDepth(2));
     for (let i = 0; i < MARINEFORD.enemyCap; i++) {
       this.shadows.push(this.add.image(0, 0, 'shadow').setVisible(false).setDepth(3));
-      this.enemies.push(this.add.image(0, 0, 'marine').setOrigin(0.5, 0.92).setScale(1.1).setVisible(false));
+      this.enemies.push(this.add.image(0, 0, 'marine').setOrigin(0.5, 0.96).setScale(0.6).setVisible(false));
     }
     this.captainShadow = this.add.image(1200, 900, 'shadow').setDepth(3).setScale(1.2);
-    this.captain = this.add.image(1200, 900, 'straw-hat').setOrigin(0.5, 0.92).setScale(1.2).setDepth(1000);
+    this.captain = this.add.image(1200, 900, 'straw-hat').setOrigin(0.5, 0.96).setScale(0.65).setDepth(1000);
     this.effects = this.add.graphics().setDepth(4000);
+    for (let i = 0; i < 12; i++) this.fists.push(this.add.image(0, 0, 'fist').setDisplaySize(27, 27).setDepth(4001).setVisible(false));
     this.cameras.main.setBounds(0, 0, MARINEFORD.width, MARINEFORD.height);
     this.resize();
     this.scale.on('resize', this.resize, this);
@@ -93,6 +97,9 @@ export class BattleScene extends Phaser.Scene {
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
     const movement = this.bridge.axis();
     const bob = animate && (movement.x || movement.y) ? Math.sin((run?.time ?? 0) * 17) * 1.5 : 0;
+    const attacking = !!run?.strikes.length;
+    const walk = Math.floor((run?.time ?? 0) * 8) % 2 + 1;
+    this.captain.setTexture(attacking ? 'straw-hat-attack' : animate && (movement.x || movement.y) ? `straw-hat-walk${walk}` : 'straw-hat');
     this.captain.setPosition(player?.x ?? 1200, (player?.y ?? 900) + bob).setDepth((player?.y ?? 900) + 10).setFlipX(Math.cos(player?.facing ?? 0) < 0);
     this.captainShadow.setPosition(player?.x ?? 1200, (player?.y ?? 900) + 2);
     this.captain.setAlpha(player && player.hurtTimer > 0 && Math.floor(player.hurtTimer * 18) % 2 === 0 ? 0.5 : 1);
@@ -101,6 +108,7 @@ export class BattleScene extends Phaser.Scene {
       const visible = !!e?.active && Math.abs(e.x - (player?.x ?? 1200)) < camera.width / camera.zoom / 2 + 160 && Math.abs(e.y - (player?.y ?? 900)) < camera.height / camera.zoom / 2 + 160;
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) continue;
+      sprite.setTexture(animate ? `marine-walk${Math.floor(run!.time * 7 + e.id) % 2 + 1}` : 'marine');
       sprite.setPosition(e.x, e.y + (animate ? Math.sin((run!.time * 12) + e.id) : 0)).setDepth(e.y + 10).setFlipX((player?.x ?? 0) < e.x);
       sprite.setTint(e.flash > 0 ? 0xffb689 : 0xffffff); shadow.setPosition(e.x, e.y + 2);
     }
@@ -110,12 +118,13 @@ export class BattleScene extends Phaser.Scene {
       if (pickup?.active) sprite.setPosition(pickup.x, pickup.y).setScale(pickup.value >= 20 ? 1.3 : 1);
     }
     this.effects.clear();
-    if (run) for (const strike of run.strikes) {
+    for (const fist of this.fists) fist.setVisible(false);
+    if (run) for (const [index, strike] of run.strikes.entries()) {
       const alpha = Math.min(1, strike.life / 0.08);
       const distance = Math.max(30, strike.reach), endX = strike.x + Math.cos(strike.angle) * distance, endY = strike.y + Math.sin(strike.angle) * distance;
       this.effects.lineStyle(9, 0x7c503b, alpha); this.effects.lineBetween(strike.x, strike.y - 19, endX, endY - 19);
       this.effects.lineStyle(5, 0xefc69a, alpha); this.effects.lineBetween(strike.x, strike.y - 21, endX, endY - 21);
-      this.effects.fillStyle(0xf6d2a9, alpha); this.effects.fillRect(endX - 8, endY - 28, 17, 15);
+      this.fists[index].setVisible(true).setPosition(endX, endY - 21).setAlpha(alpha).setRotation(strike.angle + Math.PI / 4);
       this.effects.lineStyle(2, 0xf6e5bc, alpha); this.effects.strokeCircle(endX, endY - 20, 19 - strike.life * 40);
     }
     this.bridge.tick();

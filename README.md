@@ -1,10 +1,10 @@
-# One Piece Survivor · prototipo 0.1
+# One Piece Survivor · prototipo 0.2
 
-Fangame no oficial de supervivencia para navegador. Gratis, sin anuncios, compras, cuentas ni backend. Lógica y gráficos provisionales originales. No reutiliza código ni recursos de PokéSurvivor.
+Fangame no oficial de supervivencia para navegador. Gratis, sin anuncios, compras, cuentas ni backend. Lógica propia y nuevos sprites e iconos pixel art generados para el proyecto. No reutiliza código ni recursos de PokéSurvivor.
 
 ## Probar sin instalar herramientas
 
-Descarga y descomprime `one-piece-survivor-browser-v0.1.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
+Descarga y descomprime `one-piece-survivor-browser-v0.2.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
 
 En Android/iOS, la apertura de archivos HTML desde el gestor de archivos depende del sistema y puede mostrar solo una vista previa. Para esos dispositivos, sirve la carpeta `dist/` mediante un alojamiento estático HTTPS privado o desde un ordenador de tu red. No necesita backend. Lee [PROBAR.md](docs/PROBAR.md).
 
@@ -43,6 +43,8 @@ Si Chromium ya está instalado, indica su ruta mediante `CHROMIUM_EXECUTABLE`. P
 
 - Luffy, plaza provisional inspirada en Marineford y marines perseguidores.
 - WASD/flechas, joystick táctil, ataque automático y daño por contacto.
+- Batalla móvil en horizontal: aviso de giro, pausa en vertical y botón de rotación cuando la API lo permite.
+- Luffy y marines con siluetas detalladas, poses de movimiento y ataque; iconos pixel art de mejoras.
 - Vida, regeneración lenta, experiencia, niveles y tres opciones por nivel.
 - Derrota, victoria a los diez minutos, pausa y reinicio.
 - Monedas ganadas jugando y cinco niveles de entrenamiento permanente (+5 de vida inicial por nivel).
@@ -56,7 +58,7 @@ Jefes, nuevos personajes, ataques combinados, evoluciones, sprites finales y aud
 
 ## GitHub privado
 
-Se incluye un repositorio Git local, etiqueta `v0.1.0`, CI y plantilla de incidencias. **No se ha creado un remoto de GitHub:** la autenticación disponible en el entorno no era válida. Sigue [GITHUB.md](docs/GITHUB.md) para conectarlo a tu cuenta; nunca conviertas el repositorio en público para habilitar una demo.
+Se incluye un repositorio Git local, etiqueta `v0.2.0`, CI y plantilla de incidencias. **No se ha creado un remoto de GitHub:** la autenticación disponible en el entorno no era válida. Sigue [GITHUB.md](docs/GITHUB.md) para conectarlo a tu cuenta; nunca conviertas el repositorio en público para habilitar una demo.
 
 ## Documentación
 

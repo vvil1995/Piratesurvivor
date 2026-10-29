@@ -23,3 +23,16 @@ La versión autónoma conserva dentro del HTML los textos completos MIT de Phase
 No debe atribuirse una licencia MIT a todo el fangame por contener Phaser. MIT no concede permisos sobre One Piece, personajes, nombres, escenarios, marcas o logotipos. El repositorio privado y la ausencia de monetización no sustituyen la autorización correspondiente.
 
 Para cada recurso nuevo: guardar autor, URL de origen, fecha, versión/hash, licencia comprobada, permisos adicionales, modificaciones y aviso que deba acompañarlo. No ejecutar descargadores de sprites ni incorporar recursos encontrados en buscadores sin esa revisión.
+
+## Actualización visual 0.2 · 29-10-2026
+
+- Fuente: `src/assets/pixel-atlas-v2.png`, PNG RGBA 1254×1254, generado con la herramienta de imágenes de esta sesión específicamente para el proyecto. No es un sprite descargado de otro juego.
+- SHA-256: `61c026194561623747487786739097c36f3b1aa2b0ecf8937922f9b4642f0b31`.
+- La imagen aportada por el usuario se utilizó como dirección estética (proporciones naturales, sombreado y contorno fino); no se incorporó ni recortó como recurso del juego.
+- Contiene Luffy y un soldado naval sin logotipos, con poses de reposo, desplazamiento y ataque; puño, corazón, bota, coraza, reloj, imán, brazo y moneda.
+- `src/ui/pixel-art.ts` define regiones del atlas, normaliza las poses en canvas de 96×96 y los iconos en 48×48 una sola vez durante la carga, sin suavizado. Se conserva el PNG fuente intacto. El retrato y los iconos comparten esas mismas texturas.
+- Coraza está preparada como recurso; esta actualización no incorpora una estadística de defensa ni una nueva mejora de armadura.
+- El atlas se incrusta en ambas compilaciones. No hay CDN ni descargas de recursos al jugar.
+- Los personajes generados continúan sujetos a los derechos de la franquicia. No se afirma exclusividad del contenido generado ni autorización de One Piece.
+
+La fila inicial sobre el SVG geométrico del capitán describe 0.1; ha sido sustituido en 0.2 por el nuevo retrato pixel art. El terreno y el hielo siguen usando geometría original.

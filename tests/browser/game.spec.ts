@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, isMobile }) => {
+  if (isMobile) await page.setViewportSize({ width: 844, height: 390 });
   await page.goto('/');
   await expect(page.locator('#loading')).toBeHidden();
 });
@@ -34,6 +35,8 @@ test('teclado, pausa, subida de nivel y mejora única', async ({ page }) => {
   });
   await expect(page.locator('#levelup')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('.upgrade-card')).toHaveCount(3);
+  await expect(page.locator('.upgrade-card img.pixel-icon')).toHaveCount(3);
+  expect(await page.locator('.upgrade-card img').first().evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
   const frozen = await page.evaluate(() => window.__OPS_QA__!.getRun()!.time);
   await page.waitForTimeout(200); expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.time)).toBe(frozen);
   await page.locator('.upgrade-card').first().click(); await expect(page.locator('#levelup')).toBeHidden();
@@ -61,13 +64,36 @@ test('joystick táctil, cancelación y giro', async ({ page, isMobile, browserNa
   await page.locator('#start').click(); await expect(page.locator('#touch-zone')).toBeVisible();
   const before = await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.x);
   const client = await page.context().newCDPSession(page);
-  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 100, y: 580 }] });
-  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 145, y: 580 }] });
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 100, y: 280 }] });
+  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 145, y: 280 }] });
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.x)).toBeGreaterThan(before + 10);
   await client.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
   const after = await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.x);
   await page.waitForTimeout(150); expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.x)).toBeCloseTo(after, 1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('#rotate-screen')).toBeVisible();
+  await expect(page.locator('#paused')).toBeVisible();
   await page.setViewportSize({ width: 844, height: 390 });
+  await expect(page.locator('#rotate-screen')).toBeHidden();
+  await page.locator('#resume').click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect.poll(() => page.evaluate(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>('#game canvas')!;
+    return Math.abs(canvas.width / canvas.height - innerWidth / innerHeight);
+  })).toBeLessThan(0.01);
+});
+
+
+test('móvil vertical pide girar, congela la partida y permite volver al puerto', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'Solo la experiencia móvil requiere orientación');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('#start').click();
+  await expect(page.locator('#rotate-screen')).toBeVisible();
+  const time = await page.evaluate(() => window.__OPS_QA__!.getRun()!.time);
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.time)).toBe(time);
+  await page.locator('#rotate-home').click();
+  await expect(page.locator('#home')).toBeVisible();
+  await expect(page.locator('#rotate-screen')).toBeHidden();
 });

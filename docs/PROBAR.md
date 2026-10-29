@@ -22,7 +22,7 @@ La apertura local `file://` y las direcciones HTTP(S) tienen almacenamientos ind
 | Pausar | Esc, P o botón Ⅱ | Botón Ⅱ |
 | Reanudar | Botón Volver a la batalla | Mismo botón |
 
-Al cambiar de aplicación o pestaña la batalla se pausa. Reanudar requiere una acción explícita. Se puede jugar en vertical u horizontal. El botón de pantalla completa aparece solo cuando la API está disponible.
+Al cambiar de aplicación o pestaña la batalla se pausa. Reanudar requiere una acción explícita. El puerto se puede consultar en vertical; la batalla móvil se juega en horizontal. Si arrancas en vertical, aparece el aviso de giro y se pausa el reloj. Pulsa el botón de pantalla completa y girar, o gira físicamente el dispositivo; al volver a horizontal, pulsa reanudar. En iPhone el navegador puede no permitir bloquear la orientación automáticamente. El botón de pantalla completa aparece solo cuando la API está disponible.
 
 ## Recorrido recomendado
 

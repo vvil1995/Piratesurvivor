@@ -24,3 +24,9 @@ Las áreas de catálogo se mantienen en un archivo pequeño en 0.1; pueden divid
 ## Separación de propiedad intelectual
 
 Las estadísticas y los sistemas no consultan nombres de personajes. La ficha y los textos del HUD sí son contenido de Luffy y deberán moverse a sus definiciones cuando exista selección de personajes. Las claves de texturas enlazan el contenido con la vista; se pueden reemplazar por personajes propios. Sustituir arte o nombres no autoriza por sí mismo la distribución de elementos protegidos.
+
+## Presentación 0.2
+
+El atlas PNG original se carga embebido y `rasterizeArt` prepara texturas normalizadas compartidas por escena e interfaz. Los nombres de textura se mantienen separados de las estadísticas. El paso de caminar y la pose de ataque son visuales; no alteran el sistema de colisiones.
+
+`MobileOrientation` controla el aviso de giro y solicita fullscreen/landscape solo tras un gesto de usuario. La pausa existente se utiliza al entrar en vertical. Un ResizeObserver fuerza a Phaser a medir el parent después del cambio real de dimensiones para evitar deformar la imagen. El puerto sigue siendo adaptable en vertical.
