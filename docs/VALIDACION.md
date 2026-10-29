@@ -76,3 +76,7 @@ Pendiente:
 - Economía, entrenamiento y récords v1 siguen siendo los del prototipo. La XP por isla, nuevos ataques, progresión de campaña, berries persistentes de enemigos y reclutamiento quedan para fases posteriores. No hay victoria de campaña todavía.
 - El registro por actor y las pruebas de atribución no constituyen multijugador. Reparto de XP/botín, autoridad, sincronización y cámaras múltiples se diseñarán cuando se aborde online.
 - Continúa sin haber remoto de GitHub configurado; las versiones se conservan localmente. El HTML file:// sigue pendiente de prueba fuera de la política del navegador administrado descrita arriba.
+
+## Actualización: variedad y animación direccional
+
+TypeScript, pruebas de simulación/mundo/animación y compilación pasan. Se verifican ocho direcciones, parada al dejar de moverse, reinicio al reciclar entidades, variedad de parcelas y avenidas libres. La ejecución de navegador no ha completado: el Chromium esperado por Playwright no está instalado; existe `/usr/bin/chromium`, pendiente de ejecutar la suite con `CHROMIUM_EXECUTABLE=/usr/bin/chromium`. No se afirma validación visual ni pruebas en móviles físicos. `netlify.toml` configura Node 22.18.0, `npm run build` y `dist`; el despliegue automático depende de la configuración del sitio conectado en Netlify.

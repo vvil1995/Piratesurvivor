@@ -82,3 +82,15 @@ test('navegación con dirección actualizada por intervalos no se atasca en esqu
   }
   assert.ok(Math.hypot(enemy.x - target.x, enemy.y - target.y) < 25);
 });
+
+test('barrios variados y parcelas con geometrías diferentes, sin ocupar avenidas', () => {
+  const districts = new Set<string>(), layouts = new Set<string>();
+  for (let cy = -5; cy <= 5; cy++) for (let cx = -5; cx <= 5; cx++) {
+    const c = generateChunk(42, cx, cy); districts.add(c.district);
+    layouts.add(JSON.stringify(c.obstacles.map(o => [o.kind, o.x - cx * CHUNK_SIZE, o.y - cy * CHUNK_SIZE, o.width, o.height])));
+    for (let i = 0; i < 16; i++) for (let lane = 6; lane <= 9; lane++) {
+      assert.equal(c.solids[i + lane * 16], 0); assert.equal(c.solids[lane + i * 16], 0);
+    }
+  }
+  assert.equal(districts.size, 4); assert.ok(layouts.size > 25);
+});

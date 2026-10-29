@@ -40,3 +40,7 @@ La fila inicial sobre el SVG geométrico del capitán describe 0.1; ha sido sust
 ## Shells Town 0.3
 
 Se reutiliza sin modificar el atlas pixel-atlas-v2.png y sus recortes. Suelo, bordillos, edificios de tres tejados, árboles, rocas y muros se dibujan con código original en textures.ts y world-renderer.ts. No hay archivos descargados, fuentes nuevas ni dependencias adicionales. Se retiran las texturas de suelo/hielo de Marineford de la carga actual. El nuevo terreno provisional no calca mapas de la franquicia. Se mantienen los avisos y límites de uso de personajes descritos anteriormente.
+
+## Animación direccional y variedad de Shells Town
+
+`actor-textures.ts` genera texturas procedurales originales mediante Canvas para Luffy y marines: ocho orientaciones y cuatro fases de paso más reposo. Se generan al cargar y se reutilizan. El atlas anterior permanece para retrato e iconos. Plazas, jardines y nuevas parcelas usan código original, sin recursos externos ni dependencias nuevas.

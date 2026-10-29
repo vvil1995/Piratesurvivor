@@ -24,7 +24,7 @@ export class WorldRenderer {
     ctx.imageSmoothingEnabled = false;
     const grass = chunk.district === 'garden' ? ['#719063', '#759568', '#6e8c60'] : ['#b9b39a', '#b5b096', '#bdb79d'];
     for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
-      const h = hash(chunk.variation, x, y), road = roadTile(x, y);
+      const h = hash(chunk.variation, x, y), road = roadTile(x, y) || chunk.district === 'plaza';
       ctx.fillStyle = road ? ['#c6c2ad', '#cbc7b4', '#c2bfac'][h % 3] : grass[h % 3];
       ctx.fillRect(x * 16, y * 16, 16, 16);
       if (road) {
@@ -38,6 +38,23 @@ export class WorldRenderer {
       ctx.fillStyle = '#9d9e86';
       if ((x === 5 || x === 10) && !roadTile(0, y)) ctx.fillRect(x * 16 + (x === 5 ? 14 : 0), y * 16, 2, 16);
       if ((y === 5 || y === 10) && !roadTile(x, 0)) ctx.fillRect(x * 16, y * 16 + (y === 5 ? 14 : 0), 16, 2);
+    }
+    // Detalles decorativos sin colisión, pintados una sola vez por chunk.
+    // Las sendas del jardín conectan con las avenidas; la plaza marca otro barrio.
+    if (chunk.district === 'garden') {
+      ctx.fillStyle = '#b0ac85';
+      for (const q of [24, 168]) { ctx.fillRect(q, 58, 64, 5); ctx.fillRect(q, 194, 64, 5); }
+      for (let i = 0; i < 22; i++) {
+        const h = hash(chunk.variation, i, 925), x = 8 + h % 240, y = 8 + (h >>> 8) % 240;
+        if (roadTile(Math.floor(x / 16), Math.floor(y / 16))) continue;
+        ctx.fillStyle = ['#e1bd70', '#d9d8bd', '#b68892'][h % 3]; ctx.fillRect(x, y, 2, 2);
+      }
+    }
+    if (chunk.district === 'plaza') {
+      ctx.strokeStyle = '#9eaa9d'; ctx.lineWidth = 2;
+      ctx.strokeRect(96, 96, 64, 64); ctx.strokeRect(103, 103, 50, 50);
+      ctx.fillStyle = '#8a9f9b';
+      for (const [x, y] of [[125, 110], [110, 125], [140, 125], [125, 140]]) ctx.fillRect(x, y, 5, 5);
     }
     slot.texture.refresh(); slot.chunk = chunk;
     for (let i = 0; i < chunk.obstacles.length; i++) {

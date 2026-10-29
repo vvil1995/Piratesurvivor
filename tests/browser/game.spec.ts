@@ -117,3 +117,13 @@ test('explorar coordenadas lejanas recicla chunks y conserva la geometría', asy
   expect(data.chunks).toBeLessThanOrEqual(128); expect(data.textureSlots).toBeLessThanOrEqual(49);
   expect(data.renderedChunks).toBeGreaterThan(0); expect(data.identical).toBe(true);
 });
+
+test('animación direccional responde al movimiento y se detiene al soltar', async ({ page }) => {
+  await page.locator('#start').click();
+  await page.keyboard.down('w'); await page.keyboard.down('d'); await page.waitForTimeout(250);
+  const pose = await page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture);
+  expect(pose).toMatch(/^straw-hat-ne-[1-4]$/);
+  await page.keyboard.up('w'); await page.keyboard.up('d'); await page.waitForTimeout(100);
+  const idle = await page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture);
+  expect(idle).toBe('straw-hat-ne-0');
+});
