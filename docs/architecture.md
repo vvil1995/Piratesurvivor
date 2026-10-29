@@ -30,3 +30,19 @@ Las estadísticas y los sistemas no consultan nombres de personajes. La ficha y 
 El atlas PNG original se carga embebido y `rasterizeArt` prepara texturas normalizadas compartidas por escena e interfaz. Los nombres de textura se mantienen separados de las estadísticas. El paso de caminar y la pose de ataque son visuales; no alteran el sistema de colisiones.
 
 `MobileOrientation` controla el aviso de giro y solicita fullscreen/landscape solo tras un gesto de usuario. La pausa existente se utiliza al entrar en vertical. Un ResizeObserver fuerza a Phaser a medir el parent después del cambio real de dimensiones para evitar deformar la imagen. El puerto sigue siendo adaptable en vertical.
+
+## Mundo procedural 0.3 (fase 1A–1C)
+
+`content/worlds/shells-town.ts` define identidad, población, semilla y presupuestos. `Run` recibe una definición y semilla opcionales; no importa reglas de Marineford ni finaliza por cronómetro. Se conserva el catálogo de personaje/ataque existente.
+
+`generator.ts`: chunks de 16×16 tiles de 32 unidades (512×512). Un hash de semilla/coordenadas decide distrito y variantes; calles centrales de 128 unidades y perímetros libres conectan parcelas y chunks. Los edificios son sólidos por su planta, no por el tejado; las copas de árboles pueden ocultar actores que pasan detrás del tronco. Las habitaciones en U tienen entrada. No se almacenan chunks visitados en el guardado.
+
+`ProceduralWorld`: caché máxima de 128 chunks con expulsión y regeneración determinista. Colisiones de círculos contra celdas sólidas; movimiento por ejes en pasos de hasta 6 unidades y línea de visión con margen. El combate y el retroceso consultan el mismo mundo. El suelo no cambia con el reloj.
+
+`FlowField`: campo BFS local de 81×81 celdas por objetivo, actualizado como máximo unas 3 veces por segundo mientras el objetivo cambia de celda; puede actualizarse antes si se desplaza bruscamente. Los marines recalculan dirección por turnos aproximadamente cada 0,13–0,20 segundos. Persecución directa con línea libre; ruta compartida si hay obstáculos. La separación local nunca mueve directamente a un vecino a través de sólidos. Enemigos alejados se reciclan sin recompensas.
+
+`WorldRenderer`: imágenes del suelo basadas en canvases de 256×256, reutilizadas al descargar chunks, más sprites reutilizables de obstáculos. Dibuja área visible y un anillo de margen. El zoom limita el lado visible a 1800 unidades; como máximo 49 slots para cualquier relación de pantalla. El render resta un origen local múltiplo de 512, evitando pérdida de precisión de GPU en viajes largos. Coordenadas lógicas no se acotan.
+
+`Run.players`: registro por ID. Entrada por actor, mejoras pertenecientes al actor y golpes/XP con atribución explícita. El acceso `player` es una comodidad para la UI del actor local. No existe implementación online; aparición por múltiples cámaras, propiedad de red, reparto de XP y pausa de grupo siguen pendientes.
+
+El guardado v1 admite ahora tiempos superiores a 600 segundos. Se mantiene el formato, copia anterior, exportación y datos antiguos; no se migra a la economía futura ni se borra progreso. Los resultados aún usan el botín antiguo del prototipo. Los contratos y decisiones de producto están en PLAN_GENERAL.md.

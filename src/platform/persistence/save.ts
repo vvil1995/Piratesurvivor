@@ -14,7 +14,7 @@ function valid(value: unknown): value is Progress {
   const v = value as Record<string, unknown>;
   return v.version === 1 && ['coins', 'training', 'runs', 'wins', 'totalKills', 'bestTime', 'bestLevel'].every(key =>
     typeof v[key] === 'number' && Number.isSafeInteger(v[key]) && (v[key] as number) >= 0 && (v[key] as number) <= 1e9) &&
-    (v.training as number) <= TRAINING_MAX && (v.bestTime as number) <= 600 && typeof v.lastRunId === 'string' &&
+    (v.training as number) <= TRAINING_MAX && typeof v.lastRunId === 'string' &&
     v.lastRunId.length < 150 && typeof v.reducedMotion === 'boolean';
 }
 export class SaveStore {

@@ -23,9 +23,5 @@ export const UPGRADES: UpgradeDefinition[] = [
   { id: 'reach', name: 'Brazos de goma', description: '+15% de alcance del puño.', symbol: '↔', stat: 'range', mode: 'multiply', value: 1.15, max: 6 },
   { id: 'magnet', name: 'Instinto pirata', description: '+25% de radio para recoger experiencia.', symbol: '◈', stat: 'magnet', mode: 'multiply', value: 1.25, max: 5 },
 ];
-export const MARINEFORD = {
-  id: 'marineford', name: 'Marineford', subtitle: 'La plaza helada',
-  width: 2400, height: 1800, duration: 600, enemyCap: 150, pickupCap: 180,
-};
 export const TRAINING_COST = (level: number): number => 30 + level * 20;
 export const TRAINING_MAX = 5;

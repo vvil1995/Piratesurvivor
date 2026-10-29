@@ -43,19 +43,23 @@ test('teclado, pausa, subida de nivel y mejora única', async ({ page }) => {
   expect(await page.evaluate(() => Object.values(window.__OPS_QA__!.getRun()!.taken).reduce((a, b) => a + b, 0))).toBe(1);
 });
 
-test('derrota, reinicio, victoria y guardado persistente sin duplicar botín', async ({ page }) => {
+test('derrota, reinicio, exploración sin límite y guardado persistente', async ({ page }) => {
   await page.locator('#start').click();
   await page.evaluate(() => { window.__OPS_QA__!.getRun()!.player.hp = 0; });
   await expect(page.locator('#result')).toBeVisible(); await expect(page.locator('#result-title')).toContainText('CAEN');
   await page.locator('#retry').click(); await expect(page.locator('#hud')).toBeVisible();
   await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; r.time = 600 - 1 / 60; r.player.kills = 30; });
-  await expect(page.locator('#result-title')).toHaveText('¡ERES LEYENDA!');
+  await page.waitForTimeout(200);
+  await expect(page.locator('#result')).toBeHidden();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.time)).toBeGreaterThan(600 - 1 / 60);
+  await page.evaluate(() => { window.__OPS_QA__!.getRun()!.player.hp = 0; });
+  await expect(page.locator('#result')).toBeVisible();
   const coins = await page.evaluate(() => window.__OPS_QA__!.store.progress.coins);
   await page.waitForTimeout(200); expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.coins)).toBe(coins);
-  await page.locator('#return-home').click(); await expect(page.locator('#win-count')).toHaveText('01');
+  await page.locator('#return-home').click(); await expect(page.locator('#win-count')).toHaveText('00');
   await page.locator('#train').click(); await expect(page.locator('#starting-hp')).toHaveText('105');
   await page.reload(); await expect(page.locator('#loading')).toBeHidden();
-  await expect(page.locator('#win-count')).toHaveText('01'); await expect(page.locator('#starting-hp')).toHaveText('105');
+  await expect(page.locator('#win-count')).toHaveText('00'); await expect(page.locator('#starting-hp')).toHaveText('105');
 });
 
 test('joystick táctil, cancelación y giro', async ({ page, isMobile, browserName }) => {
@@ -96,4 +100,20 @@ test('móvil vertical pide girar, congela la partida y permite volver al puerto'
   await page.locator('#rotate-home').click();
   await expect(page.locator('#home')).toBeVisible();
   await expect(page.locator('#rotate-screen')).toBeHidden();
+});
+
+
+test('explorar coordenadas lejanas recicla chunks y conserva la geometría', async ({ page }) => {
+  await page.locator('#start').click(); await page.locator('#pause').click();
+  const data = await page.evaluate(async () => {
+    const qa = window.__OPS_QA__!, run = qa.getRun()!;
+    const original = JSON.stringify(run.world.getChunk(0, 0));
+    for (let i = -30; i <= 30; i++) {
+      run.player.x = i * 10000 + 256; run.player.y = i * -10000 + 256;
+      await new Promise(requestAnimationFrame);
+    }
+    return { chunks: run.world.chunkCount, ...qa.metrics(), identical: JSON.stringify(run.world.getChunk(0, 0)) === original };
+  });
+  expect(data.chunks).toBeLessThanOrEqual(128); expect(data.textureSlots).toBeLessThanOrEqual(49);
+  expect(data.renderedChunks).toBeGreaterThan(0); expect(data.identical).toBe(true);
 });

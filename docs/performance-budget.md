@@ -15,3 +15,15 @@ Objetivos de diseño, pendientes de medición en teléfonos reales:
 La separación de vecinos y el combate aún usan pequeños callbacks; si el perfil en móvil muestra presión de GC, convertirlos a recorridos reutilizables. La optimización no debe basarse exclusivamente en resultados de Chromium de escritorio o emulación táctil.
 
 Medir sesiones de 10 minutos en Chrome Android y Safari iOS: tiempos de frame mediano y p95, memoria antes/después, calentamiento, consumo de batería cualitativo, giro, retorno desde otra app, nivel alto y límite de enemigos. Comparar tres reinicios sin crecimiento persistente de memoria. Desactivar grabación de pantalla para la medición base.
+
+## Presupuestos adicionales 0.3
+
+- Caché de datos: máximo 128 chunks; reconstrucción determinista, sin historial de chunks visitados.
+- Terreno visible más anillo: máximo 49 texturas/canvases de 256×256, reutilizados. 12 obstáculos como máximo por fragmento; sus imágenes también se reutilizan.
+- Lado máximo visible de 1800 unidades para limitar población y coste en pantallas grandes/ultrapanorámicas.
+- Campo BFS 81×81 por objetivo; dirección escalonada por enemigo y controles geométricos compartidos. No A* por enemigo y frame.
+- Graella de enemigos se vacía cada tick reciclando contenedores; no conserva celdas por las que pasó el jugador.
+- Enemigos a más de 1400 unidades y XP abandonada a más de 1700 se reciclan. No se conceden recompensas por desaparición.
+- Origen local del render: coordenadas cercanas al jugador aunque la posición lógica esté a cientos de miles de unidades.
+
+Estos límites se verifican con pruebas. No son una medición de FPS/memoria de Safari iOS o Android físicos; esa comprobación sigue pendiente.

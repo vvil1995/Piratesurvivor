@@ -4,7 +4,7 @@
 
 1. Descomprime el paquete de navegador.
 2. Abre `One-Piece-Survivor.html` en Chrome, Edge, Firefox o Safari moderno.
-3. Pulsa **Zarpar a Marineford**. No hay que instalar nada ni crear una cuenta.
+3. Pulsa **Zarpar a Shells Town**. No hay que instalar nada ni crear una cuenta.
 
 El HTML autónomo funciona sin internet y contiene todos los recursos de ejecución. `index.html` es la variante para un servidor estático y debe conservar su carpeta `assets/`. No abras ese `index.html` por doble clic: utiliza el archivo autónomo.
 
@@ -33,12 +33,17 @@ Al cambiar de aplicación o pestaña la batalla se pausa. Reanudar requiere una 
 5. Cambia de aplicación y vuelve; comprueba pausa y liberación del joystick.
 6. Pierde una partida: revisa tiempo, bajas, nivel y monedas. Reinicia.
 7. Vuelve al puerto, entrena si tienes 30 monedas y recarga la página. Deben mantenerse monedas, récords y entrenamiento.
-8. Resiste diez minutos: debe aparecer victoria y sumarse un premio de 50 monedas, además del botín normal.
-9. En móvil, gira durante movimiento y con las tarjetas abiertas. Deben seguir visibles y utilizables.
-10. Exporta/importa el progreso desde **?**. Importar sustituye el progreso actual por el del archivo seleccionado.
+8. Recorre varias calles y gira en distintas direcciones. El mundo continúa: no hay victoria al llegar a diez minutos.
+9. Intenta atravesar casas, árboles, rocas y muros. Rodea una casa y comprueba que los marines buscan otra ruta; los golpes tampoco deben atravesar edificios.
+10. En móvil, gira durante movimiento y con las tarjetas abiertas. Deben seguir visibles y utilizables.
+11. Exporta/importa el progreso desde **?**. Importar sustituye el progreso actual por el del archivo seleccionado.
 
 El guardado no conserva una batalla en curso. Borrar datos del navegador elimina el progreso local. Si aparece un aviso de almacenamiento, exporta la partida antes de cerrar. No hay sincronización entre dispositivos; puedes usar la exportación para transferirlo manualmente.
 
 ## Datos útiles al comunicar un problema
 
 Dispositivo, versión de Android/iOS, navegador y versión, orientación, minuto de partida, número de enemigos aproximado y pasos para reproducirlo. Para una pantalla negra, adjunta el error de consola si puedes acceder a él. No incluyas datos de cuentas ni credenciales.
+
+## Alcance de 0.3
+
+Solo Shells Town y la base del mundo infinito. No están disponibles Morgan, navegación a otras islas, Roger, otros personajes, taverna, nuevos drops de berries, cofres ni inventario. La economía visible conserva el comportamiento anterior del prototipo. Cada partida nueva reinicia nivel y mejoras; los récords y el entrenamiento existentes se conservan. Los cambios de semilla varían la distribución de barrios; volver a un fragmento en la misma partida lo reconstruye igual.

@@ -98,5 +98,5 @@ window.addEventListener('orientationchange', () => requestAnimationFrame(resizeC
 window.visualViewport?.addEventListener('resize', () => requestAnimationFrame(resizeCanvas));
 
 // Solo en desarrollo o en compilación de QA explícita. No se incluye en producción.
-declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; start: () => void } } }
-if (import.meta.env.DEV || import.meta.env.VITE_QA === 'true') window.__OPS_QA__ = { getRun: () => run, store, tick: sync, start };
+declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; start: () => void; metrics: () => { renderedChunks: number; textureSlots: number } } } }
+if (import.meta.env.DEV || import.meta.env.VITE_QA === 'true') window.__OPS_QA__ = { getRun: () => run, store, tick: sync, start, metrics: () => scene.diagnostics };

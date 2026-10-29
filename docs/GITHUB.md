@@ -9,8 +9,8 @@ Si trabajas desde el ZIP de código fuente, ese archivo no contiene el directori
 ```bash
 git init -b main
 git add .
-git commit -m "Prototipo jugable 0.2"
-git tag v0.2.0
+git commit -m "Prototipo jugable 0.3"
+git tag v0.3.0
 ```
 
 En el workspace original esos pasos ya están hechos; no los repitas allí.

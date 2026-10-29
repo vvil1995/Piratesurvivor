@@ -36,3 +36,7 @@ Para cada recurso nuevo: guardar autor, URL de origen, fecha, versión/hash, lic
 - Los personajes generados continúan sujetos a los derechos de la franquicia. No se afirma exclusividad del contenido generado ni autorización de One Piece.
 
 La fila inicial sobre el SVG geométrico del capitán describe 0.1; ha sido sustituido en 0.2 por el nuevo retrato pixel art. El terreno y el hielo siguen usando geometría original.
+
+## Shells Town 0.3
+
+Se reutiliza sin modificar el atlas pixel-atlas-v2.png y sus recortes. Suelo, bordillos, edificios de tres tejados, árboles, rocas y muros se dibujan con código original en textures.ts y world-renderer.ts. No hay archivos descargados, fuentes nuevas ni dependencias adicionales. Se retiran las texturas de suelo/hielo de Marineford de la carga actual. El nuevo terreno provisional no calca mapas de la franquicia. Se mantienen los avisos y límites de uso de personajes descritos anteriormente.

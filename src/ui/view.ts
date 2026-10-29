@@ -68,7 +68,8 @@ export class View {
   }
   hud(run: Run): void {
     const p = run.player;
-    el('clock').textContent = timeLabel(run.time); el('level').textContent = `NV. ${p.level}`;
+    el('clock').textContent = timeLabel(run.time);
+    el('area-label').textContent = `${run.definition.name.toUpperCase()} · ${Math.floor(run.player.x)}, ${Math.floor(run.player.y)}`; el('level').textContent = `NV. ${p.level}`;
     el('kills').textContent = p.kills.toString();
     el('health-text').textContent = `${Math.ceil(p.hp)} / ${Math.round(p.stats.maxHp)}`;
     const ratio = Math.max(0, Math.min(100, p.hp / p.stats.maxHp * 100));
@@ -92,9 +93,9 @@ export class View {
   }
   result(result: RunResult): void {
     const victory = result.outcome === 'victory';
-    el('result-eyebrow').textContent = victory ? 'MARINEFORD RESISTE TU NOMBRE' : 'LA AVENTURA NO TERMINA AQUÍ';
+    el('result-eyebrow').textContent = victory ? 'UNA NUEVA LEYENDA' : 'LA AVENTURA NO TERMINA AQUÍ';
     el('result-title').textContent = victory ? '¡ERES LEYENDA!' : 'HASTA LOS GRANDES CAEN.';
-    el('result-copy').textContent = victory ? 'Diez minutos. Una promesa cumplida. El mar te espera.' : 'Vuelve al puerto, entrena y regresa más fuerte.';
+    el('result-copy').textContent = victory ? 'Una promesa cumplida. El mar te espera.' : 'Vuelve al puerto, entrena y regresa más fuerte.';
     el('result-time').textContent = timeLabel(result.seconds); el('result-kills').textContent = String(result.kills);
     el('result-level').textContent = String(result.level); el('result-coins').textContent = `+${result.coins} ◉`;
     this.showModal('result');

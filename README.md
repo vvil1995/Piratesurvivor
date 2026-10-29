@@ -1,10 +1,10 @@
-# One Piece Survivor · prototipo 0.2
+# One Piece Survivor · prototipo 0.3
 
 Fangame no oficial de supervivencia para navegador. Gratis, sin anuncios, compras, cuentas ni backend. Lógica propia y nuevos sprites e iconos pixel art generados para el proyecto. No reutiliza código ni recursos de PokéSurvivor.
 
 ## Probar sin instalar herramientas
 
-Descarga y descomprime `one-piece-survivor-browser-v0.2.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
+Descarga y descomprime `one-piece-survivor-browser-v0.3.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
 
 En Android/iOS, la apertura de archivos HTML desde el gestor de archivos depende del sistema y puede mostrar solo una vista previa. Para esos dispositivos, sirve la carpeta `dist/` mediante un alojamiento estático HTTPS privado o desde un ordenador de tu red. No necesita backend. Lee [PROBAR.md](docs/PROBAR.md).
 
@@ -41,24 +41,26 @@ Si Chromium ya está instalado, indica su ruta mediante `CHROMIUM_EXECUTABLE`. P
 
 ## Qué incluye
 
-- Luffy, plaza provisional inspirada en Marineford y marines perseguidores.
+- Luffy y marines en Shells Town procedural, sin límites globales ni victoria por tiempo.
+- Chunks deterministas, calles conectadas, barrios residenciales, jardines y recintos.
+- Edificios, árboles, rocas y muros sólidos; los enemigos encuentran rutas alrededor de los obstáculos.
 - WASD/flechas, joystick táctil, ataque automático y daño por contacto.
 - Batalla móvil en horizontal: aviso de giro, pausa en vertical y botón de rotación cuando la API lo permite.
 - Luffy y marines con siluetas detalladas, poses de movimiento y ataque; iconos pixel art de mejoras.
 - Vida, regeneración lenta, experiencia, niveles y tres opciones por nivel.
-- Derrota, victoria a los diez minutos, pausa y reinicio.
+- Derrota, pausa y reinicio. El reloj mide la exploración; no termina la partida.
 - Monedas ganadas jugando y cinco niveles de entrenamiento permanente (+5 de vida inicial por nivel).
 - Guardado local versionado, copia de seguridad y exportación/importación.
-- Pools limitados, rejilla espacial, simulación de paso fijo y culling de enemigos.
+- Pools limitados, caché de 128 chunks, texturas reciclables, graella sin alias, campo de navegación compartido y dibujo con origen local.
 - Interfaz adaptable, navegación de menús por teclado y opción de reducir movimiento.
 
 ## Alcance pendiente
 
-Jefes, nuevos personajes, ataques combinados, evoluciones, sprites finales y audio corresponden a fases posteriores. El catálogo contempla personajes y recetas, pero no hay evoluciones jugables en esta versión. El escenario es abierto; hielo y muralla son decoración, con límites de arena. No se recupera una batalla al cerrar o refrescar.
+Jefes, cinco islas, Roger, reclutamiento, berries de enemigos, cofres, inventario, nuevos personajes, ataques combinados, evoluciones, sprites finales y audio corresponden a fases posteriores. Las nuevas decisiones están en [PLAN_GENERAL.md](docs/PLAN_GENERAL.md). El catálogo contempla personajes y recetas, pero no hay evoluciones jugables en esta versión. La entrega actual implementa exclusivamente las fases 1A–1C. El mundo es abierto; los obstáculos tienen colisión y los ataques no atraviesan paredes. No se recupera una batalla al cerrar o refrescar. Se conservan el guardado v1, las monedas y el entrenamiento antiguos; todavía no se implementa la nueva economía.
 
 ## GitHub privado
 
-Se incluye un repositorio Git local, etiqueta `v0.2.0`, CI y plantilla de incidencias. **No se ha creado un remoto de GitHub:** la autenticación disponible en el entorno no era válida. Sigue [GITHUB.md](docs/GITHUB.md) para conectarlo a tu cuenta; nunca conviertas el repositorio en público para habilitar una demo.
+Se incluye un repositorio Git local, etiqueta `v0.3.0`, CI y plantilla de incidencias. **No se ha creado un remoto de GitHub:** la autenticación disponible en el entorno no era válida. Sigue [GITHUB.md](docs/GITHUB.md) para conectarlo a tu cuenta; nunca conviertas el repositorio en público para habilitar una demo.
 
 ## Documentación
 
