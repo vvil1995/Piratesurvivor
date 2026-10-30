@@ -77,7 +77,7 @@ test('solo algunos enemigos dejan berries y hay que recogerlas', () => {
   }
 });
 test('cofres escasos: densidad determinista baja y sin duplicación al volver', () => {
-  const r = new Run(), field = new ChestField(); let small = 0, big = 0;
+  const r = new Run('luffy', 0, () => 0.5, { seed: 42 }), field = new ChestField(); let small = 0, big = 0;
   for (let x = 0; x < 90; x += 3) {
     field.sync(r.world, { x: x * 512 + 256, y: 256 });
     small += field.active.filter(c => !c.large).length; big += field.active.filter(c => c.large).length;
@@ -105,7 +105,7 @@ test('menjar cura sin superar HP y aproximadamente diez por ciento de rivales lo
   assert.equal(drops, 10);
   const r = new Run(); r.player.hp = 95; const food = r.pickups.acquire()!;
   Object.assign(food, { x: r.player.x, y: r.player.y, kind: 'food', value: 12 });
-  r.update(1 / 60, { x: 0, y: 0 }); assert.equal(r.player.hp, r.player.stats.maxHp);
+  r.update(1 / 60, { x: 0, y: 0 }); assert.equal(r.player.hp, r.player.stats.maxHp); assert.equal(r.player.xp, 1);
 });
 test('fruta temporal: recoger, rechazar/aceptar y explosión con límite de cadencia', () => {
   const r = new Run(); for (const c of r.chests.active) c.active = false;
@@ -115,4 +115,10 @@ test('fruta temporal: recoger, rechazar/aceptar y explosión con límite de cade
   for (let i = 0; i < 2; i++) { const e = r.enemies.acquire()!; Object.assign(e, { id: 999 + i, x: r.player.x + 40 + i * 5, y: r.player.y, hp: 1, maxHp: 1, speed: 0, damage: 0, xp: 0, radius: 13 }); }
   r.player.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 });
   assert.equal(r.areas.count, 1); assert.equal(new Run().player.fruit, undefined);
+});
+
+test('la poca experiencia del alimento puede provocar la subida normal, sin cartas propias de botín', () => {
+  const r = new Run(); r.player.xp = r.player.xpNext - 1;
+  const food = r.pickups.acquire()!; Object.assign(food, { x: r.player.x, y: r.player.y, kind: 'food', value: 12 });
+  r.update(1 / 60, { x: 0, y: 0 }); assert.equal(r.status, 'levelup'); assert.equal(r.player.level, 2); assert.equal(r.choices.length, 3);
 });

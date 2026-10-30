@@ -89,3 +89,5 @@ Al vencer, espera la caída. Se guarda la victoria y se concede una agrupación 
 Probar cadencia de los seis movimientos de Luffy, en particular Pistol y Gatling. Moverse mientras se dispara y comprobar que brazos/puños salen del actor. Balloon mantiene su función defensiva sin hinchar el sprite. Buffs muestran flechas de color y pequeños totales efectivos; consultar las cartas para magnitud y duración.
 
 Buscar cofres más separados. Pequeños: moneda, poca XP y posible carne; grandes: círculo/candado de3s y botín directo, sin selección de mejoras. Recoger moneda/XP. Una subida de nivel por esa XP sigue abriendo cartas normales. Objeto ocasional entra directamente en un hueco libre; no aumenta un objeto equipado. Fruta rara Bomu Bomu: recogerla, aceptar o conservar build, probar explosiones al derrotar enemigos. Se pierde al reiniciar. Comprobar que comer cura sin superar HP máximo y que enemigos dejan carne ocasionalmente.
+
+La carne también aporta1XP. Comprobar la subida normal si esa pequeña cantidad completa la barra.

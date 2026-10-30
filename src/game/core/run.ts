@@ -323,7 +323,7 @@ export class Run {
       const dx = actor.x - pickup.x, dy = actor.y - pickup.y, d = Math.hypot(dx, dy);
       if (d < 20) {
         if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { this.pendingFruit = pickup.fruitId; this.status = 'fruit'; }
-        else if (pickup.kind === 'food') { actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
+        else if (pickup.kind === 'food') { actor.xp += LOOT.foodXp; actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
         else if (pickup.kind === 'berry') actor.collectedBerries += pickup.value;
         else actor.xp += pickup.value;
         pickup.active = false;

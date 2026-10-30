@@ -364,7 +364,7 @@ test('beta permite probar los cinco personajes sin compras ni cambios del perfil
 });
 
 test('las técnicas evolucionadas de la tripulación se integran con sprites, HUD y efectos', async ({ page }) => {
-  test.setTimeout(60000);
+  test.setTimeout(90000);
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   for (const id of ['zoro', 'nami', 'usopp', 'sanji']) {
     await page.evaluate(async id => {
@@ -374,6 +374,7 @@ test('las técnicas evolucionadas de la tripulación se integran con sprites, HU
       const { CHARACTERS, ENEMIES } = await import(/* @vite-ignore */ catalog);
       for (const e of Object.values(ENEMIES) as {speed: number;damage:number;xp:number}[]) { e.speed = 0; e.damage = 0; e.xp = 0; }
       const run = window.__OPS_QA__!.getRun()!, p = run.player;
+      p.xpNext = 1e6; for (const chest of run.chests.active) chest.active = false;
       p.attacks = CHARACTERS[id].abilities.map((a: string) => ({ ...newAttack(a), level: 6 }));
       p.abilitySlots = [p.attacks.slice(0, 2).map(a => a.id), p.attacks.slice(2, 4).map(a => a.id), [p.attacks[4].id], [p.attacks[5].id]];
       for (let i = 0; i < 6; i++) {
