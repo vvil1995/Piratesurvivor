@@ -46,3 +46,13 @@ El atlas PNG original se carga embebido y `rasterizeArt` prepara texturas normal
 `Run.players`: registro por ID. Entrada por actor, mejoras pertenecientes al actor y golpes/XP con atribución explícita. El acceso `player` es una comodidad para la UI del actor local. No existe implementación online; aparición por múltiples cámaras, propiedad de red, reparto de XP y pausa de grupo siguen pendientes.
 
 El guardado v1 admite ahora tiempos superiores a 600 segundos. Se mantiene el formato, copia anterior, exportación y datos antiguos; no se migra a la economía futura ni se borra progreso. Los resultados aún usan el botín antiguo del prototipo. Los contratos y decisiones de producto están en PLAN_GENERAL.md.
+
+## Combate 0.4 — primer bloque pendiente del plan
+
+`content/attacks.ts` contiene cuatro técnicas de Luffy con seis configuraciones por técnica. El estado equipado (`id`, nivel, cooldown y ráfaga pendiente) pertenece a Run; el perfil local no guarda ataques. `systems/loadout.ts` valida catálogo por personaje, máximo cuatro espacios y máximo seis niveles. El nivel6 deriva la evolución + de los datos: no hay recetas ni objetos requeridos.
+
+`tickAttacks` avanza temporizadores por técnica y emite eventos visuales limitados por el presupuesto existente de12. Gatling programa impactos separados y vuelve a elegir objetivo; no simula tres golpes simultáneos ni representa una cadena de habilidades. `attack` calcula línea/perforación, cono, barrido y onda secundaria con colisiones/línea de visión y atribución de bajas. El daño no depende del nombre del personaje.
+
+Las cartas añaden aprendizaje/mejora a las pasivas existentes y filtran espacios/máximos. El HUD mantiene cuatro nodos, reconstruidos solo al cambiar Run/build; no se recrea por frame. Los efectos usan Graphics e iconos propios existentes, sin nuevas imágenes ni dependencias. Pistol+ perfora fila, Gatling+ combina seis disparos y dos impactos por disparo, Bazooka+ onda secundaria, Whip+ giro completo. La ráfaga gana golpes también en niveles3 y5.
+
+No se altera el formato v1, entrenamiento antiguo ni economía en este bloque; resolver de estadísticas con topes y reglas temporales nuevas es el punto2 del orden acordado. Tampoco se añaden enlaces, objetos, frutas, jefes o selección de personajes.

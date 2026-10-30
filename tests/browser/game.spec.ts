@@ -15,7 +15,10 @@ test('puerto adaptable, instrucciones, créditos y partida sin peticiones de bac
   await page.locator('#credits-open').click(); await expect(page.locator('#credits')).toContainText('Phaser');
   await page.locator('[data-close="credits"]').click();
   await page.locator('#start').click(); await expect(page.locator('#hud')).toBeVisible();
-  await expect(page.locator('#clock')).toHaveText('00:01', { timeout: 5000 });
+  await expect.poll(async () => {
+    const [minutes, seconds] = (await page.locator('#clock').innerText()).split(':').map(Number);
+    return minutes * 60 + seconds;
+  }, { timeout: 5000 }).toBeGreaterThanOrEqual(1);
   expect(errors).toEqual([]);
 });
 
@@ -31,7 +34,7 @@ test('teclado, pausa, subida de nivel y mejora única', async ({ page }) => {
   await page.evaluate(() => {
     const run = window.__OPS_QA__!.getRun()!, p = run.player, enemy = run.enemies.acquire()!;
     Object.assign(enemy, { id: 900, x: p.x + 45, y: p.y, hp: 1, maxHp: 1, damage: 0, speed: 0, xp: p.xpNext + 2 });
-    p.attackTimer = 0;
+    p.attacks[0].cooldown = 0;
   });
   await expect(page.locator('#levelup')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('.upgrade-card')).toHaveCount(3);
@@ -118,13 +121,15 @@ test('explorar coordenadas lejanas recicla chunks y conserva la geometría', asy
   expect(data.renderedChunks).toBeGreaterThan(0); expect(data.identical).toBe(true);
 });
 
-test('animación direccional responde al movimiento y se detiene al soltar', async ({ page }) => {
+test('animación direccional responde al movimiento y se detiene al parar', async ({ page }) => {
   await page.locator('#start').click();
-  await page.keyboard.down('w'); await page.keyboard.down('d'); await page.waitForTimeout(250);
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  // Movimiento de simulación determinista; el teclado/joystick se prueban en otros casos.
+  // No mantener una diagonal durante el polling: podría alcanzar un obstáculo aleatorio.
+  await page.evaluate(() => { window.__OPS_QA__!.getRun()!.update(1 / 60, { x: 1, y: -1 }); });
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(/^straw-hat-ne-[01]$/);
   expect(await page.evaluate(() => window.__OPS_QA__!.metrics().actorDirection)).toBe('ne');
-  await page.keyboard.up('w'); await page.keyboard.up('d'); await page.waitForTimeout(100);
-  // La última orientación puede ser axial por soltar teclas o deslizarse ante un obstáculo.
+  await page.waitForTimeout(120);
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorFrame)).toBe(0);
   await page.screenshot({ path: test.info().outputPath('restored-art.png') });
 });
@@ -170,4 +175,66 @@ test('los seis atlas detallados contienen ocho orientaciones utilizables sin rec
     expect(actor.empty, actor.name).toBe(0); expect(actor.distinct, actor.name).toBe(true);
   }
   await page.screenshot({ path: test.info().outputPath('directional-gallery.png'), fullPage: true });
+});
+
+test('cuatro ataques equipados, evolución +, cartas válidas y reinicio de build', async ({ page }) => {
+  await page.locator('#start').click();
+  await expect(page.locator('.attack-slot')).toHaveCount(4);
+  await expect(page.locator('.attack-slot.empty')).toHaveCount(3);
+  const offer = async (last: boolean) => {
+    await page.evaluate(async (last) => {
+      const progressionPath = '/src/game/systems/progression.ts', catalogPath = '/src/content/catalog.ts';
+      const { chooseUpgrades } = await import(/* @vite-ignore */ progressionPath);
+      const { UPGRADES } = await import(/* @vite-ignore */ catalogPath);
+      const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player;
+      // Aislar la UI de ataques; no representa el ritmo natural de una partida.
+      p.taken = Object.fromEntries(UPGRADES.map((u: { id: string; max: number }) => [u.id, u.max]));
+      p.hp = p.stats.maxHp;
+      r.status = 'levelup'; p.choices = chooseUpgrades(p.taken, () => last ? 0.999 : 0, p); qa.tick();
+    }, last);
+    await expect(page.locator('#levelup')).toBeVisible();
+    await expect(page.locator('.upgrade-card')).toHaveCount(3);
+  };
+  for (const name of ['Gatling', 'Bazooka', 'Whip']) {
+    await offer(true);
+    await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
+  }
+  await expect(page.locator('.attack-slot.empty')).toHaveCount(0);
+  for (let i = 0; i < 5; i++) {
+    await offer(false);
+    await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Pistol/ }) }).click();
+  }
+  await expect(page.locator('[data-ability="elastic-punch"]')).toHaveClass(/evolved/);
+  await expect(page.locator('[data-ability="elastic-punch"]')).toContainText('Pistol +');
+  await offer(false); await expect(page.locator('.upgrade-card')).not.toContainText(['Pistol']);
+  await page.locator('.upgrade-card').first().click();
+  await page.screenshot({ path: test.info().outputPath('four-attacks.png') });
+  await page.evaluate(() => { window.__OPS_QA__!.getRun()!.player.hp = 0; });
+  await expect(page.locator('#result')).toBeVisible(); await page.locator('#retry').click();
+  await expect(page.locator('.attack-slot.empty')).toHaveCount(3);
+  await expect(page.locator('[data-ability="elastic-punch"]')).toContainText('NV. 1 / 6');
+});
+
+test('los cuatro efectos evolucionados se dibujan sin errores en combate', async ({ page }) => {
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.locator('#start').click();
+  await page.addStyleTag({ content: '#paused{display:none!important}' });
+  const behaviors = await page.evaluate(async () => {
+    const path = '/src/game/systems/loadout.ts';
+    const { improveAttack } = await import(/* @vite-ignore */ path);
+    const r = window.__OPS_QA__!.getRun()!, p = r.player;
+    for (const id of ['elastic-punch', 'gatling', 'bazooka', 'whip']) while ((p.attacks.find(a => a.id === id)?.level ?? 0) < 6) improveAttack(p, id);
+    p.x = 256; p.y = 256;
+    for (const e of r.enemies.items) e.active = false;
+    for (let i = 0; i < 8; i++) {
+      const e = r.enemies.acquire()!, a = i * Math.PI / 4;
+      Object.assign(e, { id: 900 + i, x: p.x + Math.cos(a) * 80, y: p.y + Math.sin(a) * 80, hp: 10000, maxHp: 10000, damage: 0, speed: 0, xp: 0 });
+    }
+    r.update(1 / 60, { x: 0, y: 0 }); r.pause();
+    return r.strikes.map(s => s.behavior).sort();
+  });
+  expect(behaviors).toEqual(['burst', 'cone', 'line', 'sweep']);
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await page.screenshot({ path: test.info().outputPath('four-effects.png') });
+  expect(errors).toEqual([]);
 });

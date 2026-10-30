@@ -82,3 +82,7 @@ El mapa infinito y un registro ilimitado de cofres abiertos son incompatibles co
 Recompensa de cofre consumida exactamente una vez aunque se pause con cartas abiertas o se descargue su chunk. Con seis objetos, solo opciones de objetos equipados no máximos. Si quedan menos de tres opciones distintas, usar recompensas de berries/XP/curación explícitas; nunca forzar un séptimo objeto ni ofrecer mejoras máximas.
 
 Separar perfil v2 (berries, reclutas, entrenamiento por personaje, récords, ajustes) de Run (isla, ataques, inventario, fruta, cofres y RNG). Guardar berries recogidos mediante transacciones con ID/contador, no cada frame ni esperar exclusivamente a morir. La reanudación de Run es fase 9; migrar perfil no implica recuperar una partida activa.
+
+## Siguiente orden autorizada: empezar el primer bloque pendiente
+
+El usuario solicita enumerar todas sus indicaciones y empezar la primera. `ORDEN_DE_TRABAJO.md` las agrupa en19 bloques. Se autoriza punto1/fase2A: cuatro ataques iniciales de Luffy, equipamiento, temporizadores independientes, seis niveles con + automático, cartas mixtas y HUD de cuatro espacios. Esta orden sucede a la limitación de auditoría de fase0. Estadísticas/topes completos, economía y campaña siguen después; no se implementan fases masivamente.

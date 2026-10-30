@@ -47,3 +47,9 @@ Dispositivo, versión de Android/iOS, navegador y versión, orientación, minuto
 ## Alcance de 0.3
 
 Solo Shells Town y la base del mundo infinito. No están disponibles Morgan, navegación a otras islas, Roger, otros personajes, taverna, nuevos drops de berries, cofres ni inventario. La economía visible conserva el comportamiento anterior del prototipo. Cada partida nueva reinicia nivel y mejoras; los récords y el entrenamiento existentes se conservan. Los cambios de semilla varían la distribución de barrios; volver a un fragmento en la misma partida lo reconstruye igual.
+
+## Cuatro ataques de Luffy (fase 2A)
+
+Luffy empieza con Pistol. Al subir de nivel pueden salir cartas para aprender Gatling, Bazooka o Whip, además de pasivas y mejoras de los ataques equipados. Hay cuatro espacios visibles. Cada técnica llega a seis niveles y se convierte automáticamente en + sin objetos; ya no se ofrece después. Pistol+ perfora una fila; Gatling+ hace seis golpes que perforan dos objetivos; Bazooka+ añade onda de impacto; Whip+ gira360°. Son habilidades automáticas independientes, no una cadena desbloqueada.
+
+Probar tres partidas con elecciones diferentes; comprobar movimiento/joystick mientras se activan varios ataques, golpes detenidos por edificios, pausa durante ráfagas, cartas de nivel6 y reinicio que devuelve solo Pistol1. No se añaden berries recogibles ni personajes nuevos en esta entrega; la economía y pasivas antiguas permanecen pendientes de sus fases. Los números del combate son provisionales, no equilibrio final de campaña.

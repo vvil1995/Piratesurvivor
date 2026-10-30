@@ -3,6 +3,7 @@ import type { RunResult } from '../game/core/types.ts';
 import type { SaveStore } from '../platform/persistence/save.ts';
 import { TRAINING_COST, TRAINING_MAX } from '../content/catalog.ts';
 import { artUrl, pixelIcon, upgradeIcon } from './pixel-art.ts';
+import { ABILITIES, ATTACK_SLOTS } from '../content/attacks.ts';
 export const el = <T extends HTMLElement = HTMLElement>(id: string): T => {
   const node = document.getElementById(id);
   if (!node) throw new Error(`Falta el elemento ${id}`);
@@ -11,6 +12,7 @@ export const el = <T extends HTMLElement = HTMLElement>(id: string): T => {
 export const timeLabel = (seconds: number): string => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
 export class View {
   private modal?: string;
+  private attackSignature = '';
   private lastFocus?: HTMLElement;
   constructor() {
     document.addEventListener('keydown', event => {
@@ -56,7 +58,6 @@ export class View {
     el<HTMLImageElement>('captain-portrait').src = artUrl('straw-hat');
     const avatar = document.createElement('img'); avatar.src = artUrl('straw-hat-face'); avatar.alt = '';
     el('captain-avatar').replaceChildren(avatar);
-    el('ability-icon').replaceChildren(pixelIcon('fist'));
     el('coin-icon').replaceChildren(pixelIcon('coin'));
     this.home(store);
   }
@@ -68,6 +69,24 @@ export class View {
   }
   hud(run: Run): void {
     const p = run.player;
+    const signature = run.id + p.attacks.map(a => `${a.id}:${a.level}`).join('|');
+    if (signature !== this.attackSignature) {
+      this.attackSignature = signature;
+      const slots = el('attack-slots'); slots.replaceChildren();
+      for (let i = 0; i < ATTACK_SLOTS; i++) {
+        const state = p.attacks[i], card = document.createElement('div'); card.className = 'attack-slot'; card.setAttribute('role', 'listitem');
+        if (state) {
+          const definition = ABILITIES[state.id], plus = state.level === 6;
+          card.classList.toggle('evolved', plus); card.dataset.ability = state.id;
+          card.append(pixelIcon(definition.behavior === 'sweep' ? 'boot' : 'fist'));
+          const name = document.createElement('span'); name.textContent = definition.shortName + (plus ? ' +' : '');
+          const level = document.createElement('small'); level.textContent = plus ? 'NV. 6 · EVOLUCIÓN' : `NV. ${state.level} / 6`;
+          card.append(name, level); card.title = definition.name + (plus ? '+: ' + definition.evolution : ': ' + definition.description);
+          card.setAttribute('aria-label', `${definition.name}, nivel ${state.level}${plus ? ', evolucionado' : ''}`);
+        } else { card.classList.add('empty'); card.textContent = '+'; card.setAttribute('aria-label', `Espacio ${i + 1} libre`); }
+        slots.append(card);
+      }
+    }
     el('clock').textContent = timeLabel(run.time);
     el('area-label').textContent = `${run.definition.name.toUpperCase()} · ${Math.floor(run.player.x)}, ${Math.floor(run.player.y)}`; el('level').textContent = `NV. ${p.level}`;
     el('kills').textContent = p.kills.toString();
@@ -83,10 +102,10 @@ export class View {
     const holder = el('upgrade-choices'); holder.replaceChildren();
     for (const upgrade of run.choices) {
       const button = document.createElement('button'); button.className = 'upgrade-card';
-      const symbol = document.createElement('span'); symbol.className = 'upgrade-symbol'; symbol.append(pixelIcon(upgradeIcon(upgrade.id)));
+      const symbol = document.createElement('span'); symbol.className = 'upgrade-symbol'; symbol.append(pixelIcon('kind' in upgrade ? ABILITIES[upgrade.abilityId].behavior === 'sweep' ? 'boot' : 'fist' : upgradeIcon(upgrade.id)));
       const title = document.createElement('h3'); title.textContent = upgrade.name;
       const description = document.createElement('p'); description.textContent = upgrade.description;
-      const tag = document.createElement('small'); tag.textContent = `ELEGIR MEJORA →  ·  NIVEL ${(run.taken[upgrade.id] || 0) + 1}`;
+      const tag = document.createElement('small'); tag.textContent = 'kind' in upgrade ? 'ELEGIR ATAQUE →' : `ELEGIR MEJORA →  ·  NIVEL ${(run.taken[upgrade.id] || 0) + 1}`;
       button.append(symbol, title, description, tag); button.addEventListener('click', () => choose(upgrade.id)); holder.append(button);
     }
     this.showModal('levelup');

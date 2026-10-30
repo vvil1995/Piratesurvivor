@@ -105,10 +105,25 @@ export class BattleScene extends Phaser.Scene {
     if (run) for (const [index, strike] of run.strikes.entries()) {
       const alpha = Math.min(1, strike.life / 0.08);
       const x = strike.x - origin.x, y = strike.y - origin.y;
+      const color = strike.evolved ? 0xf8d76c : strike.behavior === 'sweep' ? 0x9bd8d5 : 0xf1d1ab;
+      if (strike.behavior === 'sweep') {
+        this.effects.lineStyle(strike.evolved ? 9 : 6, color, alpha * 0.8);
+        this.effects.beginPath(); this.effects.arc(x, y - 18, strike.reach, strike.angle - strike.arc, strike.angle + strike.arc); this.effects.strokePath();
+        this.effects.lineStyle(2, 0xffffff, alpha * 0.65);
+        this.effects.beginPath(); this.effects.arc(x, y - 18, strike.reach - 6, strike.angle - strike.arc, strike.angle + strike.arc); this.effects.strokePath();
+        continue;
+      }
+      if (strike.behavior === 'cone') {
+        this.effects.lineStyle(4, color, alpha * 0.7);
+        this.effects.beginPath(); this.effects.moveTo(x, y - 20);
+        this.effects.arc(x, y - 20, strike.reach, strike.angle - strike.arc, strike.angle + strike.arc);
+        this.effects.closePath(); this.effects.strokePath();
+        if (strike.splash) this.effects.strokeCircle(strike.impact.x - origin.x, strike.impact.y - origin.y - 20, strike.splash * (1 - strike.life / 0.22));
+      }
       const distance = Math.max(30, strike.reach), endX = x + Math.cos(strike.angle) * distance, endY = y + Math.sin(strike.angle) * distance;
       this.effects.lineStyle(9, 0x7c503b, alpha); this.effects.lineBetween(x, y - 19, endX, endY - 19);
       this.effects.lineStyle(5, 0xefc69a, alpha); this.effects.lineBetween(x, y - 21, endX, endY - 21);
-      this.fists[index].setVisible(true).setPosition(endX, endY - 21).setAlpha(alpha).setRotation(strike.angle + Math.PI / 4);
+      this.fists[index].setDisplaySize(strike.evolved ? 36 : 27, strike.evolved ? 36 : 27).setTint(color).setVisible(true).setPosition(endX, endY - 21).setAlpha(alpha).setRotation(strike.angle + Math.PI / 4);
       this.effects.lineStyle(2, 0xf6e5bc, alpha); this.effects.strokeCircle(endX, endY - 20, 19 - strike.life * 40);
     }
     this.bridge.tick();

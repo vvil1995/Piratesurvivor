@@ -1,13 +1,14 @@
 import { CHARACTERS } from '../../content/catalog.ts';
 import { SHELLS_TOWN, type WorldDefinition } from '../../content/worlds/shells-town.ts';
 import type { CharacterDefinition } from '../../content/types.ts';
-import { attack } from '../systems/combat.ts';
+import { tickAttacks } from '../systems/combat.ts';
 import { applyUpgrade, chooseUpgrades, xpForLevel } from '../systems/progression.ts';
 import { spawnEnemy, type View } from '../systems/spawner.ts';
 import { SpatialGrid } from '../spatial/grid.ts';
 import { ProceduralWorld } from '../world/world.ts';
 import { FlowField } from '../navigation/flow-field.ts';
 import { Pool } from './pool.ts';
+import { canImproveAttack, newAttack } from '../systems/loadout.ts';
 import type { Enemy, Pickup, Player, RunResult, RunStatus, Strike, Vector } from './types.ts';
 
 export interface RunOptions { world?: WorldDefinition; seed?: number }
@@ -45,8 +46,8 @@ export class Run {
     this.enemies = new Pool<Enemy>(this.definition.enemyCap, () => ({ active: false, id: 0, x: 0, y: 0, hp: 0, maxHp: 0, speed: 0, damage: 0, xp: 0, radius: 13, flash: 0 }));
     this.pickups = new Pool<Pickup>(this.definition.pickupCap, () => ({ active: false, x: 0, y: 0, value: 0 }));
     const stats = { ...this.character.stats, maxHp: this.character.stats.maxHp + Math.min(5, Math.max(0, training)) * 5 };
-    this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], x: 256, y: 256,
-      hp: stats.maxHp, stats, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, attackTimer: 0, facing: 0 });
+    this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], attacks: [newAttack(this.character.initialAbility)], x: 256, y: 256,
+      hp: stats.maxHp, stats, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, facing: 0 });
     this.fieldFor(this.player).update(this.player, 1);
   }
   private fieldFor(actor: Player): FlowField {
@@ -61,7 +62,7 @@ export class Run {
     if (this.status !== 'levelup' || playerId !== this.choicePlayerId) return false;
     const actor = this.players.get(playerId)!;
     const upgrade = actor.choices.find(choice => choice.id === id);
-    if (!upgrade) return false;
+    if (!upgrade || 'kind' in upgrade && !canImproveAttack(actor, upgrade.abilityId)) return false;
     applyUpgrade(actor, upgrade); actor.taken[id] = (actor.taken[id] || 0) + 1;
     actor.choices = []; this.status = 'playing'; this.checkLevel(); return true;
   }
@@ -70,7 +71,7 @@ export class Run {
     for (const actor of this.players.values()) {
       if (actor.hp <= 0 || actor.xp < actor.xpNext) continue;
       actor.xp -= actor.xpNext; actor.level++; actor.xpNext = xpForLevel(actor.level);
-      actor.choices = chooseUpgrades(actor.taken, this.random); this.choicePlayerId = actor.id;
+      actor.choices = chooseUpgrades(actor.taken, this.random, actor); this.choicePlayerId = actor.id;
       this.status = 'levelup'; return;
     }
   }
@@ -93,7 +94,7 @@ export class Run {
       const axis = 'x' in movement ? actor.id === this.localPlayerId ? movement : { x: 0, y: 0 } : movement.get(actor.id) ?? { x: 0, y: 0 };
       const length = Math.max(1, Math.hypot(axis.x, axis.y));
       this.world.moveCircle(actor, axis.x / length * actor.stats.speed * dt, axis.y / length * actor.stats.speed * dt, 14);
-      actor.hurtTimer = Math.max(0, actor.hurtTimer - dt); actor.attackTimer = Math.max(0, actor.attackTimer - dt);
+      actor.hurtTimer = Math.max(0, actor.hurtTimer - dt);
       actor.hp = Math.min(actor.stats.maxHp, actor.hp + 0.7 * dt);
       this.fieldFor(actor).update(actor, dt);
     }
@@ -130,9 +131,10 @@ export class Run {
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.status = 'defeat'; return; }
     this.grid.rebuild(this.enemies.items);
     for (const actor of living) {
-      if (actor.hp <= 0 || actor.attackTimer > 0) continue;
-      const strike = attack(actor, this.grid, CHARACTERS[actor.characterId].initialAbility, enemy => this.dropXp(enemy, actor.id), this.world);
-      if (strike) { if (this.strikes.length >= 12) this.strikes.shift(); this.strikes.push(strike); }
+      if (actor.hp <= 0) continue;
+      tickAttacks(actor, this.grid, this.world, dt, enemy => this.dropXp(enemy, actor.id), strike => {
+        if (this.strikes.length >= 12) this.strikes.shift(); this.strikes.push(strike);
+      });
     }
     for (let i = this.strikes.length - 1; i >= 0; i--) { this.strikes[i].life -= dt; if (this.strikes[i].life <= 0) this.strikes.splice(i, 1); }
     for (const pickup of this.pickups.items) {

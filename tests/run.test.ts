@@ -69,13 +69,13 @@ test('graella sin alias a larga distancia y sin historial creciente de celdas', 
 });
 test('entrada y combate se atribuyen al actor, sin depender del alias local', () => {
   const run = new Run();
-  const second = { ...run.player, id: 'player-2', x: 350, stats: { ...run.player.stats }, taken: {}, choices: [] };
+  const second = { ...run.player, id: 'player-2', x: 350, stats: { ...run.player.stats }, taken: {}, choices: [], attacks: structuredClone(run.player.attacks) };
   run.players.set(second.id, second);
   const x = second.x;
   run.update(1 / 60, new Map([['player-2', { x: 1, y: 0 }]]));
   assert.ok(second.x > x); assert.equal(run.player.x, 256);
   const enemy = run.enemies.acquire()!; Object.assign(enemy, { id: 99, x: second.x + 25, y: 256, hp: 1, damage: 0, speed: 0, radius: 13, xp: 5 });
-  run.player.attackTimer = 10; second.attackTimer = 0; run.update(1 / 60, { x: 0, y: 0 });
+  run.player.attacks[0].cooldown = 10; second.attacks[0].cooldown = 0; run.update(1 / 60, { x: 0, y: 0 });
   assert.equal(second.kills, 1); assert.ok(run.strikes.some(s => s.ownerId === second.id));
   assert.equal(run.player.kills, 0);
 });
@@ -102,7 +102,7 @@ test('los ataques no atraviesan edificios y el retroceso respeta sólidos', () =
   const enemy = run.enemies.acquire()!;
   Object.assign(enemy, { id: 990, x: wall.x + wall.width + 16, y: p.y, hp: 100, maxHp: 100, speed: 0, damage: 0, radius: 13, xp: 5 });
   run.update(1 / 60, { x: 0, y: 0 }); assert.equal(enemy.hp, 100);
-  enemy.x = p.x - 24; enemy.y = p.y; p.attackTimer = 0;
+  enemy.x = p.x - 24; enemy.y = p.y; p.attacks[0].cooldown = 0;
   run.update(1 / 60, { x: 0, y: 0 }); assert.ok(enemy.hp < 100); assert.ok(run.world.canOccupy(enemy.x, enemy.y, enemy.radius));
 });
 

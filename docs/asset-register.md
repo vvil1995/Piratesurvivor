@@ -55,3 +55,7 @@ Se generan específicamente para el proyecto seis hojas PNG transparentes: Luffy
 Fuentes y atlas compactos: `src/assets/actors/`. `manifest.json` registra dimensiones, bytes y SHA-256 de cada archivo. `scripts/prepare-actor-atlases.mjs` normaliza con recortes transparentes y genera 768×192; conserva originales. Los seis compactos suman aproximadamente 912 KiB; Luffy+marine, los únicos cargados, unos 308 KiB. Retrato e iconos siguen usando el atlas v2, cuyo peso es adicional. Los cuatro futuros personajes no son jugables por disponer de sus imágenes.
 
 Código de empaquetado y retales original. Sin nuevas dependencias, fuentes, música ni recursos remotos. No atribuir licencia MIT a imágenes o franquicia; la generación no concede derechos de explotación de One Piece. Se conservan los avisos legales existentes.
+
+## Efectos y HUD de ataques (fase2A)
+
+Se reutilizan sin modificación los iconos generados de puño y bota. Barridos, cono y onda de choque se dibujan con código original en Graphics de Phaser; las versiones + cambian color/tamaño y patrón. No hay sprites descargados, imágenes nuevas ni dependencias adicionales.

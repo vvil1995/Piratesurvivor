@@ -6,3 +6,6 @@
 @media(max-width:680px){.upgrade-symbol .pixel-icon{width:46px;height:46px}.ability-chip .pixel-icon{width:27px;height:27px}.mini-hat img{width:45px;height:45px;margin-top:6px}}
 @media(max-height:540px) and (orientation:landscape){.upgrade-symbol .pixel-icon{width:42px;height:42px;margin-top:-8px;margin-bottom:-8px}.upgrade-card .upgrade-symbol{height:36px!important}}
 .mini-hat img{width:100%!important;height:100%!important;margin:0!important;object-fit:contain}
+
+.attack-slots{display:flex;gap:6px;min-width:0}.attack-slot{width:74px;min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#13282dea;border:1px solid #b8c9bd55;font:9px monospace;color:#e4e9d8}.attack-slot .pixel-icon{width:28px;height:28px}.attack-slot small{font-size:6px;letter-spacing:0;color:#b4cecd}.attack-slot.empty{color:#a2b5b766;border-style:dashed;font-size:24px}.attack-slot.evolved{border-color:#edc66e;box-shadow:inset 0 0 12px #e9ba621c}.attack-slot.evolved small{color:#edc66e}.touch-device .attack-slots{margin-left:auto}
+@media(max-width:680px),(max-height:540px){.attack-slot{width:53px;min-height:57px;font-size:8px;gap:3px}.attack-slot .pixel-icon{width:23px;height:23px}.attack-slot small{font-size:5px}.attack-slots{gap:4px}.hud-bottom #area-label{display:none}}
