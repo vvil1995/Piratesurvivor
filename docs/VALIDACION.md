@@ -166,3 +166,6 @@ La revisión de alpha también detecta poses de Zoro donde espada o brazo daban 
 
 
 CI32013954:32 pruebas aprobadas,2 omisiones y2 fallos en fixtures de animación de escritorio. La regresión nueva de uniones pasa en escritorio y móvil; capturas de los seis actores revisadas sin los cortes de la captura del usuario. La pose se consulta ahora tras actualización explícita de escena mediante un método solo de QA, evitando leer fotogramas antiguos o perder el instante breve de polvo en render por software. Teclado/joystick siguen en sus pruebas independientes. Pendiente repetir la suite; no se declara éxito completo de esta ejecución.
+
+
+Resultado final CIafcf7136, ejecución41093839441: **34 pruebas aprobadas,2 omisiones intencionales**. Tipos,10 archivos de núcleo, licencias, compilación y empaquetado correctos. Regresión de los seis atlas aprobada en escritorio y móvil, con capturas revisadas: no se observan los cortes de rodilla de la captura del usuario. Alpha real:89 poses articulables y7 protegidas con sprite íntegro (5 de Zoro y2 de Nami). Se mantienen los atlas aprobados; las nuevas ilustraciones experimentales no se cargan. Safari y la comprobación en el teléfono del usuario siguen pendientes.
