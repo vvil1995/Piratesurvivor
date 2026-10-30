@@ -24,3 +24,4 @@
 .chest-options{display:grid;gap:12px}.chest-options button{white-space:normal;min-height:64px}.run-items{font-size:10px;color:#ead49c;align-self:center}
 
 .attack-selector{position:relative}.run-items{position:absolute;right:0;top:-29px;pointer-events:none}
+#chest-reward .dialog-card{max-height:calc(100svh - 48px);overflow:auto;padding:24px}
