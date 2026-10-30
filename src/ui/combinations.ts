@@ -9,7 +9,7 @@ interface Actions { move: (id: string, to: number) => boolean; merge: (from: num
 const node = <T extends HTMLElement>(id: string) => document.getElementById(id)! as T;
 export function renderCombinations(run: Run, actions: Actions): void {
   const player = run.player, message = node('combination-message');
-  message.textContent = run.pendingAbility ? `Has elegido UN movimiento: ${run.pendingAbility.name}. Las cuatro ranuras están llenas: puedes juntar dos para dejarle sitio.` : run.canJoinMovements ? 'Recompensa de jefe: puedes juntar movimientos conservando sus niveles y recargas.' : 'Consulta tus movimientos. Para juntarlos necesitas aprender otro con las cuatro ranuras llenas o una recompensa de jefe. No hay jefes disponibles todavía.';
+  message.textContent = run.pendingAbility ? `Has elegido UN movimiento: ${run.pendingAbility.name}. Las cuatro ranuras están llenas: puedes juntar dos para dejarle sitio.` : run.canJoinMovements ? 'Recompensa de jefe: puedes juntar movimientos conservando sus niveles y recargas.' : 'Consulta tus movimientos. Para juntarlos necesitas aprender otro con las cuatro ranuras llenas o una recompensa de jefe. Morgan concede una oportunidad al vencerlo.';
   const slots = node('combination-slots'); slots.replaceChildren();
   player.abilitySlots.forEach((ids, index) => {
     const card = document.createElement('section'); card.className = 'combination-slot'; card.dataset.slot = String(index);

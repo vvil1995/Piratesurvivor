@@ -55,7 +55,7 @@ export class BossRenderer {
       if (kind !== 'order') drawDanger(this.warnings, warning.zone, origin, 0xf23f46, intensity);
       else for (const gate of MORGAN_ARENA.gates) { this.warnings.lineStyle(final ? 4 : 2, 0xffb26a, 0.85); this.warnings.strokeCircle(gate.x - origin.x, gate.y - origin.y, 28); }
       this.warnings.lineStyle(final ? 4 : 2, 0xffdad0, final ? 0.95 : 0.5);
-      this.warnings.strokeCircle(x, y - 80, final ? 9 : 6);
+      this.warnings.strokeCircle(x, y - 105, final ? 9 : 6);
     }
     if (boss.impactZone) drawDanger(this.warnings, boss.impactZone, origin, 0xffa66a, 0.55);
     if (boss.state === 'stunned') {
