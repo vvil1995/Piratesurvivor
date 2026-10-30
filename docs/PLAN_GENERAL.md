@@ -86,3 +86,11 @@ Separar perfil v2 (berries, reclutas, entrenamiento por personaje, récords, aju
 ## Siguiente orden autorizada: empezar el primer bloque pendiente
 
 El usuario solicita enumerar todas sus indicaciones y empezar la primera. `ORDEN_DE_TRABAJO.md` las agrupa en19 bloques. Se autoriza punto1/fase2A: cuatro ataques iniciales de Luffy, equipamiento, temporizadores independientes, seis niveles con + automático, cartas mixtas y HUD de cuatro espacios. Esta orden sucede a la limitación de auditoría de fase0. Estadísticas/topes completos, economía y campaña siguen después; no se implementan fases masivamente.
+
+## Ajustes adicionales antes del bloque 2 — 0.4.1
+
+El usuario pide piernas visibles también en laterales/diagonales/espalda y enemigos nuevos más numerosos/fuertes con el tiempo. Se articula la parte inferior de los sprites detallados mediante dos recortes reutilizados, apoyo/peso y pequeñas marcas de paso, sin cambiar controles ni sustituir el arte por geometría. Cámara y actores dibujan tras el mismo paso de simulación.
+
+Presión normal de Shells Town configurable por minutos de Run: HP +12%/min, daño +5,5%/min, velocidad +1,2%/min; intervalo base0,65/(1+0,23×min), mínimo0,22s; grupos1/2/3 a0/4/8min. Topes de crecimiento a20min y150 enemigos simultáneos. A10min: HP×2,2, daño×1,55, velocidad×1,12. Solo enemigos nuevos; no se curan ni transforman los existentes. No depende del HP del jugador ni cambia de isla por reloj. Valores provisionales que se combinarán con bases de cada isla cuando existan, sin sustituir patrones de caps/Roger.
+
+Orden explícito: subir estas correcciones y pasar al bloque2 (pasivas, topes y HUD) sin pedir nueva confirmación.

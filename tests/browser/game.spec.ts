@@ -238,3 +238,16 @@ test('los cuatro efectos evolucionados se dibujan sin errores en combate', async
   await page.screenshot({ path: test.info().outputPath('four-effects.png') });
   expect(errors).toEqual([]);
 });
+
+test('pasos apoyados en el suelo y vuelta a reposo sin deslizamiento visual', async ({ page }) => {
+  await page.locator('#start').click();
+  await page.keyboard.down('d');
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().footsteps)).toBeGreaterThan(0);
+  await expect.poll(() => page.evaluate(() => Math.abs(window.__OPS_QA__!.metrics().legSwing))).toBeGreaterThan(1);
+  await page.screenshot({ path: test.info().outputPath('grounded-walk.png') });
+  await page.keyboard.up('d');
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().footsteps)).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorScaleY)).toBeCloseTo(0.65);
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorAngle)).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().legSwing)).toBe(0);
+});

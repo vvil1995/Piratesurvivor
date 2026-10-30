@@ -59,3 +59,7 @@ Código de empaquetado y retales original. Sin nuevas dependencias, fuentes, mú
 ## Efectos y HUD de ataques (fase2A)
 
 Se reutilizan sin modificación los iconos generados de puño y bota. Barridos, cono y onda de choque se dibujan con código original en Graphics de Phaser; las versiones + cambian color/tamaño y patrón. No hay sprites descargados, imágenes nuevas ni dependencias adicionales.
+
+## Marcha articulada 0.4.1
+
+Se conservan los atlas detallados aprobados. `walk-rig.ts` divide el dibujo en torso y dos recortes de piernas para animar ángulos opuestos con fase por distancia; tres imágenes compartiendo textura por actor, preasignadas. El personaje completo no sube y baja; el pie de retorno tiene elevación pequeña. Polvo de paso original de10×5 px, pool de12. No se incorporan nuevos archivos gráficos: se descartaron ensayos de generación cuyos ciclos repetían piernas o cambiaban de orientación.

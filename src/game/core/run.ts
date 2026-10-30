@@ -1,6 +1,7 @@
 import { CHARACTERS } from '../../content/catalog.ts';
 import { SHELLS_TOWN, type WorldDefinition } from '../../content/worlds/shells-town.ts';
 import type { CharacterDefinition } from '../../content/types.ts';
+import { difficultyAt } from '../systems/difficulty.ts';
 import { tickAttacks } from '../systems/combat.ts';
 import { applyUpgrade, chooseUpgrades, xpForLevel } from '../systems/progression.ts';
 import { spawnEnemy, type View } from '../systems/spawner.ts';
@@ -101,8 +102,9 @@ export class Run {
     if (!living.length) { this.status = 'defeat'; return; }
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
-      spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player), this.definition, this.random, ++this.enemyId);
-      this.spawnTimer = this.definition.spawnInterval;
+      const threat = difficultyAt(this.time, this.definition.spawnInterval, this.definition.difficulty);
+      for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player), this.definition, this.random, ++this.enemyId, this.time);
+      this.spawnTimer = threat.interval;
     }
     this.grid.rebuild(this.enemies.items);
     for (const enemy of this.enemies.items) {

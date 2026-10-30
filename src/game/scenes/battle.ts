@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { WalkRig } from './walk-rig.ts';
 import { ActorAnimation } from './actor-animation.ts';
 import { SHELLS_TOWN } from '../../content/worlds/shells-town.ts';
 import { ProceduralWorld } from '../world/world.ts';
@@ -18,6 +19,8 @@ export interface BattleBridge {
 export class BattleScene extends Phaser.Scene {
   private bridge: BattleBridge;
   private captain!: Phaser.GameObjects.Image;
+  private captainRig!: WalkRig;
+  private enemyRigs: WalkRig[] = [];
   private captainShadow!: Phaser.GameObjects.Image;
   private enemies: Phaser.GameObjects.Image[] = [];
   private shadows: Phaser.GameObjects.Image[] = [];
@@ -26,12 +29,14 @@ export class BattleScene extends Phaser.Scene {
   private fists: Phaser.GameObjects.Image[] = [];
   private captainAnimation = new ActorAnimation();
   private enemyAnimations = Array.from({ length: SHELLS_TOWN.enemyCap }, () => new ActorAnimation());
+  private dust: { sprite: Phaser.GameObjects.Image; x: number; y: number; life: number }[] = [];
+  private dustIndex = 0;
   private accumulator = 0;
   private previousRun?: Run;
   private worldRenderer!: WorldRenderer;
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
-  get diagnostics() { return { actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  get diagnostics() { return { legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
   preload(): void {
     this.load.image('source-atlas', atlasUrl);
     this.load.image('luffy-directions-source', luffyDirectionsUrl);
@@ -40,13 +45,16 @@ export class BattleScene extends Phaser.Scene {
   create(): void {
     createTextures(this);
     this.worldRenderer = new WorldRenderer(this);
+    for (let i = 0; i < 12; i++) this.dust.push({ sprite: this.add.image(0, 0, 'foot-dust').setDepth(-999).setVisible(false), x: 0, y: 0, life: 0 });
     for (let i = 0; i < SHELLS_TOWN.pickupCap; i++) this.crystals.push(this.add.image(0, 0, 'xp').setVisible(false).setDepth(2));
     for (let i = 0; i < SHELLS_TOWN.enemyCap; i++) {
       this.shadows.push(this.add.image(0, 0, 'shadow').setVisible(false).setDepth(-1000));
       this.enemies.push(this.add.image(0, 0, 'marine').setOrigin(0.5, 0.96).setScale(0.6).setVisible(false));
+      this.enemyRigs.push(new WalkRig(this, 'marine'));
     }
     this.captainShadow = this.add.image(256, 256, 'shadow').setDepth(-1000).setScale(1.2);
     this.captain = this.add.image(256, 256, 'straw-hat').setOrigin(0.5, 0.96).setScale(0.65).setDepth(1000);
+    this.captainRig = new WalkRig(this, 'straw-hat');
     this.effects = this.add.graphics().setDepth(4000);
     for (let i = 0; i < 12; i++) this.fists.push(this.add.image(0, 0, 'fist').setDisplaySize(27, 27).setDepth(4001).setVisible(false));
     this.resize();
@@ -59,13 +67,10 @@ export class BattleScene extends Phaser.Scene {
   }
   update(_time: number, delta: number): void {
     const run = this.bridge.run();
-    if (run !== this.previousRun) { this.accumulator = 0; this.previousRun = run; }
+    if (run !== this.previousRun) { this.accumulator = 0; this.previousRun = run; for (const p of this.dust) p.life = 0; }
     const camera = this.cameras.main;
     const player = run?.player;
-    const worldX = player?.x ?? 256, worldY = player?.y ?? 256;
-    // Posiciones lógicas globales; solo el dibujo usa origen local por chunk.
-    const origin = { x: Math.floor(worldX / CHUNK_SIZE) * CHUNK_SIZE, y: Math.floor(worldY / CHUNK_SIZE) * CHUNK_SIZE };
-    camera.centerOn(worldX - origin.x, worldY - origin.y);
+    let worldX = player?.x ?? 256, worldY = player?.y ?? 256;
     const worldView = { width: camera.width / camera.zoom, height: camera.height / camera.zoom, centerX: worldX, centerY: worldY };
     if (run) {
       run.setView(worldView);
@@ -75,25 +80,43 @@ export class BattleScene extends Phaser.Scene {
         while (this.accumulator >= 1 / 60 && run.status === 'playing') { run.update(1 / 60, axis); this.accumulator -= 1 / 60; }
       } else this.accumulator = 0;
     }
+    // Dibujar todas las entidades y la cámara tras el mismo paso de simulación.
+    worldX = player?.x ?? 256; worldY = player?.y ?? 256;
+    worldView.centerX = worldX; worldView.centerY = worldY;
+    // Posiciones lógicas globales; solo el dibujo usa origen local por chunk.
+    const origin = { x: Math.floor(worldX / CHUNK_SIZE) * CHUNK_SIZE, y: Math.floor(worldY / CHUNK_SIZE) * CHUNK_SIZE };
+    camera.centerOn(worldX - origin.x, worldY - origin.y);
     this.worldRenderer.update(run?.world ?? this.previewWorld, worldView, origin);
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
     this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate, delta / 1000);
     const pose = this.captainAnimation;
     const phase = pose.frame ? (pose.frame - 1) % 2 : 0;
-    this.captain.setTexture(`straw-hat-${pose.direction}-${phase}`).setFlipX(false);
+    this.captain.setTexture(`straw-hat-${pose.direction}-${phase}`).setFlipX(false)
+      .setScale(0.65 * (1 + pose.weight / 2), 0.65 * (1 - pose.weight)).setAngle(pose.lean);
     this.captain.setPosition(worldX - origin.x, worldY - origin.y).setDepth(worldY - origin.y + 1000);
-    this.captainShadow.setPosition(worldX - origin.x, worldY - origin.y + 2);
+    this.captainShadow.setPosition(worldX - origin.x, worldY - origin.y + 2).setScale(1.2 + pose.weight);
+    if (animate && pose.footfall) {
+      const dust = this.dust[this.dustIndex++ % this.dust.length];
+      dust.x = worldX; dust.y = worldY + 1; dust.life = 0.22;
+    }
+    for (const dust of this.dust) {
+      if (run?.status === 'playing') dust.life = Math.max(0, dust.life - delta / 1000);
+      dust.sprite.setVisible(!!animate && dust.life > 0).setPosition(dust.x - origin.x, dust.y - origin.y)
+        .setAlpha(dust.life / 0.22 * 0.7);
+    }
     this.captain.setAlpha(player && player.hurtTimer > 0 && Math.floor(player.hurtTimer * 18) % 2 === 0 ? 0.5 : 1);
+    this.captainRig.update(this.captain, pose, 0.65);
     for (let i = 0; i < this.enemies.length; i++) {
       const e = run?.enemies.items[i], sprite = this.enemies[i], shadow = this.shadows[i];
       const visible = !!e?.active && Math.abs(e.x - worldX) < camera.width / camera.zoom / 2 + 160 && Math.abs(e.y - worldY) < camera.height / camera.zoom / 2 + 160;
       sprite.setVisible(visible); shadow.setVisible(visible);
-      if (!visible || !e) continue;
+      if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate, delta / 1000);
-      sprite.setTexture(`marine-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false);
+      sprite.setTexture(`marine-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
       sprite.setPosition(e.x - origin.x, e.y - origin.y).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
+      this.enemyRigs[i].update(sprite, animation, 0.6);
     }
     for (let i = 0; i < this.crystals.length; i++) {
       const pickup = run?.pickups.items[i], sprite = this.crystals[i];

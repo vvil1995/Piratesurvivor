@@ -27,3 +27,8 @@ export interface UpgradeDefinition {
   id: string; name: string; description: string; symbol: string;
   stat: keyof Stats; mode: 'add' | 'multiply'; value: number; max: number;
 }
+
+export interface DifficultyDefinition {
+  maxMinutes: number; hpPerMinute: number; damagePerMinute: number; speedPerMinute: number;
+  spawnAcceleration: number; minInterval: number; batchEveryMinutes: number; maxBatch: number;
+}

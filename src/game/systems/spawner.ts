@@ -1,3 +1,4 @@
+import { difficultyAt } from './difficulty.ts';
 import { ENEMIES } from '../../content/catalog.ts';
 import type { WorldDefinition } from '../../content/worlds/shells-town.ts';
 import type { Pool } from '../core/pool.ts';
@@ -5,7 +6,7 @@ import type { Enemy, Player } from '../core/types.ts';
 import type { ProceduralWorld } from '../world/world.ts';
 import type { FlowField } from '../navigation/flow-field.ts';
 export interface View { width: number; height: number; centerX: number; centerY: number }
-export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: View, world: ProceduralWorld, field: FlowField, definition: WorldDefinition, random: () => number, id: number): void {
+export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: View, world: ProceduralWorld, field: FlowField, definition: WorldDefinition, random: () => number, id: number, seconds = 0): void {
   if (pool.count >= definition.enemyCap || !actors.length) return;
   let x = 0, y = 0, found = false;
   for (let tries = 0; tries < 24; tries++) {
@@ -24,7 +25,8 @@ export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: V
   if (!found) return;
   const enemy = pool.acquire(); if (!enemy) return;
   const def = ENEMIES[definition.enemyId], scale = definition.enemyScale;
-  Object.assign(enemy, { x, y, id, hp: def.hp * scale, maxHp: def.hp * scale,
-    speed: def.speed, damage: def.damage, xp: def.xp, radius: def.radius, flash: 0,
+  const threat = difficultyAt(seconds, definition.spawnInterval, definition.difficulty);
+  Object.assign(enemy, { x, y, id, hp: def.hp * scale * threat.hp, maxHp: def.hp * scale * threat.hp,
+    speed: def.speed * threat.speed, damage: def.damage * threat.damage, xp: def.xp, radius: def.radius, flash: 0,
     targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
 }

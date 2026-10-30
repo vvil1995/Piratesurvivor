@@ -13,3 +13,13 @@ test('ocho direcciones visuales y pasos según desplazamiento, no según ataque'
   actor.update('p1', 8, 0, false); assert.equal(actor.frame, 0);
   actor.update('p2', 1000, 1000, true); assert.equal(actor.frame, 0); assert.equal(actor.direction, 's');
 });
+
+test('apoyo de pies por distancia y ausencia de balanceo en reposo o movimiento reducido', () => {
+  const actor = new ActorAnimation(); actor.update('a', 0, 0, true);
+  actor.update('a', 24, 0, true); assert.equal(actor.footfall, false);
+  actor.update('a', 48, 0, true); assert.equal(actor.footfall, true); assert.ok(actor.weight > 0);
+  actor.update('a', 48, 0, true); assert.equal(actor.footfall, false);
+  for (let i = 0; i < 6; i++) actor.update('a', 48, 0, true);
+  assert.equal(actor.weight, 0); assert.equal(actor.lean, 0);
+  actor.update('a', 60, 0, false); assert.equal(actor.footfall, false); assert.equal(actor.weight, 0);
+});

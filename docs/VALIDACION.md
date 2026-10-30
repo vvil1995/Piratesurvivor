@@ -101,3 +101,11 @@ La comprobación del reloj usa progreso ≥1s en vez de observar un segundo exac
 Resultado final de regresión 0.4.0: TypeScript, cuatro archivos de pruebas de núcleo (incluidos ocho casos nuevos de combate) y compilación correctos. Suite completa Chromium: **16 aprobadas y2 omitidas intencionalmente** (móvil en escritorio). HTML autónomo probado por HTTP local en escritorio/móvil emulado, sin red adicional ni QA de producción. Las pruebas aceleradas de aprendizaje/nivel6 no miden el ritmo real de progresión ni sustituyen partidas humanas. Se mantiene pendiente Chrome Android/Safari iOS físicos, equilibrio de cooldown/daño y resolver las estadísticas del punto2.
 
 Comprobación adicional de render: dos pruebas dirigidas aprobadas (escritorio y móvil emulado) crean enemigos cercanos y ejecutan simultáneamente los cuatro ataques evolucionados. Verifican eventos de línea/ráfaga/cono/barrido y ausencia de errores de Phaser, con captura revisada. Se congela la simulación como fixture para observar efectos; no es una medición de rendimiento.
+
+## 0.4.1 — marcha y presión por tiempo
+
+Se mantienen sprites detallados; se añaden articulación de piernas, peso, recortes preasignados y polvo de paso por desplazamiento. Se elimina el desfase de un tick entre cámara/dibujo y simulación. Sin marcha al estar bloqueado, pausado o con movimiento reducido. La valoración de si la marcha deja de parecer flotante requiere prueba humana; una captura fija no lo demuestra.
+
+TypeScript, núcleo y build aprobados. Tres casos nuevos verifican curva/topes, estadísticas de enemigos nacidos tarde independientes de HP del jugador y más enemigos reales en10s avanzados, conservando pool y colisiones. Animación verifica contacto por distancia y ausencia de oscilación al parar. La suite de navegador conserva19 casos aprobados y2 omisiones; se ajusta la espera a reposo del caso de pasos para respetar sus80ms de tolerancia, repetición dirigida aprobada en escritorio y móvil emulado. HTML autónomo también aprobado en ambos perfiles sin red adicional.
+
+No se han medido FPS/memoria en dispositivos físicos. El rig añade dos imágenes por actor (preasignadas, sin texturas nuevas por enemigo); medir su impacto con150 enemigos. La presión a20min está acotada, no es un balance definitivo de campaña.
