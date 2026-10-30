@@ -80,3 +80,12 @@ Pendiente:
 ## Actualización: variedad y animación direccional
 
 TypeScript, pruebas de simulación/mundo/animación y compilación pasan. Se verifican ocho direcciones, parada al dejar de moverse, reinicio al reciclar entidades, variedad de parcelas y avenidas libres. Suite completa con `CHROMIUM_EXECUTABLE=/usr/bin/chromium`: 12 pruebas aprobadas y 2 omitidas intencionalmente en escritorio. Se corrigió una alternancia a reposo entre renders sin paso de simulación; el reposo usa una tolerancia de 80 ms. La prueba contempla pasos axiales al soltar teclas sucesivas o deslizarse ante un obstáculo. Se revisó una captura de escritorio. No se han probado móviles físicos. `netlify.toml` configura Node 22.18.0, `npm run build` y `dist`; el despliegue automático depende de la configuración del sitio conectado en Netlify.
+
+
+## Fase 0 y corrección gráfica direccional — 30-10-2026
+
+Se revisó la base 5e198bf y se actualizó PLAN_GENERAL.md con el modo individual, entrenamiento por personaje, evolución automática al nivel 6 y fases pequeñas. AUDITORIA_FASE_0.md distingue contenido real, propuestas y riesgos. No se implementó economía, campaña ni nuevos personajes.
+
+Se sustituyen los actores geométricos por hojas detalladas generadas de ocho direcciones y dos pasos para los cinco personajes y marine. Solo Luffy/marine entran en juego; el resto se prepara como recursos. Atlas compactos reproducibles, sin cargar personajes futuros ni hojas grandes innecesarias; liberación de texturas fuente de GPU. Se revisó visualmente la galería de los seis actores. Siguen pendientes ciclos más largos y poses de ataque por orientación, pruebas Android/iOS físicas y mediciones de FPS/memoria.
+
+Comprobaciones finales de esta entrega: `npm run check`, `npm test` y `npm run build` aprobados. Suite completa Chromium: **14 aprobadas, 2 omitidas intencionalmente** (controles móviles en escritorio). Incluye equivalencia de píxeles de fuente/atlas compacto para los seis actores, 16 cuadros utilizables por actor, márgenes transparentes y frente/espalda distintos; movimiento, colisiones/caché, joystick, giro, XP, derrota, pausa y persistencia conservados. Capturas de galería y móvil emulado revisadas. `check-portable.mjs` con HTTP local valida escritorio y móvil emulado sin recursos de red adicionales ni hook QA. HTML autónomo 3,76 MiB sin comprimir (~2,03 MiB gzip); este peso incluye Phaser, interfaz, atlas de iconos y los dos actores actuales. No se afirma compatibilidad física ni un FPS medido.

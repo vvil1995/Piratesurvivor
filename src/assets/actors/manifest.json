@@ -1,0 +1,134 @@
+{
+  "provenance": "Generated for this project from original pixel-atlas-v2.png as aesthetic reference; One Piece rights are not granted.",
+  "sourceLayout": {
+    "columns": 4,
+    "rows": 4,
+    "directions": [
+      "s",
+      "se",
+      "e",
+      "ne",
+      "n",
+      "nw",
+      "w",
+      "sw"
+    ],
+    "phases": 2,
+    "southwest": "mirrored southeast during extraction"
+  },
+  "runtimeLayout": {
+    "columns": 8,
+    "rows": 2,
+    "cellSize": 96
+  },
+  "assets": [
+    {
+      "file": "luffy-atlas.png",
+      "sha256": "e5496349a843654706cf42d4ee9657c1b2668553983da63e1ca3cfd1190edc34",
+      "width": 768,
+      "height": 192,
+      "bytes": 161831,
+      "role": "runtime-atlas",
+      "loadedInGame": true
+    },
+    {
+      "file": "luffy-directions.png",
+      "sha256": "b2091d54caa3463a771101bdac8a161fae52e46d52f8da73a83fe8e1989c51f0",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1593082,
+      "role": "source",
+      "loadedInGame": false
+    },
+    {
+      "file": "marine-atlas.png",
+      "sha256": "9affe2a968e2a6dd0039153d9d617cc22ed94c551a65976b3e8ffeb64eebe993",
+      "width": 768,
+      "height": 192,
+      "bytes": 153968,
+      "role": "runtime-atlas",
+      "loadedInGame": true
+    },
+    {
+      "file": "marine-directions.png",
+      "sha256": "9669799ddc703b7c54d1da5c6357c7495104aafccfa60de82d489070f128ab4d",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1402220,
+      "role": "source",
+      "loadedInGame": false
+    },
+    {
+      "file": "nami-atlas.png",
+      "sha256": "da27300c236c9dc887472f3f33dd3175e6688a506df7a7b897437f49413ef7c4",
+      "width": 768,
+      "height": 192,
+      "bytes": 152016,
+      "role": "runtime-atlas",
+      "loadedInGame": false
+    },
+    {
+      "file": "nami-directions.png",
+      "sha256": "b30adcc35174fe3074db1cacefb70bcdd2d5666a3221c45d0bd2fc4f2b15c033",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1397984,
+      "role": "source",
+      "loadedInGame": false
+    },
+    {
+      "file": "sanji-atlas.png",
+      "sha256": "480b7ed97db2f0d220c56647051201b39e5620aac6fc6d29de4961b25d1561de",
+      "width": 768,
+      "height": 192,
+      "bytes": 113389,
+      "role": "runtime-atlas",
+      "loadedInGame": false
+    },
+    {
+      "file": "sanji-directions.png",
+      "sha256": "c6a43c5e5730f5c4580fb6088dcd23e66f891ba83e23044eea71328e72a40b3f",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 979755,
+      "role": "source",
+      "loadedInGame": false
+    },
+    {
+      "file": "usopp-atlas.png",
+      "sha256": "ab9bcd30f38c3ef66620f493921256abcada88ba99321648f3107668b04c21b3",
+      "width": 768,
+      "height": 192,
+      "bytes": 172946,
+      "role": "runtime-atlas",
+      "loadedInGame": false
+    },
+    {
+      "file": "usopp-directions.png",
+      "sha256": "48b307e664139dd77a76c334add803eb55d108098b005d23234250c241f8e3a2",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1782890,
+      "role": "source",
+      "loadedInGame": false
+    },
+    {
+      "file": "zoro-atlas.png",
+      "sha256": "bac848323b36373f99f436452c1862bf9abe8dd197678d21e48cec1d036f4596",
+      "width": 768,
+      "height": 192,
+      "bytes": 179634,
+      "role": "runtime-atlas",
+      "loadedInGame": false
+    },
+    {
+      "file": "zoro-directions.png",
+      "sha256": "77e689ab2d38f0a24183b0e4c417bea139fab05a9671289aac068cb8f82fe4e1",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1567242,
+      "role": "source",
+      "loadedInGame": false
+    }
+  ]
+}

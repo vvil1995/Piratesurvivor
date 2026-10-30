@@ -16,7 +16,7 @@ export class ActorAnimation {
     if (animate && step > 0.05 && step < 40) {
       this.stillTime = 0;
       this.direction = movementDirection(dx, dy); this.distance += step;
-      this.frame = 1 + Math.floor(this.distance / 7) % 4;
+      this.frame = 1 + Math.floor(this.distance / 24) % 4;
     } else {
       this.stillTime += Math.max(0, dt);
       // Un render sin paso de simulación no significa que el actor se haya parado.

@@ -8,6 +8,8 @@ import type { Run } from '../core/run.ts';
 import type { Vector } from '../core/types.ts';
 import { createTextures } from './textures.ts';
 import atlasUrl from '../../assets/pixel-atlas-v2.png';
+import luffyDirectionsUrl from '../../assets/actors/luffy-atlas.png';
+import marineDirectionsUrl from '../../assets/actors/marine-atlas.png';
 
 export interface BattleBridge {
   run: () => Run | undefined; axis: () => Vector; tick: () => void;
@@ -29,8 +31,12 @@ export class BattleScene extends Phaser.Scene {
   private worldRenderer!: WorldRenderer;
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
-  get diagnostics() { return { actorTexture: this.captain?.texture.key ?? '', renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
-  preload(): void { this.load.image('source-atlas', atlasUrl); }
+  get diagnostics() { return { actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  preload(): void {
+    this.load.image('source-atlas', atlasUrl);
+    this.load.image('luffy-directions-source', luffyDirectionsUrl);
+    this.load.image('marine-directions-source', marineDirectionsUrl);
+  }
   create(): void {
     createTextures(this);
     this.worldRenderer = new WorldRenderer(this);
@@ -73,8 +79,9 @@ export class BattleScene extends Phaser.Scene {
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
     this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate, delta / 1000);
     const pose = this.captainAnimation;
-    this.captain.setTexture(`straw-hat-${pose.direction}-${pose.frame}`);
-    this.captain.setPosition(worldX - origin.x, worldY - origin.y).setDepth(worldY - origin.y + 1000).setFlipX(false);
+    const phase = pose.frame ? (pose.frame - 1) % 2 : 0;
+    this.captain.setTexture(`straw-hat-${pose.direction}-${phase}`).setFlipX(false);
+    this.captain.setPosition(worldX - origin.x, worldY - origin.y).setDepth(worldY - origin.y + 1000);
     this.captainShadow.setPosition(worldX - origin.x, worldY - origin.y + 2);
     this.captain.setAlpha(player && player.hurtTimer > 0 && Math.floor(player.hurtTimer * 18) % 2 === 0 ? 0.5 : 1);
     for (let i = 0; i < this.enemies.length; i++) {
@@ -84,8 +91,8 @@ export class BattleScene extends Phaser.Scene {
       if (!visible || !e) continue;
       const animation = this.enemyAnimations[i];
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate, delta / 1000);
-      sprite.setTexture(`marine-${animation.direction}-${animation.frame}`);
-      sprite.setPosition(e.x - origin.x, e.y - origin.y).setDepth(e.y - origin.y + 1000).setFlipX(false);
+      sprite.setTexture(`marine-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false);
+      sprite.setPosition(e.x - origin.x, e.y - origin.y).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
     }
     for (let i = 0; i < this.crystals.length; i++) {

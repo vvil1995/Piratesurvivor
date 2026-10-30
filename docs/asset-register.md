@@ -44,3 +44,14 @@ Se reutiliza sin modificar el atlas pixel-atlas-v2.png y sus recortes. Suelo, bo
 ## Animación direccional y variedad de Shells Town
 
 `actor-textures.ts` genera texturas procedurales originales mediante Canvas para Luffy y marines: ocho orientaciones y cuatro fases de paso más reposo. Se generan al cargar y se reutilizan. El atlas anterior permanece para retrato e iconos. Plazas, jardines y nuevas parcelas usan código original, sin recursos externos ni dependencias nuevas.
+
+
+## Atlas detallados de ocho direcciones — 30-10-2026
+
+Se retira de la carga y del código el generador geométrico `actor-textures.ts`, rechazado visualmente por el usuario. No se eliminan movimiento ni direcciones lógicas.
+
+Se generan específicamente para el proyecto seis hojas PNG transparentes: Luffy, Zoro, Nami, Usopp, Sanji y marine. Herramienta de generación de imágenes de esta sesión, tomando el atlas v2 propio como referencia estética; no se descargan sprites ajenos. Cada fuente tiene ocho perspectivas y dos pasos, con frente, espalda, laterales y diagonales. Se corrige SW mediante reflejo de SE al empaquetar. No son ocho técnicas de combate ni ciclos de ataque por orientación; el reposo congela un paso.
+
+Fuentes y atlas compactos: `src/assets/actors/`. `manifest.json` registra dimensiones, bytes y SHA-256 de cada archivo. `scripts/prepare-actor-atlases.mjs` normaliza con recortes transparentes y genera 768×192; conserva originales. Los seis compactos suman aproximadamente 912 KiB; Luffy+marine, los únicos cargados, unos 308 KiB. Retrato e iconos siguen usando el atlas v2, cuyo peso es adicional. Los cuatro futuros personajes no son jugables por disponer de sus imágenes.
+
+Código de empaquetado y retales original. Sin nuevas dependencias, fuentes, música ni recursos remotos. No atribuir licencia MIT a imágenes o franquicia; la generación no concede derechos de explotación de One Piece. Se conservan los avisos legales existentes.

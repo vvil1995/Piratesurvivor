@@ -121,8 +121,53 @@ test('explorar coordenadas lejanas recicla chunks y conserva la geometría', asy
 test('animación direccional responde al movimiento y se detiene al soltar', async ({ page }) => {
   await page.locator('#start').click();
   await page.keyboard.down('w'); await page.keyboard.down('d'); await page.waitForTimeout(250);
-  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(/^straw-hat-ne-[1-4]$/);
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(/^straw-hat-ne-[01]$/);
+  expect(await page.evaluate(() => window.__OPS_QA__!.metrics().actorDirection)).toBe('ne');
   await page.keyboard.up('w'); await page.keyboard.up('d'); await page.waitForTimeout(100);
   // La última orientación puede ser axial por soltar teclas o deslizarse ante un obstáculo.
-  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(/^straw-hat-(n|ne|e)-0$/);
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorFrame)).toBe(0);
+  await page.screenshot({ path: test.info().outputPath('restored-art.png') });
+});
+
+test('los seis atlas detallados contienen ocho orientaciones utilizables sin recortes', async ({ page }) => {
+  const summary = await page.evaluate(async () => {
+    const modulePath = '/src/game/scenes/directional-art.ts';
+    const { createDirectionalArt, createPackedDirectionalArt } = await import(/* @vite-ignore */ modulePath);
+    const gallery = document.createElement('div');
+    gallery.style.cssText = 'position:absolute;inset:0 auto auto 0;z-index:9999;background:#657379;padding:12px;display:grid;grid-template-columns:repeat(8,96px);gap:2px';
+    document.body.append(gallery);
+    const results = [];
+    for (const name of ['luffy', 'marine', 'zoro', 'nami', 'usopp', 'sanji']) {
+      const image = new Image(); image.src = `/src/assets/actors/${name}-directions.png`;
+      await image.decode();
+      const frames = new Map<string, HTMLCanvasElement>();
+      const mockScene = { textures: { get: () => ({ getSourceImage: () => image }), addCanvas: (key: string, canvas: HTMLCanvasElement) => frames.set(key, canvas) } };
+      createDirectionalArt(mockScene, name, name);
+      const packedImage = new Image(); packedImage.src = `/src/assets/actors/${name}-atlas.png`; await packedImage.decode();
+      const packedFrames = new Map<string, HTMLCanvasElement>();
+      createPackedDirectionalArt({ textures: { get: () => ({ getSourceImage: () => packedImage }), addCanvas: (key: string, canvas: HTMLCanvasElement) => packedFrames.set(key, canvas) } }, name, name);
+      let packedIdentical = packedFrames.size === frames.size;
+      for (const [key, frame] of frames) if (packedFrames.get(key)?.toDataURL() !== frame.toDataURL()) packedIdentical = false;
+      let cropped = 0, empty = 0;
+      const label = document.createElement('div'); label.textContent = name; label.style.cssText = 'grid-column:1/-1;color:white;font:14px monospace'; gallery.append(label);
+      for (const canvas of frames.values()) {
+        const data = canvas.getContext('2d')!.getImageData(0, 0, 96, 96).data;
+        let count = 0;
+        for (let y = 0; y < 96; y++) for (let x = 0; x < 96; x++) if (data[(x + y * 96) * 4 + 3] > 32) {
+          count++; if (x === 0 || y === 0 || x === 95 || y === 95) cropped++;
+        }
+        if (!count) empty++;
+        gallery.append(canvas);
+      }
+      results.push({ name, packedIdentical, frames: frames.size, cropped, empty,
+        distinct: frames.get(`${name}-n-0`)!.toDataURL() !== frames.get(`${name}-s-0`)!.toDataURL() });
+    }
+    return results;
+  });
+  for (const actor of summary) {
+    expect(actor.packedIdentical, actor.name).toBe(true);
+    expect(actor.frames, actor.name).toBe(16); expect(actor.cropped, actor.name).toBe(0);
+    expect(actor.empty, actor.name).toBe(0); expect(actor.distinct, actor.name).toBe(true);
+  }
+  await page.screenshot({ path: test.info().outputPath('directional-gallery.png'), fullPage: true });
 });
