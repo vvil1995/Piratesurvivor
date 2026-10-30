@@ -11,6 +11,9 @@ test('detecta rodillas en las piernas opacas y no en el centro transparente del 
   assert.equal(detectLegJoints(new Uint8ClampedArray(pixels.length)), undefined);
   const oneLeg = pixels.slice(); for (let y = 60; y < 94; y++) for (let x = 48; x < 96; x++) oneLeg[(y * 96 + x) * 4 + 3] = 0;
   assert.equal(detectLegJoints(oneLeg), undefined);
+  const disconnected = pixels.slice();
+  for (let y = 69; y <= 72; y++) for (let x = 0; x < 48; x++) disconnected[(y * 96 + x) * 4 + 3] = 0;
+  assert.equal(detectLegJoints(disconnected), undefined);
 });
 
 test('maluc fijo y rodilla compartida entre segmentos para todo el ciclo, escalas y giro corporal', () => {
