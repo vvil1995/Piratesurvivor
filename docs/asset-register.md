@@ -92,3 +92,7 @@ No se añaden assets. Los atlas detallados se conservan; los recortes se articul
 ### 0.9.0 — cofres
 
 Cofre de madera con bandas y cerradura: geometría pixelada original en `textures.ts`,32×32. Candado y arco de apertura: primitivas propias en `battle.ts`. Sin descargas, dependencias, fuentes ni recursos de terceros adicionales. Retrato frontal de Luffy: reutiliza el recorte sur del atlas ya registrado; no se genera ni importa otra imagen.
+
+### 0.10.0 — Morgan
+
+Morgan provisional (64×80), brazo-destral (40×58), caja de cobertura y barco: geometría pixelada original en `textures.ts`, sin imágenes descargadas. No se ha usado ningún sprite, logotipo, audio ni recurso oficial. Morgan y One Piece siguen sujetos a los derechos de sus titulares; el dibujo propio no concede autorización sobre la franquicia. Las formas de aviso y señales de puertas son primitivas originales. Sin nuevas dependencias.

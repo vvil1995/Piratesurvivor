@@ -77,3 +77,9 @@ Aprende Bazooka: Pistol sigue seleccionado y solo Pistol ataca. Toca Bazooka en 
 ## Beta0.9.0: tesoros
 
 Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el ataque seleccionado los apunta y rompe; recoge el botín. Los grandes son dorados y más grandes: acércate y espera a que el círculo del candado complete3s. Al alejarte se pausa; volver continúa. Escoge una de tres recompensas con ratón o tacto. Pausa para consultar los objetos equipados (seis espacios, nivel máximo3). Las berries se guardan al recogerlas y se conservan al abandonar/recargar; la build desaparece. Verifica que regresar a una zona no haga reaparecer cofres consumidos. Guardados de Netlify preview y producción están separados por dominio.
+
+## Beta0.10.0: Morgan
+
+Pulsa BASE DE MORGAN durante la exploración y confirma. Nivel20 recomendado, sin requisito. Aprende rectángulo de destral y arco; en fases2/3 aparecen carga, refuerzos y onda. Rojo tenue: preparación; contorno intenso: último aviso; naranja: impacto efectivo. Sal de la zona antes del golpe y usa cajas contra cargas/ondas. Comprueba que Morgan no las atraviesa y puede rodearlas. Mira tu vida y las tres fases de la barra del jefe.
+
+Al vencer, espera la caída. Se guarda la victoria y se concede una agrupación en Gestionar habilidades. Escoge explorar o embarcar; no hay cambio automático ni curación. Orange Town es llegada provisional, sin Buggy. Prueba la entrada, esquiva y navegación en móvil horizontal y PC. Si el teléfono interrumpe la aplicación, verifica pausa y reanudación; no se permite escapar del jefe mediante los botones de navegación antes de vencer.

@@ -7,6 +7,6 @@ export function damageEnemy(player: Player, enemy: Enemy, amount: number, knockb
   const critical = player.stats.critChance > 0 && random() < Math.min(STAT_LIMITS.critChance, player.stats.critChance);
   enemy.hp -= amount * ((enemy.statuses?.exposed ?? 0) > 0 ? 1.2 : 1) * (critical ? STAT_LIMITS.critMultiplier : 1); enemy.flash = 0.15;
   const dx = enemy.x - origin.x, dy = enemy.y - origin.y, distance = Math.max(1, Math.hypot(dx, dy));
-  if (enemy.kind !== 'chest') world.moveCircle(enemy, dx / distance * knockback, dy / distance * knockback, enemy.radius);
-  if (enemy.hp <= 0) { enemy.active = false; if (enemy.kind !== 'chest') player.kills++; onKill(enemy); }
+  if (!enemy.kind) world.moveCircle(enemy, dx / distance * knockback, dy / distance * knockback, enemy.radius);
+  if (enemy.hp <= 0) { enemy.active = false; if (!enemy.kind) player.kills++; onKill(enemy); }
 }

@@ -25,7 +25,7 @@ export class WorldRenderer {
     const grass = chunk.district === 'garden' ? ['#719063', '#759568', '#6e8c60'] : ['#b9b39a', '#b5b096', '#bdb79d'];
     for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
       const h = hash(chunk.variation, x, y), road = roadTile(x, y) || chunk.district === 'plaza';
-      ctx.fillStyle = road ? ['#c6c2ad', '#cbc7b4', '#c2bfac'][h % 3] : grass[h % 3];
+      ctx.fillStyle = road ? (this.world?.theme === 'orange' ? ['#d5bb9c', '#d9c3a5', '#cfb596'] : ['#c6c2ad', '#cbc7b4', '#c2bfac'])[h % 3] : grass[h % 3];
       ctx.fillRect(x * 16, y * 16, 16, 16);
       if (road) {
         ctx.fillStyle = '#a5a58f'; ctx.fillRect(x * 16, y * 16, 16, 1); ctx.fillRect(x * 16, y * 16, 1, 16);

@@ -32,7 +32,7 @@ export class View {
   showModal(id?: string): void {
     if (id === this.modal) return;
     if (!this.modal && id) this.lastFocus = document.activeElement as HTMLElement;
-    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'chest-reward']) el(name).hidden = name !== id;
+    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'chest-reward', 'boss-entry', 'boss-victory']) el(name).hidden = name !== id;
     this.modal = id;
     el('home').inert = !!id;
     el('topbar').inert = !!id;
@@ -80,6 +80,21 @@ export class View {
   }
   hud(run: Run): void {
     const p = run.player;
+    const boss = run.encounter;
+    el('hud').classList.toggle('boss-active', !!boss);
+    el('boss-panel').hidden = !boss;
+    if (boss) {
+      const percentage = Math.max(0, boss.body.hp / boss.body.maxHp * 100);
+      el('boss-phase').textContent = boss.state === 'dead' ? 'VICTORIA' : `FASE ${boss.phase}/3`;
+      el('boss-panel').dataset.phase = String(boss.phase);
+      el('boss-health-fill').style.width = `${percentage}%`;
+      el('boss-panel').querySelector('[role="progressbar"]')!.setAttribute('aria-valuenow', String(Math.round(percentage)));
+      el('boss-pattern').textContent = boss.moveName;
+    }
+    el('challenge-morgan').hidden = run.zone !== 'shells-town' || run.morganDefeated;
+    el('leave-arena').hidden = run.zone !== 'morgan-arena' || !run.morganDefeated || (boss?.elapsed ?? 2) < 1.3;
+    el('board-orange').hidden = !run.morganDefeated || run.zone === 'orange-town' || boss?.state === 'dead' && boss.elapsed < 1.3;
+    el('area-label').textContent = run.zone === 'morgan-arena' ? 'BASE NAVAL · ARENA DE MORGAN' : run.zone === 'orange-town' ? 'ORANGE TOWN · LLEGADA PROVISIONAL' : 'SHELLS TOWN · BASE NAVAL';
     el('character-name').textContent = (run.character.shortName ?? run.character.name).toUpperCase();
     el('run-items').textContent = `OBJETOS ${Object.keys(p.items).length}/6`;
     el('run-items').title = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objetos';
@@ -115,7 +130,7 @@ export class View {
     }
     el('attack-selection-label').textContent = 'ACTIVA: ' + p.abilitySlots[p.selectedSlot].map(id => ABILITIES[id].shortName).join(' + ') + ' · TOCA PARA CAMBIAR';
     el('clock').textContent = timeLabel(run.time);
-    el('area-label').textContent = `${run.definition.name.toUpperCase()} · ${Math.floor(run.player.x)}, ${Math.floor(run.player.y)}`; el('level').textContent = `NV. ${p.level}`;
+    el('level').textContent = `NV. ${p.level}`;
     el('kills').textContent = p.kills.toString();
     el('health-text').textContent = `${Math.ceil(p.hp)} / ${Math.round(p.stats.maxHp)}`;
     const ratio = Math.max(0, Math.min(100, p.hp / p.stats.maxHp * 100));

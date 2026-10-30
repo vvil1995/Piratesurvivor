@@ -15,6 +15,7 @@ const view = new View();
 let run: Run | undefined;
 let selectedCharacter = 'luffy';
 let previousStatus = '';
+let victoryShownFor = '';
 let hudAt = 0;
 const pause = () => {
   if (run?.status === 'playing') { run.pause(); controller.reset(); sync(); }
@@ -25,6 +26,10 @@ const orientation = new MobileOrientation(() => !!run && !['defeat', 'victory'].
 function sync(): void {
   if (!run) return;
   store.bank(run.id, run.player.collectedBerries);
+  if (run.morganDefeated) store.recordMorganVictory(run.id);
+  if (run.morganDefeated && run.status === 'playing' && (!run.encounter || run.encounter.elapsed >= 1.3) && victoryShownFor !== run.id) {
+    victoryShownFor = run.id; run.pause(); controller.reset(); previousStatus = 'paused'; view.hud(run); view.showModal('boss-victory'); return;
+  }
   const now = performance.now();
   if (now - hudAt > 100 || run.status !== previousStatus) { view.hud(run); hudAt = now; }
   if (run.status === previousStatus) return;
@@ -84,6 +89,18 @@ for (const id of ['manage-abilities', 'pause-build']) el(id).addEventListener('c
   if (orientation.blocked || !run?.openCombinations()) return; previousStatus = ''; sync();
 });
 el('pause').addEventListener('click', pause);
+el('challenge-morgan').addEventListener('click', () => {
+  if (!run || run.status !== 'playing' || orientation.blocked) return;
+  run.pause(); controller.reset(); sync(); view.showModal('boss-entry');
+});
+el('cancel-morgan').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); previousStatus = ''; view.showModal(); sync(); });
+el('confirm-morgan').addEventListener('click', () => { if (orientation.blocked || !run?.beginMorgan()) return; previousStatus = ''; view.showModal(); sync(); });
+for (const id of ['leave-arena', 'victory-explore']) el(id).addEventListener('click', () => {
+  if (orientation.blocked || !run?.returnToShells()) return; previousStatus = ''; view.showModal(); sync();
+});
+for (const id of ['board-orange', 'victory-ship']) el(id).addEventListener('click', () => {
+  if (orientation.blocked || !run?.boardToOrangeTown()) return; previousStatus = ''; view.showModal(); sync();
+});
 el('attack-slots').addEventListener('click', event => {
   const slot = (event.target as Element).closest<HTMLButtonElement>('button[data-slot]');
   if (slot && !orientation.blocked && run?.selectSlot(Number(slot.dataset.slot))) { view.hud(run); slot.blur(); }

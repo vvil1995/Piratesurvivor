@@ -1,7 +1,7 @@
 export const TILE = 32;
 export const CHUNK_TILES = 16;
 export const CHUNK_SIZE = TILE * CHUNK_TILES;
-export type ObstacleKind = 'house' | 'tree' | 'rock' | 'wall';
+export type ObstacleKind = 'house' | 'tree' | 'rock' | 'wall' | 'crate';
 export interface Obstacle { id: string; kind: ObstacleKind; x: number; y: number; width: number; height: number; variant: number }
 export interface Chunk {
   key: string; cx: number; cy: number; district: 'residential' | 'garden' | 'barracks' | 'plaza';

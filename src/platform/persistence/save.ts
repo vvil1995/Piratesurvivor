@@ -5,7 +5,7 @@ export const SAVE_KEY = 'ops.progress.v1';
 export interface Progress {
   version: 1; coins: number; training: number; runs: number; wins: number;
   totalKills: number; bestTime: number; bestLevel: number;
-  berryRunId?: string; berryRunAmount?: number; lastRunId: string; reducedMotion: boolean;
+  morganVictories?: number; lastMorganRunId?: string; berryRunId?: string; berryRunAmount?: number; lastRunId: string; reducedMotion: boolean;
 }
 export interface StorageLike { getItem(key: string): string | null; setItem(key: string, value: string): void }
 export const freshProgress = (): Progress => ({ version: 1, coins: 0, training: 0, runs: 0, wins: 0, totalKills: 0, bestTime: 0, bestLevel: 1, lastRunId: '', reducedMotion: false });
@@ -16,7 +16,9 @@ function valid(value: unknown): value is Progress {
     typeof v[key] === 'number' && Number.isSafeInteger(v[key]) && (v[key] as number) >= 0 && (v[key] as number) <= 1e9) &&
     (v.training as number) <= TRAINING_MAX && typeof v.lastRunId === 'string' &&
     v.lastRunId.length < 150 && (v.berryRunId === undefined || typeof v.berryRunId === 'string' && v.berryRunId.length < 150) &&
-    (v.berryRunAmount === undefined || Number.isSafeInteger(v.berryRunAmount) && (v.berryRunAmount as number) >= 0 && (v.berryRunAmount as number) <= 1e9) && typeof v.reducedMotion === 'boolean';
+    (v.berryRunAmount === undefined || Number.isSafeInteger(v.berryRunAmount) && (v.berryRunAmount as number) >= 0 && (v.berryRunAmount as number) <= 1e9) && typeof v.reducedMotion === 'boolean' &&
+    (v.morganVictories === undefined || Number.isSafeInteger(v.morganVictories) && (v.morganVictories as number) >= 0 && (v.morganVictories as number) <= 1e9) &&
+    (v.lastMorganRunId === undefined || typeof v.lastMorganRunId === 'string' && v.lastMorganRunId.length < 150);
 }
 export class SaveStore {
   progress = freshProgress();
@@ -66,6 +68,11 @@ export class SaveStore {
     p.wins += result.outcome === 'victory' ? 1 : 0;
     p.totalKills += result.kills; p.bestTime = Math.max(p.bestTime, result.seconds);
     p.bestLevel = Math.max(p.bestLevel, result.level); this.flush(); return true;
+  }
+  recordMorganVictory(runId: string): boolean {
+    if (!runId || runId.length >= 150 || this.progress.lastMorganRunId === runId) return false;
+    this.progress.lastMorganRunId = runId; this.progress.morganVictories = Math.min(1e9, (this.progress.morganVictories ?? 0) + 1);
+    this.flush(); return true;
   }
   train(): boolean {
     const p = this.progress, cost = TRAINING_COST(p.training);

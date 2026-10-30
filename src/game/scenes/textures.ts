@@ -18,6 +18,37 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0xd8b861); g.fillRect(6, 7, 3, 19); g.fillRect(23, 7, 3, 19); g.fillRect(13, 13, 7, 7);
   g.fillStyle(0x493724); g.fillRect(16, 16, 2, 3);
   g.generateTexture('small-chest', 32, 32); g.clear();
+  g.fillStyle(0x274e67, 0.5); g.fillEllipse(26, 32, 52, 12);
+  g.fillStyle(0x4e342b); g.fillPoints([{x:3,y:22},{x:48,y:22},{x:39,y:35},{x:14,y:35}],true);
+  g.fillStyle(0xb8834b); g.fillRect(7, 23, 37, 3); g.fillStyle(0x724a32); g.fillRect(13, 29, 26, 4);
+  g.fillStyle(0x493c32); g.fillRect(24, 1, 3, 24); g.fillStyle(0xece1bf); g.fillTriangle(28, 2, 28, 21, 44, 21);
+  g.fillStyle(0xc2a364); g.fillRect(26, 2, 2, 20); g.generateTexture('departure-boat', 52, 40); g.clear();
+  // Pixel art provisional original de Morgan: abrigo, mandíbula metálica y brazo-destral.
+  g.fillStyle(0x18222f); g.fillRect(16, 53, 13, 17); g.fillRect(33, 53, 13, 17);
+  g.fillStyle(0x38455e); g.fillRect(18, 54, 7, 13); g.fillRect(35, 54, 7, 13);
+  g.fillStyle(0x111b28); g.fillRect(13, 67, 16, 6); g.fillRect(33, 67, 17, 6);
+  g.fillStyle(0x697780); g.fillRect(14, 72, 14, 2); g.fillRect(34, 72, 15, 2);
+  g.fillStyle(0x30394c); g.fillRect(11, 23, 42, 35);
+  g.fillStyle(0xe3decb); g.fillRect(9, 24, 12, 33); g.fillRect(43, 24, 12, 33); g.fillRect(12, 21, 40, 5);
+  g.fillStyle(0xaaa998); g.fillRect(10, 29, 4, 27); g.fillRect(48, 29, 5, 27);
+  g.fillStyle(0xf5edd9); g.fillRect(14, 25, 5, 29); g.fillRect(44, 25, 4, 29);
+  g.fillStyle(0x687ba4); g.fillRect(22, 27, 20, 25); g.fillStyle(0x93a0bb); g.fillRect(24, 29, 7, 19);
+  g.fillStyle(0xcfa35d); g.fillRect(9, 23, 13, 5); g.fillRect(42, 23, 13, 5); g.fillRect(21, 50, 22, 5);
+  g.fillStyle(0xedd095); for (let y = 30; y < 48; y += 6) { g.fillRect(31, y, 2, 2); g.fillRect(36, y, 2, 2); }
+  g.fillStyle(0xa66e53); g.fillRect(23, 5, 20, 18); g.fillStyle(0xe4b58a); g.fillRect(25, 6, 15, 12);
+  g.fillStyle(0xf0ca9b); g.fillRect(26, 7, 7, 6); g.fillStyle(0xc1a263); g.fillRect(21, 2, 24, 6);
+  g.fillStyle(0xe6d69d); g.fillRect(23, 1, 20, 4); g.fillStyle(0x283040); g.fillRect(26, 10, 5, 2); g.fillRect(36, 10, 4, 2);
+  g.fillStyle(0x566774); g.fillRect(22, 16, 22, 7); g.fillStyle(0xc0cbd0); g.fillRect(24, 17, 18, 3);
+  g.fillStyle(0xf0e9cd); g.fillRect(25, 18, 3, 1); g.fillRect(37, 18, 3, 1);
+  g.generateTexture('morgan', 64, 80); g.clear();
+  g.fillStyle(0x293c48); g.fillRect(5, 16, 8, 37); g.fillStyle(0x80959e); g.fillRect(6, 17, 5, 35);
+  g.fillStyle(0xc1cdd0); g.fillRect(7, 17, 2, 31); g.fillStyle(0x455d69); g.fillRect(0, 4, 12, 23);
+  g.fillStyle(0x9fbdc3); g.fillPoints([{x:9,y:7},{x:26,y:0},{x:35,y:5},{x:35,y:25},{x:25,y:32},{x:9,y:23}],true);
+  g.fillStyle(0xe6eeee); g.fillRect(31, 6, 4, 18); g.fillStyle(0x617b88); g.fillRect(11, 10, 16, 12);
+  g.fillStyle(0xd7d8b4); g.fillRect(4, 45, 10, 7); g.generateTexture('morgan-axe', 40, 58); g.clear();
+  g.fillStyle(0x4b3328); g.fillRect(0, 0, 64, 64); g.fillStyle(0x976740); g.fillRect(3, 3, 58, 58);
+  g.lineStyle(3, 0xd1a367); g.strokeRect(5, 5, 54, 54); g.lineBetween(7, 7, 57, 57); g.lineBetween(57, 7, 7, 57);
+  g.generateTexture('crate', 64, 64); g.clear();
   g.fillStyle(0x59402f); g.fillRect(1, 4, 15, 10); g.fillStyle(0xeee3bf); g.fillEllipse(9, 8, 13, 10); g.fillStyle(0x354c3b); g.fillRect(6, 9, 6, 5); g.fillStyle(0xffffff); g.fillRect(6, 4, 5, 2);
   g.generateTexture('food', 18, 18); g.clear();
   g.fillStyle(0xded1ac, 0.65); g.fillRect(1, 2, 2, 1); g.fillRect(5, 0, 1, 2); g.fillRect(7, 3, 2, 1);

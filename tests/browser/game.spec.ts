@@ -563,3 +563,55 @@ test('retrato frontal y cofres pequeños/grandes con elección táctil y guardad
   await page.reload(); await expect(page.locator('#loading')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.coins)).toBe(coins);
 });
+
+test('Morgan: entrada voluntaria, aviso visible, victoria y navegación sin curación', async ({ page }, testInfo) => {
+  await page.locator('#start').click();
+  await page.locator('#challenge-morgan').click(); await expect(page.locator('#boss-entry')).toBeVisible();
+  await page.locator('#cancel-morgan').click(); await expect(page.locator('#boss-entry')).toBeHidden();
+  await page.locator('#challenge-morgan').click(); await page.locator('#confirm-morgan').click();
+  await expect(page.locator('#boss-panel')).toBeVisible();
+  await expect(page.locator('#boss-phase')).toHaveText('FASE 1/3');
+  await page.evaluate(async () => {
+    const path = '/src/content/bosses/morgan.ts', { MORGAN_ATTACKS } = await import(/* @vite-ignore */ path);
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player, b = r.encounter!;
+    for (const attack of p.attacks) attack.cooldown = 1e6;
+    b.body.x = 384; b.body.y = 220; p.x = 384; p.y = 370;
+    b.prepare(MORGAN_ATTACKS[0], p, r.world); b.tick = () => {}; qa.draw(); qa.tick();
+  });
+  await expect(page.locator('#boss-pattern')).toContainText('Cop de destral');
+  await page.screenshot({ path: testInfo.outputPath('morgan-warning.png') });
+  const viewport = page.viewportSize()!;
+  const bar = await page.locator('#boss-panel').boundingBox();
+  expect(bar!.x).toBeGreaterThanOrEqual(0); expect(bar!.x + bar!.width).toBeLessThanOrEqual(viewport.width);
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player, b = r.encounter!;
+    b.tick = Object.getPrototypeOf(b).tick; p.hp = 43; b.body.x = p.x; b.body.y = p.y - 40; b.body.hp = 1;
+    p.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); qa.draw();
+  });
+  await expect(page.locator('#boss-victory')).toBeVisible();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.zone)).toBe('morgan-arena');
+  expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.morganVictories)).toBe(1);
+  await page.locator('#victory-ship').click(); await expect(page.locator('#boss-victory')).toBeHidden();
+  await expect(page.locator('#area-label')).toContainText('ORANGE TOWN');
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.hp)).toBeLessThan(45);
+  await expect(page.locator('#challenge-morgan')).toBeHidden();
+  await page.reload(); await expect(page.locator('#loading')).toBeHidden();
+  expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.morganVictories)).toBe(1);
+});
+
+test('Morgan: cinco patrones legibles y fases sin avisos ocultos por el HUD', async ({ page }, testInfo) => {
+  await page.locator('#start').click(); await page.locator('#challenge-morgan').click(); await page.locator('#confirm-morgan').click();
+  for (const id of ['axe', 'sweep', 'charge', 'order', 'devastating']) {
+    await page.evaluate(async id => {
+      const path = '/src/content/bosses/morgan.ts', { MORGAN_ATTACKS } = await import(/* @vite-ignore */ path);
+      const qa = window.__OPS_QA__!, r = qa.getRun()!, b = r.encounter!;
+      for (const a of r.player.attacks) a.cooldown = 1e6;
+      b.body.x = 384; b.body.y = 176; r.player.x = 384; r.player.y = 400;
+      b.prepare(MORGAN_ATTACKS.find((a: { id: string }) => a.id === id)!, r.player, r.world);
+      b.elapsed = b.telegraph!.attack.preparation - 0.15; b.telegraph!.elapsed = b.elapsed;
+      b.tick = () => {}; qa.draw(); qa.tick();
+    }, id);
+    expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.encounter!.stage)).toBe('final');
+    await page.screenshot({ path: testInfo.outputPath(`morgan-${id}.png`) });
+  }
+});

@@ -15,7 +15,8 @@ export class FlowField {
   private elapsed = 1;
   readonly world: CollisionWorld;
   rebuilds = 0;
-  constructor(world: CollisionWorld) { this.world = world; this.distances.fill(-1); }
+  private clearance: number;
+  constructor(world: CollisionWorld, clearance = 14) { this.world = world; this.clearance = clearance; this.distances.fill(-1); }
   update(target: Vector, dt: number): void {
     this.elapsed += dt;
     const tx = Math.floor(target.x / TILE), ty = Math.floor(target.y / TILE);
@@ -32,7 +33,7 @@ export class FlowField {
         const nx = x + dx, ny = y + dy, next = nx + ny * SIDE;
         if (nx < 0 || nx >= SIDE || ny < 0 || ny >= SIDE || this.distances[next] !== -1) continue;
         // -2 distingue paredes ya evaluadas de celdas pendientes.
-        if (!this.world.canOccupy((this.left + nx) * TILE + 16, (this.top + ny) * TILE + 16, 14)) { this.distances[next] = -2; continue; }
+        if (!this.world.canOccupy((this.left + nx) * TILE + 16, (this.top + ny) * TILE + 16, this.clearance)) { this.distances[next] = -2; continue; }
         this.distances[next] = this.distances[at] + 1; this.queue[write++] = next;
       }
     }

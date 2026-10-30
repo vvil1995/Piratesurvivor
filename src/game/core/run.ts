@@ -1,3 +1,7 @@
+import { MorganEncounter } from '../bosses/morgan.ts';
+import { ArenaWorld, MORGAN_ARENA } from '../world/arena.ts';
+import { MORGAN } from '../../content/bosses/morgan.ts';
+import { ENEMIES } from '../../content/catalog.ts';
 import { equipItem, itemChoices } from '../systems/items.ts';
 import { LOOT } from '../../content/loot.ts';
 import { ChestField, chestReward, dropLoot } from '../systems/loot.ts';
@@ -27,7 +31,12 @@ export class Run {
   readonly players = new Map<string, Player>();
   readonly character: CharacterDefinition;
   readonly definition: WorldDefinition;
-  readonly world: ProceduralWorld;
+  world: ProceduralWorld;
+  private shellsWorld: ProceduralWorld;
+  private returnPosition: Vector = { x: 256, y: 256 };
+  zone: 'shells-town' | 'morgan-arena' | 'orange-town' = 'shells-town';
+  encounter?: MorganEncounter;
+  morganDefeated = false;
   readonly enemies: Pool<Enemy>;
   readonly pickups: Pool<Pickup>;
   readonly projectiles = new Pool<Projectile>(PROJECTILE_CAP, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, radius: 3, life: 0, damage: 0, hostile: false, ownerId: '', reflected: false, remainingHits: 1, hit: new Set<number>() }));
@@ -35,6 +44,7 @@ export class Run {
   readonly chests = new ChestField();
   readonly grid = new SpatialGrid();
   readonly strikes: Strike[] = [];
+  private bossField?: FlowField;
   private fields = new Map<string, FlowField>();
   private choicePlayerId = this.localPlayerId;
   status: RunStatus = 'playing';
@@ -65,6 +75,7 @@ export class Run {
     this.id = globalThis.crypto?.randomUUID?.() || `run-${Date.now()}-${random()}`;
     this.definition = options.world ?? SHELLS_TOWN;
     this.world = new ProceduralWorld((options.seed ?? Math.floor(random() * 2147483647)) ^ this.definition.seedSalt);
+    this.shellsWorld = this.world;
     this.enemies = new Pool<Enemy>(this.definition.enemyCap, () => ({ active: false, id: 0, x: 0, y: 0, hp: 0, maxHp: 0, speed: 0, damage: 0, xp: 0, radius: 13, flash: 0 }));
     this.pickups = new Pool<Pickup>(this.definition.pickupCap, () => ({ active: false, x: 0, y: 0, value: 0, kind: 'xp' }));
     const baseStats = { ...this.character.stats };
@@ -79,6 +90,48 @@ export class Run {
     let field = this.fields.get(actor.id);
     if (!field) { field = new FlowField(this.world); this.fields.set(actor.id, field); }
     return field;
+  }
+  get navigationPoint(): Vector { return this.zone === 'morgan-arena' ? MORGAN_ARENA.gates[3] : this.returnPosition; }
+  private clearBattlefield(): void {
+    this.enemies.clear(); this.pickups.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
+    this.fields.clear(); this.bossField = undefined;
+    for (const state of this.player.attacks) { state.pending = 0; state.targetId = undefined; }
+  }
+  beginMorgan(): boolean {
+    if (!['playing', 'paused'].includes(this.status) || this.zone !== 'shells-town' || this.morganDefeated) return false;
+    this.returnPosition = { x: this.player.x, y: this.player.y }; this.clearBattlefield();
+    this.world = new ArenaWorld(this.world.seed); this.zone = 'morgan-arena'; this.bossField = new FlowField(this.world, MORGAN.radius);
+    Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter();
+    this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
+  }
+  returnToShells(): boolean {
+    if (!this.morganDefeated || this.zone !== 'morgan-arena' || !['playing', 'paused'].includes(this.status)) return false;
+    this.clearBattlefield(); this.encounter = undefined; this.world = this.shellsWorld; this.zone = 'shells-town';
+    Object.assign(this.player, this.returnPosition); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
+  }
+  boardToOrangeTown(): boolean {
+    if (!this.morganDefeated || this.zone === 'orange-town' || !['playing', 'paused'].includes(this.status)) return false;
+    this.clearBattlefield(); this.encounter = undefined; this.zone = 'orange-town';
+    this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x42756767, 'orange');
+    Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
+  }
+  private defeatMorgan(): void {
+    if (this.morganDefeated) return;
+    this.morganDefeated = true; this.encounter!.defeated(); this.enemies.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
+    this.grantCombinationReward();
+  }
+  private callReinforcements(): void {
+    let remaining = Math.min(MORGAN.reinforcementCount, MORGAN.reinforcementCap - this.enemies.count);
+    const gates = [...MORGAN_ARENA.gates].sort((a, b) => Math.hypot(b.x - this.player.x, b.y - this.player.y) - Math.hypot(a.x - this.player.x, a.y - this.player.y));
+    for (const gate of gates) {
+      if (remaining <= 0) break;
+      if (Math.hypot(gate.x - this.player.x, gate.y - this.player.y) < 110 || !this.world.canOccupy(gate.x, gate.y, 13)) continue;
+      const enemy = this.enemies.acquire(); if (!enemy) break;
+      const def = ENEMIES.marine;
+      Object.assign(enemy, { ...def, active: true, id: ++this.enemyId, ...gate, hp: def.hp * 1.5, maxHp: def.hp * 1.5, kind: undefined, flash: 0,
+        statuses: undefined, stolen: false, lureIndex: undefined, decoyHitTimer: 0, ranged: undefined, shotTimer: 0, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
+      remaining--;
+    }
   }
   setView(view: View): void { this.view = view; }
   pause(): void { if (this.status === 'playing') this.status = 'paused'; }
@@ -159,6 +212,7 @@ export class Run {
     }
   }
   private dropXp(enemy: Enemy, ownerId: string): void {
+    if (enemy.kind === 'boss') { this.defeatMorgan(); return; }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
     if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, enemy, ownerId, 'berry', LOOT.enemyBerries);
     const pickup = this.pickups.acquire();
@@ -186,11 +240,16 @@ export class Run {
     }
     if (!living.length) { this.defeat(); return; }
     this.spawnTimer -= dt;
-    if (this.spawnTimer <= 0) {
+    if (this.zone === 'shells-town' && this.spawnTimer <= 0) {
       const threat = difficultyAt(this.time, this.definition.spawnInterval, this.definition.difficulty);
       for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player), this.definition, this.random, ++this.enemyId, this.time);
       this.spawnTimer = threat.interval;
     }
+    if (this.encounter && !this.morganDefeated) {
+      this.bossField!.update(this.player, dt);
+      this.encounter.tick(dt, this.player, this.world, from => this.bossField!.direction(from, this.player, MORGAN.radius), () => this.callReinforcements());
+      if (this.player.hp <= 0) { this.defeat(); return; }
+    } else if (this.encounter) this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
     this.grid.rebuild(this.enemies.items);
     for (const enemy of this.enemies.items) {
       if (!enemy.active) continue;
@@ -242,8 +301,8 @@ export class Run {
       }
     }
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
-    this.chests.sync(this.world, this.player);
-    this.grid.rebuild([...this.enemies.items, ...this.chests.active.filter(c => !c.large)]);
+    if (this.zone === 'shells-town') this.chests.sync(this.world, this.player);
+    this.grid.rebuild([...this.enemies.items, ...(this.zone === 'shells-town' ? this.chests.active.filter(c => !c.large) : []), ...(this.encounter?.body.active ? [this.encounter.body] : [])]);
     for (const actor of living) {
       if (actor.hp <= 0) continue;
       tickAttacks(actor, this.grid, this.world, dt, enemy => this.dropXp(enemy, actor.id), strike => {
@@ -270,7 +329,7 @@ export class Run {
       }
     }
     // Solo un cofre grande progresa a la vez; alejarse conserva su progreso.
-    const large = this.chests.active.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
+    const large = this.zone === 'shells-town' && this.chests.active.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
     if (large) {
       large.openProgress = Math.min(LOOT.largeOpenSeconds, (large.openProgress ?? 0) + dt);
       if (large.openProgress >= LOOT.largeOpenSeconds) { large.active = false; this.chestChoices = itemChoices(this.player, this.random); this.status = 'chest'; }
@@ -279,7 +338,7 @@ export class Run {
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }
   }
   private defeat(): void {
-    this.status = 'defeat'; this.strikes.length = 0;
+    this.status = 'defeat'; this.encounter?.cancel(); this.strikes.length = 0;
     for (const p of this.projectiles.items) { p.active = false; p.hit.clear(); }
     for (const a of this.areas.items) a.active = false;
     for (const p of this.pickups.items) if (p.kind === 'food') p.active = false;

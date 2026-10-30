@@ -1,3 +1,5 @@
+import { BossRenderer } from './boss-renderer.ts';
+import { MORGAN_ARENA } from '../world/arena.ts';
 import { LOOT } from '../../content/loot.ts';
 import Phaser from 'phaser';
 import { WalkRig } from './walk-rig.ts';
@@ -24,6 +26,8 @@ export interface BattleBridge {
   ready: () => void; reducedMotion: () => boolean;
 }
 export class BattleScene extends Phaser.Scene {
+  private departureBoat!: Phaser.GameObjects.Image;
+  private bossRenderer!: BossRenderer;
   private bridge: BattleBridge;
   private captain!: Phaser.GameObjects.Image;
   private captainRig!: WalkRig;
@@ -78,6 +82,8 @@ export class BattleScene extends Phaser.Scene {
     this.captainShadow = this.add.image(256, 256, 'shadow').setDepth(-1000).setScale(1.2);
     this.captain = this.add.image(256, 256, 'straw-hat').setOrigin(0.5, 0.96).setScale(0.65).setDepth(1000);
     this.captainRig = new WalkRig(this, 'straw-hat');
+    this.bossRenderer = new BossRenderer(this);
+    this.departureBoat = this.add.image(0, 0, 'departure-boat').setVisible(false).setScale(1.5);
     this.effects = this.add.graphics().setDepth(4000);
     for (let i = 0; i < 12; i++) this.fists.push(this.add.image(0, 0, 'fist').setDisplaySize(27, 27).setDepth(4001).setVisible(false));
     this.resize();
@@ -92,6 +98,8 @@ export class BattleScene extends Phaser.Scene {
     const run = this.bridge.run();
     if (run !== this.previousRun) { this.accumulator = 0; this.previousRun = run; for (const p of this.dust) p.life = 0; }
     const camera = this.cameras.main;
+    if (run?.zone === 'morgan-arena') camera.setZoom(Math.max(0.3, Math.min(1.4, camera.width / (MORGAN_ARENA.width + 48), (camera.height - 120) / (MORGAN_ARENA.height + 32))));
+    else this.resize();
     const player = run?.player;
     let worldX = player?.x ?? 256, worldY = player?.y ?? 256;
     const worldView = { width: camera.width / camera.zoom, height: camera.height / camera.zoom, centerX: worldX, centerY: worldY };
@@ -108,7 +116,9 @@ export class BattleScene extends Phaser.Scene {
     worldView.centerX = worldX; worldView.centerY = worldY;
     // Posiciones lógicas globales; solo el dibujo usa origen local por chunk.
     const origin = { x: Math.floor(worldX / CHUNK_SIZE) * CHUNK_SIZE, y: Math.floor(worldY / CHUNK_SIZE) * CHUNK_SIZE };
-    camera.centerOn(worldX - origin.x, worldY - origin.y);
+    if (run?.zone === 'morgan-arena') camera.centerOn(MORGAN_ARENA.width / 2 - origin.x, MORGAN_ARENA.height / 2 - origin.y);
+    else camera.centerOn(worldX - origin.x, worldY - origin.y);
+    if (run?.zone === 'morgan-arena') { worldView.centerX = MORGAN_ARENA.width / 2; worldView.centerY = MORGAN_ARENA.height / 2; }
     this.worldRenderer.update(run?.world ?? this.previewWorld, worldView, origin);
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
     this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate, delta / 1000);
@@ -147,7 +157,7 @@ export class BattleScene extends Phaser.Scene {
       this.enemyRigs[i].update(sprite, animation, 0.6);
     }
     for (let i = 0; i < this.chestSprites.length; i++) {
-      const chest = run?.chests.active[i], sprite = this.chestSprites[i];
+      const chest = run?.zone === 'shells-town' ? run.chests.active[i] : undefined, sprite = this.chestSprites[i];
       sprite.setVisible(!!chest?.active);
       if (chest?.active) sprite.setPosition(chest.x - origin.x, chest.y - origin.y).setScale(chest.large ? 1.35 : 1).setTint(chest.large ? 0xffdc8a : 0xffffff).setDepth(chest.y - origin.y + 1000);
     }
@@ -160,8 +170,11 @@ export class BattleScene extends Phaser.Scene {
       }
     }
     this.effects.clear();
+    this.bossRenderer.update(run?.encounter, origin);
+    this.departureBoat.setVisible(!!run?.morganDefeated && run.zone !== 'orange-town');
+    if (run?.morganDefeated) this.departureBoat.setPosition(run.navigationPoint.x - origin.x, run.navigationPoint.y - origin.y).setDepth(run.navigationPoint.y - origin.y + 1000);
     if (run) {
-      for (const chest of run.chests.active) if (chest.active && chest.large && ((chest.openProgress ?? 0) > 0 || Math.hypot(chest.x - worldX, chest.y - worldY) < 110)) {
+      for (const chest of run.zone === 'shells-town' ? run.chests.active : []) if (chest.active && chest.large && ((chest.openProgress ?? 0) > 0 || Math.hypot(chest.x - worldX, chest.y - worldY) < 110)) {
         const x = chest.x - origin.x, y = chest.y - origin.y - 48;
         this.effects.fillStyle(0x14252e, 0.9); this.effects.fillCircle(x, y, 16);
         this.effects.lineStyle(3, 0x64757a); this.effects.strokeCircle(x, y, 14);

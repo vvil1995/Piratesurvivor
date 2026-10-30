@@ -10,7 +10,7 @@ export interface Player extends Vector {
 }
 export interface EquippedAttack { id: string; level: number; cooldown: number; pending: number; burstTimer: number; activeFor: number; activationPending?: boolean; targetId?: number; counterUsed?: boolean }
 export interface Enemy extends Vector {
-  active: boolean; id: number; kind?: 'chest'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
+  active: boolean; id: number; kind?: 'chest' | 'boss'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
   speed: number; damage: number; xp: number; radius: number; flash: number;
   statuses?: Partial<Record<StatusKind, number>>; stolen?: boolean; lureIndex?: number; decoyHitTimer?: number;
   ranged?: { interval: number; speed: number; range: number }; shotTimer?: number;
