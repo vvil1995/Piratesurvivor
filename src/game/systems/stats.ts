@@ -27,5 +27,5 @@ export function receivedDamage(raw: number, armor: number): number {
   return Math.max(0, raw) * (1 - clamp(armor, STAT_LIMITS.armor));
 }
 export function attackCooldown(base: number, atLevel: number, player: Player): number {
-  return Math.max(0.2, base * (1 - STAT_LIMITS.cooldownReduction), atLevel * player.stats.cooldown / player.baseStats.cooldown);
+  return Math.max(STAT_LIMITS.minimumAttackCooldown, base * (1 - STAT_LIMITS.cooldownReduction), atLevel * player.stats.cooldown / player.baseStats.cooldown);
 }

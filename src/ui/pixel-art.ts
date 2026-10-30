@@ -1,6 +1,7 @@
 // Atlas original generado para el proyecto. Recortes lógicos: el PNG fuente no se modifica.
-export type IconName = 'fist' | 'heart' | 'boot' | 'armor' | 'clock' | 'magnet' | 'arm' | 'coin';
-export const ICONS: IconName[] = ['fist', 'heart', 'boot', 'armor', 'clock', 'magnet', 'arm', 'coin'];
+import { combatIcons, type CombatIcon } from './combat-icons.ts';
+export type IconName = 'fist' | 'heart' | 'boot' | 'armor' | 'clock' | 'magnet' | 'arm' | 'coin' | CombatIcon;
+export const ICONS: IconName[] = ['fist', 'heart', 'boot', 'armor', 'clock', 'magnet', 'arm', 'coin', 'swords', 'staff', 'slingshot'];
 const urls = new Map<string, string>();
 type Region = readonly [number, number, number, number];
 const characters: Record<string, Region> = {
@@ -14,7 +15,7 @@ const characters: Record<string, Region> = {
   'marine-walk2': [664, 352, 237, 342],
   'marine-attack': [950, 352, 304, 342],
 };
-const items: Record<IconName, Region> = {
+const items: Record<Exclude<IconName, CombatIcon>, Region> = {
   fist: [45, 716, 235, 232], heart: [345, 720, 250, 230],
   boot: [647, 717, 270, 234], armor: [963, 713, 278, 239],
   clock: [38, 954, 251, 287], magnet: [345, 962, 260, 278],
@@ -32,6 +33,7 @@ export function rasterizeArt(source: CanvasImageSource): Map<string, HTMLCanvasE
     ctx.drawImage(source, x, y, width, height, Math.floor((size - w) / 2), character ? size - h - 4 : Math.floor((size - h) / 2), w, h);
     urls.set(name, canvas.toDataURL('image/png')); result.set(name, canvas);
   }
+  for (const [name, canvas] of combatIcons()) { urls.set(name, canvas.toDataURL('image/png')); result.set(name, canvas); }
   return result;
 }
 export const artUrl = (name: string): string => urls.get(name) || '';
@@ -41,3 +43,5 @@ export function pixelIcon(name: IconName): HTMLImageElement {
   image.width = 48; image.height = 48; image.draggable = false; return image;
 }
 export const upgradeIcon = (id: string): IconName => ({ power: 'fist', armor: 'armor', critical: 'fist', regen: 'heart', tempo: 'clock', heart: 'heart', feet: 'boot', reach: 'arm', magnet: 'magnet' }[id] as IconName) || 'heart';
+
+export function registerArt(name: string, canvas: HTMLCanvasElement): void { urls.set(name, canvas.toDataURL('image/png')); }

@@ -298,13 +298,15 @@ test('quinta habilidad, combinación táctil, buffs constantes y ocho movimiento
   await expect(page.locator('#combination-done')).toBeEnabled(); await page.locator('#combination-done').click();
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.attacks.length)).toBe(5);
   await page.locator('#manage-abilities').click();
+  await expect(page.locator('#merge-apply')).toBeDisabled();
+  await page.locator('#combination-done').click();
+  await offerChoice(page, 'ability:impulse', true);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Impulso/ }) }).click();
   const fury = page.locator('.component-detail').filter({ has: page.getByRole('heading', { name: /Furia/ }) });
   await fury.locator('select').selectOption('0'); await fury.getByRole('button', { name: 'Mover', exact: true }).click();
   await expect(page.locator('#combination-slots')).toContainText('CONSTANTE');
   await page.locator('#combination-done').click();
   await expect(page.locator('[data-ability="fury"]')).toHaveClass(/buff-constant/);
-  await offerChoice(page, 'ability:impulse', true);
-  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Impulso/ }) }).click();
   for (const [id, name, from, to] of [['balloon', 'Balloon', '2', '3'], ['axe', 'Axe', '1', '0']]) {
     await offerChoice(page, `ability:${id}`, true);
     await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
@@ -322,4 +324,109 @@ test('quinta habilidad, combinación táctil, buffs constantes y ocho movimiento
   expect(data.offers).not.toContain('ability:fortress'); expect(data.offers).not.toContain('ability:frenzy');
   await page.locator('#manage-abilities').click();
   await page.screenshot({ path: test.info().outputPath('eight-movements.png') });
+});
+
+test('beta permite probar los cinco personajes sin compras ni cambios del perfil', async ({ page }) => {
+  test.setTimeout(60000);
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  const profile = await page.evaluate(() => JSON.stringify(window.__OPS_QA__!.store.progress));
+  for (const [id, name, visual, hp] of [['luffy', 'Luffy', 'straw-hat', 100], ['zoro', 'Zoro', 'zoro', 110], ['nami', 'Nami', 'nami', 90], ['usopp', 'Usopp', 'usopp', 85], ['sanji', 'Sanji', 'sanji', 105]] as const) {
+    await page.locator('#beta-character').selectOption(id);
+    await expect(page.locator('#start')).toBeEnabled();
+    await expect(page.locator('#character-title')).toContainText(name.toUpperCase());
+    if (id !== 'luffy') await expect(page.locator('#train')).toBeDisabled();
+    await page.locator('#start').click(); await expect(page.locator('#hud')).toBeVisible();
+    await expect(page.locator('#character-name')).toHaveText(name.toUpperCase());
+    await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(new RegExp(`^${visual}-s-[01]$`));
+    expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.stats.maxHp)).toBe(hp);
+    await page.locator('#pause').click(); await page.locator('#abandon').click();
+  }
+  expect(await page.evaluate(() => JSON.stringify(window.__OPS_QA__!.store.progress))).toBe(profile);
+  expect(errors).toEqual([]);
+});
+
+test('las técnicas evolucionadas de la tripulación se integran con sprites, HUD y efectos', async ({ page }) => {
+  test.setTimeout(60000);
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  for (const id of ['zoro', 'nami', 'usopp', 'sanji']) {
+    await page.evaluate(async id => {
+      await window.__OPS_QA__!.start(id);
+      const path = '/src/game/systems/loadout.ts', catalog = '/src/content/catalog.ts';
+      const { newAttack } = await import(/* @vite-ignore */ path);
+      const { CHARACTERS } = await import(/* @vite-ignore */ catalog);
+      const run = window.__OPS_QA__!.getRun()!, p = run.player;
+      p.attacks = CHARACTERS[id].abilities.map((a: string) => ({ ...newAttack(a), level: 6 }));
+      p.abilitySlots = [p.attacks.slice(0, 2).map(a => a.id), p.attacks.slice(2, 4).map(a => a.id), [p.attacks[4].id], [p.attacks[5].id]];
+      for (let i = 0; i < 6; i++) {
+        const enemy = run.enemies.acquire()!;
+        Object.assign(enemy, { id: 900 + i, x: p.x + 30 + i * 20, y: p.y, hp: 5000, maxHp: 5000, speed: 0, damage: 0, xp: 0 });
+      }
+      window.__OPS_QA__!.tick();
+    }, id);
+    await expect(page.locator('#character-name')).toHaveText(id.toUpperCase());
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => [...document.querySelectorAll('.attack-slot .component-name')].every(name => {
+      const label = name.getBoundingClientRect(), slot = name.closest('.attack-slot')!.getBoundingClientRect();
+      return label.left >= slot.left && label.right <= slot.right;
+    }))).toBe(true);
+    await page.screenshot({ path: test.info().outputPath(`crew-${id}.png`) });
+    await page.locator('#pause').click(); await page.locator('#pause-build').click();
+    await expect(page.locator('#combinations')).toBeVisible();
+    await expect(page.locator('#combinations')).toContainText('+');
+    expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.attacks.length)).toBe(6);
+    await page.evaluate(() => window.__OPS_QA__!.getRun()!.finishCombinations());
+    await page.evaluate(() => window.__OPS_QA__!.tick());
+    await page.locator('#abandon').click();
+  }
+  expect(errors).toEqual([]);
+});
+
+test('el quinto elegido se junta solo al confirmarlo, y cancelar conserva las cuatro ranuras', async ({ page }) => {
+  await page.locator('#start').click();
+  for (const [id, name] of [['gatling', 'Gatling'], ['bazooka', 'Bazooka'], ['whip', 'Whip']]) {
+    await offerChoice(page, `ability:${id}`, true);
+    await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
+  }
+  await page.locator('#manage-abilities').click(); await expect(page.locator('#merge-apply')).toBeDisabled();
+  await page.locator('#combination-done').click();
+  await offerChoice(page, 'ability:fury', true);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Furia/ }) }).click();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.attacks.length)).toBe(4);
+  await page.locator('#combination-cancel').click(); await expect(page.locator('#levelup')).toBeVisible();
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Furia/ }) }).click();
+  await page.locator('#pending-join-target').selectOption('0'); await page.locator('#pending-join-apply').click();
+  await expect(page.locator('#combinations')).toBeHidden();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.abilitySlots)).toEqual([['elastic-punch', 'fury'], ['gatling'], ['bazooka'], ['whip']]);
+  await expect(page.locator('[data-ability="fury"]')).toHaveClass(/buff-constant/);
+});
+
+test('paso articulado en ocho direcciones y Whip con pierna elástica en lugar de círculo', async ({ page }) => {
+  test.setTimeout(60000);
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  await page.locator('#start').click();
+  const origin = await page.evaluate(() => {
+    const r = window.__OPS_QA__!.getRun()!, p = r.player;
+    for (let y = 128; y <= 1024; y += 32) for (let x = 128; x <= 1024; x += 32) {
+      if (Array.from({ length: 8 }, (_, i) => i * Math.PI / 4).every(a => r.world.segmentClear(x, y, x + Math.cos(a) * 55, y + Math.sin(a) * 55, 14))) return { x, y };
+    }
+    throw new Error('Fixture sin espacio abierto');
+  });
+  for (const [direction, keys] of [['e', ['ArrowRight']], ['se', ['ArrowRight', 'ArrowDown']], ['s', ['ArrowDown']], ['sw', ['ArrowLeft', 'ArrowDown']], ['w', ['ArrowLeft']], ['nw', ['ArrowLeft', 'ArrowUp']], ['n', ['ArrowUp']], ['ne', ['ArrowRight', 'ArrowUp']]] as [string, string[]][]) {
+    await page.evaluate(o => Object.assign(window.__OPS_QA__!.getRun()!.player, o), origin);
+    for (const key of keys) await page.keyboard.down(key);
+    await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorDirection)).toBe(direction);
+    await expect.poll(() => page.evaluate(() => Math.abs(window.__OPS_QA__!.metrics().legSwing))).toBeGreaterThan(2);
+    if (['e', 'n'].includes(direction)) await page.screenshot({ path: test.info().outputPath(`articulated-${direction}.png`) });
+    for (const key of keys) await page.keyboard.up(key);
+    await page.waitForTimeout(100);
+  }
+  await page.evaluate(async () => {
+    const r = window.__OPS_QA__!.getRun()!, p = r.player;
+    r.strikes.length = 0; r.strikes.push({ x: p.x, y: p.y, ownerId: p.id, life: 0.18, angle: 0.4, reach: 95, behavior: 'sweep', evolved: true, arc: Math.PI, splash: 0, impact: { x: p.x + 90, y: p.y }, visual: 'rubber-kick' });
+    r.pause(); window.__OPS_QA__!.tick();
+  });
+  await page.addStyleTag({ content: '#paused{display:none!important}' });
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await page.screenshot({ path: test.info().outputPath('elastic-whip.png') });
+  expect(errors).toEqual([]);
 });

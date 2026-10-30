@@ -1,7 +1,7 @@
 import type { Run } from '../game/core/run.ts';
 import type { RunResult } from '../game/core/types.ts';
 import type { SaveStore } from '../platform/persistence/save.ts';
-import { TRAINING_COST, TRAINING_MAX } from '../content/catalog.ts';
+import { CHARACTERS, TRAINING_COST, TRAINING_MAX } from '../content/catalog.ts';
 import { artUrl, pixelIcon, upgradeIcon } from './pixel-art.ts';
 import { abilityIcon } from './ability-icon.ts';
 import { combined } from '../game/systems/buffs.ts';
@@ -41,29 +41,35 @@ export class View {
     else if (this.lastFocus?.isConnected && this.lastFocus.offsetParent !== null) this.lastFocus.focus();
   }
   get modalId(): string | undefined { return this.modal; }
-  home(store: SaveStore): void {
+  home(store: SaveStore, characterId = 'luffy'): void {
+    const character = CHARACTERS[characterId], trained = !!character.legacyTraining;
+    el('character-title').textContent = character.name.toUpperCase(); el('character-tagline').textContent = character.title;
+    el('character-style').textContent = character.style ?? 'SUPERVIVENCIA'; el('character-initial').textContent = ABILITIES[character.initialAbility].shortName.toUpperCase();
+    el('portrait-index').textContent = String(Object.keys(CHARACTERS).indexOf(characterId) + 1).padStart(2, '0');
     const p = store.progress;
     el('best-time').textContent = timeLabel(p.bestTime);
     el('run-count').textContent = p.runs.toString().padStart(2, '0');
     el('win-count').textContent = p.wins.toString().padStart(2, '0');
     el('coins').textContent = p.coins.toString();
-    el('training-level').textContent = `${p.training}/5`;
-    el('starting-hp').textContent = (100 + p.training * 5).toString();
+    el('training-level').textContent = trained ? `${p.training}/5` : '—';
+    el('starting-hp').textContent = (character.stats.maxHp + (trained ? p.training * 5 : 0)).toString();
     const train = el<HTMLButtonElement>('train');
-    train.disabled = p.training >= TRAINING_MAX || p.coins < TRAINING_COST(p.training);
-    train.replaceChildren(document.createTextNode(p.training >= TRAINING_MAX ? 'MÁXIMO' : `${TRAINING_COST(p.training)} `));
-    if (artUrl('coin') && p.training < TRAINING_MAX) train.append(pixelIcon('coin'));
+    train.disabled = !trained || p.training >= TRAINING_MAX || p.coins < TRAINING_COST(p.training);
+    train.replaceChildren(document.createTextNode(!trained ? 'BETA' : p.training >= TRAINING_MAX ? 'MÁXIMO' : `${TRAINING_COST(p.training)} `));
+    el('training-description').textContent = trained ? '+5 de vida inicial por nivel' : 'Acceso de prueba sin entrenamiento comprado';
+    if (trained && artUrl('coin') && p.training < TRAINING_MAX) train.append(pixelIcon('coin'));
     train.setAttribute('aria-label', p.training >= TRAINING_MAX ? 'Entrenamiento al máximo' : `Entrenar por ${TRAINING_COST(p.training)} monedas`);
     el<HTMLInputElement>('reduced-motion').checked = p.reducedMotion;
     document.body.classList.toggle('reduced-motion', p.reducedMotion);
     this.warning(store.warning);
   }
-  refreshArt(store: SaveStore): void {
-    el<HTMLImageElement>('captain-portrait').src = artUrl('straw-hat');
-    const avatar = document.createElement('img'); avatar.src = artUrl('straw-hat-face'); avatar.alt = '';
+  refreshArt(store: SaveStore, characterId = 'luffy'): void {
+    const visual = CHARACTERS[characterId].visual;
+    el<HTMLImageElement>('captain-portrait').src = artUrl(visual) || artUrl(`${visual}-portrait`);
+    const avatar = document.createElement('img'); avatar.src = artUrl(`${visual}-face`); avatar.alt = '';
     el('captain-avatar').replaceChildren(avatar);
     el('coin-icon').replaceChildren(pixelIcon('coin'));
-    this.home(store);
+    this.home(store, characterId);
   }
   warning(message: string): void { el('storage-warning').hidden = !message; el('storage-warning').textContent = message; }
   setPlaying(playing: boolean): void {
@@ -73,6 +79,8 @@ export class View {
   }
   hud(run: Run): void {
     const p = run.player;
+    el('character-name').textContent = (run.character.shortName ?? run.character.name).toUpperCase();
+    el('run-berries').textContent = p.collectedBerries.toString();
     const signature = run.id + p.abilitySlots.map(slot => slot.join(',')).join('|') + p.attacks.map(a => `${a.id}:${a.level}:${a.activeFor > 0}`).join('|');
     if (signature !== this.attackSignature) {
       this.attackSignature = signature;

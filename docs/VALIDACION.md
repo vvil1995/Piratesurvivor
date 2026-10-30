@@ -127,3 +127,24 @@ Auditoría y migración incremental: estados aprendidos separados de cuatro ranu
 Nuevos tests de agrupación/cancelación/transacción, límites de buffs, alternancia/constancia, Balloon/reflectores, Axe diferido, pausa/limpieza, cap de96 proyectiles y colisiones, rifle real. Núcleo/tipos/build aprobados. Navegador:24 aprobadas,2 omisiones intencionales de móvil en escritorio. Se prueba UI de ocho movimientos con gestión táctil y modo constante. Falta equilibrio de sesiones largas y medición física de FPS/consumo con proyectiles/áreas/rifles. FaseF de otros personajes todavía no implementada en esta fita.
 
 Artefacto0.6 autónomo también aprobado por HTTP local en escritorio/móvil emulado, sin red adicional ni QA en producción. Captura de ocho movimientos/gestión táctil revisada. La ejecución de26 casos de navegador fue24 aprobados y2 omitidos; pruebas aceleradas no equivalen a una partida humana completa.
+
+## Beta0.7 — tripulación de pruebas
+
+Acceso de prueba autorizado a Luffy/Zoro/Nami/Usopp/Sanji mediante selector, sin compras, sin desbloqueos persistentes y sin cambios del perfil al seleccionar/abandonar. Catálogos34 habilidades:30 exclusivas +4 universales, seis niveles cada una. Datos configurables y ejecutores compartidos; adaptaciones señaladas en el detalle.
+
+Check, nueve archivos de pruebas de núcleo y compilación aprobados. El nuevo archivo crew.test.ts contiene ocho casos:60 activaciones (30 técnicas×niveles1/6), catálogos, robo único, estados/caducidad, objetivo enfocado y contraataque, atracción/explosión del señuelo y comida/regeneración, perforación/rebotes/humo/explosiones limitadas, desvío y limpieza al morir. Fixtures controladas, no prueba de equilibrio de sesiones humanas.
+
+El HTML autónomo incluye los cinco atlas y ocupa4,59MiB (aprox.2698KiB gzip). La web carga bajo demanda los otros cuatro atlas; el inicial sigue conteniendo Luffy/marine y recursos comunes. Sin nuevas dependencias ni recursos externos. Entrenamiento comprado individual, pasivas exclusivas, récords por personaje y taverna pendientes; se conserva el perfil y entrenamiento de Luffy anteriores. Pendiente medir FPS, calor y consumo en Android/iOS físicos y comprobar Safari.
+
+Suite completa de navegador de beta0.7:28 aprobadas y2 omisiones intencionales (controles móviles en proyecto escritorio). Se verifican selector real de los cinco, nombre/sprite/vida inicial, ausencia de compras/cambios del perfil al abandonar y efectos evolucionados de la tripulación con HUD y gestión. Capturas de puerto móvil y combate de Zoro revisadas; ajuste de truncado de nombres largos en HUD. HTML autónomo por HTTP local: escritorio y móvil emulado aprobados con red deshabilitada, inicio de los cinco, sin peticiones externas adicionales ni hookQA. No se verificó publicación de Netlify ni dispositivos físicos.
+
+Tras el ajuste final del HUD y extraer el cooldown mínimo a configuración (0,2s, sin cambiar el valor), se repiten check/núcleo/build y las cuatro pruebas de selector/tripulación en escritorio/móvil:4 aprobadas. Se comprueba que los nombres quedan dentro de su ranura; capturas finales de Zoro y Nami revisadas. Paquete de navegador y fuente0.7.0 generados en release/ (ignorados por Git); CI conserva el ZIP como artefacto.
+
+
+##0.7.1 — agrupación condicionada, movimiento, presentación y experiencia
+
+Check, nueve archivos de pruebas de núcleo y build aprobados localmente. Se prueba aprendizaje único, unión bloqueada antes del quinto, una oportunidad por aprendizaje, cancelación con rollback, concesión futura de jefe consumible y capacidad16 con un catálogo ficticio exclusivo del test. Rodilla/apoyo/recobro y reposo se comprueban en ocho direcciones en la función de pose; esto no valida por sí mismo la calidad estética.
+
+XP: marine inicial10 frente a5, marine de10min16; recompensa no depende de HP del jugador. Mismos cristales/bajas producen nivel2 antes; la pausa de subida funciona. Ritmo de aparición por segundo inferior en0/2/4/8min; se mantienen HP/daño por tiempo, pools y colisiones. Fórmula de recompensa y cadencias configurables. No se ha medido un equilibrio definitivo.
+
+Las pruebas de navegador nuevas y regresión están preparadas. El entorno actual deniega listen/setsockopt (EPERM) al servidor y a Chromium; intentos con permisos adicionales interrumpidos, no ejecutados. Por tanto, no se heredan como aprobados para0.7.1 los resultados de0.7.0. Verificar mediante CI y posteriormente en teléfonos reales. Se genera el HTML compilado; el candidato nuevo de cicle lateral no se carga en él.

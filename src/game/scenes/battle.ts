@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { WalkRig } from './walk-rig.ts';
+import { drawElasticStrike, drawAxe, drawWeaponSweep } from './elastic-effects.ts';
 import { ActorAnimation } from './actor-animation.ts';
+import { ACTOR_ART } from '../../content/actor-art.ts';
+import { createPackedDirectionalArt } from './directional-art.ts';
 import { ABILITIES } from '../../content/attacks.ts';
 import { combined } from '../systems/buffs.ts';
 import { SHELLS_TOWN } from '../../content/worlds/shells-town.ts';
@@ -36,9 +39,23 @@ export class BattleScene extends Phaser.Scene {
   private accumulator = 0;
   private previousRun?: Run;
   private worldRenderer!: WorldRenderer;
+  private actorLoads = new Map<string, Promise<void>>();
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
   get diagnostics() { return { legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  async ensureActorArt(visual: string): Promise<void> {
+    if (this.textures.exists(`${visual}-s-0`)) return;
+    const known = this.actorLoads.get(visual); if (known) return known;
+    const load = ACTOR_ART[visual]; if (!load) throw new Error('Atlas no disponible');
+    const promise = (async () => {
+      const { default: url } = await load();
+      const image = new Image(); image.src = url; await image.decode();
+      const key = `source-${visual}`; this.textures.addImage(key, image);
+      createPackedDirectionalArt(this, key, visual); this.textures.remove(key);
+    })();
+    this.actorLoads.set(visual, promise);
+    try { await promise; } catch (error) { this.actorLoads.delete(visual); throw error; }
+  }
   preload(): void {
     this.load.image('source-atlas', atlasUrl);
     this.load.image('luffy-directions-source', luffyDirectionsUrl);
@@ -95,7 +112,7 @@ export class BattleScene extends Phaser.Scene {
     let inflation = 1;
     if (player) for (const a of player.attacks) if (a.activeFor > 0) inflation = Math.max(inflation, ABILITIES[a.id].levels[a.level - 1].inflate ?? 1);
     const phase = pose.frame ? (pose.frame - 1) % 2 : 0;
-    this.captain.setTexture(`straw-hat-${pose.direction}-${phase}`).setFlipX(false)
+    this.captain.setTexture(`${run?.character.visual ?? 'straw-hat'}-${pose.direction}-${phase}`).setFlipX(false)
       .setScale(0.65 * (1 + pose.weight / 2) * inflation, 0.65 * (1 - pose.weight)).setAngle(pose.lean);
     this.captain.setPosition(worldX - origin.x, worldY - origin.y).setDepth(worldY - origin.y + 1000);
     this.captainShadow.setPosition(worldX - origin.x, worldY - origin.y + 2).setScale(1.2 + pose.weight);
@@ -119,20 +136,28 @@ export class BattleScene extends Phaser.Scene {
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate, delta / 1000);
       sprite.setTexture(`marine-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
       sprite.setPosition(e.x - origin.x, e.y - origin.y).setDepth(e.y - origin.y + 1000);
-      sprite.setTint(e.flash > 0 ? 0xffb689 : e.ranged ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
+      sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
       this.enemyRigs[i].update(sprite, animation, 0.6);
     }
     for (let i = 0; i < this.crystals.length; i++) {
       const pickup = run?.pickups.items[i], sprite = this.crystals[i];
       sprite.setVisible(!!pickup?.active);
-      if (pickup?.active) sprite.setPosition(pickup.x - origin.x, pickup.y - origin.y).setScale(pickup.value >= 20 ? 1.3 : 1);
+      if (pickup?.active) {
+        const kind = pickup.kind ?? 'xp', factor = kind === 'xp' && pickup.value >= 20 ? 1.3 : 1;
+        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : 18) * factor, 18 * factor);
+      }
     }
     this.effects.clear();
     if (run) {
       for (const area of run.areas.items) if (area.active) {
         const x = area.x - origin.x, y = area.y - origin.y;
-        this.effects.fillStyle(area.triggered ? 0x8ae0ce : 0xedbd67, area.triggered ? area.life * 0.6 : 0.12);
+        if (area.visual === 'rubber-axe') { drawAxe(this.effects, x, y, area.delay, area.life, area.radius); continue; }
+        this.effects.fillStyle(area.kind === 'smoke' ? 0xa2adba : area.kind === 'decoy' ? 0xc3936c : area.triggered ? 0x8ae0ce : 0xedbd67, area.triggered ? area.life * 0.6 : 0.12);
         this.effects.fillCircle(x, y, area.radius); this.effects.lineStyle(2, area.triggered ? 0xd1fff0 : 0xedbd67, 0.8); this.effects.strokeCircle(x, y, area.radius);
+        if (area.kind === 'decoy') {
+          this.effects.lineStyle(4, 0xc59b6c, 0.95); this.effects.lineBetween(x, y - 22, x, y + 6); this.effects.lineBetween(x - 12, y - 12, x + 12, y - 12);
+          this.effects.fillStyle(0xd9bd8c, 0.95); this.effects.fillCircle(x, y - 27, 6);
+        }
         if (area.triggered) {
           this.effects.lineStyle(5, 0xf3ce81, area.life / 0.3); this.effects.lineBetween(x, y - 70, x, y);
           if (area.shockRadius) this.effects.strokeCircle(x, y, area.shockRadius * (1 - area.life / 0.4));
@@ -140,15 +165,16 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const bullet of run.projectiles.items) if (bullet.active) {
         const x = bullet.x - origin.x, y = bullet.y - origin.y - 18;
-        const color = bullet.hostile ? 0xffa0a0 : bullet.reflected ? 0xf9dc79 : 0x9bdfef;
+        const ammo = bullet.abilityId ? ABILITIES[bullet.abilityId].levels[(bullet.level ?? 1) - 1] : undefined;
+        const color = bullet.hostile ? 0xffa0a0 : bullet.reflected ? 0xf9dc79 : ammo?.status === 'confuse' ? 0xadb6c7 : ammo?.splash ? 0xf1ad68 : ammo?.status ? 0xb0d991 : 0xc3e7ef;
         this.effects.lineStyle(2, color, 0.8); this.effects.lineBetween(x, y, x - bullet.vx * 0.035, y - bullet.vy * 0.035);
         this.effects.fillStyle(color); this.effects.fillCircle(x, y, bullet.radius);
       }
       if (player) for (const state of player.attacks) {
         const ability = ABILITIES[state.id], x = player.x - origin.x, y = player.y - origin.y - 22;
         if (ability.behavior === 'guard' && state.activeFor > 0) {
-          this.effects.fillStyle(0x92dce1, 0.12); this.effects.fillEllipse(x, y, 72, 76);
-          this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); this.effects.strokeEllipse(x, y, 72, 76);
+          this.effects.fillStyle(0x92dce1, 0.12); if (ability.visual !== 'slash') this.effects.fillEllipse(x, y, 72, 76);
+          this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); if (ability.visual === 'slash') { for (const offset of [-9, 0, 9]) this.effects.lineBetween(x - 24, y - 18 + offset, x + 24, y + 18 + offset); } else this.effects.strokeEllipse(x, y, 72, 76);
         }
         if (ability.buff && (combined(player, state.id) || state.activeFor > 0)) {
           const color = { speed: 0x83dfc8, armor: 0x92c8ed, damage: 0xf0aa73, cooldown: 0xc0a1e8 }[ability.buff.stat];
@@ -161,6 +187,8 @@ export class BattleScene extends Phaser.Scene {
       const alpha = Math.min(1, strike.life / 0.08);
       const x = strike.x - origin.x, y = strike.y - origin.y;
       const color = strike.evolved ? 0xf8d76c : strike.behavior === 'sweep' ? 0x9bd8d5 : 0xf1d1ab;
+      if (drawElasticStrike(this.effects, strike, x, y)) continue;
+      if (drawWeaponSweep(this.effects, strike, x, y)) continue;
       if (strike.behavior === 'guard') {
         this.effects.lineStyle(3, color, alpha * 0.6); this.effects.strokeCircle(x, y - 18, strike.reach * (1 - strike.life / 0.3)); continue;
       }
@@ -179,9 +207,16 @@ export class BattleScene extends Phaser.Scene {
         if (strike.splash) this.effects.strokeCircle(strike.impact.x - origin.x, strike.impact.y - origin.y - 20, strike.splash * (1 - strike.life / 0.22));
       }
       const distance = Math.max(30, strike.reach), endX = x + Math.cos(strike.angle) * distance, endY = y + Math.sin(strike.angle) * distance;
+      if (strike.visual === 'slash') {
+        this.effects.lineStyle(strike.evolved ? 5 : 3, 0xd5f1ed, alpha);
+        for (const offset of [-5, 0, 5]) this.effects.lineBetween(x, y - 19 + offset, endX, endY - 19 + offset);
+        continue;
+      }
+      if (strike.visual === 'staff') { this.effects.lineStyle(5, 0xc19b69, alpha); this.effects.lineBetween(x, y - 19, endX, endY - 19); this.effects.fillStyle(0xe8cca1, alpha); this.effects.fillCircle(endX, endY - 19, 5); continue; }
+      if (strike.visual === 'kick') { this.effects.lineStyle(3, 0xe1e4c4, alpha); this.effects.lineBetween(x, y - 19, endX, endY - 19); this.fists[index].setTexture('boot').setDisplaySize(26, 26).setTint(color).setVisible(true).setPosition(endX, endY - 19).setAlpha(alpha).setRotation(strike.angle); continue; }
       this.effects.lineStyle(9, 0x7c503b, alpha); this.effects.lineBetween(x, y - 19, endX, endY - 19);
       this.effects.lineStyle(5, 0xefc69a, alpha); this.effects.lineBetween(x, y - 21, endX, endY - 21);
-      this.fists[index].setDisplaySize(strike.evolved ? 36 : 27, strike.evolved ? 36 : 27).setTint(color).setVisible(true).setPosition(endX, endY - 21).setAlpha(alpha).setRotation(strike.angle + Math.PI / 4);
+      this.fists[index].setTexture('fist').setDisplaySize(strike.evolved ? 36 : 27, strike.evolved ? 36 : 27).setTint(color).setVisible(true).setPosition(endX, endY - 21).setAlpha(alpha).setRotation(strike.angle + Math.PI / 4);
       this.effects.lineStyle(2, 0xf6e5bc, alpha); this.effects.strokeCircle(endX, endY - 20, 19 - strike.life * 40);
     }
     this.bridge.tick();

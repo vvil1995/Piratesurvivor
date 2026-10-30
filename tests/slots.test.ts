@@ -72,3 +72,48 @@ test('cancelar aprendizaje devuelve las cartas sin consumir nivel ni buff', () =
   run.selectUpgrade('ability:fury'); run.cancelCombinations();
   assert.equal(run.status, 'levelup'); assert.equal(p.attacks.length, 4); assert.equal(p.learnedBuffs.length, 0); assert.equal(p.choices.length, 1);
 });
+
+test('una carta aprende solo un movimiento, en ranura propia; no se puede juntar antes del quinto', () => {
+  const run = new Run(), p = run.player;
+  run.status = 'levelup'; p.choices = ['gatling', 'bazooka', 'whip'].map(id => ({ kind: 'ability', id: `ability:${id}`, abilityId: id, name: id, description: '', symbol: '', max: 6 }));
+  assert.equal(run.selectUpgrade('ability:gatling'), true);
+  assert.deepEqual(p.abilitySlots, [['elastic-punch'], ['gatling'], [], []]);
+  assert.equal(p.attacks.length, 2); assert.equal(run.selectUpgrade('ability:whip'), false);
+  run.openCombinations(); assert.equal(run.canJoinMovements, false);
+  assert.equal(run.combine(1, 0), false); assert.equal(run.moveComponent('gatling', 0), false);
+  run.finishCombinations(); assert.equal(p.attacks.length, 2);
+});
+
+test('quinto movimiento concede una agrupación, cancelar revierte y la recompensa futura se consume una vez', () => {
+  const run = new Run(), p = run.player;
+  for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(p, id);
+  const before = p.abilitySlots.map(s => [...s]);
+  run.status = 'levelup'; p.choices = [{ kind: 'ability', id: 'ability:fury', abilityId: 'fury', name: 'Furia', description: '', symbol: '', max: 6 }];
+  run.selectUpgrade('ability:fury'); assert.equal(run.canJoinMovements, true);
+  assert.equal(run.combine(1, 0), true); assert.equal(run.canJoinMovements, false); assert.equal(run.combine(2, 0), false);
+  run.cancelCombinations(); assert.deepEqual(p.abilitySlots, before); assert.equal(p.attacks.length, 4);
+  run.selectUpgrade('ability:fury'); run.combine(1, 0); run.finishCombinations(); run.openCombinations();
+  assert.equal(run.combine(2, 0), false);
+  run.grantCombinationReward(); assert.equal(run.combine(2, 0), true); assert.equal(run.combine(3, 0), false);
+});
+
+test('capacidad futura real de dieciséis componentes, cuatro por ranura, sin reiniciar recargas', async () => {
+  const { ABILITIES, MAX_LEARNED_ABILITIES } = await import('../src/content/attacks.ts');
+  const { CHARACTERS } = await import('../src/content/catalog.ts');
+  const original = CHARACTERS.luffy.abilities, extra = Array.from({ length: 15 }, (_, i) => `qa-future-${i}`);
+  try {
+    for (const id of extra) ABILITIES[id] = { ...ABILITIES.gatling, id };
+    CHARACTERS.luffy.abilities = ['elastic-punch', ...extra];
+    const run = new Run(), p = run.player; p.attacks[0].cooldown = 3;
+    for (const id of extra) {
+      if (p.abilitySlots.some(s => !s.length)) assert.equal(improveAttack(p, id), true);
+      else {
+        run.status = 'levelup'; p.choices = [{ kind: 'ability', id: `ability:${id}`, abilityId: id, name: id, description: '', symbol: '', max: 6 }];
+        assert.equal(run.selectUpgrade(`ability:${id}`), true);
+        assert.equal(run.finishCombinations(p.abilitySlots.findIndex(s => s.length < 4)), true);
+      }
+    }
+    assert.equal(MAX_LEARNED_ABILITIES, 16); assert.equal(p.attacks.length, 16); assert.equal(validLoadout(p), true);
+    assert.ok(p.abilitySlots.every(s => s.length === 4)); assert.equal(p.attacks[0].cooldown, 3);
+  } finally { CHARACTERS.luffy.abilities = original; for (const id of extra) delete ABILITIES[id]; }
+});

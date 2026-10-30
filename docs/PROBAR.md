@@ -4,7 +4,7 @@
 
 1. Descomprime el paquete de navegador.
 2. Abre `One-Piece-Survivor.html` en Chrome, Edge, Firefox o Safari moderno.
-3. Pulsa **Zarpar a Shells Town**. No hay que instalar nada ni crear una cuenta.
+3. Escoge Luffy, Zoro, Nami, Usopp o Sanji en el selector BETA (sin compras) y pulsa **Zarpar a Shells Town**. No hay que instalar nada ni crear una cuenta.
 
 El HTML autónomo funciona sin internet y contiene todos los recursos de ejecución. `index.html` es la variante para un servidor estático y debe conservar su carpeta `assets/`. No abras ese `index.html` por doble clic: utiliza el archivo autónomo.
 
@@ -59,3 +59,11 @@ Probar tres partidas con elecciones diferentes; comprobar movimiento/joystick mi
 En las cartas probar vida (+20máximo y cura20), regeneración, armadura y crítico. Pausar para ver los efectos efectivos, que ya respetan topes. La XP se ve arriba con valor numérico y barra; al subir de nivel se reinicia el progreso. Vida/regen no tienen máximo de elecciones; las demás sí. Reiniciar debe borrar estas pasivas y conservar solo el perfil anterior.
 
 El equilibrio cambió: regeneración inicial0,2HP/s; daño/velocidad/cooldown temporales ahora se suman sobre la base, no se multiplican repetidamente. Los números son provisionales y necesitan partidas humanas con y sin mejoras. El enemigo recibe más estadísticas y más frecuencia por tiempo, hasta los topes de0.4.1. No hay viajes automáticos ni victoria por reloj.
+
+
+## Beta de los cinco personajes
+
+Prueba una partida con cada uno. Aprender una quinta habilidad abre el menú de agrupación: une dos ranuras para dejar una libre y confirma. Cada técnica conserva su nivel y reloj; máximo dos buffs distintos por partida. Mejora una técnica hasta6 para comprobar su +. Revisa especialmente la carga de Zoro cerca de muros, el señuelo/robo de Nami, humo/proyectiles de Usopp y recogida de comida de Sanji. Abandonar no cobra ni suma recompensas. La taverna y el entrenamiento individual nuevo todavía no están disponibles.
+
+
+En0.7.1, antes de la quinta habilidad el menú solo permite consultar/separar, no unir libremente. Al elegir una nueva con cuatro ranuras ocupadas puedes juntar dos existentes y confirmar, o usar «Juntar el nuevo y aprender». Cancelar devuelve la elección. Prueba especialmente si el doble de XP inicial y el crecimiento de recompensa por enemigo resistente permiten montar la build antes de la acumulación.

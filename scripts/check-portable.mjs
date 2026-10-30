@@ -44,6 +44,17 @@ try {
     await page.screenshot({ path: `test-results/screenshots/portable-${mobile ? 'mobile' : 'desktop'}-battle.png` });
     await page.locator('#pause').click();
     await page.locator('#paused').waitFor({ state: 'visible' });
+    await page.locator('#abandon').click();
+    for (const id of ['zoro', 'nami', 'usopp', 'sanji']) {
+      await page.locator('#beta-character').selectOption(id);
+      await page.locator('#start').waitFor({ state: 'visible' });
+      await page.waitForFunction(() => !document.querySelector('#start').disabled);
+      await page.locator('#start').click();
+      await page.locator('#hud').waitFor({ state: 'visible' });
+      assert.equal((await page.locator('#character-name').innerText()).toLowerCase(), id);
+      await page.waitForTimeout(250);
+      await page.locator('#pause').click(); await page.locator('#abandon').click();
+    }
     assert.deepEqual(errors, [], 'Sin errores JavaScript'); assert.deepEqual(external, [], 'Sin solicitudes externas');
     console.log(`HTML autónomo ${server ? 'HTTP local' : 'file://'} ${mobile ? 'móvil emulado' : 'escritorio'}: carga, partida, pausa, sin recursos de red adicionales ni hook QA.`);
     await context.close();

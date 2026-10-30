@@ -10,6 +10,7 @@ export class ActorAnimation {
   direction: Direction = 's';
   frame = 0;
   footfall = false;
+  get gaitPhase(): number { return this.distance / 48 * Math.PI; }
   get weight(): number { return this.frame ? Math.pow(Math.cos(this.distance / 48 * Math.PI), 8) * 0.018 : 0; }
   get legSwing(): number { return this.frame ? Math.sin(this.distance / 48 * Math.PI) * 9 : 0; }
   get lean(): number { return this.frame ? Math.sin(this.distance / 48 * Math.PI) * 0.9 : 0; }

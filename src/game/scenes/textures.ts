@@ -11,6 +11,8 @@ export function createTextures(scene: Phaser.Scene): void {
   // Las texturas normalizadas ya son independientes: liberar hojas grandes de GPU.
   for (const key of ['source-atlas', 'luffy-directions-source', 'marine-directions-source']) scene.textures.remove(key);
   const g = scene.make.graphics({ x: 0, y: 0 });
+  g.fillStyle(0x59402f); g.fillRect(1, 4, 15, 10); g.fillStyle(0xeee3bf); g.fillEllipse(9, 8, 13, 10); g.fillStyle(0x354c3b); g.fillRect(6, 9, 6, 5); g.fillStyle(0xffffff); g.fillRect(6, 4, 5, 2);
+  g.generateTexture('food', 18, 18); g.clear();
   g.fillStyle(0xded1ac, 0.65); g.fillRect(1, 2, 2, 1); g.fillRect(5, 0, 1, 2); g.fillRect(7, 3, 2, 1);
   g.generateTexture('foot-dust', 10, 5); g.clear();
   g.fillStyle(0x142a33, 0.25); g.fillEllipse(16, 7, 27, 12); g.generateTexture('shadow', 32, 14); g.clear();

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import './ui/style.css';
 import { BattleScene } from './game/scenes/battle.ts';
+import { CHARACTERS } from './content/catalog.ts';
 import { Run } from './game/core/run.ts';
 import { Controller } from './platform/input/controller.ts';
 import { MobileOrientation } from './platform/input/orientation.ts';
@@ -11,6 +12,7 @@ import { View, el } from './ui/view.ts';
 const store = new SaveStore();
 const view = new View();
 let run: Run | undefined;
+let selectedCharacter = 'luffy';
 let previousStatus = '';
 let hudAt = 0;
 const pause = () => {
@@ -37,6 +39,7 @@ function sync(): void {
       move: (id, to) => { const ok = run!.moveComponent(id, to); if (ok) refresh(); return ok; },
       merge: (from, to) => { const ok = run!.combine(from, to); if (ok) refresh(); return ok; },
       done: () => { if (!orientation.blocked && run!.finishCombinations()) { refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); } },
+      learnWith: to => { if (!orientation.blocked && run!.finishCombinations(to)) { refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); } },
       cancel: () => { run!.cancelCombinations(); refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); },
     });
   }
@@ -45,14 +48,23 @@ function sync(): void {
     const result = run.result()!; store.record(result); view.result(result); view.warning(store.warning);
   } else view.showModal();
 }
-function start(): void {
-  controller.reset(); run = new Run('luffy', store.progress.training); previousStatus = ''; hudAt = 0;
-  view.showModal(); view.setPlaying(true); (document.activeElement as HTMLElement)?.blur(); sync(); orientation.sync();
+async function start(characterId = selectedCharacter): Promise<void> {
+  if (!CHARACTERS[characterId]) return;
+  controller.reset(); el('loading').hidden = false;
+  try {
+    await scene.ensureActorArt(CHARACTERS[characterId].visual);
+    selectedCharacter = characterId;
+    run = new Run(characterId, CHARACTERS[characterId].legacyTraining ? store.progress.training : 0); previousStatus = ''; hudAt = 0;
+    view.refreshArt(store, selectedCharacter); view.showModal(); view.setPlaying(true);
+    (document.activeElement as HTMLElement)?.blur(); sync(); orientation.sync();
+  } catch {
+    el('beta-load-status').textContent = 'No se pudo cargar el personaje. Vuelve a intentarlo.';
+  } finally { el('loading').hidden = true; }
 }
 function home(): void {
-  controller.reset(); run = undefined; previousStatus = ''; view.showModal(); view.setPlaying(false); view.home(store); orientation.sync(); el('start').focus();
+  controller.reset(); run = undefined; previousStatus = ''; view.showModal(); view.setPlaying(false); view.home(store, selectedCharacter); orientation.sync(); el('start').focus();
 }
-el('start').addEventListener('click', start); el('retry').addEventListener('click', start);
+el('start').addEventListener('click', () => { void start(); }); el('retry').addEventListener('click', () => { void start(); });
 el('return-home').addEventListener('click', home); el('abandon').addEventListener('click', home);
 el('rotate-home').addEventListener('click', home);
 for (const id of ['manage-abilities', 'pause-build']) el(id).addEventListener('click', () => {
@@ -60,7 +72,18 @@ for (const id of ['manage-abilities', 'pause-build']) el(id).addEventListener('c
 });
 el('pause').addEventListener('click', pause);
 el('resume').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); view.showModal(); (document.activeElement as HTMLElement)?.blur(); sync(); });
-el('train').addEventListener('click', () => { store.train(); view.home(store); });
+el('train').addEventListener('click', () => { if (!CHARACTERS[selectedCharacter].legacyTraining) return; store.train(); view.home(store, selectedCharacter); });
+el<HTMLSelectElement>('beta-character').addEventListener('change', async event => {
+  const id = (event.target as HTMLSelectElement).value; if (!CHARACTERS[id] || run) return;
+  selectedCharacter = id; el<HTMLButtonElement>('start').disabled = true;
+  el('beta-load-status').textContent = 'Preparando personaje…';
+  try {
+    await scene.ensureActorArt(CHARACTERS[id].visual);
+    if (selectedCharacter === id) { view.refreshArt(store, id); el('beta-load-status').textContent = 'Acceso de prueba. No compra ni desbloquea personajes.'; }
+  } catch {
+    if (selectedCharacter === id) { selectedCharacter = 'luffy'; el<HTMLSelectElement>('beta-character').value = 'luffy'; view.refreshArt(store, 'luffy'); el('beta-load-status').textContent = 'No se pudo cargar. Prueba otra vez.'; }
+  } finally { if (selectedCharacter === id || selectedCharacter === 'luffy') el<HTMLButtonElement>('start').disabled = false; }
+});
 el('help-open').addEventListener('click', () => view.showModal('help'));
 el('credits-open').addEventListener('click', () => view.showModal('credits'));
 document.querySelector('.brand')!.addEventListener('click', event => { event.preventDefault(); home(); });
@@ -68,7 +91,7 @@ document.querySelectorAll<HTMLElement>('[data-close]').forEach(button => button.
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && ['help', 'credits'].includes(view.modalId || '')) view.showModal();
 });
-el<HTMLInputElement>('reduced-motion').addEventListener('change', event => { store.progress.reducedMotion = (event.target as HTMLInputElement).checked; store.flush(); view.home(store); });
+el<HTMLInputElement>('reduced-motion').addEventListener('change', event => { store.progress.reducedMotion = (event.target as HTMLInputElement).checked; store.flush(); view.home(store, selectedCharacter); });
 el('export-save').addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([store.export()], { type: 'application/json' }));
   const link = document.createElement('a'); link.href = url; link.download = 'one-piece-survivor-progreso.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -78,7 +101,7 @@ el<HTMLInputElement>('import-save').addEventListener('change', async event => {
   if (!file) return;
   const success = file.size < 20000 && store.import(await file.text());
   el('import-status').textContent = success ? 'Progreso importado.' : 'Archivo de progreso inválido. No se ha reemplazado tu progreso.';
-  input.value = ''; view.home(store);
+  input.value = ''; view.home(store, selectedCharacter);
 });
 el('fullscreen').addEventListener('click', async () => {
   try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); }
@@ -86,9 +109,9 @@ el('fullscreen').addEventListener('click', async () => {
 });
 if (!document.documentElement.requestFullscreen) el('fullscreen').hidden = true;
 window.addEventListener('pagehide', () => store.flush());
-view.home(store);
+view.home(store, selectedCharacter);
 const scene = new BattleScene({ run: () => run, axis: () => controller.axis(), tick: sync,
-  ready: () => { view.refreshArt(store); el('loading').hidden = true; }, reducedMotion: () => store.progress.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches });
+  ready: () => { view.refreshArt(store, selectedCharacter); el('loading').hidden = true; }, reducedMotion: () => store.progress.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches });
 const game = new Phaser.Game({
   type: Phaser.AUTO, parent: 'game', backgroundColor: '#607780',
   width: window.innerWidth, height: window.innerHeight,
@@ -112,5 +135,5 @@ window.addEventListener('orientationchange', () => requestAnimationFrame(resizeC
 window.visualViewport?.addEventListener('resize', () => requestAnimationFrame(resizeCanvas));
 
 // Solo en desarrollo o en compilación de QA explícita. No se incluye en producción.
-declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; start: () => void; metrics: () => { legSwing: number; footsteps: number; actorScaleY: number; actorAngle: number; actorTexture: string; actorDirection: string; actorFrame: number; renderedChunks: number; textureSlots: number } } } }
+declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; start: (characterId?: string) => Promise<void>; metrics: () => { legSwing: number; footsteps: number; actorScaleY: number; actorAngle: number; actorTexture: string; actorDirection: string; actorFrame: number; renderedChunks: number; textureSlots: number } } } }
 if (import.meta.env.DEV || import.meta.env.VITE_QA === 'true') window.__OPS_QA__ = { getRun: () => run, store, tick: sync, start, metrics: () => scene.diagnostics };

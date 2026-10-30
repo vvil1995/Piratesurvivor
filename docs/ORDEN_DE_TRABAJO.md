@@ -32,3 +32,7 @@ La base de mundo/controles y los atlas ya existen (899d20b). Se comienza ahora e
 - Corrección solicitada0.4.1: articulación de piernas conservando los atlas; enemigos nuevos más fuertes/numerosos por tiempo, con topes y sin transición automática.
 - Punto2:0.5.0, vida/regen, defensa/crítico, resolver y topes, cartas válidas y HUDXP/estadísticas. Indicadores de berries recogidos/fruta esperan a esos sistemas reales; no se muestran valores ficticios.
 - Siguiente pendiente del orden: punto3, variedad de Shells Town y variantes de enemigos. Los resultados anteriores no equivalen a campaña completa ni a equilibrio final.
+
+## Actualización vigente — beta0.7
+
+El usuario autoriza selector gratuito de los cinco para probar habilidades, dejando la taverna para después. Catálogo de6 exclusivas por personaje +4 buffs comunes, máximo2 buffs aprendidos. Cuatro ranuras con1–4 componentes independientes sustituyen equipamiento plano/cadenas obligatorias. FasesA–F del combate implementadas; faseG de equilibrio sigue provisional. Tras validar esta beta, retomar variedad de Shells Town y luego economía/cofres. Conservar el perfilv1 hasta migrar explícitamente la economía; no afirmar entrenamiento individual nuevo, pasivas exclusivas ni campaña completa.

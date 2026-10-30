@@ -6,8 +6,8 @@ Actualizado con las últimas decisiones del usuario. Sustituye el plan anterior 
 
 - Trabajar sobre TypeScript, Phaser 3 y Vite existentes. Solo modo individual; no añadir red, servidores, salas ni arquitectura anticipada de cooperativo. No retirar el registro de actores existente por motivos cosméticos.
 - Cinco personajes: Luffy gratuito; Zoro, Nami, Usopp y Sanji reclutables sin duplicados, mismo precio. Estadísticas, pasiva, entrenamiento y récords por personaje. Técnicas propias hasta Arlong Park; no Gears, Clima-Tact ni Diable Jambe.
-- Catálogo objetivo de diez ataques por personaje, cuatro equipados. Seis niveles por ataque: 2–5 modifican su comportamiento, 6 evoluciona automáticamente a «+», sin objetos ni recetas. Los máximos no vuelven a ofrecerse. No implementar los 50 a la vez.
-- Cadenas ordenadas de hasta cuatro ataques, con retardos, independientes de los espacios equipados. Se obtienen en encuentros opcionales y llegan después de equilibrar el combate básico.
+- Regla vigente: seis técnicas exclusivas y cuatro buffs compartidos por personaje; máximo dos buffs aprendidos y cuatro ranuras agrupables. Seis niveles por ataque: 2–5 modifican su comportamiento, 6 evoluciona automáticamente a «+», sin objetos ni recetas. Los máximos no vuelven a ofrecerse. 30 técnicas exclusivas y cuatro buffs en el catálogo de beta; balance pendiente.
+- Agrupaciones de hasta cuatro componentes independientes por ranura, sin retardos obligatorios entre ellos. Recompensas de jefes para combinaciones pendientes de definir. Esta regla sustituye las cadenas ordenadas anteriores.
 - Tres cartas por nivel con pausa: nuevo ataque si hay espacio, mejora de equipado o pasiva temporal. Vida: +20 HP máximos y cura 20, sin límite de elecciones; regeneración: elecciones ilimitadas con incrementos pequeños. Otras pasivas con límites configurables.
 - Cuatro ataques, seis objetos (tres niveles por objeto) y una fruta son sistemas independientes. Se pierden con el nivel, XP y pasivas temporales al terminar la partida.
 - Única mejora permanente de poder: entrenamiento de estadísticas comprado con berries, individual por personaje. Perfil conserva también berries, reclutas, ajustes y récords. Sin talentos ni frutas permanentes.
@@ -15,7 +15,7 @@ Actualizado con las últimas decisiones del usuario. Sustituye el plan anterior 
 - East Blue: Shells Town/Morgan → Orange Town/Buggy → Syrup/Kuro → Baratie/Don Krieg → Arlong Park/Arlong. Tras vencer, navegación voluntaria. Sin nivel mínimo, reloj obligatorio ni curación al viajar; conservar vida, build y nivel. Objetivo de dominio: 30–45 minutos hasta Roger, sujeto a pruebas.
 - Roger inmortal en arena delimitada, agresivo y con presión creciente e invocaciones. Puntuar daño y supervivencia por separado, guardar build/personaje/caps derrotados. Sin muerte automática por tiempo. Cuatro minutos deben ser excepcionales. Sin acceso directo desde menú: repetir East Blue en cada intento.
 - Frutas temporales adicionales incluso para Luffy: una activa, aceptar/sustituir/ignorar, sin compras, niveles permanentes ni espacios de ataque/objeto. La excepción narrativa es deliberada. Catálogo y probabilidades pendientes de validación, no contenido ya existente.
-- Mantener estética detallada del atlas v2 aprobado. Nuevos atlas derivados como referencia visual: ocho orientaciones y dos pasos para los cinco personajes previstos y un marine. No sustituirlos por sprites geométricos. Solo Luffy/marine se cargan y son actores actuales; preparar gráficos no implementa personajes.
+- Mantener estética detallada del atlas v2 aprobado. Nuevos atlas derivados como referencia visual: ocho orientaciones y dos pasos para los cinco personajes previstos y un marine. No sustituirlos por sprites geométricos. La beta carga Luffy/marine al inicio y los otros atlas al seleccionarlos; los cinco son jugables para pruebas, sin compras.
 - Sin backend, telemetría, anuncios, monetización ni sagas adicionales.
 
 ## Estado y fases verificables
@@ -112,3 +112,19 @@ Siguiente bloque del orden: variedad de Shells Town y enemigos; economía/cofres
 Nueva instrucción del usuario sustituye contradicciones: cada personaje tendrá6 exclusivas +4 buffs universales (30 exclusivas distintas y4 compartidas). Solo2 buffs distintos aprendidos por Run, hasta8 movimientos en total. Cuatro ranuras, hasta4 componentes por ranura; cada componente conserva estado, nivel, efecto y cooldown independiente. Agrupar no crea cadena ni fusión y ya no exige primero un encuentro; las recompensas de caps quedan sin fijar. El motor admite grupos ampliables y separación sin reiniciar relojes.
 
 FasesA–E implementadas para Luffy en0.6:6 técnicas/+ y4 buffs disponibles, gestión de quinta habilidad, HUD por ranura y menú táctil. Los buffs solos alternan tiempo/cooldown y agrupados son constantes menores; números expresamente de prueba en buffs.ts. Los otros personajes siguen en faseF; no se regalan reclutas ni se modifica la economía pendiente.
+
+
+## Beta0.7 — acceso de pruebas autorizado
+
+El usuario confirma probar los cinco personajes sin taverna. Selector de sesión, sin modificar desbloquejos ni gastar monedas. FaseF: catálogos funcionales de6 técnicas por personaje, buffs y agrupaciones comunes; efectos de proyectil/área/control/defensa/comida reutilizables. Las adaptaciones están etiquetadas; municiones de humo/irritante no se presentan como técnicas canónicas verificadas de East Blue. Entrenamiento nuevo, pasivas exclusivas y récords individuales siguen pendientes; conservar perfilv1 y entrenamiento heredado de Luffy.
+
+Próxima faseG: equilibrar primero Shells Town en sesiones humanas con los cinco, medir móvil real y revisar legibilidad de efectos. Después retomar economía/cofres y Morgan por entregas pequeñas. No ampliar aún las cinco islas ni Roger.
+
+
+## Corrección vigente0.7.1 — calidad visual y ritmo
+
+No agrupar libremente desde el inicio. Una carta da un movimiento, en su propia ranura mientras haya sitio. Al elegir otro con cuatro ranuras llenas se permite una unión; también se prepara concesión explícita por jefe futuro. Hasta4 componentes por ranura y16 estructurales en futuros catálogos, manteniendo dos buffs distintos y las seis exclusivas actuales. Cancelación transaccional.
+
+Prioridad visual: Luffy coherente con el estilo detallado aprobado; después Zoro/Nami/Usopp/Sanji. No llamar acabado a los efectos provisionales. Validar silueta, pisada/rodilla, identidad de armas y coherencia a escala real antes de sustituir sprites. Hay un candidato generado de cicle lateral de Luffy en revisión, todavía fuera de los assets de ejecución.
+
+XP Shells Town: multiplicador2 y escalado0,5 de la resistencia extra por tiempo. Mayor dificultad conserva recompensa creciente; curva de requisitos sin cambios. Cadencia inicial0,95s, aceleración0,18/min, grupos cada6min, máximo3 y150 enemigos. No altera guardado ni economía. Probar equilibrio en sesiones humanas antes de fijar valores.

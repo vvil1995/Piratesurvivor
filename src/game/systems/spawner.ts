@@ -33,6 +33,7 @@ export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: V
   const def = ENEMIES[type], scale = definition.enemyScale;
   const threat = difficultyAt(seconds, definition.spawnInterval, definition.difficulty);
   Object.assign(enemy, { x, y, id, hp: def.hp * scale * threat.hp, maxHp: def.hp * scale * threat.hp,
-    speed: def.speed * threat.speed, damage: def.damage * threat.damage, xp: def.xp, radius: def.radius, flash: 0,
-    ranged: def.ranged, shotTimer: 1 + id % 5 * 0.2, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
+    speed: def.speed * threat.speed, damage: def.damage * threat.damage,
+    xp: Math.max(1, Math.round(def.xp * (definition.xpMultiplier ?? 1) * (1 + (threat.hp - 1) * (definition.xpThreatScaling ?? 0)))), radius: def.radius, flash: 0,
+    stolen: false, statuses: undefined, lureIndex: undefined, decoyHitTimer: 0, ranged: def.ranged, shotTimer: 1 + id % 5 * 0.2, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
 }

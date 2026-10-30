@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import { artUrl, registerArt } from '../../ui/pixel-art.ts';
 import type { Direction } from './actor-animation.ts';
 
 export const SHEET_DIRECTIONS: readonly Direction[] = ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw'];
@@ -61,5 +62,12 @@ export function createPackedDirectionalArt(scene: Phaser.Scene, sourceKey: strin
     const ctx = canvas.getContext('2d')!; ctx.imageSmoothingEnabled = false;
     ctx.drawImage(source, i * 96, phase * 96, 96, 96, 0, 0, 96, 96);
     scene.textures.addCanvas(`${actor}-${SHEET_DIRECTIONS[i]}-${phase}`, canvas);
+    if (phase === 0 && i === 0) {
+      registerArt(`${actor}-portrait`, canvas);
+      if (!artUrl(`${actor}-face`)) {
+        const face = document.createElement('canvas'); face.width = 48; face.height = 48;
+        face.getContext('2d')!.drawImage(canvas, 24, 3, 48, 42, 0, 3, 48, 42); registerArt(`${actor}-face`, face);
+      }
+    }
   }
 }

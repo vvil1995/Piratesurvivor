@@ -71,3 +71,15 @@ Armadura usa el icono de coraza original del atlasv2; regeneración usa corazón
 ## Combate v2 —0.6
 
 Burbujas defensivas, marcas de área, ondas, auras de buffs y proyectiles son Graphics originales reutilizados con presupuestos fijos. Se reutilizan iconos de puño/bota/coraza/reloj. No se descargan recursos ni se añaden dependencias. Marine con rifle usa el atlas existente con tinte provisional; su comportamiento de disparo sí está implementado. No se presenta esta visual provisional como un sprite final de arma.
+
+
+### Beta0.7 — reutilización de los cinco atlas
+
+Los atlas compactos ya registrados de Zoro, Nami, Usopp y Sanji se cargan bajo demanda en la compilación web. El HTML autónomo los incluye todos para funcionar sin red. Se generan retrato/miniatura desde esos mismos atlas, sin archivos duplicados. El movimiento conserva el rig de piernas y ocho orientaciones. Nuevos efectos de espada/bastón/patada/humo/señuelo y comida (bola de arroz) dibujados mediante Canvas/Phaser, originales del proyecto. Sin nuevas dependencias, descargas ni recursos de terceros. Se mantienen avisos y límites de derechos sobre los personajes.
+
+
+### Correcciones0.7.1 — efectos y revisión de movimiento
+
+Iconos de espadas/bastón/tirachinas en combat-icons.ts y efectos elásticos/sandalias/armas en elastic-effects.ts: dibujo original por código, sin descargas ni dependencias nuevas. El rig reutiliza los atlas con muslo/pantorrilla separados; cuatro imágenes preasignadas por actor frente a dos del rig anterior, sin nuevas texturas por paso. Medir coste en móvil real.
+
+Candidato de cicle lateral de Luffy generado con image_gen el30-10-2026 usando el atlas original del proyecto como referencia; refinado para diferenciar contacto/paso. No incorporado a los recursos de ejecución ni considerado validado: falta revisar coherencia de proporciones con las otras direcciones a escala real. No se descargan recursos oficiales ni de terceros.

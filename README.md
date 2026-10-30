@@ -1,10 +1,10 @@
-# One Piece Survivor · prototipo 0.6
+# One Piece Survivor · beta 0.7.1
 
 Fangame no oficial de supervivencia para navegador. Gratis, sin anuncios, compras, cuentas ni backend. Lógica propia y nuevos sprites e iconos pixel art generados para el proyecto. No reutiliza código ni recursos de PokéSurvivor.
 
 ## Probar sin instalar herramientas
 
-Descarga y descomprime `one-piece-survivor-browser-v0.6.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
+Descarga y descomprime `one-piece-survivor-browser-v0.7.1.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
 
 En Android/iOS, la apertura de archivos HTML desde el gestor de archivos depende del sistema y puede mostrar solo una vista previa. Para esos dispositivos, sirve la carpeta `dist/` mediante un alojamiento estático HTTPS privado o desde un ordenador de tu red. No necesita backend. Lee [PROBAR.md](docs/PROBAR.md).
 
@@ -41,10 +41,10 @@ Si Chromium ya está instalado, indica su ruta mediante `CHROMIUM_EXECUTABLE`. P
 
 ## Qué incluye
 
-- Luffy y marines en Shells Town procedural, sin límites globales ni victoria por tiempo.
+- Selector beta gratuito: Luffy, Zoro, Nami, Usopp y Sanji en Shells Town procedural, sin límites globales ni victoria por tiempo. No compra ni desbloquea personajes del futuro sistema de reclutamiento.
 - Chunks deterministas, calles conectadas, barrios residenciales, jardines y recintos.
 - Edificios, árboles, rocas y muros sólidos; los enemigos encuentran rutas alrededor de los obstáculos.
-- WASD/flechas, joystick táctil y daño por contacto. Cuatro ataques automáticos de Luffy con temporizadores independientes: Pistol, Gatling, Bazooka y Whip; seis niveles y evolución + automática. Cuatro espacios visibles, cartas mixtas de aprendizaje/mejora/pasivas. Son ataques equipados, no cadenas.
+- WASD/flechas y joystick táctil. Seis técnicas exclusivas por personaje y cuatro buffs compartidos (máximo dos aprendidos por partida). Cuatro ranuras con hasta cuatro componentes; cooldowns independientes, seis niveles y evolución + automática. Cartas de aprendizaje, mejora y pasivas; menú de agrupación táctil.
 - Batalla móvil en horizontal: aviso de giro, pausa en vertical y botón de rotación cuando la API lo permite.
 - Luffy y marines con siluetas detalladas, poses de movimiento y ataque; iconos pixel art de mejoras.
 - Vida, regeneración lenta, experiencia, niveles y tres opciones por nivel.
@@ -56,7 +56,7 @@ Si Chromium ya está instalado, indica su ruta mediante `CHROMIUM_EXECUTABLE`. P
 
 ## Alcance pendiente
 
-Jefes, cinco islas, Roger, reclutamiento, berries de enemigos, cofres, inventario, nuevos personajes, enlaces, catálogo completo de diez ataques por personaje, sprites finales y audio corresponden a fases posteriores. Las nuevas decisiones están en [PLAN_GENERAL.md](docs/PLAN_GENERAL.md). El catálogo contempla personajes y recetas, con evoluciones + automáticas de los cuatro ataques actuales; los enlaces siguen pendientes. La entrega actual conserva fases 1A–1C e incorpora el primer bloque de combate (fase2A). El mundo es abierto; los obstáculos tienen colisión y los ataques no atraviesan paredes. No se recupera una batalla al cerrar o refrescar. Se conservan el guardado v1, las monedas y el entrenamiento antiguos; todavía no se implementa la nueva economía.
+Jefes, cinco islas, Roger, reclutamiento, economía completa, cofres, inventario, pasivas exclusivas y entrenamiento/récords por personaje siguen pendientes. Esta beta conserva el perfil v1, las monedas y el entrenamiento de vida de Luffy; los demás personajes no consumen ni comparten sus mejoras compradas. El robo de Nami suma berries una sola vez por enemigo. No se recupera una batalla al cerrar o refrescar. Cooldowns, efectos y estadísticas son de ensayo; queda equilibrar partidas reales. Véase [COMBATE_V2.md](docs/COMBATE_V2.md).
 
 ## GitHub privado
 
@@ -80,3 +80,12 @@ Vida +20 y cura20 sin límite de elecciones; regeneración pequeña ilimitada en
 ## 0.6: seis técnicas y combinaciones
 
 Luffy incorpora Balloon defensivo y Axe con impacto diferido. Seis exclusivas y hasta dos de cuatro buffs, cuatro ranuras de hasta cuatro componentes independientes. La quinta habilidad abre gestión antes de aprenderla. Agrupar no reinicia cooldowns ni crea una cadena. Buff solo temporal; agrupado constante menor. Perfil de intensidades/tiempos expresamente provisional. Las otras cuatro plantillas esperan la faseF y el acceso público sigue en Luffy.
+
+
+## Correcciones0.7.1
+
+Una carta aprende un solo movimiento, inicialmente en ranura propia. No se permite agrupar libremente desde el principio: al elegir otro con las cuatro ranuras llenas se habilita una agrupación (existentes entre sí o nuevo con existente). Cancelar restaura las ranuras. Integración de recompensas de jefes preparada pero sin jefes implementados. Capacidad estructural16 (4×4); catálogo actual6 exclusivas +máximo2 buffs aprendidos.
+
+Shells Town: XP base×2, recompensa adicional por resistencia de enemigos tardíos; intervalo inicial0,95s y grupos dobles desde6min. Se mantienen la curva de XP necesaria, daño/vida por tiempo y el límite150. Ajustes provisionales que requieren partidas humanas.
+
+Presentación: flexión de rodilla en el rig; Whip con pierna/sandalia, Bazooka con dos brazos, Pistol/Gatling con golpes y Axe descendente; barridos de espada/bastón/patada según familia. Iconos originales de espadas, bastón y tirachinas. No representan todavía el acabado gráfico definitivo de la tripulación.

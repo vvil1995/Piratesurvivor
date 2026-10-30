@@ -13,12 +13,12 @@ export function canImproveAttack(player: Player, id: string): boolean {
     (ABILITIES[id].category !== 'buff' || player.learnedBuffs.includes(id) || player.learnedBuffs.length < MAX_LEARNED_BUFFS);
 }
 export const hasFreeSlot = (player: Player): boolean => player.abilitySlots.some(slot => slot.length === 0);
-export function improveAttack(player: Player, id: string): boolean {
+export function improveAttack(player: Player, id: string, joinSlot?: number): boolean {
   if (!canImproveAttack(player, id)) return false;
   const equipped = player.attacks.find(a => a.id === id);
   if (equipped) { equipped.level++; return true; }
-  const slot = player.abilitySlots.find(slot => slot.length === 0);
-  if (!slot) return false;
+  const slot = joinSlot === undefined ? player.abilitySlots.find(slot => slot.length === 0) : player.abilitySlots[joinSlot];
+  if (!slot || slot.length >= COMPONENTS_PER_SLOT) return false;
   player.attacks.push(newAttack(id)); slot.push(id);
   if (ABILITIES[id].category === 'buff' && !player.learnedBuffs.includes(id)) player.learnedBuffs.push(id);
   return true;
