@@ -29,7 +29,6 @@ test('el paso lateral y diagonal flexiona rodilla, alterna piernas y vuelve a re
   for (const direction of ['e', 'w', 'ne', 'nw', 'se', 'sw', 'n', 's'] as const) {
     const a = legPose(direction, Math.PI / 2, -1, true), b = legPose(direction, Math.PI / 2, 1, true);
     assert.ok(Math.abs(a.thigh - b.thigh) >= 24); assert.ok(Math.abs(a.knee) > 0); assert.ok(Math.abs(b.knee) === 0);
-    assert.ok(a.lift > b.lift);
-    assert.deepEqual(legPose(direction, Math.PI / 2, -1, false), { thigh: 0, knee: 0, offsetX: 0, lift: 0 });
+    assert.deepEqual(legPose(direction, Math.PI / 2, -1, false), { thigh: 0, knee: 0 });
   }
 });

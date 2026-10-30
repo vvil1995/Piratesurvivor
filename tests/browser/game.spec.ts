@@ -443,3 +443,47 @@ test('paso articulado en ocho direcciones y Whip con pierna elástica en lugar d
   await page.screenshot({ path: test.info().outputPath('elastic-whip.png') });
   expect(errors).toEqual([]);
 });
+
+test('uniones opacas de cadera y rodilla en los seis atlas y todo el ciclo', async ({ page }) => {
+  test.setTimeout(90000);
+  const result = await page.evaluate(async () => {
+    const jointsPath = '/src/game/scenes/walk-joints.ts', posePath = '/src/game/scenes/walk-pose.ts';
+    const { detectLegJoints, legTransform } = await import(/* @vite-ignore */ jointsPath);
+    const { legPose } = await import(/* @vite-ignore */ posePath);
+    const directions = ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw'];
+    let checked = 0, fallback = 0, gaps = 0;
+    const gallery = document.createElement('div'); gallery.style.cssText = 'position:absolute;left:0;top:0;z-index:9999;display:grid;grid-template-columns:repeat(4,128px);background:#60736d;padding:12px;color:white;font:12px monospace'; document.body.append(gallery);
+    for (const actor of ['luffy', 'zoro', 'nami', 'usopp', 'sanji', 'marine']) {
+      const image = new Image(); image.src = `/src/assets/actors/${actor}-atlas.png`; await image.decode();
+      for (let frame = 0; frame < 2; frame++) for (let d = 0; d < 8; d++) {
+        const source = document.createElement('canvas'); source.width = source.height = 96; const s = source.getContext('2d')!;
+        s.drawImage(image, d * 96, frame * 96, 96, 96, 0, 0, 96, 96);
+        const joints = detectLegJoints(s.getImageData(0, 0, 96, 96).data);
+        if (!joints) { fallback++; continue; }
+        for (const phase of [Math.PI / 2, Math.PI * 1.5]) {
+          const output = document.createElement('canvas'); output.width = output.height = 128; const ctx = output.getContext('2d')!; ctx.imageSmoothingEnabled = false;
+          const body = { x: 64, y: 113, scaleX: 1, scaleY: 1, angle: 0, originX: 0.5, originY: 0.96 };
+          for (let leg = 0; leg < 2; leg++) {
+            const j = joints[leg], pose = legPose(directions[d], phase, leg ? 1 : -1, true), t = legTransform(body, j, pose.thigh);
+            const draw = (pivot: {x: number;y:number}, position: {x:number;y:number}, angle: number, top: number, bottom: number) => {
+              ctx.save(); ctx.translate(position.x, position.y); ctx.rotate(angle * Math.PI / 180);
+              ctx.drawImage(source, j.left, top, 48, bottom - top, j.left - pivot.x, top - pivot.y, 48, bottom - top); ctx.restore();
+            };
+            draw(j.hip, t.root, t.angle, Math.min(60, j.hip.y - 4), j.knee.y + 5);
+            draw(j.knee, t.knee, t.angle + pose.knee, j.knee.y - 4, 96);
+            const alpha = ctx.getImageData(Math.round(t.knee.x) - 1, Math.round(t.knee.y) - 1, 3, 3).data;
+            if (!alpha.some((v, i) => i % 4 === 3 && v > 96)) gaps++;
+            checked++;
+          }
+          ctx.drawImage(source, 0, 0, 96, 70, body.x - 48, body.y - 96 * body.originY, 96, 70);
+          if (directions[d] === 'e') {
+            const label = document.createElement('div'); label.style.cssText = 'display:flex;flex-direction:column'; label.append(document.createTextNode(`${actor} · ${frame} · ${phase.toFixed(1)}`), output); gallery.append(label);
+          }
+        }
+      }
+    }
+    return { checked, fallback, gaps };
+  });
+  expect(result.checked).toBeGreaterThan(100); expect(result.gaps).toBe(0);
+  await page.screenshot({ path: test.info().outputPath('joint-regression.png'), fullPage: true });
+});
