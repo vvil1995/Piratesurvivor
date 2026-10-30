@@ -23,6 +23,7 @@ async function isolateWalk(page: Page) {
     const path = '/src/content/catalog.ts', { ENEMIES } = await import(/* @vite-ignore */ path);
     for (const enemy of Object.values(ENEMIES) as { speed: number; damage: number }[]) { enemy.speed = 0; enemy.damage = 0; }
     const run = window.__OPS_QA__!.getRun()!; run.enemies.clear();
+    for (const chest of run.chests.active) chest.active = false;
     for (const attack of run.player.attacks) { attack.cooldown = 1e6; attack.pending = 0; }
   });
 }
@@ -78,7 +79,7 @@ test('derrota, reinicio, exploración sin límite y guardado persistente', async
   await page.evaluate(() => { window.__OPS_QA__!.getRun()!.player.hp = 0; });
   await expect(page.locator('#result')).toBeVisible(); await expect(page.locator('#result-title')).toContainText('CAEN');
   await page.locator('#retry').click(); await expect(page.locator('#hud')).toBeVisible();
-  await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; r.time = 600 - 1 / 60; r.player.kills = 30; });
+  await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; r.time = 600 - 1 / 60; r.player.kills = 30; const coin = r.pickups.acquire()!; Object.assign(coin, { x: r.player.x, y: r.player.y, kind: 'berry', value: 30 }); });
   await page.waitForTimeout(200);
   await expect(page.locator('#result')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.time)).toBeGreaterThan(600 - 1 / 60);

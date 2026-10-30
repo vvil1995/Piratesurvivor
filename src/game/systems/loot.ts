@@ -25,7 +25,7 @@ export class ChestField {
         for (let i = 0; i < LOOT.chestsPerChunk + (seed % LOOT.largeChunkEvery === 0 ? 1 : 0); i++) {
           for (let attempt = 0; attempt < 12; attempt++) {
             const v = hash(seed, i, attempt), px = x * CHUNK_SIZE + 48 + v % 416, py = y * CHUNK_SIZE + 48 + (v >>> 12) % 416;
-            if (!world.canOccupy(px, py, 18)) continue;
+            if (Math.hypot(px - 256, py - 256) < 100 || !world.canOccupy(px, py, 18) || chests.some(c => Math.hypot(c.x - px, c.y - py) < 90)) continue;
             chests.push({ active: true, id: -(this.chunks.size * 2 + i + 1), kind: 'chest', large: i > 0, openProgress: 0,
               x: px, y: py, hp: LOOT.chestHp, maxHp: LOOT.chestHp, speed: 0, damage: 0, xp: 0, radius: 14, flash: 0 }); break;
           }
