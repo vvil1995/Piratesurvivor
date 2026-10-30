@@ -17,7 +17,8 @@ La apertura local `file://` y las direcciones HTTP(S) tienen almacenamientos ind
 | Acción | Ordenador | Móvil/tableta |
 | --- | --- | --- |
 | Moverse | WASD o flechas | Arrastrar en la zona izquierda, debajo del HUD |
-| Atacar | Automático dentro del alcance | Automático |
+| Atacar | Automático: solo ranura seleccionada | Automático: solo ranura seleccionada |
+| Elegir ranura | Clic o teclas1–4 | Tocar el cuadrado inferior |
 | Elegir mejora | Clic o Tab y Enter | Tocar una tarjeta |
 | Pausar | Esc, P o botón Ⅱ | Botón Ⅱ |
 | Reanudar | Botón Volver a la batalla | Mismo botón |
@@ -67,3 +68,8 @@ Prueba una partida con cada uno. Aprender una quinta habilidad abre el menú de 
 
 
 En0.7.1, antes de la quinta habilidad el menú solo permite consultar/separar, no unir libremente. Al elegir una nueva con cuatro ranuras ocupadas puedes juntar dos existentes y confirmar, o usar «Juntar el nuevo y aprender». Cancelar devuelve la elección. Prueba especialmente si el doble de XP inicial y el crecimiento de recompensa por enemigo resistente permiten montar la build antes de la acumulación.
+
+
+## Beta0.8.0: tocar para elegir
+
+Aprende Bazooka: Pistol sigue seleccionado y solo Pistol ataca. Toca Bazooka en el HUD y comprueba borde dorado/etiqueta ACTIVA; vuelve a Pistol tocándolo. En PC también1–4. Antes del quinto movimiento no puedes unirlos. Al desbloquear una combinación, elige su ranura para que funcionen juntos sus componentes; seleccionar otra deja ese grupo en reserva. Cambiar no reinicia cooldowns. Prueba especialmente el ataque inicial de Zoro contra marines cercanos, lejanos y detrás de muros.

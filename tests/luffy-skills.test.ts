@@ -9,7 +9,7 @@ function enemy(run: Run, id: number, x: number, y: number) {
   const e = run.enemies.acquire()!; Object.assign(e, { id, x, y, hp: 1000, maxHp: 1000, speed: 0, damage: 0, xp: 5 }); return e;
 }
 test('Balloon repele y mitiga contacto; su evolución refleja proyectiles reales del pool', () => {
-  const run = new Run(), p = run.player; improveAttack(p, 'balloon');
+  const run = new Run(), p = run.player; improveAttack(p, 'balloon'); run.selectSlot(1);
   p.attacks[0].cooldown = 100;
   const e = enemy(run, 900, p.x + 20, p.y); e.damage = 10;
   run.update(1 / 60, axis);
@@ -24,7 +24,7 @@ test('Balloon repele y mitiga contacto; su evolución refleja proyectiles reales
 });
 
 test('Axe avisa, no daña antes del impacto y se resuelve una sola vez', () => {
-  const run = new Run(), p = run.player; improveAttack(p, 'axe'); p.attacks[0].cooldown = 100;
+  const run = new Run(), p = run.player; improveAttack(p, 'axe'); run.selectSlot(1); p.attacks[0].cooldown = 100;
   const e = enemy(run, 900, p.x + 70, p.y);
   run.update(1 / 60, axis); assert.equal(run.areas.count, 1); assert.equal(e.hp, 1000);
   const area = run.areas.items.find(a => a.active)!;
@@ -37,7 +37,7 @@ test('Axe avisa, no daña antes del impacto y se resuelve una sola vez', () => {
 });
 
 test('pausa congela áreas/proyectiles y muerte limpia efectos', () => {
-  const run = new Run(), p = run.player; improveAttack(p, 'axe'); p.attacks[0].cooldown = 100;
+  const run = new Run(), p = run.player; improveAttack(p, 'axe'); run.selectSlot(1); p.attacks[0].cooldown = 100;
   enemy(run, 900, p.x + 70, p.y); run.update(1 / 60, axis);
   spawnProjectile(run, p.x, p.y, p.x + 200, p.y, 10, 200, p.id);
   run.pause(); const area = run.areas.items.find(a => a.active)!, delay = area.delay;

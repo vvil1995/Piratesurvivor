@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { WalkRig } from './walk-rig.ts';
 import { drawElasticStrike, drawAxe, drawWeaponSweep } from './elastic-effects.ts';
-import { ActorAnimation } from './actor-animation.ts';
+import { ActorAnimation, movementDirection } from './actor-animation.ts';
 import { ACTOR_ART } from '../../content/actor-art.ts';
 import { createPackedDirectionalArt } from './directional-art.ts';
 import { ABILITIES } from '../../content/attacks.ts';
+import { activeMovements } from '../systems/loadout.ts';
 import { combined } from '../systems/buffs.ts';
 import { SHELLS_TOWN } from '../../content/worlds/shells-town.ts';
 import { ProceduralWorld } from '../world/world.ts';
@@ -109,6 +110,9 @@ export class BattleScene extends Phaser.Scene {
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
     this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate, delta / 1000);
     const pose = this.captainAnimation;
+    // En reposo mirar al blanco del golpe. Al caminar manda la dirección de movimiento.
+    const aimedStrike = run?.strikes.find(s => s.ownerId === player?.id && s.targetId !== undefined);
+    if (!pose.frame && aimedStrike) pose.direction = movementDirection(Math.cos(aimedStrike.angle), Math.sin(aimedStrike.angle));
     let inflation = 1;
     if (player) for (const a of player.attacks) if (a.activeFor > 0) inflation = Math.max(inflation, ABILITIES[a.id].levels[a.level - 1].inflate ?? 1);
     const phase = pose.frame ? (pose.frame - 1) % 2 : 0;
@@ -176,7 +180,7 @@ export class BattleScene extends Phaser.Scene {
           this.effects.fillStyle(0x92dce1, 0.12); if (ability.visual !== 'slash') this.effects.fillEllipse(x, y, 72, 76);
           this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); if (ability.visual === 'slash') { for (const offset of [-9, 0, 9]) this.effects.lineBetween(x - 24, y - 18 + offset, x + 24, y + 18 + offset); } else this.effects.strokeEllipse(x, y, 72, 76);
         }
-        if (ability.buff && (combined(player, state.id) || state.activeFor > 0)) {
+        if (ability.buff && (combined(player, state.id) && activeMovements(player).includes(state.id) || state.activeFor > 0)) {
           const color = { speed: 0x83dfc8, armor: 0x92c8ed, damage: 0xf0aa73, cooldown: 0xc0a1e8 }[ability.buff.stat];
           this.effects.lineStyle(state.level === 6 ? 3 : 1, color, 0.65); this.effects.strokeCircle(x, y + 12, state.level === 6 ? 31 : 26);
         }

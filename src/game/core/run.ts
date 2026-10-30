@@ -14,7 +14,7 @@ import { SpatialGrid } from '../spatial/grid.ts';
 import { ProceduralWorld } from '../world/world.ts';
 import { FlowField } from '../navigation/flow-field.ts';
 import { Pool } from './pool.ts';
-import { canImproveAttack, hasFreeSlot, improveAttack, mergeSlots, moveAbility, newAttack } from '../systems/loadout.ts';
+import { canImproveAttack, hasFreeSlot, improveAttack, mergeSlots, moveAbility, newAttack, selectSlot } from '../systems/loadout.ts';
 import type { AreaEffect, Projectile, Enemy, Pickup, Player, RunResult, RunStatus, Strike, Vector } from './types.ts';
 
 export interface RunOptions { world?: WorldDefinition; seed?: number }
@@ -38,6 +38,7 @@ export class Run {
   private combinationRewards = 0;
   private pendingCombinationUsed = false;
   private slotsBeforeLearning?: string[][];
+  private selectedBeforeLearning = 0;
   get canJoinMovements(): boolean { return !!this.pendingAbility && !this.pendingCombinationUsed || this.combinationRewards > 0; }
   // Punto de integración futuro: solo una recompensa real de jefe debe llamar aquí.
   grantCombinationReward(): void { this.combinationRewards++; }
@@ -64,7 +65,7 @@ export class Run {
     const baseStats = { ...this.character.stats };
     const modifiers = { permanent: { maxHp: Math.min(5, Math.max(0, training)) * 5 }, temporary: {}, items: {}, fruit: {}, buffs: {}, skills: {} };
     const stats = resolveStats(baseStats, Object.values(modifiers));
-    this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], attacks: [newAttack(this.character.initialAbility)], abilitySlots: [[this.character.initialAbility], [], [], []], learnedBuffs: [], x: 256, y: 256,
+    this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], attacks: [newAttack(this.character.initialAbility)], abilitySlots: [[this.character.initialAbility], [], [], []], selectedSlot: 0, learnedBuffs: [], x: 256, y: 256,
       collectedBerries: 0, hp: stats.maxHp, stats, baseStats, modifiers, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, facing: 0 });
     this.fieldFor(this.player).update(this.player, 1);
   }
@@ -76,13 +77,18 @@ export class Run {
   setView(view: View): void { this.view = view; }
   pause(): void { if (this.status === 'playing') this.status = 'paused'; }
   resume(): void { if (this.status === 'paused') this.status = 'playing'; }
+  selectSlot(slot: number): boolean {
+    if (this.status !== 'playing' || !selectSlot(this.player, slot)) return false;
+    for (let i = this.strikes.length - 1; i >= 0; i--) if (this.strikes[i].ownerId === this.player.id) this.strikes.splice(i, 1);
+    tickBuffs(this.player, 0); tickGuards(this.player, 0); return true;
+  }
   selectUpgrade(id: string, playerId = this.choicePlayerId): boolean {
     if (this.status !== 'levelup' || playerId !== this.choicePlayerId) return false;
     const actor = this.players.get(playerId)!;
     const upgrade = actor.choices.find(choice => choice.id === id);
     if (!upgrade || 'kind' in upgrade && !canImproveAttack(actor, upgrade.abilityId)) return false;
     if ('kind' in upgrade && !actor.attacks.some(a => a.id === upgrade.abilityId) && !hasFreeSlot(actor)) {
-      this.slotsBeforeLearning = actor.abilitySlots.map(slot => [...slot]); this.pendingCombinationUsed = false;
+      this.slotsBeforeLearning = actor.abilitySlots.map(slot => [...slot]); this.selectedBeforeLearning = actor.selectedSlot; this.pendingCombinationUsed = false;
       this.pendingAbility = upgrade; this.combinationOrigin = 'levelup'; this.status = 'combining'; return true;
     }
     applyUpgrade(actor, upgrade); actor.taken[id] = (actor.taken[id] || 0) + 1;
@@ -124,7 +130,7 @@ export class Run {
     if (this.status !== 'combining') return;
     if (this.pendingAbility && this.slotsBeforeLearning) {
       const actor = this.players.get(this.choicePlayerId)!;
-      actor.abilitySlots = this.slotsBeforeLearning; updateBuffModifiers(actor);
+      actor.abilitySlots = this.slotsBeforeLearning; actor.selectedSlot = this.selectedBeforeLearning; updateBuffModifiers(actor);
     }
     this.slotsBeforeLearning = undefined; this.pendingCombinationUsed = false;
     this.pendingAbility = undefined; this.status = this.combinationOrigin;

@@ -238,6 +238,8 @@ test('los cuatro efectos evolucionados se dibujan sin errores en combate', async
     const { improveAttack } = await import(/* @vite-ignore */ path);
     const r = window.__OPS_QA__!.getRun()!, p = r.player;
     for (const id of ['elastic-punch', 'gatling', 'bazooka', 'whip']) while ((p.attacks.find(a => a.id === id)?.level ?? 0) < 6) improveAttack(p, id);
+    // Grupo ya desbloqueado de fixture: reglas de obtención probadas aparte.
+    p.abilitySlots = [['elastic-punch', 'gatling', 'bazooka', 'whip'], [], [], []]; p.selectedSlot = 0;
     p.x = 256; p.y = 256;
     for (const e of r.enemies.items) e.active = false;
     for (let i = 0; i < 8; i++) {
@@ -352,7 +354,7 @@ test('beta permite probar los cinco personajes sin compras ni cambios del perfil
     if (id !== 'luffy') await expect(page.locator('#train')).toBeDisabled();
     await page.locator('#start').click(); await expect(page.locator('#hud')).toBeVisible();
     await expect(page.locator('#character-name')).toHaveText(name.toUpperCase());
-    await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(new RegExp(`^${visual}-s-[01]$`));
+    await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(new RegExp(`^${visual}-(?:n|ne|e|se|s|sw|w|nw)-[01]$`));
     expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.stats.maxHp)).toBe(hp);
     await page.locator('#pause').click(); await page.locator('#abandon').click();
   }
@@ -368,7 +370,8 @@ test('las técnicas evolucionadas de la tripulación se integran con sprites, HU
       await window.__OPS_QA__!.start(id);
       const path = '/src/game/systems/loadout.ts', catalog = '/src/content/catalog.ts';
       const { newAttack } = await import(/* @vite-ignore */ path);
-      const { CHARACTERS } = await import(/* @vite-ignore */ catalog);
+      const { CHARACTERS, ENEMIES } = await import(/* @vite-ignore */ catalog);
+      for (const e of Object.values(ENEMIES) as {speed: number;damage:number;xp:number}[]) { e.speed = 0; e.damage = 0; e.xp = 0; }
       const run = window.__OPS_QA__!.getRun()!, p = run.player;
       p.attacks = CHARACTERS[id].abilities.map((a: string) => ({ ...newAttack(a), level: 6 }));
       p.abilitySlots = [p.attacks.slice(0, 2).map(a => a.id), p.attacks.slice(2, 4).map(a => a.id), [p.attacks[4].id], [p.attacks[5].id]];
@@ -379,7 +382,10 @@ test('las técnicas evolucionadas de la tripulación se integran con sprites, HU
       window.__OPS_QA__!.tick();
     }, id);
     await expect(page.locator('#character-name')).toHaveText(id.toUpperCase());
-    await page.waitForTimeout(800);
+    for (let slot = 0; slot < 4; slot++) {
+      await page.evaluate(slot => window.__OPS_QA__!.getRun()!.selectSlot(slot), slot);
+      await page.waitForTimeout(200);
+    }
     expect(await page.evaluate(() => [...document.querySelectorAll('.attack-slot .component-name')].every(name => {
       const label = name.getBoundingClientRect(), slot = name.closest('.attack-slot')!.getBoundingClientRect();
       return label.left >= slot.left && label.right <= slot.right;
@@ -500,4 +506,33 @@ test('uniones opacas de cadera y rodilla en los seis atlas y todo el ciclo', asy
   });
   expect(result.checked).toBeGreaterThan(100); expect(result.gaps).toBe(0);
   await page.screenshot({ path: test.info().outputPath('joint-regression.png'), fullPage: true });
+});
+
+test('tocar las ranuras alterna Pistol/Bazooka sin agruparlos ni disparar el que queda en reserva', async ({ page, isMobile }) => {
+  await page.locator('#start').click();
+  await isolateWalk(page);
+  await offerChoice(page, 'ability:bazooka', true);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Bazooka/ }) }).click();
+  const sample = () => page.evaluate(() => {
+    const r = window.__OPS_QA__!.getRun()!, p = r.player; r.enemies.clear(); r.strikes.length = 0;
+    const e = r.enemies.acquire()!; Object.assign(e, { id: 999, x: p.x + 30, y: p.y, hp: 10000, maxHp: 10000, xp: 0, speed: 0, damage: 0 });
+    for (const a of p.attacks) a.cooldown = 0;
+    r.update(1 / 60, { x: 0, y: 0 });
+    const result = { behaviors: r.strikes.map(s => s.behavior), selected: p.selectedSlot, groups: p.abilitySlots.map(s => [...s]), fired: p.attacks.filter(a => a.cooldown > 0).map(a => a.id) };
+    for (const a of p.attacks) a.cooldown = 1e6;
+    return result;
+  });
+  await expect(page.locator('.attack-slot[data-slot="0"]')).toHaveAttribute('aria-pressed', 'true');
+  const first = await sample(); expect(first.behaviors).toEqual(['line']); expect(first.fired).toEqual(['elastic-punch']);
+  expect(first.groups).toEqual([['elastic-punch'], ['bazooka'], [], []]);
+  const bazooka = page.locator('.attack-slot[data-slot="1"]');
+  if (isMobile) await bazooka.tap(); else await bazooka.click();
+  await expect(bazooka).toHaveAttribute('aria-pressed', 'true');
+  expect((await sample()).behaviors).toEqual(['cone']);
+  const pistol = page.locator('.attack-slot[data-slot="0"]');
+  if (isMobile) await pistol.tap(); else await pistol.click();
+  expect((await sample()).behaviors).toEqual(['line']);
+  await page.keyboard.press('2'); await expect(bazooka).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('#manage-abilities').click(); await expect(page.locator('#merge-apply')).toBeDisabled();
+  await page.screenshot({ path: test.info().outputPath('selected-slot.png') });
 });

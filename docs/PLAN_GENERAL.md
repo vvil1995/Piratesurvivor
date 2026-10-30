@@ -1,5 +1,7 @@
 # Plan maestro — modo individual
 
+**Vigente0.8.0:** cuatro ranuras seleccionables, solo una en uso. Aprender no activa ni combina. Los grupos desbloqueados actúan al seleccionar su ranura. Esta regla sustituye cualquier referencia histórica a cuatro ranuras disparando simultáneamente.
+
 Actualizado con las últimas decisiones del usuario. Sustituye el plan anterior de 1.000 berries, evoluciones por recetas y preparación específica de cooperativo. Estado auditado: commit 5e198bf; nuevos atlas direccionales posteriores documentados en AUDITORIA_FASE_0.md.
 
 ## Reglas de producto
@@ -128,3 +130,10 @@ No agrupar libremente desde el inicio. Una carta da un movimiento, en su propia 
 Prioridad visual: Luffy coherente con el estilo detallado aprobado; después Zoro/Nami/Usopp/Sanji. No llamar acabado a los efectos provisionales. Validar silueta, pisada/rodilla, identidad de armas y coherencia a escala real antes de sustituir sprites. Hay un candidato generado de cicle lateral de Luffy en revisión, todavía fuera de los assets de ejecución.
 
 XP Shells Town: multiplicador2 y escalado0,5 de la resistencia extra por tiempo. Mayor dificultad conserva recompensa creciente; curva de requisitos sin cambios. Cadencia inicial0,95s, aceleración0,18/min, grupos cada6min, máximo3 y150 enemigos. No altera guardado ni economía. Probar equilibrio en sesiones humanas antes de fijar valores.
+
+
+## Corrección vigente0.8.0 — selección y ritmo básico
+
+El usuario aclara que aprender un movimiento nuevo debe ofrecer una alternativa elegible en el HUD, no disparar dos a la vez. Cuatro ranuras seleccionables, una activa; grupos desbloqueados ejecutan sus componentes solo al elegir su ranura. Se mantienen acceso por quinto aprendizaje o recompensa real de jefe futuro, máximo4 componentes y16 estructurales. Relojes por componente; cambio de selección sin reiniciar recargas y cancelando ráfagas pendientes. Buff temporal activado dura hasta agotarse, sin reactivación en reserva; constante solo con su grupo activo.
+
+Básicos:0,8–0,9s salvo carga de Zoro1,2s, con reducción progresiva por nivel y topes globales existentes. Zoro elige blanco a distancia realmente alcanzable, comprueba el recorrido antes de moverse y no consume cooldown si no puede acertar. El personaje mira al blanco al atacar en reposo; caminar conserva su dirección. No se modifica el rig de piernas aceptado.

@@ -71,6 +71,13 @@ for (const id of ['manage-abilities', 'pause-build']) el(id).addEventListener('c
   if (orientation.blocked || !run?.openCombinations()) return; previousStatus = ''; sync();
 });
 el('pause').addEventListener('click', pause);
+el('attack-slots').addEventListener('click', event => {
+  const slot = (event.target as Element).closest<HTMLButtonElement>('button[data-slot]');
+  if (slot && !orientation.blocked && run?.selectSlot(Number(slot.dataset.slot))) { view.hud(run); slot.blur(); }
+});
+document.addEventListener('keydown', event => {
+  if (!event.ctrlKey && !event.metaKey && !event.altKey && /^[1-4]$/.test(event.key) && !event.repeat && !orientation.blocked && run?.selectSlot(Number(event.key) - 1)) view.hud(run);
+});
 el('resume').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); view.showModal(); (document.activeElement as HTMLElement)?.blur(); sync(); });
 el('train').addEventListener('click', () => { if (!CHARACTERS[selectedCharacter].legacyTraining) return; store.train(); view.home(store, selectedCharacter); });
 el<HTMLSelectElement>('beta-character').addEventListener('change', async event => {

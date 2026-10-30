@@ -1,5 +1,7 @@
 # Combate v2 — referencia vigente
 
+**Regla vigente0.8.0:** las cuatro ranuras son seleccionables y solo UNA se ejecuta automáticamente. Aprender un movimiento no lo selecciona ni lo une al anterior. Tocar su cuadrado cambia de opción. Las combinaciones desbloqueadas ejecutan únicamente los componentes del grupo seleccionado; el resto queda en reserva. Esto sustituye las cuatro ranuras atacando simultáneamente de las versiones anteriores.
+
 **Corrección0.7.1 del usuario:** capacidad estructural4×4=16 componentes para futuros catálogos; hoy solo6 exclusivas +2 buffs distintos. Agrupar requiere el aprendizaje de otro movimiento con cuatro ranuras ocupadas o una recompensa real de jefe. No se ofrece unión libre desde el menú. Una oportunidad permite una unión; los componentes conservan sus relojes. El nuevo también puede juntarse explícitamente con una ranura existente para no bloquear la capacidad futura. Cancelar aprendizaje revierte las ranuras anteriores. Los jefes todavía no existen.
 
 Este documento aplica la nueva instrucción: seis exclusivas y cuatro buffs por personaje; máximo seis exclusivas + dos buffs aprendidos, cuatro ranuras con hasta cuatro componentes. Sustituye catálogo de diez exclusivas y agrupaciones como cadenas por defecto. Agrupar conserva movimientos independientes; futuras recompensas de caps no están fijadas.

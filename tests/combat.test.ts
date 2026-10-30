@@ -38,7 +38,7 @@ test('Pistol normal alcanza un enemigo y Pistol+ perfora la fila', () => {
 });
 
 test('Gatling dispara en tiempos distintos y busca al siguiente enemigo tras una baja', () => {
-  const p = actor(); p.attacks = [newAttack('gatling')];
+  const p = actor(); p.attacks = [newAttack('gatling')]; p.abilitySlots = [['gatling'], [], [], []];
   const enemies = [makeEnemy(1, 45, 0, 10), makeEnemy(2, 0, 65, 10), makeEnemy(3, -85, 0, 10)];
   const grid = new SpatialGrid(), kills: number[] = [], moments: number[] = [];
   for (let i = 0; i < 28; i++) {
@@ -62,7 +62,7 @@ test('Whip+ gira 360 grados; Bazooka empuja más y su evolución genera onda', (
 });
 
 test('temporizadores independientes y pausa de Run congelan ataques y ráfagas', () => {
-  const run = new Run(); improveAttack(run.player, 'gatling');
+  const run = new Run(); improveAttack(run.player, 'gatling'); run.selectSlot(1);
   run.player.attacks[0].cooldown = 10;
   const e = run.enemies.acquire()!; Object.assign(e, makeEnemy(99, run.player.x + 30, run.player.y));
   run.update(1 / 60, { x: 0, y: 0 });

@@ -169,3 +169,8 @@ CI32013954:32 pruebas aprobadas,2 omisiones y2 fallos en fixtures de animación 
 
 
 Resultado final CIafcf7136, ejecución41093839441: **34 pruebas aprobadas,2 omisiones intencionales**. Tipos,10 archivos de núcleo, licencias, compilación y empaquetado correctos. Regresión de los seis atlas aprobada en escritorio y móvil, con capturas revisadas: no se observan los cortes de rodilla de la captura del usuario. Alpha real:89 poses articulables y7 protegidas con sprite íntegro (5 de Zoro y2 de Nami). Se mantienen los atlas aprobados; las nuevas ilustraciones experimentales no se cargan. Safari y la comprobación en el teléfono del usuario siguen pendientes.
+
+
+## 0.8.0 — selección de ranura y básicos
+
+Cambio solicitado: una sola ranura activa, alternativas seleccionables mediante botones/tacto y teclas1–4, grupos con componentes independientes únicamente al seleccionarlos. Tests de núcleo comprueban aprendizaje de Bazooka sin activación simultánea, cambio sin reset de cooldown, cancelación de ráfagas, buffs temporales/constantes, comida persistente y Zoro sin carga al aire ni contra bloqueos. Datos básicos y reducción por nivel verificados. Once archivos de núcleo y tipos aprobados; pendiente build final y CI de UI. Las fixtures antiguas que asumían cuatro ranuras simultáneas ahora equipan explícitamente un grupo o eligen su ranura. No se cambian las piernas ni el guardado.

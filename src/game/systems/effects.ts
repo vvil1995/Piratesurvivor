@@ -10,11 +10,11 @@ import { applySkillHit, applyStatus } from './status.ts';
 import { receivedDamage } from './stats.ts';
 export const PROJECTILE_CAP = 96, AREA_CAP = 24;
 export interface Effects { projectiles: Pool<Projectile>; areas: Pool<AreaEffect> }
-export function nearestTarget(player: Player, grid: SpatialGrid, world: CollisionWorld, range: number): Enemy | undefined {
+export function nearestTarget(player: Player, grid: SpatialGrid, world: CollisionWorld, range: number, clearance = 2): Enemy | undefined {
   let target: Enemy | undefined, best = range * range;
   grid.visit(player.x, player.y, range, enemy => {
     const d = (player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2;
-    if (d <= best && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) { target = enemy; best = d; }
+    if (d <= best && world.segmentClear(player.x, player.y, enemy.x, enemy.y, clearance)) { target = enemy; best = d; }
   });
   return target;
 }

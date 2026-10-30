@@ -1,6 +1,6 @@
 import type { Run } from '../game/core/run.ts';
 import { ABILITIES } from '../content/attacks.ts';
-import { hasFreeSlot } from '../game/systems/loadout.ts';
+import { activeMovements, hasFreeSlot } from '../game/systems/loadout.ts';
 import { combined } from '../game/systems/buffs.ts';
 import { attackCooldown } from '../game/systems/stats.ts';
 import { abilityIcon } from './ability-icon.ts';
@@ -22,7 +22,7 @@ export function renderCombinations(run: Run, actions: Actions): void {
       const timing = document.createElement('p'); timing.className = 'component-timing';
       if (definition.buff) {
         const constant = combined(player, id), b = definition.buff, value = (constant ? b.constant : b.temporary)[state.level - 1];
-        timing.textContent = `${constant ? 'CONSTANTE' : state.activeFor > 0 ? 'TEMPORAL · ACTIVO' : 'TEMPORAL · DESCANSO'} · ${value >= 0 ? '+' : ''}${Math.round(value * 100)}% · ${constant ? 'Sin ciclo' : `${b.duration[state.level - 1]}s activo / ${b.cooldown[state.level - 1]}s descanso`}`;
+        timing.textContent = `${constant ? activeMovements(player).includes(id) ? 'CONSTANTE' : 'CONSTANTE · EN RESERVA' : state.activeFor > 0 ? 'TEMPORAL · ACTIVO' : 'TEMPORAL · DESCANSO'} · ${value >= 0 ? '+' : ''}${Math.round(value * 100)}% · ${constant ? 'Sin ciclo' : `${b.duration[state.level - 1]}s activo / ${b.cooldown[state.level - 1]}s descanso`}`;
       } else timing.textContent = `Cooldown ${attackCooldown(definition.levels[0].cooldown, definition.levels[state.level - 1].cooldown, player).toFixed(2)}s · restante ${state.cooldown.toFixed(1)}s`;
       const controls = document.createElement('div'); controls.className = 'component-controls';
       const select = document.createElement('select'); select.setAttribute('aria-label', `Destino de ${definition.shortName}`);

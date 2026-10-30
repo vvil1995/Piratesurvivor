@@ -1,3 +1,4 @@
+import { activeMovements } from './loadout.ts';
 import { ABILITIES } from '../../content/attacks.ts';
 import { damageEnemy } from './hits.ts';
 import { castArea, queueImpact } from './effects.ts';
@@ -56,9 +57,14 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
 
 export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionWorld, dt: number,
   onKill: (enemy: Enemy) => void, emit: (strike: Strike) => void, random: () => number = Math.random, effects?: SkillEffects): void {
+  const active = activeMovements(player);
   for (const state of player.attacks) {
     if (ABILITIES[state.id].category === 'buff') continue;
     const params = ABILITIES[state.id].levels[state.level - 1];
+    if (!active.includes(state.id)) {
+      if (ABILITIES[state.id].behavior !== 'guard') state.cooldown = Math.max(0, state.cooldown - dt);
+      state.pending = 0; if (ABILITIES[state.id].behavior !== 'heal') state.activeFor = 0; state.activationPending = false; continue;
+    }
     if (ABILITIES[state.id].behavior === 'guard') {
       if (state.activationPending) {
         state.activationPending = false;

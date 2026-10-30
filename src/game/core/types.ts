@@ -3,7 +3,7 @@ export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' 
 export interface Vector { x: number; y: number }
 export interface Player extends Vector {
   id: string; characterId: string;
-  taken: Record<string, number>; choices: LevelChoice[]; attacks: EquippedAttack[]; abilitySlots: string[][]; learnedBuffs: string[];
+  taken: Record<string, number>; choices: LevelChoice[]; attacks: EquippedAttack[]; abilitySlots: string[][]; selectedSlot: number; learnedBuffs: string[];
   hp: number; stats: Stats; baseStats: Stats;
   modifiers: { permanent: StatModifiers; temporary: StatModifiers; items: StatModifiers; fruit: StatModifiers; buffs: StatModifiers; skills: StatModifiers }; level: number; xp: number; xpNext: number;
   collectedBerries: number; kills: number; hurtTimer: number; facing: number;

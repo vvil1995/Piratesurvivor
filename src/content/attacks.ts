@@ -3,10 +3,10 @@ import { UNIVERSAL_BUFFS } from './buffs.ts';
 import type { AbilityDefinition, AttackLevel } from './types.ts';
 
 // Datos de equilibrio provisionales, todos los comportamientos se ejecutan por tipo.
-function levels(base: AttackLevel, evolved: Partial<AttackLevel>): readonly AttackLevel[] {
+function levels(base: AttackLevel, evolved: Partial<AttackLevel>, cooldownStep = 0.025): readonly AttackLevel[] {
   return Array.from({ length: 6 }, (_, i) => ({ ...base,
     damage: base.damage * (1 + i * 0.13), range: base.range * (1 + i * 0.025),
-    cooldown: base.cooldown * (1 - i * 0.025),
+    cooldown: base.cooldown * (1 - i * cooldownStep),
     shots: base.shots > 1 ? base.shots + (i >= 2 ? 1 : 0) + (i >= 4 ? 1 : 0) : 1,
     ...(i >= 2 ? { width: base.width * 1.2 } : {}),
     ...(i === 5 ? evolved : {}),
@@ -17,7 +17,7 @@ export const ABILITIES: Record<string, AbilityDefinition> = {
   'elastic-punch': {
     id: 'elastic-punch', name: 'Gomu Gomu no Pistol', shortName: 'Pistol', behavior: 'line', visual: 'rubber-punch',
     description: 'Puño preciso hacia el enemigo más cercano.', evolution: 'El puño atraviesa a todos los enemigos de la línea.',
-    levels: levels({ damage: 1, range: 1, cooldown: 1.5, width: 15, arc: 0.15, hits: 1, shots: 1, interval: 0.12, knockback: 13, splash: 0 }, { hits: 150, width: 24 }),
+    levels: levels({ damage: 1, range: 1, cooldown: 0.8, width: 15, arc: 0.15, hits: 1, shots: 1, interval: 0.12, knockback: 13, splash: 0 }, { hits: 150, width: 24 }, 0.06),
   },
   gatling: {
     id: 'gatling', name: 'Gomu Gomu no Gatling', shortName: 'Gatling', behavior: 'burst', visual: 'rubber-flurry',

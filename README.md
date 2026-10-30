@@ -1,10 +1,10 @@
-# One Piece Survivor · beta 0.7.2
+# One Piece Survivor · beta 0.8.0
 
 Fangame no oficial de supervivencia para navegador. Gratis, sin anuncios, compras, cuentas ni backend. Lógica propia y nuevos sprites e iconos pixel art generados para el proyecto. No reutiliza código ni recursos de PokéSurvivor.
 
 ## Probar sin instalar herramientas
 
-Descarga y descomprime `one-piece-survivor-browser-v0.7.2.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
+Descarga y descomprime `one-piece-survivor-browser-v0.8.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
 
 En Android/iOS, la apertura de archivos HTML desde el gestor de archivos depende del sistema y puede mostrar solo una vista previa. Para esos dispositivos, sirve la carpeta `dist/` mediante un alojamiento estático HTTPS privado o desde un ordenador de tu red. No necesita backend. Lee [PROBAR.md](docs/PROBAR.md).
 
@@ -89,3 +89,12 @@ Una carta aprende un solo movimiento, inicialmente en ranura propia. No se permi
 Shells Town: XP base×2, recompensa adicional por resistencia de enemigos tardíos; intervalo inicial0,95s y grupos dobles desde6min. Se mantienen la curva de XP necesaria, daño/vida por tiempo y el límite150. Ajustes provisionales que requieren partidas humanas.
 
 Presentación: flexión de rodilla en el rig; Whip con pierna/sandalia, Bazooka con dos brazos, Pistol/Gatling con golpes y Axe descendente; barridos de espada/bastón/patada según familia. Iconos originales de espadas, bastón y tirachinas. No representan todavía el acabado gráfico definitivo de la tripulación.
+
+
+## Regla vigente0.8.0 — elegir ataque
+
+Las cuatro ranuras son opciones seleccionables: solo UNA dispara. Aprender Bazooka ocupa una ranura libre y mantiene la selección anterior; tocar el cuadrado o pulsar1–4 cambia de opción. Una combinación desbloqueada ejecuta los componentes de la ranura seleccionada, con relojes independientes. Las otras ranuras quedan en reserva. Cambiar no reinicia cooldowns ni conserva ráfagas pendientes.
+
+Un buff temporal ya activado conserva su duración al cambiar, sin reactivarse en reserva; los buffs constantes de combinaciones solo se aplican al seleccionar su grupo. La comida ya preparada conserva curación/regeneración al recogerla.
+
+Cooldowns básicos de ensayo: Pistol0,8s, Oni Giri1,2s, bastón0,9s, Namari0,9s y Collier0,8s. Sus niveles reducen6% de intervalo por escalón, hasta30% al6, respetando topes globales. Oni Giri exige objetivo alcanzable y contacto con el recorrido planeado; no gasta cooldown ni se mueve si no puede golpear.

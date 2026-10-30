@@ -15,7 +15,7 @@ export function chooseUpgrades(taken: Record<string, number>, random: () => numb
     const next = current + 1, params = ability.levels[next - 1];
     pool.push({ kind: 'ability', id: `ability:${id}`, abilityId: id,
       name: `${ability.shortName}${next === 6 ? ' +' : ''} · NV. ${next}`,
-      description: !current ? ability.description : next === 6 ? ability.evolution : `Daño ${Math.round(params.damage * 100)}% y alcance ${Math.round(params.range * 100)}% de base. Intervalo base ${params.cooldown.toFixed(2)}s.${params.shots > 1 ? ` Ráfaga: ${params.shots} golpes.` : ''}`,
+      description: !current ? ability.description + ' Se aprende como opción: selecciónala en los cuadrados inferiores.' : next === 6 ? ability.evolution : `Daño ${Math.round(params.damage * 100)}% y alcance ${Math.round(params.range * 100)}% de base. Intervalo base ${params.cooldown.toFixed(2)}s.${params.shots > 1 ? ` Ráfaga: ${params.shots} golpes.` : ''}`,
       symbol: '✦', max: 6 });
   }
   const selected: LevelChoice[] = [];

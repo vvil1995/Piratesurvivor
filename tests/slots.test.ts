@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Run } from '../src/game/core/run.ts';
-import { improveAttack, mergeSlots, moveAbility, validLoadout, canImproveAttack } from '../src/game/systems/loadout.ts';
+import { improveAttack, mergeSlots, moveAbility, validLoadout, canImproveAttack, selectSlot } from '../src/game/systems/loadout.ts';
 import { tickBuffs, updateBuffModifiers } from '../src/game/systems/buffs.ts';
 import { chooseUpgrades } from '../src/game/systems/progression.ts';
 const close = (a: number, b: number) => assert.ok(Math.abs(a - b) < 1e-8);
@@ -29,7 +29,7 @@ test('dos buffs aprendidos, combinar no libera límite y siguen mejorando a6', (
 });
 
 test('buff individual alterna y combinado es constante menor, sin duplicar modificadores', () => {
-  const p = new Run().player; improveAttack(p, 'fury');
+  const p = new Run().player; improveAttack(p, 'fury'); selectSlot(p, 1);
   tickBuffs(p, 0.01); const temporary = p.stats.damage;
   assert.ok(temporary > p.baseStats.damage);
   tickBuffs(p, 4); close(p.stats.damage, p.baseStats.damage);

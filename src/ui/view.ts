@@ -81,12 +81,14 @@ export class View {
     const p = run.player;
     el('character-name').textContent = (run.character.shortName ?? run.character.name).toUpperCase();
     el('run-berries').textContent = p.collectedBerries.toString();
-    const signature = run.id + p.abilitySlots.map(slot => slot.join(',')).join('|') + p.attacks.map(a => `${a.id}:${a.level}:${a.activeFor > 0}`).join('|');
+    const signature = run.id + ':' + p.selectedSlot + ':' + p.abilitySlots.map(slot => slot.join(',')).join('|') + p.attacks.map(a => `${a.id}:${a.level}:${a.activeFor > 0}`).join('|');
     if (signature !== this.attackSignature) {
       this.attackSignature = signature;
       const slots = el('attack-slots'); slots.replaceChildren();
       for (let i = 0; i < ATTACK_SLOTS; i++) {
-        const ids = p.abilitySlots[i], card = document.createElement('div'); card.className = 'attack-slot'; card.setAttribute('role', 'listitem');
+        const ids = p.abilitySlots[i], card = document.createElement('button'); card.type = 'button'; card.className = 'attack-slot'; card.dataset.slot = String(i);
+        card.classList.toggle('selected', i === p.selectedSlot); card.setAttribute('aria-pressed', String(i === p.selectedSlot)); card.disabled = !ids.length;
+        card.setAttribute('aria-label', `Seleccionar ranura ${i + 1}: ${ids.map(id => ABILITIES[id].shortName).join(' + ') || 'vacía'}`);
         card.classList.toggle('grouped', ids.length > 1);
         if (!ids.length) { card.classList.add('empty'); card.textContent = '+'; card.setAttribute('aria-label', `Espacio ${i + 1} libre`); }
         for (const id of ids) {
@@ -96,7 +98,7 @@ export class View {
           component.append(pixelIcon(abilityIcon(definition)));
           const text = document.createElement('span'); text.className = 'component-name'; text.textContent = definition.shortName + (plus ? ' +' : '');
           const level = document.createElement('small');
-          const mode = definition.buff ? combined(p, id) ? 'CONST' : state.activeFor > 0 ? 'ACTIVO' : 'DESCANSO' : '';
+          const mode = definition.buff ? combined(p, id) ? i === p.selectedSlot ? 'CONST' : 'RESERVA' : state.activeFor > 0 ? 'ACTIVO' : i === p.selectedSlot ? 'DESCANSO' : 'RESERVA' : '';
           level.textContent = mode ? `NV. ${state.level} · ${mode}` : plus ? 'NV. 6 · EVOLUCIÓN' : `NV. ${state.level} / 6`;
           component.classList.toggle('buff-constant', mode === 'CONST'); component.classList.toggle('buff-active', mode === 'ACTIVO'); component.classList.toggle('buff-rest', mode === 'DESCANSO');
           const detail = document.createElement('span'); detail.append(text, level); component.append(detail);
@@ -107,6 +109,7 @@ export class View {
         slots.append(card);
       }
     }
+    el('attack-selection-label').textContent = 'ACTIVA: ' + p.abilitySlots[p.selectedSlot].map(id => ABILITIES[id].shortName).join(' + ') + ' · TOCA PARA CAMBIAR';
     el('clock').textContent = timeLabel(run.time);
     el('area-label').textContent = `${run.definition.name.toUpperCase()} · ${Math.floor(run.player.x)}, ${Math.floor(run.player.y)}`; el('level').textContent = `NV. ${p.level}`;
     el('kills').textContent = p.kills.toString();

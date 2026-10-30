@@ -1,3 +1,4 @@
+import { activeMovements } from './loadout.ts';
 import { ABILITIES } from '../../content/attacks.ts';
 import type { Enemy, Player, Vector } from '../core/types.ts';
 import type { CollisionWorld } from '../world/world.ts';
@@ -12,6 +13,7 @@ export function tickGuards(player: Player, dt: number): void {
     const params = ability.levels[state.level - 1];
     if (ability.behavior === 'guard') {
       state.cooldown = Math.max(0, state.cooldown - dt);
+      if (!activeMovements(player).includes(state.id)) { state.activeFor = 0; state.activationPending = false; continue; }
       if (state.cooldown <= 0) {
         state.activeFor = params.duration ?? 2; state.activationPending = true; state.counterUsed = false;
         state.cooldown = attackCooldown(ability.levels[0].cooldown, params.cooldown, player);
@@ -27,7 +29,7 @@ export function tickGuards(player: Player, dt: number): void {
 export function counterGuard(player: Player, origin: Vector, grid: SpatialGrid, world: CollisionWorld, onKill: (e: Enemy) => void, random: () => number): boolean {
   for (const state of player.attacks) {
     const p = ABILITIES[state.id].levels[state.level - 1];
-    if (state.activeFor <= 0 || state.counterUsed || !p.counterDamage) continue;
+    if (!activeMovements(player).includes(state.id) || state.activeFor <= 0 || state.counterUsed || !p.counterDamage) continue;
     state.counterUsed = true;
     const angle = Math.atan2(origin.y - player.y, origin.x - player.x), radius = player.stats.range * p.range;
     grid.visit(player.x, player.y, radius + 15, enemy => {
