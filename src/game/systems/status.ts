@@ -1,6 +1,7 @@
 import type { AttackLevel, StatusKind } from '../../content/types.ts';
 import type { Enemy, Player } from '../core/types.ts';
 export function applyStatus(enemy: Enemy, kind: StatusKind, seconds: number): void {
+  if (enemy.kind === 'chest') return;
   const states = enemy.statuses ??= {};
   states[kind] = Math.max(states[kind] ?? 0, Math.min(5, seconds));
   if (kind === 'stun') enemy.shotTimer = Math.max(enemy.shotTimer ?? 0, seconds);
@@ -11,5 +12,5 @@ export function tickStatus(enemy: Enemy, dt: number): void {
 }
 export function applySkillHit(player: Player, enemy: Enemy, params: AttackLevel): void {
   if (params.status) applyStatus(enemy, params.status, params.statusDuration ?? 0.5);
-  if (params.steal && !enemy.stolen) { enemy.stolen = true; player.collectedBerries += params.steal; }
+  if (enemy.kind !== 'chest' && params.steal && !enemy.stolen) { enemy.stolen = true; player.collectedBerries += params.steal; }
 }

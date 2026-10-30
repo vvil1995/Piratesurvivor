@@ -73,3 +73,7 @@ En0.7.1, antes de la quinta habilidad el menú solo permite consultar/separar, n
 ## Beta0.8.0: tocar para elegir
 
 Aprende Bazooka: Pistol sigue seleccionado y solo Pistol ataca. Toca Bazooka en el HUD y comprueba borde dorado/etiqueta ACTIVA; vuelve a Pistol tocándolo. En PC también1–4. Antes del quinto movimiento no puedes unirlos. Al desbloquear una combinación, elige su ranura para que funcionen juntos sus componentes; seleccionar otra deja ese grupo en reserva. Cambiar no reinicia cooldowns. Prueba especialmente el ataque inicial de Zoro contra marines cercanos, lejanos y detrás de muros.
+
+## Beta0.9.0: tesoros
+
+Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el ataque seleccionado los apunta y rompe; recoge el botín. Los grandes son dorados y más grandes: acércate y espera a que el círculo del candado complete3s. Al alejarte se pausa; volver continúa. Escoge una de tres recompensas con ratón o tacto. Pausa para consultar los objetos equipados (seis espacios, nivel máximo3). Las berries se guardan al recogerlas y se conservan al abandonar/recargar; la build desaparece. Verifica que regresar a una zona no haga reaparecer cofres consumidos. Guardados de Netlify preview y producción están separados por dominio.

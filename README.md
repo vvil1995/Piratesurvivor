@@ -98,3 +98,5 @@ Las cuatro ranuras son opciones seleccionables: solo UNA dispara. Aprender Bazoo
 Un buff temporal ya activado conserva su duración al cambiar, sin reactivarse en reserva; los buffs constantes de combinaciones solo se aplican al seleccionar su grupo. La comida ya preparada conserva curación/regeneración al recogerla.
 
 Cooldowns básicos de ensayo: Pistol0,8s, Oni Giri1,2s, bastón0,9s, Namari0,9s y Collier0,8s. Sus niveles reducen6% de intervalo por escalón, hasta30% al6, respetando topes globales. Oni Giri exige objetivo alcanzable y contacto con el recorrido planeado; no gasta cooldown ni se mueve si no puede golpear.
+
+Beta0.9.0: retrato frontal uniforme, drops de berries, cofres pequeños destructibles y grandes con candado/círculo de3s por proximidad. Elección de tres recompensas, seis espacios de objetos de hasta tres niveles. Guardado incremental de moneda recogida; desaparece la antigua recompensa automática por tiempo/bajas. Contenido y valores de botín en `src/content/loot.ts` y objetos en `src/content/items.ts`. Sin nuevos recursos externos.

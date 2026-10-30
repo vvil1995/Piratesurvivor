@@ -88,3 +88,7 @@ Candidato de cicle lateral de Luffy generado con image_gen el30-10-2026 usando e
 ###0.7.2 — uniones de rodilla
 
 No se añaden assets. Los atlas detallados se conservan; los recortes se articulan sobre puntos opacos de la propia pose y se solapan en la unión. Pose no separable y reposo conservan el sprite íntegro. Lectura de alpha una vez por textura, compartida entre actores.
+
+### 0.9.0 — cofres
+
+Cofre de madera con bandas y cerradura: geometría pixelada original en `textures.ts`,32×32. Candado y arco de apertura: primitivas propias en `battle.ts`. Sin descargas, dependencias, fuentes ni recursos de terceros adicionales. Retrato frontal de Luffy: reutiliza el recorte sur del atlas ya registrado; no se genera ni importa otra imagen.

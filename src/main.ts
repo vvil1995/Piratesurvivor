@@ -1,3 +1,4 @@
+import { ITEMS } from './content/items.ts';
 import Phaser from 'phaser';
 import './ui/style.css';
 import { BattleScene } from './game/scenes/battle.ts';
@@ -23,12 +24,23 @@ const controller = new Controller(() => run?.status === 'playing', pause);
 const orientation = new MobileOrientation(() => !!run && !['defeat', 'victory'].includes(run.status), pause);
 function sync(): void {
   if (!run) return;
+  store.bank(run.id, run.player.collectedBerries);
   const now = performance.now();
   if (now - hudAt > 100 || run.status !== previousStatus) { view.hud(run); hudAt = now; }
   if (run.status === previousStatus) return;
   previousStatus = run.status;
   if (run.status !== 'playing') controller.reset();
-  if (run.status === 'levelup') view.upgrades(run, id => {
+  if (run.status === 'chest') {
+    view.showModal('chest-reward');
+    el('chest-options').replaceChildren(...run.chestChoices.map(id => {
+      const button = document.createElement('button'); button.className = 'secondary-button';
+      const item = ITEMS[id];
+      button.textContent = item ? `${item.name} · Nv. ${(run!.player.items[id] ?? 0) + 1}/3 — ${item.description}` : ({ 'supplies-berries': '5 berries', 'supplies-heal': 'Recuperar 25 HP', 'supplies-xp': '20 XP' }[id] ?? id);
+      button.onclick = () => { if (orientation.blocked || !run?.selectChestReward(id)) return; previousStatus = ''; view.showModal(); sync(); };
+      return button;
+    }));
+  }
+  else if (run.status === 'levelup') view.upgrades(run, id => {
     if (!run) return;
     if (run.selectUpgrade(id)) { previousStatus = ''; view.showModal(); (document.activeElement as HTMLElement)?.blur(); sync(); }
   });
@@ -62,6 +74,7 @@ async function start(characterId = selectedCharacter): Promise<void> {
   } finally { el('loading').hidden = true; }
 }
 function home(): void {
+  if (run) store.bank(run.id, run.player.collectedBerries);
   controller.reset(); run = undefined; previousStatus = ''; view.showModal(); view.setPlaying(false); view.home(store, selectedCharacter); orientation.sync(); el('start').focus();
 }
 el('start').addEventListener('click', () => { void start(); }); el('retry').addEventListener('click', () => { void start(); });
@@ -115,7 +128,7 @@ el('fullscreen').addEventListener('click', async () => {
   catch { el('fullscreen').title = 'Este navegador no permite pantalla completa. Puedes usar el navegador normalmente.'; }
 });
 if (!document.documentElement.requestFullscreen) el('fullscreen').hidden = true;
-window.addEventListener('pagehide', () => store.flush());
+window.addEventListener('pagehide', () => { if (run) store.bank(run.id, run.player.collectedBerries); store.flush(); });
 view.home(store, selectedCharacter);
 const scene = new BattleScene({ run: () => run, axis: () => controller.axis(), tick: sync,
   ready: () => { view.refreshArt(store, selectedCharacter); el('loading').hidden = true; }, reducedMotion: () => store.progress.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches });

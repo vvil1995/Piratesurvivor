@@ -1,3 +1,4 @@
+import { LOOT } from '../../content/loot.ts';
 import Phaser from 'phaser';
 import { WalkRig } from './walk-rig.ts';
 import { drawElasticStrike, drawAxe, drawWeaponSweep } from './elastic-effects.ts';
@@ -30,6 +31,7 @@ export class BattleScene extends Phaser.Scene {
   private captainShadow!: Phaser.GameObjects.Image;
   private enemies: Phaser.GameObjects.Image[] = [];
   private shadows: Phaser.GameObjects.Image[] = [];
+  private chestSprites: Phaser.GameObjects.Image[] = [];
   private crystals: Phaser.GameObjects.Image[] = [];
   private effects!: Phaser.GameObjects.Graphics;
   private fists: Phaser.GameObjects.Image[] = [];
@@ -65,6 +67,7 @@ export class BattleScene extends Phaser.Scene {
   create(): void {
     createTextures(this);
     this.worldRenderer = new WorldRenderer(this);
+    for (let i = 0; i < 18; i++) this.chestSprites.push(this.add.image(0, 0, 'small-chest').setOrigin(0.5, 0.8).setVisible(false));
     for (let i = 0; i < 12; i++) this.dust.push({ sprite: this.add.image(0, 0, 'foot-dust').setDepth(-999).setVisible(false), x: 0, y: 0, life: 0 });
     for (let i = 0; i < SHELLS_TOWN.pickupCap; i++) this.crystals.push(this.add.image(0, 0, 'xp').setVisible(false).setDepth(2));
     for (let i = 0; i < SHELLS_TOWN.enemyCap; i++) {
@@ -143,6 +146,11 @@ export class BattleScene extends Phaser.Scene {
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
       this.enemyRigs[i].update(sprite, animation, 0.6);
     }
+    for (let i = 0; i < this.chestSprites.length; i++) {
+      const chest = run?.chests.active[i], sprite = this.chestSprites[i];
+      sprite.setVisible(!!chest?.active);
+      if (chest?.active) sprite.setPosition(chest.x - origin.x, chest.y - origin.y).setScale(chest.large ? 1.35 : 1).setTint(chest.large ? 0xffdc8a : 0xffffff).setDepth(chest.y - origin.y + 1000);
+    }
     for (let i = 0; i < this.crystals.length; i++) {
       const pickup = run?.pickups.items[i], sprite = this.crystals[i];
       sprite.setVisible(!!pickup?.active);
@@ -153,6 +161,16 @@ export class BattleScene extends Phaser.Scene {
     }
     this.effects.clear();
     if (run) {
+      for (const chest of run.chests.active) if (chest.active && chest.large && ((chest.openProgress ?? 0) > 0 || Math.hypot(chest.x - worldX, chest.y - worldY) < 110)) {
+        const x = chest.x - origin.x, y = chest.y - origin.y - 48;
+        this.effects.fillStyle(0x14252e, 0.9); this.effects.fillCircle(x, y, 16);
+        this.effects.lineStyle(3, 0x64757a); this.effects.strokeCircle(x, y, 14);
+        this.effects.lineStyle(3, 0xf4d075); this.effects.beginPath();
+        this.effects.arc(x, y, 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (chest.openProgress ?? 0) / LOOT.largeOpenSeconds, false); this.effects.strokePath();
+        this.effects.lineStyle(2, 0xf4d075); this.effects.strokeRoundedRect(x - 4, y - 7, 8, 9, 4);
+        this.effects.fillStyle(0xf4d075); this.effects.fillRect(x - 6, y - 2, 12, 10);
+        this.effects.fillStyle(0x14252e); this.effects.fillRect(x - 1, y + 1, 2, 4);
+      }
       for (const area of run.areas.items) if (area.active) {
         const x = area.x - origin.x, y = area.y - origin.y;
         if (area.visual === 'rubber-axe') { drawAxe(this.effects, x, y, area.delay, area.life, area.radius); continue; }

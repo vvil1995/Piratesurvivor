@@ -1,3 +1,6 @@
+import { equipItem, itemChoices } from '../systems/items.ts';
+import { LOOT } from '../../content/loot.ts';
+import { ChestField, chestReward, dropLoot } from '../systems/loot.ts';
 import { CHARACTERS } from '../../content/catalog.ts';
 import { SHELLS_TOWN, type WorldDefinition } from '../../content/worlds/shells-town.ts';
 import type { AbilityChoice, CharacterDefinition } from '../../content/types.ts';
@@ -29,6 +32,7 @@ export class Run {
   readonly pickups: Pool<Pickup>;
   readonly projectiles = new Pool<Projectile>(PROJECTILE_CAP, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, radius: 3, life: 0, damage: 0, hostile: false, ownerId: '', reflected: false, remainingHits: 1, hit: new Set<number>() }));
   readonly areas = new Pool<AreaEffect>(AREA_CAP, () => ({ active: false, x: 0, y: 0, ownerId: '', radius: 0, shockRadius: 0, damage: 0, knockback: 0, delay: 0, life: 0, triggered: false, evolved: false }));
+  readonly chests = new ChestField();
   readonly grid = new SpatialGrid();
   readonly strikes: Strike[] = [];
   private fields = new Map<string, FlowField>();
@@ -43,6 +47,7 @@ export class Run {
   // Punto de integración futuro: solo una recompensa real de jefe debe llamar aquí.
   grantCombinationReward(): void { this.combinationRewards++; }
   private combinationOrigin: 'playing' | 'paused' | 'levelup' = 'playing';
+  chestChoices: string[] = [];
   time = 0;
   private spawnTimer = 0;
   private enemyId = 0;
@@ -66,7 +71,8 @@ export class Run {
     const modifiers = { permanent: { maxHp: Math.min(5, Math.max(0, training)) * 5 }, temporary: {}, items: {}, fruit: {}, buffs: {}, skills: {} };
     const stats = resolveStats(baseStats, Object.values(modifiers));
     this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], attacks: [newAttack(this.character.initialAbility)], abilitySlots: [[this.character.initialAbility], [], [], []], selectedSlot: 0, learnedBuffs: [], x: 256, y: 256,
-      collectedBerries: 0, hp: stats.maxHp, stats, baseStats, modifiers, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, facing: 0 });
+      items: {}, collectedBerries: 0, hp: stats.maxHp, stats, baseStats, modifiers, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, facing: 0 });
+    this.chests.sync(this.world, this.player);
     this.fieldFor(this.player).update(this.player, 1);
   }
   private fieldFor(actor: Player): FlowField {
@@ -77,6 +83,14 @@ export class Run {
   setView(view: View): void { this.view = view; }
   pause(): void { if (this.status === 'playing') this.status = 'paused'; }
   resume(): void { if (this.status === 'paused') this.status = 'playing'; }
+  selectChestReward(id: string): boolean {
+    if (this.status !== 'chest' || !this.chestChoices.includes(id)) return false;
+    if (id === 'supplies-berries') this.player.collectedBerries += 5;
+    else if (id === 'supplies-heal') this.player.hp = Math.min(this.player.stats.maxHp, this.player.hp + 25);
+    else if (id === 'supplies-xp') this.player.xp += 20;
+    else if (!equipItem(this.player, id)) return false;
+    this.chestChoices = []; this.status = 'playing'; this.checkLevel(); return true;
+  }
   selectSlot(slot: number): boolean {
     if (this.status !== 'playing' || !selectSlot(this.player, slot)) return false;
     for (let i = this.strikes.length - 1; i >= 0; i--) if (this.strikes[i].ownerId === this.player.id) this.strikes.splice(i, 1);
@@ -145,6 +159,8 @@ export class Run {
     }
   }
   private dropXp(enemy: Enemy, ownerId: string): void {
+    if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
+    if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, enemy, ownerId, 'berry', LOOT.enemyBerries);
     const pickup = this.pickups.acquire();
     if (pickup) { Object.assign(pickup, { x: enemy.x, y: enemy.y, value: enemy.xp, ownerId, kind: 'xp', abilityId: undefined, life: undefined }); return; }
     let nearest: Pickup | undefined, best = Infinity;
@@ -226,7 +242,8 @@ export class Run {
       }
     }
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
-    this.grid.rebuild(this.enemies.items);
+    this.chests.sync(this.world, this.player);
+    this.grid.rebuild([...this.enemies.items, ...this.chests.active.filter(c => !c.large)]);
     for (const actor of living) {
       if (actor.hp <= 0) continue;
       tickAttacks(actor, this.grid, this.world, dt, enemy => this.dropXp(enemy, actor.id), strike => {
@@ -252,6 +269,12 @@ export class Run {
         const step = Math.min(d, dt * 350); pickup.x += dx / d * step; pickup.y += dy / d * step;
       }
     }
+    // Solo un cofre grande progresa a la vez; alejarse conserva su progreso.
+    const large = this.chests.active.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
+    if (large) {
+      large.openProgress = Math.min(LOOT.largeOpenSeconds, (large.openProgress ?? 0) + dt);
+      if (large.openProgress >= LOOT.largeOpenSeconds) { large.active = false; this.chestChoices = itemChoices(this.player, this.random); this.status = 'chest'; }
+    }
     this.checkLevel(); this.maintenance += dt;
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }
   }
@@ -265,6 +288,6 @@ export class Run {
   result(): RunResult | undefined {
     if (this.status !== 'defeat' && this.status !== 'victory') return;
     return { id: this.id, outcome: this.status, seconds: Math.floor(this.time), kills: this.player.kills, level: this.player.level,
-      coins: this.player.collectedBerries + Math.floor(this.player.kills / 3 + this.time / 15) + (this.status === 'victory' ? 50 : 0) };
+      coins: this.player.collectedBerries };
   }
 }

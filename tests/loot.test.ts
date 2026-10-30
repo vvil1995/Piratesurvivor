@@ -1,0 +1,77 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { Run } from '../src/game/core/run.ts';
+import { ChestField, chestReward } from '../src/game/systems/loot.ts';
+import { damageEnemy } from '../src/game/systems/hits.ts';
+import { SaveStore, SAVE_KEY, freshProgress } from '../src/platform/persistence/save.ts';
+
+test('cofres deterministas sin reaparición ni curación al descargar chunks', () => {
+  const r = new Run('luffy', 0, () => 0.5, { seed: 42 }), a = r.chests.active.find(c => c.active)!;
+  assert.ok(a); const position = { x: a.x, y: a.y }, hp = a.hp;
+  a.hp -= 3;
+  r.chests.sync(r.world, { x: 10000, y: -10000 }); r.world.prune([{ x: 10000, y: -10000 }]);
+  r.chests.sync(r.world, r.player); assert.equal(r.chests.active.find(c => c.id === a.id)!.hp, hp - 3);
+  a.active = false; r.chests.sync(r.world, { x: -10000, y: 10000 }); r.chests.sync(r.world, r.player);
+  assert.equal(r.chests.active.find(c => c.id === a.id)!.active, false);
+  const other = new ChestField(); other.sync(r.world, r.player);
+  assert.ok(other.active.some(c => c.x === position.x && c.y === position.y));
+  assert.ok(r.chests.active.length <= 18);
+  assert.ok(other.active.every(c => r.world.canOccupy(c.x, c.y, 18)));
+});
+test('ataques rompen cofres, no suman bajas ni empujan y generan una única recompensa', () => {
+  const r = new Run(), c = r.chests.active.find(c => c.active)!; let rewards = 0;
+  const origin = { x: c.x - 20, y: c.y }, x = c.x;
+  const hit = () => damageEnemy(r.player, c, 100, 50, origin, r.world, chest => { rewards++; chestReward(r.pickups, chest, r.player.id, () => 0); }, () => 0.5);
+  hit(); hit(); assert.equal(c.x, x); assert.equal(r.player.kills, 0); assert.equal(rewards, 1);
+  const coin = r.pickups.items.find(p => p.active)!; assert.equal(coin.kind, 'berry'); assert.equal(coin.value, 2);
+  assert.equal(r.player.collectedBerries, 0);
+});
+test('recolección de monedas y guardado incremental sin duplicación al morir', () => {
+  const values = new Map<string, string>();
+  const storage = { getItem: (k: string) => values.get(k) ?? null, setItem: (k: string, v: string) => { values.set(k, v); } };
+  const s = new SaveStore(storage), r = new Run();
+  const coin = r.pickups.acquire()!; Object.assign(coin, { x: r.player.x, y: r.player.y, ownerId: r.player.id, kind: 'berry', value: 3 });
+  r.update(1 / 60, { x: 0, y: 0 }); assert.equal(r.player.collectedBerries, 3); assert.equal(coin.active, false);
+  s.bank(r.id, 3); s.bank(r.id, 3); s.bank(r.id, 2); assert.equal(s.progress.coins, 3);
+  const restored = new SaveStore(storage); restored.bank(r.id, 3); assert.equal(restored.progress.coins, 3);
+  r.player.hp = 0; r.update(1 / 60, { x: 0, y: 0 }); const result = r.result()!;
+  assert.equal(result.coins, 3); restored.record(result); restored.record(result); assert.equal(restored.progress.coins, 3);
+  restored.bank('another-run', 2); assert.equal(restored.progress.coins, 5);
+  storage.setItem(SAVE_KEY, JSON.stringify({ ...freshProgress(), coins: 123 })); assert.equal(new SaveStore(storage).progress.coins, 123);
+});
+test('cofre grande requiere tres segundos, pausa al alejarse y entrega solo una elección', () => {
+  const r = new Run('luffy', 0, () => 0.5, { seed: 42 });
+  const large = r.chests.active[0]; assert.ok(large); large.large = true;
+  large.x = r.player.x; large.y = r.player.y; r.player.stats.armor = 0.6;
+  for (const a of r.player.attacks) a.cooldown = 1e6;
+  const tick = (n: number) => { for (let i = 0; i < n; i++) { r.enemies.clear(); r.update(1 / 60, { x: 0, y: 0 }); } };
+  tick(60); assert.ok((large.openProgress ?? 0) > 0.9); assert.equal(r.status, 'playing');
+  large.x += 100; const before = large.openProgress; tick(60); assert.equal(large.openProgress, before);
+  large.x -= 100; tick(121); assert.equal(r.status, 'chest'); assert.equal(large.active, false);
+  assert.equal(r.chestChoices.length, 3); assert.equal(new Set(r.chestChoices).size, 3);
+  assert.equal(r.selectChestReward('invalid'), false); const choice = r.chestChoices[0];
+  assert.equal(r.selectChestReward(choice), true); assert.equal(r.selectChestReward(choice), false);
+  assert.equal(Object.keys(r.player.items).length, 1); assert.equal(new Run().player.items[choice], undefined);
+});
+test('objetos limitados a seis espacios y tres niveles, respetando topes globales', async () => {
+  const { equipItem, itemChoices } = await import('../src/game/systems/items.ts');
+  const r = new Run(), p = r.player;
+  for (const id of ['boots', 'whetstone', 'vest', 'medicine', 'watch', 'telescope']) {
+    for (let i = 0; i < 3; i++) assert.equal(equipItem(p, id), true);
+    assert.equal(equipItem(p, id), false);
+  }
+  assert.equal(equipItem(p, 'compass'), false); assert.deepEqual(itemChoices(p, () => 0), ['supplies-berries', 'supplies-heal', 'supplies-xp']);
+  assert.ok(p.stats.armor <= 0.6); assert.ok(p.stats.speed <= p.baseStats.speed * 2);
+});
+test('solo algunos enemigos dejan berries y hay que recogerlas', () => {
+  for (const [roll, expected] of [[0, true], [0.9, false]] as const) {
+    const r = new Run('luffy', 0, () => roll);
+    for (const chest of r.chests.active) chest.active = false;
+    const e = r.enemies.acquire()!;
+    Object.assign(e, { id: 9999, x: r.player.x + 40, y: r.player.y, hp: 1, maxHp: 1, speed: 0, damage: 0, xp: 0, radius: 13 });
+    r.update(1 / 60, { x: 0, y: 0 });
+    assert.equal(e.active, false);
+    assert.equal(r.pickups.items.some(p => p.active && p.kind === 'berry'), expected);
+    assert.equal(r.player.collectedBerries, 0);
+  }
+});

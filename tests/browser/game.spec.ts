@@ -536,3 +536,29 @@ test('tocar las ranuras alterna Pistol/Bazooka sin agruparlos ni disparar el que
   await page.locator('#manage-abilities').click(); await expect(page.locator('#merge-apply')).toBeDisabled();
   await page.screenshot({ path: test.info().outputPath('selected-slot.png') });
 });
+
+test('retrato frontal y cofres pequeños/grandes con elección táctil y guardado de berries', async ({ page }) => {
+  expect(await page.locator('#captain-portrait').getAttribute('src')).toBe(await page.evaluate(async () => {
+    const path = '/src/ui/pixel-art.ts'; return (await import(/* @vite-ignore */ path)).artUrl('straw-hat-portrait');
+  }));
+  await page.locator('#start').click(); await isolateWalk(page);
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player;
+    for (const chest of r.chests.active) chest.active = false;
+    const chest = r.chests.active[0]; Object.assign(chest, { active: true, large: false, hp: 1, x: p.x + 25, y: p.y });
+    p.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 });
+    if (chest.active || p.kills !== 0) throw new Error('El cofre no se rompió correctamente');
+    const coin = r.pickups.acquire()!; Object.assign(coin, { x: p.x, y: p.y, kind: 'berry', ownerId: p.id, value: 7 });
+    r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
+    Object.assign(chest, { active: true, large: true, openProgress: 2.99, x: p.x, y: p.y });
+    r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); qa.draw();
+  });
+  await expect(page.locator('#chest-reward')).toBeVisible();
+  await expect(page.locator('#chest-options button')).toHaveCount(3);
+  const coins = await page.evaluate(() => window.__OPS_QA__!.store.progress.coins); expect(coins).toBeGreaterThanOrEqual(7);
+  await page.locator('#chest-options button').first().click();
+  await expect(page.locator('#chest-reward')).toBeHidden();
+  expect(await page.evaluate(() => Object.keys(window.__OPS_QA__!.getRun()!.player.items).length)).toBe(1);
+  await page.reload(); await expect(page.locator('#loading')).toBeHidden();
+  expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.coins)).toBe(coins);
+});

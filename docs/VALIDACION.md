@@ -174,3 +174,15 @@ Resultado final CIafcf7136, ejecución41093839441: **34 pruebas aprobadas,2 omis
 ## 0.8.0 — selección de ranura y básicos
 
 Cambio solicitado: una sola ranura activa, alternativas seleccionables mediante botones/tacto y teclas1–4, grupos con componentes independientes únicamente al seleccionarlos. Tests de núcleo comprueban aprendizaje de Bazooka sin activación simultánea, cambio sin reset de cooldown, cancelación de ráfagas, buffs temporales/constantes, comida persistente y Zoro sin carga al aire ni contra bloqueos. Datos básicos y reducción por nivel verificados. Once archivos de núcleo, tipos y build final aprobados. CI de UI pendiente: ejecución41101703694 en cola sin runner asignado (30/10/2026,17:56UTC); no se declara aprobada la suite de navegador. Netlify confirma deploy-preview-3 publicado. Prueba manual en móvil real y Safari pendiente. Las fixtures antiguas que asumían cuatro ranuras simultáneas ahora equipan explícitamente un grupo o eligen su ranura. No se cambian las piernas ni el guardado.
+
+## 0.9.0 — retrato, berries, cofres y objetos
+
+Luffy usa el recorte frontal del mismo atlas direccional que la tripulación. No se modifican sprites ni movimiento.
+
+Monedas recogibles de algunos enemigos (12%,1 berry), cofres pequeños destructibles con recompensas modestas y grandes por proximidad: candado/círculo de3s, progreso pausado al alejarse y elección de tres objetos. Primer catálogo de8 objetos con seis espacios y tres niveles; límites globales existentes. Cuando no quedan tres mejoras válidas, completar con suministros. No se añaden aún ancla, bolsa de berries, jefes ni entrenamiento nuevo.
+
+Chunks con identidad y posiciones deterministas, sin regeneración de recompensas ni HP al volver; hasta18 cofres en zona activa. Historial ligero de hasta32768 chunks por partida; al agotarlo se dejan de crear cofres nuevos, sin borrar consumidos. La memoria de cofres queda acotada. No son obstáculos sólidos para no cerrar rutas.
+
+Guardado incremental al recoger berries, sin duplicarlas en resultado y compatible con guardados v1 anteriores. Se elimina la antigua recompensa sintética de bajas/tiempo: solo se conservan las berries realmente obtenidas. Se mantienen monedas/entrenamiento previos y la beta de cinco personajes.
+
+Comprobación final: tipos,12 archivos de núcleo (incluido drops) y compilación/empaquetado aprobados. Nuevas pruebas cubren determinismo, descarga/retorno, impactos, apertura/pausa, selección única, límites de objetos, guardado incremental/restauración y drops. Navegador local intentado: servidor Vite denegado con EPERM en5173. Suite preparada para CI, incluyendo retrato frontal, destrucción, apertura/elección táctil y recarga del guardado. No se declara aprobado navegador ni móvil físico/Safari.

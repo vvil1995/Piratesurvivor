@@ -1,3 +1,4 @@
+import { ITEMS } from '../content/items.ts';
 import type { Run } from '../game/core/run.ts';
 import type { RunResult } from '../game/core/types.ts';
 import type { SaveStore } from '../platform/persistence/save.ts';
@@ -31,7 +32,7 @@ export class View {
   showModal(id?: string): void {
     if (id === this.modal) return;
     if (!this.modal && id) this.lastFocus = document.activeElement as HTMLElement;
-    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations']) el(name).hidden = name !== id;
+    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'chest-reward']) el(name).hidden = name !== id;
     this.modal = id;
     el('home').inert = !!id;
     el('topbar').inert = !!id;
@@ -65,7 +66,7 @@ export class View {
   }
   refreshArt(store: SaveStore, characterId = 'luffy'): void {
     const visual = CHARACTERS[characterId].visual;
-    el<HTMLImageElement>('captain-portrait').src = artUrl(visual) || artUrl(`${visual}-portrait`);
+    el<HTMLImageElement>('captain-portrait').src = artUrl(`${visual}-portrait`) || artUrl(visual);
     const avatar = document.createElement('img'); avatar.src = artUrl(`${visual}-face`); avatar.alt = '';
     el('captain-avatar').replaceChildren(avatar);
     el('coin-icon').replaceChildren(pixelIcon('coin'));
@@ -80,6 +81,9 @@ export class View {
   hud(run: Run): void {
     const p = run.player;
     el('character-name').textContent = (run.character.shortName ?? run.character.name).toUpperCase();
+    el('run-items').textContent = `OBJETOS ${Object.keys(p.items).length}/6`;
+    el('run-items').title = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objetos';
+    el('inventory-list').textContent = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objetos';
     el('run-berries').textContent = p.collectedBerries.toString();
     const signature = run.id + ':' + p.selectedSlot + ':' + p.abilitySlots.map(slot => slot.join(',')).join('|') + p.attacks.map(a => `${a.id}:${a.level}:${a.activeFor > 0}`).join('|');
     if (signature !== this.attackSignature) {

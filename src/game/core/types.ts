@@ -1,16 +1,16 @@
 import type { Stats, StatModifiers, LevelChoice, AttackBehavior, StatusKind } from '../../content/types.ts';
-export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining';
+export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'chest';
 export interface Vector { x: number; y: number }
 export interface Player extends Vector {
   id: string; characterId: string;
   taken: Record<string, number>; choices: LevelChoice[]; attacks: EquippedAttack[]; abilitySlots: string[][]; selectedSlot: number; learnedBuffs: string[];
   hp: number; stats: Stats; baseStats: Stats;
   modifiers: { permanent: StatModifiers; temporary: StatModifiers; items: StatModifiers; fruit: StatModifiers; buffs: StatModifiers; skills: StatModifiers }; level: number; xp: number; xpNext: number;
-  collectedBerries: number; kills: number; hurtTimer: number; facing: number;
+  items: Record<string, number>; collectedBerries: number; kills: number; hurtTimer: number; facing: number;
 }
 export interface EquippedAttack { id: string; level: number; cooldown: number; pending: number; burstTimer: number; activeFor: number; activationPending?: boolean; targetId?: number; counterUsed?: boolean }
 export interface Enemy extends Vector {
-  active: boolean; id: number; hp: number; maxHp: number;
+  active: boolean; id: number; kind?: 'chest'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
   speed: number; damage: number; xp: number; radius: number; flash: number;
   statuses?: Partial<Record<StatusKind, number>>; stolen?: boolean; lureIndex?: number; decoyHitTimer?: number;
   ranged?: { interval: number; speed: number; range: number }; shotTimer?: number;

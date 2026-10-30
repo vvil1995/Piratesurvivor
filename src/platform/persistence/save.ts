@@ -5,7 +5,7 @@ export const SAVE_KEY = 'ops.progress.v1';
 export interface Progress {
   version: 1; coins: number; training: number; runs: number; wins: number;
   totalKills: number; bestTime: number; bestLevel: number;
-  lastRunId: string; reducedMotion: boolean;
+  berryRunId?: string; berryRunAmount?: number; lastRunId: string; reducedMotion: boolean;
 }
 export interface StorageLike { getItem(key: string): string | null; setItem(key: string, value: string): void }
 export const freshProgress = (): Progress => ({ version: 1, coins: 0, training: 0, runs: 0, wins: 0, totalKills: 0, bestTime: 0, bestLevel: 1, lastRunId: '', reducedMotion: false });
@@ -15,7 +15,8 @@ function valid(value: unknown): value is Progress {
   return v.version === 1 && ['coins', 'training', 'runs', 'wins', 'totalKills', 'bestTime', 'bestLevel'].every(key =>
     typeof v[key] === 'number' && Number.isSafeInteger(v[key]) && (v[key] as number) >= 0 && (v[key] as number) <= 1e9) &&
     (v.training as number) <= TRAINING_MAX && typeof v.lastRunId === 'string' &&
-    v.lastRunId.length < 150 && typeof v.reducedMotion === 'boolean';
+    v.lastRunId.length < 150 && (v.berryRunId === undefined || typeof v.berryRunId === 'string' && v.berryRunId.length < 150) &&
+    (v.berryRunAmount === undefined || Number.isSafeInteger(v.berryRunAmount) && (v.berryRunAmount as number) >= 0 && (v.berryRunAmount as number) <= 1e9) && typeof v.reducedMotion === 'boolean';
 }
 export class SaveStore {
   progress = freshProgress();
@@ -50,10 +51,18 @@ export class SaveStore {
       return true;
     } catch { this.warning = 'No se puede guardar en este navegador. El progreso actual solo está en memoria.'; return false; }
   }
+  bank(runId: string, collected: number): boolean {
+    if (!Number.isSafeInteger(collected) || collected < 0 || collected > 1e9 || runId.length >= 150) return false;
+    const p = this.progress, previous = p.berryRunId === runId ? p.berryRunAmount ?? 0 : 0;
+    if (collected <= previous) return false;
+    p.coins = Math.min(1e9, p.coins + collected - previous); p.berryRunId = runId; p.berryRunAmount = collected;
+    return this.flush();
+  }
   record(result: RunResult): boolean {
     if (result.id === this.progress.lastRunId) return false;
     const p = this.progress;
-    p.lastRunId = result.id; p.runs++; p.coins += result.coins;
+    this.bank(result.id, result.coins);
+    p.lastRunId = result.id; p.runs++;
     p.wins += result.outcome === 'victory' ? 1 : 0;
     p.totalKills += result.kills; p.bestTime = Math.max(p.bestTime, result.seconds);
     p.bestLevel = Math.max(p.bestLevel, result.level); this.flush(); return true;
