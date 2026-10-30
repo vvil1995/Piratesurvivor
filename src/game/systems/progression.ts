@@ -15,7 +15,7 @@ export function chooseUpgrades(taken: Record<string, number>, random: () => numb
     const next = current + 1, params = ability.levels[next - 1];
     pool.push({ kind: 'ability', id: `ability:${id}`, abilityId: id,
       name: `${ability.shortName}${next === 6 ? ' +' : ''} · NV. ${next}`,
-      description: !current ? ability.description + ' Se aprende como opción: selecciónala en los cuadrados inferiores.' : next === 6 ? ability.evolution : `Daño ${Math.round(params.damage * 100)}% y alcance ${Math.round(params.range * 100)}% de base. Intervalo base ${params.cooldown.toFixed(2)}s.${params.shots > 1 ? ` Ráfaga: ${params.shots} golpes.` : ''}`,
+      description: ability.buff ? `${({ speed: 'Velocidad', armor: 'Reducción de daño', damage: 'Daño', cooldown: 'Cooldown' })[ability.buff.stat]} ${ability.buff.temporary[next - 1] >= 0 ? '+' : ''}${(ability.buff.temporary[next - 1] * 100).toFixed(1)}${ability.buff.stat === 'armor' ? ' puntos porcentuales' : '%'} durante ${ability.buff.duration[next - 1]}s; descanso ${ability.buff.cooldown[next - 1]}s. En combinación: ${(ability.buff.constant[next - 1] * 100).toFixed(1)}% constante. Sujeto a límites globales.` : !current ? ability.description + ' Se aprende como opción: selecciónala en los cuadrados inferiores.' : next === 6 ? ability.evolution : `Daño ${Math.round(params.damage * 100)}% y alcance ${Math.round(params.range * 100)}% de base. Intervalo base ${params.cooldown.toFixed(2)}s.${params.shots > 1 ? ` Ráfaga: ${params.shots} golpes.` : ''}`,
       symbol: '✦', max: 6 });
   }
   const selected: LevelChoice[] = [];

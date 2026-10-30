@@ -58,7 +58,7 @@ test('Zoro espera un blanco alcanzable y no consume carga ni cooldown en el aire
   assert.ok(e.hp < 10000); assert.ok(p.x > 0 && p.x <= 55); assert.ok(p.attacks[0].cooldown > 0);
 });
 test('ataques principales más rápidos desde el inicio y reducción adicional hasta nivel6', () => {
-  for (const [id, cooldown] of [['elastic-punch', 0.8], ['oni-giri', 1.2], ['staff-hit', 0.9], ['namari-boshi', 0.9], ['collier', 0.8]] as const) {
+  for (const [id, cooldown] of [['elastic-punch', 0.45], ['oni-giri', 1.2], ['staff-hit', 0.9], ['namari-boshi', 0.9], ['collier', 0.8]] as const) {
     const a = ABILITIES[id]; assert.equal(a.levels[0].cooldown, cooldown);
     assert.ok(a.levels[5].cooldown < cooldown * 0.75);
   }

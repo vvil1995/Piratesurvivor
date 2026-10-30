@@ -148,7 +148,7 @@ export function spawnZone(effects: Effects, player: Player, params: AttackLevel,
   return true;
 }
 
-export function queueImpact(effects: Effects, player: Player, x: number, y: number, radius: number, damage: number, delay = 0.08): boolean {
+export function queueImpact(effects: Effects, player: Player, x: number, y: number, radius: number, damage: number, delay = 0.08, visual?: string): boolean {
   const area = effects.areas.acquire(); if (!area) return false;
-  Object.assign(area, { x, y, ownerId: player.id, kind: 'impact', radius, shockRadius: 0, damage, knockback: 10, delay, life: 0.3, triggered: false, evolved: true, status: undefined, statusDuration: undefined, tickTimer: 0, hp: undefined, visual: undefined }); return true;
+  Object.assign(area, { x, y, ownerId: player.id, kind: 'impact', radius, shockRadius: 0, damage, knockback: 10, delay, life: 0.3, triggered: false, evolved: true, status: undefined, statusDuration: undefined, tickTimer: 0, hp: undefined, visual }); return true;
 }

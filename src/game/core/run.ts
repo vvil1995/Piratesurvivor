@@ -2,9 +2,9 @@ import { MorganEncounter } from '../bosses/morgan.ts';
 import { ArenaWorld, MORGAN_ARENA } from '../world/arena.ts';
 import { MORGAN } from '../../content/bosses/morgan.ts';
 import { ENEMIES } from '../../content/catalog.ts';
-import { equipItem, itemChoices } from '../systems/items.ts';
+import { FRUITS } from '../../content/fruits.ts';
 import { LOOT } from '../../content/loot.ts';
-import { ChestField, chestReward, dropLoot } from '../systems/loot.ts';
+import { ChestField, chestReward, dropLoot, largeChestReward } from '../systems/loot.ts';
 import { CHARACTERS } from '../../content/catalog.ts';
 import { SHELLS_TOWN, type WorldDefinition } from '../../content/worlds/shells-town.ts';
 import type { AbilityChoice, CharacterDefinition } from '../../content/types.ts';
@@ -12,7 +12,7 @@ import { receivedDamage, regenerationRate, resolveStats } from '../systems/stats
 import { difficultyAt } from '../systems/difficulty.ts';
 import { tickStatus } from '../systems/status.ts';
 import { counterGuard, tickGuards } from '../systems/guards.ts';
-import { AREA_CAP, PROJECTILE_CAP, spawnProjectile, tickEffects } from '../systems/effects.ts';
+import { AREA_CAP, PROJECTILE_CAP, queueImpact, spawnProjectile, tickEffects } from '../systems/effects.ts';
 import { tickBuffs, updateBuffModifiers } from '../systems/buffs.ts';
 import { tickAttacks } from '../systems/combat.ts';
 import { applyUpgrade, chooseUpgrades, xpForLevel } from '../systems/progression.ts';
@@ -57,7 +57,9 @@ export class Run {
   // Punto de integración futuro: solo una recompensa real de jefe debe llamar aquí.
   grantCombinationReward(): void { this.combinationRewards++; }
   private combinationOrigin: 'playing' | 'paused' | 'levelup' = 'playing';
-  chestChoices: string[] = [];
+  pendingFruit?: string;
+  lootNotice = ''; lootNoticeFor = 0;
+  private fruitCooldown = 0;
   time = 0;
   private spawnTimer = 0;
   private enemyId = 0;
@@ -136,13 +138,10 @@ export class Run {
   setView(view: View): void { this.view = view; }
   pause(): void { if (this.status === 'playing') this.status = 'paused'; }
   resume(): void { if (this.status === 'paused') this.status = 'playing'; }
-  selectChestReward(id: string): boolean {
-    if (this.status !== 'chest' || !this.chestChoices.includes(id)) return false;
-    if (id === 'supplies-berries') this.player.collectedBerries += 5;
-    else if (id === 'supplies-heal') this.player.hp = Math.min(this.player.stats.maxHp, this.player.hp + 25);
-    else if (id === 'supplies-xp') this.player.xp += 20;
-    else if (!equipItem(this.player, id)) return false;
-    this.chestChoices = []; this.status = 'playing'; this.checkLevel(); return true;
+  selectFruit(replace: boolean): boolean {
+    if (this.status !== 'fruit' || !this.pendingFruit || !FRUITS[this.pendingFruit]) return false;
+    if (replace) { if (this.player.fruit !== this.pendingFruit) this.fruitCooldown = 0; this.player.fruit = this.pendingFruit; }
+    this.pendingFruit = undefined; this.status = 'playing'; this.checkLevel(); return true;
   }
   selectSlot(slot: number): boolean {
     if (this.status !== 'playing' || !selectSlot(this.player, slot)) return false;
@@ -214,9 +213,12 @@ export class Run {
   private dropXp(enemy: Enemy, ownerId: string): void {
     if (enemy.kind === 'boss') { this.defeatMorgan(); return; }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
+    const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;
+    if (owner && fruit && this.fruitCooldown <= 0) { this.fruitCooldown = fruit.cooldown; queueImpact(this, owner, enemy.x, enemy.y, fruit.radius, owner.stats.damage * fruit.damage, 0.12, 'bomu-explosion'); }
+    if (this.random() < LOOT.enemyFoodChance) dropLoot(this.pickups, { x: enemy.x, y: enemy.y + 16 }, ownerId, 'food', LOOT.enemyFoodHeal);
     if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, enemy, ownerId, 'berry', LOOT.enemyBerries);
     const pickup = this.pickups.acquire();
-    if (pickup) { Object.assign(pickup, { x: enemy.x, y: enemy.y, value: enemy.xp, ownerId, kind: 'xp', abilityId: undefined, life: undefined }); return; }
+    if (pickup) { Object.assign(pickup, { x: enemy.x, y: enemy.y, value: enemy.xp, ownerId, kind: 'xp', abilityId: undefined, life: undefined, level: undefined, fruitId: undefined }); return; }
     let nearest: Pickup | undefined, best = Infinity;
     for (const item of this.pickups.items) {
       if (item.ownerId !== ownerId || item.kind && item.kind !== 'xp') continue;
@@ -228,6 +230,7 @@ export class Run {
   update(dt: number, movement: Vector | ReadonlyMap<string, Vector>): void {
     if (this.status !== 'playing') return;
     dt = Math.min(1 / 30, Math.max(0, dt)); this.time += dt;
+    this.fruitCooldown = Math.max(0, this.fruitCooldown - dt); this.lootNoticeFor = Math.max(0, this.lootNoticeFor - dt);
     const living = [...this.players.values()].filter(actor => actor.hp > 0);
     for (const actor of living) {
       tickBuffs(actor, dt); tickGuards(actor, dt);
@@ -319,20 +322,22 @@ export class Run {
       if (!actor || actor.hp <= 0 || Math.hypot(actor.x - pickup.x, actor.y - pickup.y) > 1700) { pickup.active = false; continue; }
       const dx = actor.x - pickup.x, dy = actor.y - pickup.y, d = Math.hypot(dx, dy);
       if (d < 20) {
-        if (pickup.kind === 'food') { actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
+        if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { this.pendingFruit = pickup.fruitId; this.status = 'fruit'; }
+        else if (pickup.kind === 'food') { actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
         else if (pickup.kind === 'berry') actor.collectedBerries += pickup.value;
         else actor.xp += pickup.value;
         pickup.active = false;
+        if (this.status === 'fruit') break;
       }
       else if (pickup.kind !== 'food' && d < actor.stats.magnet && this.world.segmentClear(pickup.x, pickup.y, actor.x, actor.y, 2)) {
         const step = Math.min(d, dt * 350); pickup.x += dx / d * step; pickup.y += dy / d * step;
       }
     }
     // Solo un cofre grande progresa a la vez; alejarse conserva su progreso.
-    const large = this.zone === 'shells-town' && this.chests.active.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
+    const large = this.status === 'playing' && this.zone === 'shells-town' && this.chests.active.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
     if (large) {
       large.openProgress = Math.min(LOOT.largeOpenSeconds, (large.openProgress ?? 0) + dt);
-      if (large.openProgress >= LOOT.largeOpenSeconds) { large.active = false; this.chestChoices = itemChoices(this.player, this.random); this.status = 'chest'; }
+      if (large.openProgress >= LOOT.largeOpenSeconds) { large.active = false; this.lootNotice = largeChestReward(this.pickups, large, this.player, this.random); this.lootNoticeFor = 4; }
     }
     this.checkLevel(); this.maintenance += dt;
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }

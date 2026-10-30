@@ -538,7 +538,7 @@ test('tocar las ranuras alterna Pistol/Bazooka sin agruparlos ni disparar el que
   await page.screenshot({ path: test.info().outputPath('selected-slot.png') });
 });
 
-test('retrato frontal y cofres pequeños/grandes con elección táctil y guardado de berries', async ({ page }) => {
+test('retrato frontal y cofres pequeños/grandes con botín directo y guardado de berries', async ({ page }) => {
   expect(await page.locator('#captain-portrait').getAttribute('src')).toBe(await page.evaluate(async () => {
     const path = '/src/ui/pixel-art.ts'; return (await import(/* @vite-ignore */ path)).artUrl('straw-hat-portrait');
   }));
@@ -546,7 +546,9 @@ test('retrato frontal y cofres pequeños/grandes con elección táctil y guardad
   await page.evaluate(() => {
     const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player;
     for (const chest of r.chests.active) chest.active = false;
-    const chest = r.chests.active[0]; Object.assign(chest, { active: true, large: false, hp: 1, x: p.x + 25, y: p.y });
+    p.xpNext = 1e6; Object.assign(r, { random: () => 0.5 });
+    const chest = r.chests.active[0] ?? { id: -999, kind: 'chest', radius: 14, speed: 0, damage: 0, xp: 0 };
+    if (!r.chests.active.length) r.chests.active.push(chest as typeof r.chests.active[number]); Object.assign(chest, { active: true, large: false, hp: 1, x: p.x + 25, y: p.y });
     p.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 });
     if (chest.active || p.kills !== 0) throw new Error('El cofre no se rompió correctamente');
     const coin = r.pickups.acquire()!; Object.assign(coin, { x: p.x, y: p.y, kind: 'berry', ownerId: p.id, value: 7 });
@@ -554,12 +556,12 @@ test('retrato frontal y cofres pequeños/grandes con elección táctil y guardad
     Object.assign(chest, { active: true, large: true, openProgress: 2.99, x: p.x, y: p.y });
     r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); qa.draw();
   });
-  await expect(page.locator('#chest-reward')).toBeVisible();
-  await expect(page.locator('#chest-options button')).toHaveCount(3);
-  const coins = await page.evaluate(() => window.__OPS_QA__!.store.progress.coins); expect(coins).toBeGreaterThanOrEqual(7);
-  await page.locator('#chest-options button').first().click();
-  await expect(page.locator('#chest-reward')).toBeHidden();
-  expect(await page.evaluate(() => Object.keys(window.__OPS_QA__!.getRun()!.player.items).length)).toBe(1);
+  await expect(page.locator('#loot-notice')).toContainText('Cofre');
+  expect(await page.locator('#chest-reward').count()).toBe(0);
+  expect(await page.locator('#chest-options').count()).toBe(0);
+  await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
+  const coins = await page.evaluate(() => window.__OPS_QA__!.store.progress.coins); expect(coins).toBeGreaterThanOrEqual(16);
+  expect(await page.evaluate(() => Object.keys(window.__OPS_QA__!.getRun()!.player.items).length)).toBe(0);
   await page.reload(); await expect(page.locator('#loading')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.coins)).toBe(coins);
 });
@@ -614,4 +616,30 @@ test('Morgan: cinco patrones legibles y fases sin avisos ocultos por el HUD', as
     expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.encounter!.stage)).toBe('final');
     await page.screenshot({ path: testInfo.outputPath(`morgan-${id}.png`) });
   }
+});
+
+test('buffs legibles, Balloon sin deformación y fruta temporal con decisión táctil', async ({ page }, info) => {
+  await page.locator('#start').click(); await isolateWalk(page);
+  await page.evaluate(async () => {
+    const path = '/src/game/systems/loadout.ts', { improveAttack } = await import(/* @vite-ignore */ path);
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; improveAttack(r.player, 'fury'); r.selectSlot(1); r.player.attacks.find(a => a.id === 'fury')!.activeFor = 60; qa.draw(); qa.tick();
+  });
+  await expect(page.locator('#buff-strip')).toContainText('ATK');
+  await expect(page.locator('#buff-strip')).toContainText('×1.12');
+  await page.evaluate(async () => {
+    const path = '/src/game/systems/loadout.ts', { improveAttack } = await import(/* @vite-ignore */ path);
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; improveAttack(r.player, 'balloon'); r.selectSlot(2); r.player.attacks.find(a => a.id === 'balloon')!.activeFor = 60; qa.draw(); qa.tick();
+  });
+  await expect(page.locator('#buff-strip')).toContainText('DEF');
+  expect(await page.evaluate(() => window.__OPS_QA__!.metrics().actorScaleY)).toBeCloseTo(0.65, 2);
+  await page.screenshot({ path: info.outputPath('balloon-defense.png') });
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.pickups.acquire()!;
+    Object.assign(p, { x: r.player.x, y: r.player.y, kind: 'fruit', fruitId: 'bomu', value: 0 });
+    r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
+  });
+  await expect(page.locator('#fruit-found')).toBeVisible();
+  await expect(page.locator('#fruit-description')).toContainText('Bomu');
+  await page.locator('#fruit-take').click(); await expect(page.locator('#fruit-found')).toBeHidden();
+  await expect(page.locator('#fruit-active')).toContainText('Bomu');
 });

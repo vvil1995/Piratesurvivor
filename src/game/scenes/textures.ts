@@ -49,8 +49,16 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0x4b3328); g.fillRect(0, 0, 64, 64); g.fillStyle(0x976740); g.fillRect(3, 3, 58, 58);
   g.lineStyle(3, 0xd1a367); g.strokeRect(5, 5, 54, 54); g.lineBetween(7, 7, 57, 57); g.lineBetween(57, 7, 7, 57);
   g.generateTexture('crate', 64, 64); g.clear();
-  g.fillStyle(0x59402f); g.fillRect(1, 4, 15, 10); g.fillStyle(0xeee3bf); g.fillEllipse(9, 8, 13, 10); g.fillStyle(0x354c3b); g.fillRect(6, 9, 6, 5); g.fillStyle(0xffffff); g.fillRect(6, 4, 5, 2);
-  g.generateTexture('food', 18, 18); g.clear();
+  // Muslo de carne con hueso: dibujo pixelado propio, curación reconocible.
+  g.fillStyle(0xe9dfbd); g.fillRect(1, 7, 16, 4); g.fillRect(0, 5, 4, 8); g.fillRect(14, 5, 4, 8);
+  g.fillStyle(0x6e332b); g.fillRect(4, 3, 10, 12); g.fillRect(3, 5, 12, 8);
+  g.fillStyle(0xbc6340); g.fillRect(5, 4, 8, 9); g.fillStyle(0xe19a5c); g.fillRect(5, 4, 5, 3);
+  g.fillStyle(0xf4d39a); g.fillRect(6, 5, 3, 1); g.generateTexture('food', 18, 18); g.clear();
+  g.fillStyle(0x61376e); g.fillCircle(9, 11, 7); g.fillStyle(0xbe6ac1); g.fillCircle(8, 10, 6);
+  g.lineStyle(1, 0xeab8d4); g.strokeCircle(8, 10, 3); g.lineBetween(8, 7, 10, 10);
+  g.fillStyle(0x90b864); g.fillRect(8, 0, 2, 5); g.fillTriangle(10, 2, 17, 0, 13, 5);
+  g.generateTexture('devil-fruit', 18, 18); g.clear();
+
   g.fillStyle(0xded1ac, 0.65); g.fillRect(1, 2, 2, 1); g.fillRect(5, 0, 1, 2); g.fillRect(7, 3, 2, 1);
   g.generateTexture('foot-dust', 10, 5); g.clear();
   g.fillStyle(0x142a33, 0.25); g.fillEllipse(16, 7, 27, 12); g.generateTexture('shadow', 32, 14); g.clear();

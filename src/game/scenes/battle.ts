@@ -1,3 +1,4 @@
+import { BUFF_LOOK } from '../../ui/buff-info.ts';
 import { BossRenderer } from './boss-renderer.ts';
 import { MORGAN_ARENA } from '../world/arena.ts';
 import { LOOT } from '../../content/loot.ts';
@@ -126,11 +127,9 @@ export class BattleScene extends Phaser.Scene {
     // En reposo mirar al blanco del golpe. Al caminar manda la dirección de movimiento.
     const aimedStrike = run?.strikes.find(s => s.ownerId === player?.id && s.targetId !== undefined);
     if (!pose.frame && aimedStrike) pose.direction = movementDirection(Math.cos(aimedStrike.angle), Math.sin(aimedStrike.angle));
-    let inflation = 1;
-    if (player) for (const a of player.attacks) if (a.activeFor > 0) inflation = Math.max(inflation, ABILITIES[a.id].levels[a.level - 1].inflate ?? 1);
     const phase = pose.frame ? (pose.frame - 1) % 2 : 0;
     this.captain.setTexture(`${run?.character.visual ?? 'straw-hat'}-${pose.direction}-${phase}`).setFlipX(false)
-      .setScale(0.65 * (1 + pose.weight / 2) * inflation, 0.65 * (1 - pose.weight)).setAngle(pose.lean);
+      .setScale(0.65 * (1 + pose.weight / 2) , 0.65 * (1 - pose.weight)).setAngle(pose.lean);
     this.captain.setPosition(worldX - origin.x, worldY - origin.y).setDepth(worldY - origin.y + 1000);
     this.captainShadow.setPosition(worldX - origin.x, worldY - origin.y + 2).setScale(1.2 + pose.weight);
     if (animate && pose.footfall) {
@@ -166,7 +165,7 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(!!pickup?.active);
       if (pickup?.active) {
         const kind = pickup.kind ?? 'xp', factor = kind === 'xp' && pickup.value >= 20 ? 1.3 : 1;
-        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : 18) * factor, 18 * factor);
+        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : 18) * factor, 18 * factor);
       }
     }
     this.effects.clear();
@@ -186,6 +185,13 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const area of run.areas.items) if (area.active) {
         const x = area.x - origin.x, y = area.y - origin.y;
+        if (area.visual === 'bomu-explosion') {
+          const alpha = Math.max(0, area.life / 0.3), radius = area.radius * (area.triggered ? Math.min(1, 0.4 + (0.3 - area.life) * 5) : 0.2);
+          this.effects.fillStyle(0xe28a48, alpha * 0.35); this.effects.fillCircle(x, y, radius);
+          this.effects.lineStyle(3, 0xffd89b, alpha);
+          for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; this.effects.lineBetween(x + Math.cos(a) * radius * 0.4, y + Math.sin(a) * radius * 0.4, x + Math.cos(a) * radius, y + Math.sin(a) * radius); }
+          continue;
+        }
         if (area.visual === 'rubber-axe') { drawAxe(this.effects, x, y, area.delay, area.life, area.radius); continue; }
         this.effects.fillStyle(area.kind === 'smoke' ? 0xa2adba : area.kind === 'decoy' ? 0xc3936c : area.triggered ? 0x8ae0ce : 0xedbd67, area.triggered ? area.life * 0.6 : 0.12);
         this.effects.fillCircle(x, y, area.radius); this.effects.lineStyle(2, area.triggered ? 0xd1fff0 : 0xedbd67, 0.8); this.effects.strokeCircle(x, y, area.radius);
@@ -208,12 +214,12 @@ export class BattleScene extends Phaser.Scene {
       if (player) for (const state of player.attacks) {
         const ability = ABILITIES[state.id], x = player.x - origin.x, y = player.y - origin.y - 22;
         if (ability.behavior === 'guard' && state.activeFor > 0) {
-          this.effects.fillStyle(0x92dce1, 0.12); if (ability.visual !== 'slash') this.effects.fillEllipse(x, y, 72, 76);
-          this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); if (ability.visual === 'slash') { for (const offset of [-9, 0, 9]) this.effects.lineBetween(x - 24, y - 18 + offset, x + 24, y + 18 + offset); } else this.effects.strokeEllipse(x, y, 72, 76);
+          this.effects.fillStyle(0x92dce1, 0.08);
+          this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); if (ability.visual === 'slash') { for (const offset of [-9, 0, 9]) this.effects.lineBetween(x - 24, y - 18 + offset, x + 24, y + 18 + offset); } else { for (const side of [-1, 1]) { this.effects.beginPath(); this.effects.arc(x, y + 3, 28, side < 0 ? Math.PI * 0.65 : -Math.PI * 0.35, side < 0 ? Math.PI * 1.35 : Math.PI * 0.35); this.effects.strokePath(); } }
         }
         if (ability.buff && (combined(player, state.id) && activeMovements(player).includes(state.id) || state.activeFor > 0)) {
-          const color = { speed: 0x83dfc8, armor: 0x92c8ed, damage: 0xf0aa73, cooldown: 0xc0a1e8 }[ability.buff.stat];
-          this.effects.lineStyle(state.level === 6 ? 3 : 1, color, 0.65); this.effects.strokeCircle(x, y + 12, state.level === 6 ? 31 : 26);
+          const color = BUFF_LOOK[ability.buff.stat].tint;
+          for (const side of [-1, 1]) { const ax = x + side * 23, ay = y - 8 - (run.time % 0.8) * 10; this.effects.lineStyle(3, color, 0.8); this.effects.lineBetween(ax - 4, ay + 4, ax, ay); this.effects.lineBetween(ax, ay, ax + 4, ay + 4); this.effects.lineBetween(ax, ay, ax, ay + 10); }
         }
       }
     }
@@ -222,10 +228,11 @@ export class BattleScene extends Phaser.Scene {
       const alpha = Math.min(1, strike.life / 0.08);
       const x = strike.x - origin.x, y = strike.y - origin.y;
       const color = strike.evolved ? 0xf8d76c : strike.behavior === 'sweep' ? 0x9bd8d5 : 0xf1d1ab;
-      if (drawElasticStrike(this.effects, strike, x, y)) continue;
+      const owner = run.players.get(strike.ownerId), attached = strike.visual?.startsWith('rubber-') && strike.visual !== 'rubber-kick' && owner;
+      if (drawElasticStrike(this.effects, strike, attached ? owner.x - origin.x : x, attached ? owner.y - origin.y : y, attached ? { direction: owner.id === player?.id ? pose.direction : movementDirection(Math.cos(owner.facing), Math.sin(owner.facing)), targetX: x + Math.cos(strike.angle) * strike.reach, targetY: y - 26 + Math.sin(strike.angle) * strike.reach } : undefined)) continue;
       if (drawWeaponSweep(this.effects, strike, x, y)) continue;
       if (strike.behavior === 'guard') {
-        this.effects.lineStyle(3, color, alpha * 0.6); this.effects.strokeCircle(x, y - 18, strike.reach * (1 - strike.life / 0.3)); continue;
+        this.effects.lineStyle(3, 0x92c8ed, alpha); for (const side of [-1, 1]) { this.effects.lineBetween(x + side * 24, y - 36, x + side * 24, y - 12); this.effects.lineBetween(x + side * 24, y - 36, x + side * 16, y - 36); } continue;
       }
       if (strike.behavior === 'sweep') {
         this.effects.lineStyle(strike.evolved ? 9 : 6, color, alpha * 0.8);

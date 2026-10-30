@@ -1,3 +1,5 @@
+import { armSocket } from './attack-anchor.ts';
+import type { Direction } from './actor-animation.ts';
 import type Phaser from 'phaser';
 import type { Strike } from '../core/types.ts';
 const TAU = Math.PI * 2;
@@ -20,7 +22,7 @@ export function sandal(g: Phaser.GameObjects.Graphics, x: number, y: number, alp
   g.lineStyle(2 * size, 0x8a4134, alpha); g.lineBetween(x - 6 * size, y - 4 * size, x + 2 * size, y + 2 * size); g.lineBetween(x + 2 * size, y + 2 * size, x + 6 * size, y - 4 * size);
 }
 // Presentación por familia visual, sin consultar nombres de personajes en el motor.
-export function drawElasticStrike(g: Phaser.GameObjects.Graphics, strike: Strike, x: number, y: number): boolean {
+export function drawElasticStrike(g: Phaser.GameObjects.Graphics, strike: Strike, x: number, y: number, actor?: { direction: Direction; targetX: number; targetY: number }): boolean {
   if (!strike.visual?.startsWith('rubber-')) return false;
   const kick = strike.visual === 'rubber-kick', total = kick ? 0.36 : 0.24;
   const progress = Math.max(0, Math.min(1, 1 - strike.life / total)), alpha = Math.min(1, strike.life / 0.07);
@@ -43,9 +45,11 @@ export function drawElasticStrike(g: Phaser.GameObjects.Graphics, strike: Strike
   for (let i = 0; i < count; i++) {
     const offset = (i - (count - 1) / 2), angle = strike.angle + (strike.visual === 'rubber-flurry' ? offset * 0.13 : 0);
     const side = strike.visual === 'rubber-double' ? offset * 15 : offset * 7;
-    const sx = x - Math.sin(angle) * side, sy = y - 21 + Math.cos(angle) * side;
+    const socket = armSocket(actor?.direction ?? 's', count === 1 ? Math.cos(angle) < 0 ? -1 : 1 : i % 2 === 0 ? -1 : 1);
+    const sx = x + socket.x, sy = y + socket.y;
     const length = Math.max(12, strike.reach * extension * (1 - Math.abs(offset) * 0.08));
-    const ex = sx + Math.cos(angle) * length, ey = sy + Math.sin(angle) * length;
+    const ex = actor ? sx + (actor.targetX - sx - Math.sin(angle) * side) * extension : sx + Math.cos(angle) * length;
+    const ey = actor ? sy + (actor.targetY - sy + Math.cos(angle) * side) * extension : sy + Math.sin(angle) * length;
     limb(g, sx, sy, ex, ey, alpha * (i === 1 || count === 1 ? 1 : 0.7), strike.evolved ? 10 : 7); hand(g, ex, ey, alpha);
     if (progress > 0.2 && progress < 0.7) {
       g.lineStyle(2, 0xffe5a0, alpha); for (let ray = 0; ray < 5; ray++) { const a = ray / 5 * TAU; g.lineBetween(ex + Math.cos(a) * 15, ey + Math.sin(a) * 15, ex + Math.cos(a) * 23, ey + Math.sin(a) * 23); }

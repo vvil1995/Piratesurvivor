@@ -1,3 +1,5 @@
+import { FRUITS } from '../content/fruits.ts';
+import { BUFF_LOOK, buffEffect } from './buff-info.ts';
 import { ITEMS } from '../content/items.ts';
 import type { Run } from '../game/core/run.ts';
 import type { RunResult } from '../game/core/types.ts';
@@ -32,7 +34,7 @@ export class View {
   showModal(id?: string): void {
     if (id === this.modal) return;
     if (!this.modal && id) this.lastFocus = document.activeElement as HTMLElement;
-    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'chest-reward', 'boss-entry', 'boss-victory']) el(name).hidden = name !== id;
+    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'fruit-found', 'boss-entry', 'boss-victory']) el(name).hidden = name !== id;
     this.modal = id;
     el('home').inert = !!id;
     el('topbar').inert = !!id;
@@ -80,6 +82,18 @@ export class View {
   }
   hud(run: Run): void {
     const p = run.player;
+    const badges = p.attacks.filter(a => ABILITIES[a.id].buff && (combined(p, a.id) ? p.abilitySlots[p.selectedSlot].includes(a.id) : a.activeFor > 0)).map(a => {
+      const buff = ABILITIES[a.id].buff!, look = BUFF_LOOK[buff.stat], badge = document.createElement('span'); badge.style.color = look.color;
+      const effective = buff.stat === 'armor' ? `${Math.round(p.stats.armor * 100)}%` : buff.stat === 'cooldown' ? `−${Math.round((1 - p.stats.cooldown / p.baseStats.cooldown) * 100)}% CD` : `×${(p.stats[buff.stat] / p.baseStats[buff.stat]).toFixed(2)}`;
+      badge.textContent = `↑${look.label} ${effective}`; badge.title = `${ABILITIES[a.id].name}: ${buffEffect(buff, a.level, combined(p, a.id))}. Total mostrado con los límites combinados.`; return badge;
+    });
+    for (const a of p.attacks) if (ABILITIES[a.id].behavior === 'guard' && a.activeFor > 0) {
+      const badge = document.createElement('span'); badge.style.color = BUFF_LOOK.armor.color;
+      badge.textContent = `↑DEF ${Math.round(p.stats.armor * 100)}%`; badge.title = `${ABILITIES[a.id].shortName}: reducción de daño activa, sujeta al límite global60%.`; badges.push(badge);
+    }
+    el('buff-strip').replaceChildren(...badges);
+    el('fruit-active').textContent = p.fruit ? `FRUTA: ${FRUITS[p.fruit].name}` : '';
+    el('loot-notice').textContent = run.lootNoticeFor > 0 ? run.lootNotice : '';
     const boss = run.encounter;
     el('hud').classList.toggle('boss-active', !!boss);
     el('boss-panel').hidden = !boss;

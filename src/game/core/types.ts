@@ -1,12 +1,12 @@
 import type { Stats, StatModifiers, LevelChoice, AttackBehavior, StatusKind } from '../../content/types.ts';
-export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'chest';
+export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'fruit';
 export interface Vector { x: number; y: number }
 export interface Player extends Vector {
   id: string; characterId: string;
   taken: Record<string, number>; choices: LevelChoice[]; attacks: EquippedAttack[]; abilitySlots: string[][]; selectedSlot: number; learnedBuffs: string[];
   hp: number; stats: Stats; baseStats: Stats;
   modifiers: { permanent: StatModifiers; temporary: StatModifiers; items: StatModifiers; fruit: StatModifiers; buffs: StatModifiers; skills: StatModifiers }; level: number; xp: number; xpNext: number;
-  items: Record<string, number>; collectedBerries: number; kills: number; hurtTimer: number; facing: number;
+  fruit?: string; items: Record<string, number>; collectedBerries: number; kills: number; hurtTimer: number; facing: number;
 }
 export interface EquippedAttack { id: string; level: number; cooldown: number; pending: number; burstTimer: number; activeFor: number; activationPending?: boolean; targetId?: number; counterUsed?: boolean }
 export interface Enemy extends Vector {
@@ -16,7 +16,7 @@ export interface Enemy extends Vector {
   ranged?: { interval: number; speed: number; range: number }; shotTimer?: number;
   targetId?: string; steeringTime?: number; steerX?: number; steerY?: number;
 }
-export interface Pickup extends Vector { active: boolean; value: number; ownerId?: string; kind?: 'xp' | 'food' | 'berry'; life?: number; abilityId?: string; level?: number }
+export interface Pickup extends Vector { active: boolean; value: number; ownerId?: string; kind?: 'xp' | 'food' | 'berry' | 'fruit'; fruitId?: string; life?: number; abilityId?: string; level?: number }
 export interface Strike extends Vector { angle: number; reach: number; life: number; ownerId: string; behavior: AttackBehavior; evolved: boolean; arc: number; splash: number; impact: Vector; targetId?: number; visual?: string }
 export interface RunResult {
   id: string; outcome: 'defeat' | 'victory'; seconds: number; kills: number; level: number; coins: number;

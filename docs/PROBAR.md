@@ -83,3 +83,9 @@ Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el 
 Pulsa BASE DE MORGAN durante la exploración y confirma. Nivel20 recomendado, sin requisito. Aprende rectángulo de destral y arco; en fases2/3 aparecen carga, refuerzos y onda. Rojo tenue: preparación; contorno intenso: último aviso; naranja: impacto efectivo. Sal de la zona antes del golpe y usa cajas contra cargas/ondas. Comprueba que Morgan no las atraviesa y puede rodearlas. Mira tu vida y las tres fases de la barra del jefe.
 
 Al vencer, espera la caída. Se guarda la victoria y se concede una agrupación en Gestionar habilidades. Escoge explorar o embarcar; no hay cambio automático ni curación. Orange Town es llegada provisional, sin Buggy. Prueba la entrada, esquiva y navegación en móvil horizontal y PC. Si el teléfono interrumpe la aplicación, verifica pausa y reanudación; no se permite escapar del jefe mediante los botones de navegación antes de vencer.
+
+## Beta0.11.0
+
+Probar cadencia de los seis movimientos de Luffy, en particular Pistol y Gatling. Moverse mientras se dispara y comprobar que brazos/puños salen del actor. Balloon mantiene su función defensiva sin hinchar el sprite. Buffs muestran flechas de color y pequeños totales efectivos; consultar las cartas para magnitud y duración.
+
+Buscar cofres más separados. Pequeños: moneda, poca XP y posible carne; grandes: círculo/candado de3s y botín directo, sin selección de mejoras. Recoger moneda/XP. Una subida de nivel por esa XP sigue abriendo cartas normales. Objeto ocasional entra directamente en un hueco libre; no aumenta un objeto equipado. Fruta rara Bomu Bomu: recogerla, aceptar o conservar build, probar explosiones al derrotar enemigos. Se pierde al reiniciar. Comprobar que comer cura sin superar HP máximo y que enemigos dejan carne ocasionalmente.

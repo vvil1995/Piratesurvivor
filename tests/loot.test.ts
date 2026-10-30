@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Run } from '../src/game/core/run.ts';
-import { ChestField, chestReward } from '../src/game/systems/loot.ts';
+import { ChestField, chestReward, largeChestReward } from '../src/game/systems/loot.ts';
 import { damageEnemy } from '../src/game/systems/hits.ts';
 import { SaveStore, SAVE_KEY, freshProgress } from '../src/platform/persistence/save.ts';
 
@@ -19,7 +19,7 @@ test('cofres deterministas sin reaparición ni curación al descargar chunks', (
   assert.ok(other.active.every(c => r.world.canOccupy(c.x, c.y, 18)));
 });
 test('ataques rompen cofres, no suman bajas ni empujan y generan una única recompensa', () => {
-  const r = new Run(), c = r.chests.active.find(c => c.active)!; let rewards = 0;
+  const r = new Run('luffy', 0, () => 0.5, { seed: 42 }), c = r.chests.active.find(c => c.active)!; let rewards = 0;
   const origin = { x: c.x - 20, y: c.y }, x = c.x;
   const hit = () => damageEnemy(r.player, c, 100, 50, origin, r.world, chest => { rewards++; chestReward(r.pickups, chest, r.player.id, () => 0); }, () => 0.5);
   hit(); hit(); assert.equal(c.x, x); assert.equal(r.player.kills, 0); assert.equal(rewards, 1);
@@ -39,7 +39,7 @@ test('recolección de monedas y guardado incremental sin duplicación al morir',
   restored.bank('another-run', 2); assert.equal(restored.progress.coins, 5);
   storage.setItem(SAVE_KEY, JSON.stringify({ ...freshProgress(), coins: 123 })); assert.equal(new SaveStore(storage).progress.coins, 123);
 });
-test('cofre grande requiere tres segundos, pausa al alejarse y entrega solo una elección', () => {
+test('cofre grande requiere tres segundos, pausa al alejarse y entrega botín sin cartas', () => {
   const r = new Run('luffy', 0, () => 0.5, { seed: 42 });
   const large = r.chests.active[0]; assert.ok(large); large.large = true;
   large.x = r.player.x; large.y = r.player.y; r.player.stats.armor = 0.6;
@@ -47,11 +47,12 @@ test('cofre grande requiere tres segundos, pausa al alejarse y entrega solo una 
   const tick = (n: number) => { for (let i = 0; i < n; i++) { r.enemies.clear(); r.update(1 / 60, { x: 0, y: 0 }); } };
   tick(60); assert.ok((large.openProgress ?? 0) > 0.9); assert.equal(r.status, 'playing');
   large.x += 100; const before = large.openProgress; tick(60); assert.equal(large.openProgress, before);
-  large.x -= 100; tick(121); assert.equal(r.status, 'chest'); assert.equal(large.active, false);
-  assert.equal(r.chestChoices.length, 3); assert.equal(new Set(r.chestChoices).size, 3);
-  assert.equal(r.selectChestReward('invalid'), false); const choice = r.chestChoices[0];
-  assert.equal(r.selectChestReward(choice), true); assert.equal(r.selectChestReward(choice), false);
-  assert.equal(Object.keys(r.player.items).length, 1); assert.equal(new Run().player.items[choice], undefined);
+  large.x -= 100; tick(121); assert.equal(r.status, 'playing'); assert.equal(large.active, false);
+  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'berry'));
+  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'xp'));
+  assert.equal(Object.keys(r.player.items).length, 0);
+  const count = r.pickups.count; tick(1); assert.ok(r.pickups.count <= count); // No vuelve a entregar.
+
 });
 test('objetos limitados a seis espacios y tres niveles, respetando topes globales', async () => {
   const { equipItem, itemChoices } = await import('../src/game/systems/items.ts');
@@ -74,4 +75,44 @@ test('solo algunos enemigos dejan berries y hay que recogerlas', () => {
     assert.equal(r.pickups.items.some(p => p.active && p.kind === 'berry'), expected);
     assert.equal(r.player.collectedBerries, 0);
   }
+});
+test('cofres escasos: densidad determinista baja y sin duplicación al volver', () => {
+  const r = new Run(), field = new ChestField(); let small = 0, big = 0;
+  for (let x = 0; x < 90; x += 3) {
+    field.sync(r.world, { x: x * 512 + 256, y: 256 });
+    small += field.active.filter(c => !c.large).length; big += field.active.filter(c => c.large).length;
+  }
+  assert.ok(small < 90, `${small} pequeños en270 chunks`); assert.ok(big < 25, `${big} grandes en270 chunks`);
+});
+test('botín grande: berries/XP, objeto nuevo ocasional sin mejorar equipado y fruta rara', () => {
+  const r = new Run(), chest = { x: r.player.x + 100, y: r.player.y } as never;
+  largeChestReward(r.pickups, chest, r.player, () => 0);
+  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'berry' && p.value >= 9));
+  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'xp' && p.value >= 28));
+  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'fruit'));
+  const first = Object.keys(r.player.items)[0]; assert.equal(r.player.items[first], 1);
+  largeChestReward(r.pickups, chest, r.player, () => 0); assert.equal(r.player.items[first], 1);
+  assert.equal(r.status, 'playing');
+});
+test('menjar cura sin superar HP y aproximadamente diez por ciento de rivales lo deja', () => {
+  let drops = 0;
+  for (let i = 0; i < 100; i++) {
+    const r = new Run('luffy', 0, () => (i + 0.5) / 100);
+    for (const c of r.chests.active) c.active = false;
+    const e = r.enemies.acquire()!; Object.assign(e, { id: 9999, x: r.player.x + 40, y: r.player.y, hp: 1, maxHp: 1, speed: 0, damage: 0, xp: 0, radius: 13 });
+    r.update(1 / 60, { x: 0, y: 0 }); if (r.pickups.items.some(p => p.active && p.kind === 'food')) drops++;
+  }
+  assert.equal(drops, 10);
+  const r = new Run(); r.player.hp = 95; const food = r.pickups.acquire()!;
+  Object.assign(food, { x: r.player.x, y: r.player.y, kind: 'food', value: 12 });
+  r.update(1 / 60, { x: 0, y: 0 }); assert.equal(r.player.hp, r.player.stats.maxHp);
+});
+test('fruta temporal: recoger, rechazar/aceptar y explosión con límite de cadencia', () => {
+  const r = new Run(); for (const c of r.chests.active) c.active = false;
+  const pickup = () => { const p = r.pickups.acquire()!; Object.assign(p, { x: r.player.x, y: r.player.y, kind: 'fruit', fruitId: 'bomu', value: 0 }); r.update(1 / 60, { x: 0, y: 0 }); };
+  pickup(); assert.equal(r.status, 'fruit'); r.selectFruit(false); assert.equal(r.player.fruit, undefined);
+  pickup(); r.selectFruit(true); assert.equal(r.player.fruit, 'bomu');
+  for (let i = 0; i < 2; i++) { const e = r.enemies.acquire()!; Object.assign(e, { id: 999 + i, x: r.player.x + 40 + i * 5, y: r.player.y, hp: 1, maxHp: 1, speed: 0, damage: 0, xp: 0, radius: 13 }); }
+  r.player.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 });
+  assert.equal(r.areas.count, 1); assert.equal(new Run().player.fruit, undefined);
 });

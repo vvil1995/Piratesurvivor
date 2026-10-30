@@ -1,4 +1,4 @@
-import { ITEMS } from './content/items.ts';
+import { FRUITS } from './content/fruits.ts';
 import Phaser from 'phaser';
 import './ui/style.css';
 import { BattleScene } from './game/scenes/battle.ts';
@@ -35,15 +35,11 @@ function sync(): void {
   if (run.status === previousStatus) return;
   previousStatus = run.status;
   if (run.status !== 'playing') controller.reset();
-  if (run.status === 'chest') {
-    view.showModal('chest-reward');
-    el('chest-options').replaceChildren(...run.chestChoices.map(id => {
-      const button = document.createElement('button'); button.className = 'secondary-button';
-      const item = ITEMS[id];
-      button.textContent = item ? `${item.name} · Nv. ${(run!.player.items[id] ?? 0) + 1}/3 — ${item.description}` : ({ 'supplies-berries': '5 berries', 'supplies-heal': 'Recuperar 25 HP', 'supplies-xp': '20 XP' }[id] ?? id);
-      button.onclick = () => { if (orientation.blocked || !run?.selectChestReward(id)) return; previousStatus = ''; view.showModal(); sync(); };
-      return button;
-    }));
+  if (run.status === 'fruit') {
+    view.showModal('fruit-found');
+    const fruit = FRUITS[run.pendingFruit!];
+    el('fruit-description').textContent = `${fruit.name}: ${fruit.description}`;
+    el('fruit-current').textContent = run.player.fruit ? `Actual: ${FRUITS[run.player.fruit].name}. Sustituirla elimina su efecto anterior.` : 'No tienes fruta activa.';
   }
   else if (run.status === 'levelup') view.upgrades(run, id => {
     if (!run) return;
@@ -89,6 +85,7 @@ for (const id of ['manage-abilities', 'pause-build']) el(id).addEventListener('c
   if (orientation.blocked || !run?.openCombinations()) return; previousStatus = ''; sync();
 });
 el('pause').addEventListener('click', pause);
+for (const [id, replace] of [['fruit-take', true], ['fruit-keep', false]] as const) el(id).addEventListener('click', () => { if (orientation.blocked || !run?.selectFruit(replace)) return; previousStatus = ''; view.showModal(); sync(); });
 el('challenge-morgan').addEventListener('click', () => {
   if (!run || run.status !== 'playing' || orientation.blocked) return;
   run.pause(); controller.reset(); sync(); view.showModal('boss-entry');

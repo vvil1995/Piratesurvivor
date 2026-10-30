@@ -96,3 +96,7 @@ Cofre de madera con bandas y cerradura: geometría pixelada original en `texture
 ### 0.10.0 — Morgan
 
 Morgan provisional (64×80), brazo-destral (40×58), caja de cobertura y barco: geometría pixelada original en `textures.ts`, sin imágenes descargadas. No se ha usado ningún sprite, logotipo, audio ni recurso oficial. Morgan y One Piece siguen sujetos a los derechos de sus titulares; el dibujo propio no concede autorización sobre la franquicia. Las formas de aviso y señales de puertas son primitivas originales. Sin nuevas dependencias.
+
+### 0.11.0 — botín y buffs
+
+Carne con hueso y fruta de espirales: primitivas pixeladas originales18×18 en `textures.ts`; sustituyen el plato provisional y añaden la primera fruta funcional. Flechas de buff: líneas originales y caracteres del sistema; sin imágenes, fuentes ni paquetes externos. Orígenes de hombros calculados sobre el atlas normalizado existente; no se modifica la caminata ni se importan sprites nuevos.
