@@ -18,6 +18,15 @@ async function offerChoice(page: Page, target: string, capPassives = false, hurt
   await expect(page.locator('.upgrade-card')).toHaveCount(3);
 }
 
+async function isolateWalk(page: Page) {
+  await page.evaluate(async () => {
+    const path = '/src/content/catalog.ts', { ENEMIES } = await import(/* @vite-ignore */ path);
+    for (const enemy of Object.values(ENEMIES) as { speed: number; damage: number }[]) { enemy.speed = 0; enemy.damage = 0; }
+    const run = window.__OPS_QA__!.getRun()!; run.enemies.clear();
+    for (const attack of run.player.attacks) { attack.cooldown = 1e6; attack.pending = 0; }
+  });
+}
+
 test.beforeEach(async ({ page, isMobile }) => {
   if (isMobile) await page.setViewportSize({ width: 844, height: 390 });
   await page.goto('/');
@@ -246,6 +255,7 @@ test('los cuatro efectos evolucionados se dibujan sin errores en combate', async
 
 test('pasos apoyados en el suelo y vuelta a reposo sin deslizamiento visual', async ({ page }) => {
   await page.locator('#start').click();
+  await isolateWalk(page);
   const step = await page.evaluate(() => {
     const qa = window.__OPS_QA__!, p = qa.getRun()!.player; qa.draw(); let swing = 0;
     for (let i = 0; i < 8; i++) { p.x += 6; qa.draw(); swing = Math.max(swing, Math.abs(qa.metrics().legSwing)); }
@@ -409,6 +419,7 @@ test('paso articulado en ocho direcciones y Whip con pierna elástica en lugar d
   test.setTimeout(60000);
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.locator('#start').click();
+  await isolateWalk(page);
   const origin = await page.evaluate(() => {
     const r = window.__OPS_QA__!.getRun()!, p = r.player;
     for (let y = 128; y <= 1024; y += 32) for (let x = 128; x <= 1024; x += 32) {
