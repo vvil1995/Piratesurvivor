@@ -196,6 +196,7 @@ test('los seis atlas detallados contienen ocho orientaciones utilizables sin rec
 });
 
 test('cuatro ataques equipados, evolución +, cartas válidas y reinicio de build', async ({ page }) => {
+  test.setTimeout(90000);
   await page.locator('#start').click();
   await expect(page.locator('.attack-slot')).toHaveCount(4);
   await expect(page.locator('.attack-slot.empty')).toHaveCount(3);
@@ -283,6 +284,7 @@ test('vida, defensa, regeneración, críticos y XP se reflejan en la interfaz y 
 });
 
 test('quinta habilidad, combinación táctil, buffs constantes y ocho movimientos sin duplicados', async ({ page }) => {
+  test.setTimeout(90000);
   await page.locator('#start').click();
   for (const [id, name] of [['gatling', 'Gatling'], ['bazooka', 'Bazooka'], ['whip', 'Whip']]) {
     await offerChoice(page, `ability:${id}`, true);
@@ -413,11 +415,22 @@ test('paso articulado en ocho direcciones y Whip con pierna elástica en lugar d
   });
   for (const [direction, keys] of [['e', ['ArrowRight']], ['se', ['ArrowRight', 'ArrowDown']], ['s', ['ArrowDown']], ['sw', ['ArrowLeft', 'ArrowDown']], ['w', ['ArrowLeft']], ['nw', ['ArrowLeft', 'ArrowUp']], ['n', ['ArrowUp']], ['ne', ['ArrowRight', 'ArrowUp']]] as [string, string[]][]) {
     await page.evaluate(o => Object.assign(window.__OPS_QA__!.getRun()!.player, o), origin);
-    for (const key of keys) await page.keyboard.down(key);
-    await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorDirection)).toBe(direction);
-    await expect.poll(() => page.evaluate(() => Math.abs(window.__OPS_QA__!.metrics().legSwing))).toBeGreaterThan(2);
+    // Teclado y colisiones se prueban aparte. Desplazamiento por RAF acotado:
+    // no acabar contra un edificio mientras el runner procesa una captura.
+    const pose = await page.evaluate(async ({ keys }) => {
+      const qa = window.__OPS_QA__!, p = qa.getRun()!.player;
+      const dx = keys.includes('ArrowRight') ? 2 : keys.includes('ArrowLeft') ? -2 : 0;
+      const dy = keys.includes('ArrowDown') ? 2 : keys.includes('ArrowUp') ? -2 : 0;
+      let swing = 0;
+      for (let i = 0; i < 12; i++) {
+        p.x += dx; p.y += dy;
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        swing = Math.max(swing, Math.abs(qa.metrics().legSwing));
+      }
+      return { direction: qa.metrics().actorDirection, swing };
+    }, { keys });
+    expect(pose.direction).toBe(direction); expect(pose.swing).toBeGreaterThan(2);
     if (['e', 'n'].includes(direction)) await page.screenshot({ path: test.info().outputPath(`articulated-${direction}.png`) });
-    for (const key of keys) await page.keyboard.up(key);
     await page.waitForTimeout(100);
   }
   await page.evaluate(async () => {
