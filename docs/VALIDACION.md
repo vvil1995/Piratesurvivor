@@ -109,3 +109,13 @@ Se mantienen sprites detallados; se añaden articulación de piernas, peso, reco
 TypeScript, núcleo y build aprobados. Tres casos nuevos verifican curva/topes, estadísticas de enemigos nacidos tarde independientes de HP del jugador y más enemigos reales en10s avanzados, conservando pool y colisiones. Animación verifica contacto por distancia y ausencia de oscilación al parar. La suite de navegador conserva19 casos aprobados y2 omisiones; se ajusta la espera a reposo del caso de pasos para respetar sus80ms de tolerancia, repetición dirigida aprobada en escritorio y móvil emulado. HTML autónomo también aprobado en ambos perfiles sin red adicional.
 
 No se han medido FPS/memoria en dispositivos físicos. El rig añade dos imágenes por actor (preasignadas, sin texturas nuevas por enemigo); medir su impacto con150 enemigos. La presión a20min está acotada, no es un balance definitivo de campaña.
+
+## 0.5.0 — bloque2
+
+Se añaden vida/regen ilimitadas en elecciones, armadura/críticos reales, resolver de estadísticas y topes combinados configurables. Se mejora XP superior y se muestran estadísticas efectivas en pausa. El entrenamientov1 mantiene +5HP por nivel; no se introducen otras compras permanentes. Se mantienen articulación y presión temporal0.4.1.
+
+Ocho casos nuevos verifican cura exacta20 y repetición, suma sobre base sin exponencial, topes de fuentes y de cooldown por ataque evolucionado, idempotencia/reemplazo de fuente, regeneración almacenada al subir vida y máximo absoluto3HP/s, filtrado de cartas, defensa/regen reales y ausencia de resurrección, daño crítico×1,5 con RNG controlado. Los contenedores probados de objetos/fruta no equivalen a inventario/frutas implementados.
+
+Las fixtures de resistencia elevan también baseStats para que recalcular estadísticas no borre su aumento artificial de vida. La nueva prueba de UI elige vida/armadura/regen/crítico, verifica pausa y XP y reinicio de la build. No demuestra equilibrio ni compatibilidad física. Pendientes: sesiones humanas y FPS/memoria en Android/iOS reales; valoración de las piernas por el usuario.
+
+Resultado final0.5: `npm run check`, `npm test` (seis archivos, incluidos ocho casos de estadísticas) y `npm run build` correctos. Suite completa de navegador: **22 aprobadas,2 omitidas intencionalmente**. HTML autónomo por HTTP local en escritorio y móvil emulado: aprobado sin red adicional ni hookQA. Captura de pausa/estadísticas revisada. El balance numérico permanece provisional y no se ha validado un teléfono físico.

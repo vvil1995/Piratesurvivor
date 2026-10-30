@@ -40,4 +40,4 @@ export function pixelIcon(name: IconName): HTMLImageElement {
   image.src = artUrl(name); image.alt = ''; image.setAttribute('aria-hidden', 'true');
   image.width = 48; image.height = 48; image.draggable = false; return image;
 }
-export const upgradeIcon = (id: string): IconName => ({ power: 'fist', tempo: 'clock', heart: 'heart', feet: 'boot', reach: 'arm', magnet: 'magnet' }[id] as IconName) || 'heart';
+export const upgradeIcon = (id: string): IconName => ({ power: 'fist', armor: 'armor', critical: 'fist', regen: 'heart', tempo: 'clock', heart: 'heart', feet: 'boot', reach: 'arm', magnet: 'magnet' }[id] as IconName) || 'heart';

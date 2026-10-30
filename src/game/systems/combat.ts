@@ -1,10 +1,11 @@
 import { ABILITIES } from '../../content/attacks.ts';
-import { CHARACTERS } from '../../content/catalog.ts';
+import { STAT_LIMITS } from '../../content/stat-rules.ts';
+import { attackCooldown } from './stats.ts';
 import type { Enemy, Player, Strike } from '../core/types.ts';
 import type { CollisionWorld } from '../world/world.ts';
 import type { SpatialGrid } from '../spatial/grid.ts';
 
-export function attack(player: Player, grid: SpatialGrid, abilityId: string, onKill: (enemy: Enemy) => void, world: CollisionWorld, level = 1): Strike | undefined {
+export function attack(player: Player, grid: SpatialGrid, abilityId: string, onKill: (enemy: Enemy) => void, world: CollisionWorld, level = 1, random: () => number = Math.random): Strike | undefined {
   const ability = ABILITIES[abilityId], params = ability.levels[level - 1];
   const range = player.stats.range * params.range;
   let target: Enemy | undefined, closest = range ** 2;
@@ -30,7 +31,9 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
   const hit = new Set<number>();
   const damage = (enemy: Enemy, multiplier = 1) => {
     if (!enemy.active || hit.has(enemy.id)) return;
-    hit.add(enemy.id); enemy.hp -= player.stats.damage * params.damage * multiplier; enemy.flash = 0.15;
+    hit.add(enemy.id);
+    const critical = player.stats.critChance > 0 && random() < Math.min(STAT_LIMITS.critChance, player.stats.critChance);
+    enemy.hp -= player.stats.damage * params.damage * multiplier * (critical ? STAT_LIMITS.critMultiplier : 1); enemy.flash = 0.15;
     const dx = enemy.x - player.x, dy = enemy.y - player.y, distance = Math.max(1, Math.hypot(dx, dy));
     world.moveCircle(enemy, dx / distance * params.knockback, dy / distance * params.knockback, enemy.radius);
     if (enemy.hp <= 0) { enemy.active = false; player.kills++; onKill(enemy); }
@@ -50,21 +53,21 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
 }
 
 export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionWorld, dt: number,
-  onKill: (enemy: Enemy) => void, emit: (strike: Strike) => void): void {
+  onKill: (enemy: Enemy) => void, emit: (strike: Strike) => void, random: () => number = Math.random): void {
   for (const state of player.attacks) {
     const params = ABILITIES[state.id].levels[state.level - 1];
     state.cooldown = Math.max(0, state.cooldown - dt);
     state.burstTimer = Math.max(0, state.burstTimer - dt);
     if (state.pending > 0) {
       if (state.burstTimer > 0) continue;
-      const strike = attack(player, grid, state.id, onKill, world, state.level);
+      const strike = attack(player, grid, state.id, onKill, world, state.level, random);
       if (strike) emit(strike);
       state.pending = strike ? state.pending - 1 : 0; state.burstTimer = params.interval;
     } else if (state.cooldown <= 0) {
-      const strike = attack(player, grid, state.id, onKill, world, state.level);
+      const strike = attack(player, grid, state.id, onKill, world, state.level, random);
       if (!strike) continue;
       emit(strike); state.pending = params.shots - 1; state.burstTimer = params.interval;
-      state.cooldown = Math.max(0.2, params.cooldown * player.stats.cooldown / CHARACTERS[player.characterId].stats.cooldown);
+      state.cooldown = attackCooldown(ABILITIES[state.id].levels[0].cooldown, params.cooldown, player);
     }
   }
 }

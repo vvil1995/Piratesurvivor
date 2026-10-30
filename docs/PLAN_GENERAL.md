@@ -94,3 +94,15 @@ El usuario pide piernas visibles también en laterales/diagonales/espalda y enem
 Presión normal de Shells Town configurable por minutos de Run: HP +12%/min, daño +5,5%/min, velocidad +1,2%/min; intervalo base0,65/(1+0,23×min), mínimo0,22s; grupos1/2/3 a0/4/8min. Topes de crecimiento a20min y150 enemigos simultáneos. A10min: HP×2,2, daño×1,55, velocidad×1,12. Solo enemigos nuevos; no se curan ni transforman los existentes. No depende del HP del jugador ni cambia de isla por reloj. Valores provisionales que se combinarán con bases de cada isla cuando existan, sin sustituir patrones de caps/Roger.
 
 Orden explícito: subir estas correcciones y pasar al bloque2 (pasivas, topes y HUD) sin pedir nueva confirmación.
+
+## Bloque 2 — estadísticas temporales y HUD (0.5)
+
+Tras subir0.4.1, se implementa el bloque2 por autorización expresa: estadísticas derivadas de base y fuentes separadas (permanente/temporal/objetos/fruta; solo las existentes tienen contenido). Las aportaciones porcentuales se suman sobre la base, sin productos repetidos. Perfilv1 y entrenamiento antiguo de vida se conservan.
+
+Valores provisionales implementados: fuerza +8% base×10; cooldown −3% base×10; movimiento +4%×8; defensa +3pp×10; crítico +2pp×10 y multiplicador1,5. Vida +20 y cura20, ilimitada; regeneración +0,02HP/s por elección ilimitada. Regeneración base0,2HP/s (antes había0,7 fijo).
+
+Topes combinados: defensa60%, crítico50%, velocidad+75%, reducción de cooldown50% incluyendo mejoras de la propia técnica, daño3,5×base, alcance2,5×base, recogida3×base. Regeneración ≤0,5% de HP máximos/s y además ≤3HP/s para impedir que vida ilimitada elimine el riesgo por curación. El efecto está limitado aunque sus elecciones no lo estén; la carta lo advierte cuando ya está al tope. Son configuración de equilibrio, no cifras definitivas demostradas.
+
+Cartas finitas sin beneficio al estar en un tope no se ofrecen. Vida y regeneración siguen disponibles, y curación de20 completa la tercera opción cuando procede. Nuevas pasivas se pierden al reiniciar, sin compras permanentes adicionales. Se añade resumen de estadísticas efectivas a pausa, XP numérica/barra más visible y reset sin animación inversa al subir nivel. Berries recogidos y fruta activa no se simulan con indicadores ficticios: se mostrarán cuando existan sus sistemas.
+
+Siguiente bloque del orden: variedad de Shells Town y enemigos; economía/cofres/inventario y entrenamiento completo quedan después. No se añaden multijugador, caps o frutas jugables en0.5.

@@ -1,10 +1,10 @@
-# One Piece Survivor · prototipo 0.4
+# One Piece Survivor · prototipo 0.5
 
 Fangame no oficial de supervivencia para navegador. Gratis, sin anuncios, compras, cuentas ni backend. Lógica propia y nuevos sprites e iconos pixel art generados para el proyecto. No reutiliza código ni recursos de PokéSurvivor.
 
 ## Probar sin instalar herramientas
 
-Descarga y descomprime `one-piece-survivor-browser-v0.4.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
+Descarga y descomprime `one-piece-survivor-browser-v0.5.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
 
 En Android/iOS, la apertura de archivos HTML desde el gestor de archivos depende del sistema y puede mostrar solo una vista previa. Para esos dispositivos, sirve la carpeta `dist/` mediante un alojamiento estático HTTPS privado o desde un ordenador de tu red. No necesita backend. Lee [PROBAR.md](docs/PROBAR.md).
 
@@ -72,3 +72,7 @@ Repositorio privado conectado: https://github.com/vvil1995/Piratesurvivor. CI ve
 - [Validación y pruebas pendientes](docs/VALIDACION.md)
 
 One Piece y sus personajes pertenecen a sus respectivos titulares. La gratuidad, este aviso y los dibujos originales no conceden autorización sobre la franquicia. El código nuevo se mantiene privado sin una licencia pública de redistribución elegida todavía; las dependencias conservan sus propias licencias.
+
+## 0.5: estadísticas y HUD
+
+Vida +20 y cura20 sin límite de elecciones; regeneración pequeña ilimitada en niveles pero limitada en efecto; armadura y críticos reales. Bonificaciones sumadas sobre la base con límites globales configurables. Barra XP superior con valor numérico y reset de nivel, estadísticas efectivas en pausa. El perfil v1 y el entrenamiento antiguo se conservan; berries recogibles, inventario y entrenamiento nuevo siguen pendientes.

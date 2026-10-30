@@ -1,7 +1,8 @@
 export interface Stats {
   maxHp: number; speed: number; damage: number; cooldown: number;
-  range: number; magnet: number;
+  range: number; magnet: number; armor: number; regeneration: number; critChance: number;
 }
+export type StatModifiers = Partial<Record<keyof Stats, number>>;
 export interface CharacterDefinition {
   id: string; name: string; title: string; stats: Stats;
   initialAbility: string; abilities: readonly string[]; visual: string;
@@ -25,7 +26,7 @@ export interface AbilityChoice {
 export type LevelChoice = UpgradeDefinition | AbilityChoice;
 export interface UpgradeDefinition {
   id: string; name: string; description: string; symbol: string;
-  stat: keyof Stats; mode: 'add' | 'multiply'; value: number; max: number;
+  stat: keyof Stats; value: number; max: number;
 }
 
 export interface DifficultyDefinition {

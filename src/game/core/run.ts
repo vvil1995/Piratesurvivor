@@ -1,6 +1,7 @@
 import { CHARACTERS } from '../../content/catalog.ts';
 import { SHELLS_TOWN, type WorldDefinition } from '../../content/worlds/shells-town.ts';
 import type { CharacterDefinition } from '../../content/types.ts';
+import { receivedDamage, regenerationRate, resolveStats } from '../systems/stats.ts';
 import { difficultyAt } from '../systems/difficulty.ts';
 import { tickAttacks } from '../systems/combat.ts';
 import { applyUpgrade, chooseUpgrades, xpForLevel } from '../systems/progression.ts';
@@ -46,9 +47,11 @@ export class Run {
     this.world = new ProceduralWorld((options.seed ?? Math.floor(random() * 2147483647)) ^ this.definition.seedSalt);
     this.enemies = new Pool<Enemy>(this.definition.enemyCap, () => ({ active: false, id: 0, x: 0, y: 0, hp: 0, maxHp: 0, speed: 0, damage: 0, xp: 0, radius: 13, flash: 0 }));
     this.pickups = new Pool<Pickup>(this.definition.pickupCap, () => ({ active: false, x: 0, y: 0, value: 0 }));
-    const stats = { ...this.character.stats, maxHp: this.character.stats.maxHp + Math.min(5, Math.max(0, training)) * 5 };
+    const baseStats = { ...this.character.stats };
+    const modifiers = { permanent: { maxHp: Math.min(5, Math.max(0, training)) * 5 }, temporary: {}, items: {}, fruit: {} };
+    const stats = resolveStats(baseStats, Object.values(modifiers));
     this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], attacks: [newAttack(this.character.initialAbility)], x: 256, y: 256,
-      hp: stats.maxHp, stats, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, facing: 0 });
+      hp: stats.maxHp, stats, baseStats, modifiers, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, facing: 0 });
     this.fieldFor(this.player).update(this.player, 1);
   }
   private fieldFor(actor: Player): FlowField {
@@ -96,7 +99,7 @@ export class Run {
       const length = Math.max(1, Math.hypot(axis.x, axis.y));
       this.world.moveCircle(actor, axis.x / length * actor.stats.speed * dt, axis.y / length * actor.stats.speed * dt, 14);
       actor.hurtTimer = Math.max(0, actor.hurtTimer - dt);
-      actor.hp = Math.min(actor.stats.maxHp, actor.hp + 0.7 * dt);
+      actor.hp = Math.min(actor.stats.maxHp, actor.hp + regenerationRate(actor.stats) * dt);
       this.fieldFor(actor).update(actor, dt);
     }
     if (!living.length) { this.status = 'defeat'; return; }
@@ -127,7 +130,7 @@ export class Run {
       });
       this.world.moveCircle(enemy, (enemy.steerX ?? 0) * enemy.speed * dt + sx * dt * 5, (enemy.steerY ?? 0) * enemy.speed * dt + sy * dt * 5, enemy.radius);
       if (Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
-        target.hp = Math.max(0, target.hp - enemy.damage); target.hurtTimer = 0.65;
+        target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor)); target.hurtTimer = 0.65;
       }
     }
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.status = 'defeat'; return; }
@@ -136,7 +139,7 @@ export class Run {
       if (actor.hp <= 0) continue;
       tickAttacks(actor, this.grid, this.world, dt, enemy => this.dropXp(enemy, actor.id), strike => {
         if (this.strikes.length >= 12) this.strikes.shift(); this.strikes.push(strike);
-      });
+      }, this.random);
     }
     for (let i = this.strikes.length - 1; i >= 0; i--) { this.strikes[i].life -= dt; if (this.strikes[i].life <= 0) this.strikes.splice(i, 1); }
     for (const pickup of this.pickups.items) {

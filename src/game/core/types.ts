@@ -1,10 +1,11 @@
-import type { Stats, LevelChoice, AttackBehavior } from '../../content/types.ts';
+import type { Stats, StatModifiers, LevelChoice, AttackBehavior } from '../../content/types.ts';
 export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory';
 export interface Vector { x: number; y: number }
 export interface Player extends Vector {
   id: string; characterId: string;
   taken: Record<string, number>; choices: LevelChoice[]; attacks: EquippedAttack[];
-  hp: number; stats: Stats; level: number; xp: number; xpNext: number;
+  hp: number; stats: Stats; baseStats: Stats;
+  modifiers: { permanent: StatModifiers; temporary: StatModifiers; items: StatModifiers; fruit: StatModifiers }; level: number; xp: number; xpNext: number;
   kills: number; hurtTimer: number; facing: number;
 }
 export interface EquippedAttack { id: string; level: number; cooldown: number; pending: number; burstTimer: number }

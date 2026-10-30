@@ -13,6 +13,8 @@ export const timeLabel = (seconds: number): string => `${Math.floor(seconds / 60
 export class View {
   private modal?: string;
   private attackSignature = '';
+  private xpLevel = 0;
+  private xpRunId = '';
   private lastFocus?: HTMLElement;
   constructor() {
     document.addEventListener('keydown', event => {
@@ -95,8 +97,23 @@ export class View {
     el('health-fill').style.width = `${ratio}%`;
     const health = document.querySelector('.health-track')!;
     health.setAttribute('aria-valuemax', String(Math.round(p.stats.maxHp))); health.setAttribute('aria-valuenow', String(Math.ceil(p.hp)));
-    const xp = Math.min(100, p.xp / p.xpNext * 100);
-    el('xp-fill').style.width = `${xp}%`; document.querySelector('.xp-track')!.setAttribute('aria-valuenow', String(Math.floor(xp)));
+    const xp = Math.min(100, p.xp / p.xpNext * 100), fill = el('xp-fill');
+    if (this.xpLevel !== p.level || this.xpRunId !== run.id) {
+      fill.style.transition = 'none'; this.xpLevel = p.level; this.xpRunId = run.id;
+      requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.transition = ''; }));
+    }
+    fill.style.width = `${xp}%`;
+    const track = document.querySelector('.xp-track')!;
+    track.setAttribute('aria-valuenow', String(Math.floor(xp))); track.setAttribute('aria-valuetext', `${Math.floor(p.xp)} de ${p.xpNext}`);
+    el('xp-text').textContent = `XP ${Math.floor(p.xp)} / ${p.xpNext}`;
+    if (run.status === 'paused') {
+      el('stat-damage').textContent = p.stats.damage.toFixed(1);
+      el('stat-armor').textContent = `${Math.round(p.stats.armor * 100)}%`;
+      el('stat-critical').textContent = `${Math.round(p.stats.critChance * 100)}% ×1,5`;
+      el('stat-regen').textContent = `${p.stats.regeneration.toFixed(2)} HP/s`;
+      el('stat-speed').textContent = `${Math.round(p.stats.speed)}`;
+      el('stat-cooldown').textContent = `−${Math.round((1 - p.stats.cooldown / p.baseStats.cooldown) * 100)}%`;
+    }
   }
   upgrades(run: Run, choose: (id: string) => void): void {
     const holder = el('upgrade-choices'); holder.replaceChildren();

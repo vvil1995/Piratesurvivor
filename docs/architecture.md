@@ -56,3 +56,9 @@ El guardado v1 admite ahora tiempos superiores a 600 segundos. Se mantiene el fo
 Las cartas añaden aprendizaje/mejora a las pasivas existentes y filtran espacios/máximos. El HUD mantiene cuatro nodos, reconstruidos solo al cambiar Run/build; no se recrea por frame. Los efectos usan Graphics e iconos propios existentes, sin nuevas imágenes ni dependencias. Pistol+ perfora fila, Gatling+ combina seis disparos y dos impactos por disparo, Bazooka+ onda secundaria, Whip+ giro completo. La ráfaga gana golpes también en niveles3 y5.
 
 No se altera el formato v1, entrenamiento antiguo ni economía en este bloque; resolver de estadísticas con topes y reglas temporales nuevas es el punto2 del orden acordado. Tampoco se añaden enlaces, objetos, frutas, jefes o selección de personajes.
+
+## Estadísticas0.5
+
+`content/stat-rules.ts` concentra topes y multiplicador crítico. `systems/stats.ts` resuelve base+fuentes y aplica protecciones al recibir daño, regenerar y calcular intervalos por técnica. `Player.stats` es el resultado efectivo; `baseStats` conserva la base y `modifiers` las contribuciones. Recalcular no suma dos veces ni cura implícitamente. Cambiar/reemplazar una fuente elimina su efecto anterior; los contenedores de objetos/fruta están vacíos hasta sus fases.
+
+`applyUpgrade` suma un modificador temporal y recompone. Solo la carta de vida cura20. Defensa y críticos tienen efecto real en combate; el RNG procede de Run y es inyectable para pruebas. El mínimo de intervalo se aplica sobre el ataque base, de modo que nivel6 no permite saltar el tope50%. Regeneración limitada por vida y máximo absoluto, pero sus elecciones permanecen ilimitadas. Cartas finitas al tope no se ofrecen. No se serializa esta build en el perfilv1.

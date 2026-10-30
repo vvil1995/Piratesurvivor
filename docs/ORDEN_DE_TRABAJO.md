@@ -25,3 +25,10 @@ Las decisiones más recientes prevalecen: modo individual, diez ataques disponib
 ## Estado de este orden
 
 La base de mundo/controles y los atlas ya existen (899d20b). Se comienza ahora el punto1/fase2A: cuatro ataques de Luffy, seis niveles, cartas para aprender/mejorar y HUD de cuatro espacios. Se mantienen pasivas/economía antiguas hasta sus bloques; no confundir este primer bloque con acabar toda Shells Town ni con tener el catálogo de50 ataques. Enlaces, objetos, frutas y nuevos personajes no se implementan en esta entrega.
+
+## Entregas completadas después de este orden
+
+- Punto1:0.4.0, cuatro ataques de Luffy, seis niveles/+, cartas y cuatro espacios.
+- Corrección solicitada0.4.1: articulación de piernas conservando los atlas; enemigos nuevos más fuertes/numerosos por tiempo, con topes y sin transición automática.
+- Punto2:0.5.0, vida/regen, defensa/crítico, resolver y topes, cartas válidas y HUDXP/estadísticas. Indicadores de berries recogidos/fruta esperan a esos sistemas reales; no se muestran valores ficticios.
+- Siguiente pendiente del orden: punto3, variedad de Shells Town y variantes de enemigos. Los resultados anteriores no equivalen a campaña completa ni a equilibrio final.

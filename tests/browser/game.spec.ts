@@ -251,3 +251,39 @@ test('pasos apoyados en el suelo y vuelta a reposo sin deslizamiento visual', as
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorAngle)).toBe(0);
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().legSwing)).toBe(0);
 });
+
+test('vida, defensa, regeneración, críticos y XP se reflejan en la interfaz y se reinician', async ({ page }) => {
+  await page.locator('#start').click();
+  const offer = async (roll: number, hurt = false) => {
+    await page.evaluate(async ({ roll, hurt }) => {
+      const path = '/src/game/systems/progression.ts'; const { chooseUpgrades } = await import(/* @vite-ignore */ path);
+      const r = window.__OPS_QA__!.getRun()!;
+      if (hurt) r.player.hp = 40;
+      r.status = 'levelup'; r.player.choices = chooseUpgrades(r.player.taken, () => roll, r.player);
+      window.__OPS_QA__!.tick();
+    }, { roll, hurt });
+    await expect(page.locator('.upgrade-card')).toHaveCount(3);
+  };
+  await offer(0.2, true);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Espíritu/ }) }).click();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.stats.maxHp)).toBe(120);
+  await offer(0.2);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Guardia/ }) }).click();
+  await offer(0.2);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Segundo aliento/ }) }).click();
+  await offer(0.55);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Golpe certero/ }) }).click();
+  await page.locator('#pause').click();
+  await expect(page.locator('#stat-armor')).toHaveText('3%');
+  await expect(page.locator('#stat-critical')).toHaveText('2% ×1,5');
+  await expect(page.locator('#stat-regen')).toHaveText('0.22 HP/s');
+  await page.evaluate(() => { const p = window.__OPS_QA__!.getRun()!.player; p.xp = p.xpNext / 2; });
+  await expect(page.locator('.xp-track')).toHaveAttribute('aria-valuenow', '50');
+  await expect(page.locator('#xp-text')).toContainText('XP 10 / 21');
+  await page.screenshot({ path: test.info().outputPath('effective-stats.png') });
+  await page.locator('#resume').click();
+  await page.evaluate(() => { window.__OPS_QA__!.getRun()!.player.hp = 0; });
+  await expect(page.locator('#result')).toBeVisible(); await page.locator('#retry').click();
+  const stats = await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.stats);
+  expect(stats.maxHp).toBe(100); expect(stats.armor).toBe(0); expect(stats.critChance).toBe(0); expect(stats.regeneration).toBe(0.2);
+});

@@ -53,3 +53,9 @@ Solo Shells Town y la base del mundo infinito. No están disponibles Morgan, nav
 Luffy empieza con Pistol. Al subir de nivel pueden salir cartas para aprender Gatling, Bazooka o Whip, además de pasivas y mejoras de los ataques equipados. Hay cuatro espacios visibles. Cada técnica llega a seis niveles y se convierte automáticamente en + sin objetos; ya no se ofrece después. Pistol+ perfora una fila; Gatling+ hace seis golpes que perforan dos objetivos; Bazooka+ añade onda de impacto; Whip+ gira360°. Son habilidades automáticas independientes, no una cadena desbloqueada.
 
 Probar tres partidas con elecciones diferentes; comprobar movimiento/joystick mientras se activan varios ataques, golpes detenidos por edificios, pausa durante ráfagas, cartas de nivel6 y reinicio que devuelve solo Pistol1. No se añaden berries recogibles ni personajes nuevos en esta entrega; la economía y pasivas antiguas permanecen pendientes de sus fases. Los números del combate son provisionales, no equilibrio final de campaña.
+
+## 0.5 — pasivas y estadísticas
+
+En las cartas probar vida (+20máximo y cura20), regeneración, armadura y crítico. Pausar para ver los efectos efectivos, que ya respetan topes. La XP se ve arriba con valor numérico y barra; al subir de nivel se reinicia el progreso. Vida/regen no tienen máximo de elecciones; las demás sí. Reiniciar debe borrar estas pasivas y conservar solo el perfil anterior.
+
+El equilibrio cambió: regeneración inicial0,2HP/s; daño/velocidad/cooldown temporales ahora se suman sobre la base, no se multiplican repetidamente. Los números son provisionales y necesitan partidas humanas con y sin mejoras. El enemigo recibe más estadísticas y más frecuencia por tiempo, hasta los topes de0.4.1. No hay viajes automáticos ni victoria por reloj.
