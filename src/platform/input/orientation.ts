@@ -14,7 +14,7 @@ export class MobileOrientation {
     const touch = navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
     const blocked = touch && this.active() && innerHeight > innerWidth;
     this.overlay.hidden = !blocked;
-    for (const name of ['paused', 'levelup', 'hud', 'touch-zone']) document.getElementById(name)!.inert = blocked;
+    for (const name of ['paused', 'levelup', 'combinations', 'hud', 'touch-zone']) document.getElementById(name)!.inert = blocked;
     if (blocked && !this.blocked) {
       this.blocked = true; this.onBlock();
       requestAnimationFrame(() => document.getElementById('rotate-action')!.focus());

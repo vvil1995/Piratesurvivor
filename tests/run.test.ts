@@ -69,7 +69,7 @@ test('graella sin alias a larga distancia y sin historial creciente de celdas', 
 });
 test('entrada y combate se atribuyen al actor, sin depender del alias local', () => {
   const run = new Run();
-  const second = { ...run.player, id: 'player-2', x: 350, stats: { ...run.player.stats }, taken: {}, choices: [], attacks: structuredClone(run.player.attacks), baseStats: { ...run.player.baseStats }, modifiers: structuredClone(run.player.modifiers) };
+  const second = { ...run.player, id: 'player-2', x: 350, stats: { ...run.player.stats }, taken: {}, choices: [], attacks: structuredClone(run.player.attacks), abilitySlots: structuredClone(run.player.abilitySlots), learnedBuffs: [...run.player.learnedBuffs], baseStats: { ...run.player.baseStats }, modifiers: structuredClone(run.player.modifiers) };
   run.players.set(second.id, second);
   const x = second.x;
   run.update(1 / 60, new Map([['player-2', { x: 1, y: 0 }]]));

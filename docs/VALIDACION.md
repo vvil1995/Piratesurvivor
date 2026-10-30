@@ -119,3 +119,11 @@ Ocho casos nuevos verifican cura exacta20 y repetición, suma sobre base sin exp
 Las fixtures de resistencia elevan también baseStats para que recalcular estadísticas no borre su aumento artificial de vida. La nueva prueba de UI elige vida/armadura/regen/crítico, verifica pausa y XP y reinicio de la build. No demuestra equilibrio ni compatibilidad física. Pendientes: sesiones humanas y FPS/memoria en Android/iOS reales; valoración de las piernas por el usuario.
 
 Resultado final0.5: `npm run check`, `npm test` (seis archivos, incluidos ocho casos de estadísticas) y `npm run build` correctos. Suite completa de navegador: **22 aprobadas,2 omitidas intencionalmente**. HTML autónomo por HTTP local en escritorio y móvil emulado: aprobado sin red adicional ni hookQA. Captura de pausa/estadísticas revisada. El balance numérico permanece provisional y no se ha validado un teléfono físico.
+
+## 0.6 — combate v2, fasesA–E
+
+Auditoría y migración incremental: estados aprendidos separados de cuatro ranuras; hasta cuatro componentes por ranura, máximo dos buffs aprendidos, niveles independientes1–6, sin reiniciar recargas/ráfagas. Buffs temporales/constantes calculados una sola vez y limitados por stats globales. Datos de ensayo, no valores definitivos.
+
+Nuevos tests de agrupación/cancelación/transacción, límites de buffs, alternancia/constancia, Balloon/reflectores, Axe diferido, pausa/limpieza, cap de96 proyectiles y colisiones, rifle real. Núcleo/tipos/build aprobados. Navegador:24 aprobadas,2 omisiones intencionales de móvil en escritorio. Se prueba UI de ocho movimientos con gestión táctil y modo constante. Falta equilibrio de sesiones largas y medición física de FPS/consumo con proyectiles/áreas/rifles. FaseF de otros personajes todavía no implementada en esta fita.
+
+Artefacto0.6 autónomo también aprobado por HTTP local en escritorio/móvil emulado, sin red adicional ni QA en producción. Captura de ocho movimientos/gestión táctil revisada. La ejecución de26 casos de navegador fue24 aprobados y2 omitidos; pruebas aceleradas no equivalen a una partida humana completa.

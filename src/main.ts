@@ -5,6 +5,7 @@ import { Run } from './game/core/run.ts';
 import { Controller } from './platform/input/controller.ts';
 import { MobileOrientation } from './platform/input/orientation.ts';
 import { SaveStore } from './platform/persistence/save.ts';
+import { renderCombinations } from './ui/combinations.ts';
 import { View, el } from './ui/view.ts';
 
 const store = new SaveStore();
@@ -29,6 +30,16 @@ function sync(): void {
     if (!run) return;
     if (run.selectUpgrade(id)) { previousStatus = ''; view.showModal(); (document.activeElement as HTMLElement)?.blur(); sync(); }
   });
+  else if (run.status === 'combining') {
+    view.showModal('combinations');
+    const refresh = () => { previousStatus = ''; sync(); };
+    renderCombinations(run, {
+      move: (id, to) => { const ok = run!.moveComponent(id, to); if (ok) refresh(); return ok; },
+      merge: (from, to) => { const ok = run!.combine(from, to); if (ok) refresh(); return ok; },
+      done: () => { if (!orientation.blocked && run!.finishCombinations()) { refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); } },
+      cancel: () => { run!.cancelCombinations(); refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); },
+    });
+  }
   else if (run.status === 'paused') view.showModal('paused');
   else if (run.status === 'defeat' || run.status === 'victory') {
     const result = run.result()!; store.record(result); view.result(result); view.warning(store.warning);
@@ -44,6 +55,9 @@ function home(): void {
 el('start').addEventListener('click', start); el('retry').addEventListener('click', start);
 el('return-home').addEventListener('click', home); el('abandon').addEventListener('click', home);
 el('rotate-home').addEventListener('click', home);
+for (const id of ['manage-abilities', 'pause-build']) el(id).addEventListener('click', () => {
+  if (orientation.blocked || !run?.openCombinations()) return; previousStatus = ''; sync();
+});
 el('pause').addEventListener('click', pause);
 el('resume').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); view.showModal(); (document.activeElement as HTMLElement)?.blur(); sync(); });
 el('train').addEventListener('click', () => { store.train(); view.home(store); });

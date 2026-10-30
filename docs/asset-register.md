@@ -67,3 +67,7 @@ Se conservan los atlas detallados aprobados. `walk-rig.ts` divide el dibujo en t
 ## Bloque2 — reutilización
 
 Armadura usa el icono de coraza original del atlasv2; regeneración usa corazón y críticos puño. Sin nuevos recursos gráficos o de sonido ni dependencias. Las hojas ensayadas para más pasos no se incorporaron: la marcha actual es articulación en motor sobre el arte ya registrado.
+
+## Combate v2 —0.6
+
+Burbujas defensivas, marcas de área, ondas, auras de buffs y proyectiles son Graphics originales reutilizados con presupuestos fijos. Se reutilizan iconos de puño/bota/coraza/reloj. No se descargan recursos ni se añaden dependencias. Marine con rifle usa el atlas existente con tinte provisional; su comportamiento de disparo sí está implementado. No se presenta esta visual provisional como un sprite final de arma.

@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Run } from '../src/game/core/run.ts';
 import { ABILITIES } from '../src/content/attacks.ts';
-import { UPGRADES } from '../src/content/catalog.ts';
-import { improveAttack, newAttack } from '../src/game/systems/loadout.ts';
+import { CHARACTERS, UPGRADES } from '../src/content/catalog.ts';
+import { improveAttack, mergeSlots, newAttack } from '../src/game/systems/loadout.ts';
 import { chooseUpgrades } from '../src/game/systems/progression.ts';
 import { attack, tickAttacks } from '../src/game/systems/combat.ts';
 import { SpatialGrid } from '../src/game/spatial/grid.ts';
@@ -15,14 +15,15 @@ const actor = () => { const p = new Run().player; p.x = 0; p.y = 0; return p; };
 
 test('cuatro ataques, seis niveles, evolución automática y fin de ofertas al máximo', () => {
   const p = actor();
-  for (const id of Object.keys(ABILITIES)) {
+  for (const id of CHARACTERS.luffy.abilities) {
     assert.equal(ABILITIES[id].levels.length, 6);
+    if (!p.attacks.some(a => a.id === id) && p.abilitySlots.every(slot => slot.length)) mergeSlots(p, 1, 0);
     while ((p.attacks.find(a => a.id === id)?.level ?? 0) < 6) assert.equal(improveAttack(p, id), true);
     assert.equal(improveAttack(p, id), false);
   }
-  assert.equal(p.attacks.length, 4); assert.equal(improveAttack(p, 'inventado'), false);
+  assert.equal(p.attacks.length, 6); assert.equal(improveAttack(p, 'inventado'), false);
   const choices = chooseUpgrades({}, () => 0.99, p);
-  assert.equal(choices.length, 3); assert.ok(choices.every(c => !('kind' in c)));
+  assert.equal(choices.length, 3); assert.ok(choices.every(c => !('kind' in c) || ABILITIES[c.abilityId].category === 'buff'));
   const fresh = actor(); assert.equal(fresh.attacks.length, 1); assert.equal(fresh.attacks[0].level, 1);
 });
 
@@ -38,7 +39,7 @@ test('Pistol normal alcanza un enemigo y Pistol+ perfora la fila', () => {
 
 test('Gatling dispara en tiempos distintos y busca al siguiente enemigo tras una baja', () => {
   const p = actor(); p.attacks = [newAttack('gatling')];
-  const enemies = [makeEnemy(1, 45, 0, 10), makeEnemy(2, 65, 0, 10), makeEnemy(3, 85, 0, 10)];
+  const enemies = [makeEnemy(1, 45, 0, 10), makeEnemy(2, 0, 65, 10), makeEnemy(3, -85, 0, 10)];
   const grid = new SpatialGrid(), kills: number[] = [], moments: number[] = [];
   for (let i = 0; i < 28; i++) {
     grid.rebuild(enemies);
@@ -73,7 +74,7 @@ test('temporizadores independientes y pausa de Run congelan ataques y ráfagas',
 
 test('ningún ejecutor atraviesa muros ni concede doble recompensa en golpes múltiples', () => {
   const wallWorld: CollisionWorld = { ...clearWorld, segmentClear: () => false };
-  for (const id of Object.keys(ABILITIES)) {
+  for (const id of ['elastic-punch', 'gatling', 'bazooka', 'whip']) {
     const p = actor(), enemy = makeEnemy(1, 50, 0, 1), grid = new SpatialGrid(); grid.rebuild([enemy]);
     let kills = 0;
     assert.equal(attack(p, grid, id, () => kills++, wallWorld, 6), undefined);

@@ -106,3 +106,9 @@ Topes combinados: defensa60%, crítico50%, velocidad+75%, reducción de cooldown
 Cartas finitas sin beneficio al estar en un tope no se ofrecen. Vida y regeneración siguen disponibles, y curación de20 completa la tercera opción cuando procede. Nuevas pasivas se pierden al reiniciar, sin compras permanentes adicionales. Se añade resumen de estadísticas efectivas a pausa, XP numérica/barra más visible y reset sin animación inversa al subir nivel. Berries recogidos y fruta activa no se simulan con indicadores ficticios: se mostrarán cuando existan sus sistemas.
 
 Siguiente bloque del orden: variedad de Shells Town y enemigos; economía/cofres/inventario y entrenamiento completo quedan después. No se añaden multijugador, caps o frutas jugables en0.5.
+
+## Regla vigente — combate v2 (0.6)
+
+Nueva instrucción del usuario sustituye contradicciones: cada personaje tendrá6 exclusivas +4 buffs universales (30 exclusivas distintas y4 compartidas). Solo2 buffs distintos aprendidos por Run, hasta8 movimientos en total. Cuatro ranuras, hasta4 componentes por ranura; cada componente conserva estado, nivel, efecto y cooldown independiente. Agrupar no crea cadena ni fusión y ya no exige primero un encuentro; las recompensas de caps quedan sin fijar. El motor admite grupos ampliables y separación sin reiniciar relojes.
+
+FasesA–E implementadas para Luffy en0.6:6 técnicas/+ y4 buffs disponibles, gestión de quinta habilidad, HUD por ranura y menú táctil. Los buffs solos alternan tiempo/cooldown y agrupados son constantes menores; números expresamente de prueba en buffs.ts. Los otros personajes siguen en faseF; no se regalan reclutas ni se modifica la economía pendiente.

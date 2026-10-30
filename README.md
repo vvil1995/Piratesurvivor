@@ -1,10 +1,10 @@
-# One Piece Survivor · prototipo 0.5
+# One Piece Survivor · prototipo 0.6
 
 Fangame no oficial de supervivencia para navegador. Gratis, sin anuncios, compras, cuentas ni backend. Lógica propia y nuevos sprites e iconos pixel art generados para el proyecto. No reutiliza código ni recursos de PokéSurvivor.
 
 ## Probar sin instalar herramientas
 
-Descarga y descomprime `one-piece-survivor-browser-v0.5.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
+Descarga y descomprime `one-piece-survivor-browser-v0.6.0.zip` y abre **One-Piece-Survivor.html** con un navegador moderno. El archivo incluye motor, estilos, gráficos y avisos MIT. No necesita conexión ni un servidor.
 
 En Android/iOS, la apertura de archivos HTML desde el gestor de archivos depende del sistema y puede mostrar solo una vista previa. Para esos dispositivos, sirve la carpeta `dist/` mediante un alojamiento estático HTTPS privado o desde un ordenador de tu red. No necesita backend. Lee [PROBAR.md](docs/PROBAR.md).
 
@@ -76,3 +76,7 @@ One Piece y sus personajes pertenecen a sus respectivos titulares. La gratuidad,
 ## 0.5: estadísticas y HUD
 
 Vida +20 y cura20 sin límite de elecciones; regeneración pequeña ilimitada en niveles pero limitada en efecto; armadura y críticos reales. Bonificaciones sumadas sobre la base con límites globales configurables. Barra XP superior con valor numérico y reset de nivel, estadísticas efectivas en pausa. El perfil v1 y el entrenamiento antiguo se conservan; berries recogibles, inventario y entrenamiento nuevo siguen pendientes.
+
+## 0.6: seis técnicas y combinaciones
+
+Luffy incorpora Balloon defensivo y Axe con impacto diferido. Seis exclusivas y hasta dos de cuatro buffs, cuatro ranuras de hasta cuatro componentes independientes. La quinta habilidad abre gestión antes de aprenderla. Agrupar no reinicia cooldowns ni crea una cadena. Buff solo temporal; agrupado constante menor. Perfil de intensidades/tiempos expresamente provisional. Las otras cuatro plantillas esperan la faseF y el acceso público sigue en Luffy.

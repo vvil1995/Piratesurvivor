@@ -3,6 +3,8 @@ import type { RunResult } from '../game/core/types.ts';
 import type { SaveStore } from '../platform/persistence/save.ts';
 import { TRAINING_COST, TRAINING_MAX } from '../content/catalog.ts';
 import { artUrl, pixelIcon, upgradeIcon } from './pixel-art.ts';
+import { abilityIcon } from './ability-icon.ts';
+import { combined } from '../game/systems/buffs.ts';
 import { ABILITIES, ATTACK_SLOTS } from '../content/attacks.ts';
 export const el = <T extends HTMLElement = HTMLElement>(id: string): T => {
   const node = document.getElementById(id);
@@ -19,7 +21,7 @@ export class View {
   constructor() {
     document.addEventListener('keydown', event => {
       if (!this.modal || event.key !== 'Tab') return;
-      const items = [...el(this.modal).querySelectorAll<HTMLElement>('button:not([disabled]), input:not([hidden]), [tabindex="0"], a[href]')].filter(node => node.offsetParent !== null);
+      const items = [...el(this.modal).querySelectorAll<HTMLElement>('button:not([disabled]), input:not([hidden]), select, [tabindex="0"], a[href]')].filter(node => node.offsetParent !== null);
       if (!items.length) return;
       const first = items[0], last = items[items.length - 1];
       if (event.shiftKey && (document.activeElement === first || !el(this.modal).contains(document.activeElement))) { event.preventDefault(); last.focus(); }
@@ -29,7 +31,7 @@ export class View {
   showModal(id?: string): void {
     if (id === this.modal) return;
     if (!this.modal && id) this.lastFocus = document.activeElement as HTMLElement;
-    for (const name of ['help', 'credits', 'paused', 'levelup', 'result']) el(name).hidden = name !== id;
+    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations']) el(name).hidden = name !== id;
     this.modal = id;
     el('home').inert = !!id;
     el('topbar').inert = !!id;
@@ -71,21 +73,29 @@ export class View {
   }
   hud(run: Run): void {
     const p = run.player;
-    const signature = run.id + p.attacks.map(a => `${a.id}:${a.level}`).join('|');
+    const signature = run.id + p.abilitySlots.map(slot => slot.join(',')).join('|') + p.attacks.map(a => `${a.id}:${a.level}:${a.activeFor > 0}`).join('|');
     if (signature !== this.attackSignature) {
       this.attackSignature = signature;
       const slots = el('attack-slots'); slots.replaceChildren();
       for (let i = 0; i < ATTACK_SLOTS; i++) {
-        const state = p.attacks[i], card = document.createElement('div'); card.className = 'attack-slot'; card.setAttribute('role', 'listitem');
-        if (state) {
-          const definition = ABILITIES[state.id], plus = state.level === 6;
-          card.classList.toggle('evolved', plus); card.dataset.ability = state.id;
-          card.append(pixelIcon(definition.behavior === 'sweep' ? 'boot' : 'fist'));
-          const name = document.createElement('span'); name.textContent = definition.shortName + (plus ? ' +' : '');
-          const level = document.createElement('small'); level.textContent = plus ? 'NV. 6 · EVOLUCIÓN' : `NV. ${state.level} / 6`;
-          card.append(name, level); card.title = definition.name + (plus ? '+: ' + definition.evolution : ': ' + definition.description);
-          card.setAttribute('aria-label', `${definition.name}, nivel ${state.level}${plus ? ', evolucionado' : ''}`);
-        } else { card.classList.add('empty'); card.textContent = '+'; card.setAttribute('aria-label', `Espacio ${i + 1} libre`); }
+        const ids = p.abilitySlots[i], card = document.createElement('div'); card.className = 'attack-slot'; card.setAttribute('role', 'listitem');
+        card.classList.toggle('grouped', ids.length > 1);
+        if (!ids.length) { card.classList.add('empty'); card.textContent = '+'; card.setAttribute('aria-label', `Espacio ${i + 1} libre`); }
+        for (const id of ids) {
+          const state = p.attacks.find(a => a.id === id)!, definition = ABILITIES[id], plus = state.level === 6;
+          const component = document.createElement('div'); component.className = 'ability-component'; component.dataset.ability = id;
+          component.classList.toggle('evolved', plus);
+          component.append(pixelIcon(abilityIcon(definition)));
+          const text = document.createElement('span'); text.className = 'component-name'; text.textContent = definition.shortName + (plus ? ' +' : '');
+          const level = document.createElement('small');
+          const mode = definition.buff ? combined(p, id) ? 'CONST' : state.activeFor > 0 ? 'ACTIVO' : 'DESCANSO' : '';
+          level.textContent = mode ? `NV. ${state.level} · ${mode}` : plus ? 'NV. 6 · EVOLUCIÓN' : `NV. ${state.level} / 6`;
+          component.classList.toggle('buff-constant', mode === 'CONST'); component.classList.toggle('buff-active', mode === 'ACTIVO'); component.classList.toggle('buff-rest', mode === 'DESCANSO');
+          const detail = document.createElement('span'); detail.append(text, level); component.append(detail);
+          component.title = `${definition.name}: ${plus ? definition.evolution : definition.description}`;
+          component.setAttribute('aria-label', `${definition.name}, nivel ${state.level}${plus ? ', evolucionado' : ''} ${mode}`);
+          card.append(component);
+        }
         slots.append(card);
       }
     }
@@ -119,10 +129,10 @@ export class View {
     const holder = el('upgrade-choices'); holder.replaceChildren();
     for (const upgrade of run.choices) {
       const button = document.createElement('button'); button.className = 'upgrade-card';
-      const symbol = document.createElement('span'); symbol.className = 'upgrade-symbol'; symbol.append(pixelIcon('kind' in upgrade ? ABILITIES[upgrade.abilityId].behavior === 'sweep' ? 'boot' : 'fist' : upgradeIcon(upgrade.id)));
+      const symbol = document.createElement('span'); symbol.className = 'upgrade-symbol'; symbol.append(pixelIcon('kind' in upgrade ? abilityIcon(ABILITIES[upgrade.abilityId]) : upgradeIcon(upgrade.id)));
       const title = document.createElement('h3'); title.textContent = upgrade.name;
       const description = document.createElement('p'); description.textContent = upgrade.description;
-      const tag = document.createElement('small'); tag.textContent = 'kind' in upgrade ? 'ELEGIR ATAQUE →' : `ELEGIR MEJORA →  ·  NIVEL ${(run.taken[upgrade.id] || 0) + 1}`;
+      const tag = document.createElement('small'); tag.textContent = 'kind' in upgrade ? ABILITIES[upgrade.abilityId].buff ? 'ELEGIR BUFF →' : 'ELEGIR HABILIDAD →' : `ELEGIR MEJORA →  ·  NIVEL ${(run.taken[upgrade.id] || 0) + 1}`;
       button.append(symbol, title, description, tag); button.addEventListener('click', () => choose(upgrade.id)); holder.append(button);
     }
     this.showModal('levelup');

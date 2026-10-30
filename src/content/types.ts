@@ -9,15 +9,17 @@ export interface CharacterDefinition {
 }
 export interface EnemyDefinition {
   id: string; hp: number; damage: number; speed: number;
-  xp: number; radius: number; visual: string;
+  xp: number; radius: number; visual: string; ranged?: { interval: number; speed: number; range: number };
 }
-export type AttackBehavior = 'line' | 'burst' | 'cone' | 'sweep';
+export type AttackBehavior = 'line' | 'burst' | 'cone' | 'sweep' | 'buff' | 'guard' | 'slam';
 export interface AttackLevel {
   damage: number; range: number; cooldown: number; width: number; arc: number;
   hits: number; shots: number; interval: number; knockback: number; splash: number;
+  duration?: number; delay?: number; area?: number; guard?: number; inflate?: number; shape?: 'line' | 'cone';
 }
 export interface AbilityDefinition {
   id: string; name: string; shortName: string; behavior: AttackBehavior;
+  category?: 'exclusive' | 'buff'; buff?: BuffDefinition;
   description: string; evolution: string; levels: readonly AttackLevel[];
 }
 export interface AbilityChoice {
@@ -32,4 +34,10 @@ export interface UpgradeDefinition {
 export interface DifficultyDefinition {
   maxMinutes: number; hpPerMinute: number; damagePerMinute: number; speedPerMinute: number;
   spawnAcceleration: number; minInterval: number; batchEveryMinutes: number; maxBatch: number;
+}
+
+export interface BuffDefinition {
+  stat: 'speed' | 'armor' | 'damage' | 'cooldown';
+  temporary: readonly number[]; constant: readonly number[];
+  duration: readonly number[]; cooldown: readonly number[];
 }

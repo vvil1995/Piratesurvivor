@@ -3,11 +3,12 @@ import type { CharacterDefinition, EnemyDefinition, UpgradeDefinition } from './
 export const CHARACTERS: Record<string, CharacterDefinition> = {
   luffy: {
     id: 'luffy', name: 'Monkey D. Luffy', title: 'El futuro rey de los piratas',
-    initialAbility: 'elastic-punch', abilities: ['elastic-punch', 'gatling', 'bazooka', 'whip'], visual: 'straw-hat',
+    initialAbility: 'elastic-punch', abilities: ['elastic-punch', 'gatling', 'bazooka', 'whip', 'balloon', 'axe'], visual: 'straw-hat',
     stats: { maxHp: 100, speed: 195, damage: 24, cooldown: 0.72, range: 155, magnet: 75, armor: 0, regeneration: 0.2, critChance: 0 },
   },
 };
 export const ENEMIES: Record<string, EnemyDefinition> = {
+  'marine-rifle': { id: 'marine-rifle', hp: 32, damage: 10, speed: 66, xp: 7, radius: 13, visual: 'marine', ranged: { interval: 2.4, speed: 200, range: 250 } },
   marine: { id: 'marine', hp: 32, damage: 10, speed: 66, xp: 5, radius: 13, visual: 'marine' },
 };
 export { ABILITIES } from './attacks.ts';

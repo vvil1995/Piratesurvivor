@@ -1,4 +1,22 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function offerChoice(page: Page, target: string, capPassives = false, hurt = false) {
+  await page.evaluate(async ({ target, capPassives, hurt }) => {
+    const progressionPath = '/src/game/systems/progression.ts', catalogPath = '/src/content/catalog.ts';
+    const { chooseUpgrades } = await import(/* @vite-ignore */ progressionPath);
+    const { UPGRADES } = await import(/* @vite-ignore */ catalogPath);
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player;
+    if (capPassives) Object.assign(p.taken, Object.fromEntries(UPGRADES.map((u: { id: string; max: number }) => [u.id, u.max])));
+    if (hurt) p.hp = 40;
+    for (let i = 0; i < 100; i++) {
+      const choices = chooseUpgrades(p.taken, () => i / 100, p);
+      if (choices.some((c: { id: string }) => c.id === target)) { r.status = 'levelup'; p.choices = choices; qa.tick(); return; }
+    }
+    throw new Error(`No hay carta válida: ${target}`);
+  }, { target, capPassives, hurt });
+  await expect(page.locator('#levelup')).toBeVisible();
+  await expect(page.locator('.upgrade-card')).toHaveCount(3);
+}
 
 test.beforeEach(async ({ page, isMobile }) => {
   if (isMobile) await page.setViewportSize({ width: 844, height: 390 });
@@ -181,32 +199,18 @@ test('cuatro ataques equipados, evolución +, cartas válidas y reinicio de buil
   await page.locator('#start').click();
   await expect(page.locator('.attack-slot')).toHaveCount(4);
   await expect(page.locator('.attack-slot.empty')).toHaveCount(3);
-  const offer = async (last: boolean) => {
-    await page.evaluate(async (last) => {
-      const progressionPath = '/src/game/systems/progression.ts', catalogPath = '/src/content/catalog.ts';
-      const { chooseUpgrades } = await import(/* @vite-ignore */ progressionPath);
-      const { UPGRADES } = await import(/* @vite-ignore */ catalogPath);
-      const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player;
-      // Aislar la UI de ataques; no representa el ritmo natural de una partida.
-      p.taken = Object.fromEntries(UPGRADES.map((u: { id: string; max: number }) => [u.id, u.max]));
-      p.hp = p.stats.maxHp;
-      r.status = 'levelup'; p.choices = chooseUpgrades(p.taken, () => last ? 0.999 : 0, p); qa.tick();
-    }, last);
-    await expect(page.locator('#levelup')).toBeVisible();
-    await expect(page.locator('.upgrade-card')).toHaveCount(3);
-  };
   for (const name of ['Gatling', 'Bazooka', 'Whip']) {
-    await offer(true);
+    await offerChoice(page, `ability:${name.toLowerCase()}`, true);
     await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
   }
   await expect(page.locator('.attack-slot.empty')).toHaveCount(0);
   for (let i = 0; i < 5; i++) {
-    await offer(false);
+    await offerChoice(page, 'ability:elastic-punch', true);
     await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Pistol/ }) }).click();
   }
   await expect(page.locator('[data-ability="elastic-punch"]')).toHaveClass(/evolved/);
   await expect(page.locator('[data-ability="elastic-punch"]')).toContainText('Pistol +');
-  await offer(false); await expect(page.locator('.upgrade-card')).not.toContainText(['Pistol']);
+  await offerChoice(page, 'ability:gatling', true); await expect(page.locator('.upgrade-card')).not.toContainText(['Pistol']);
   await page.locator('.upgrade-card').first().click();
   await page.screenshot({ path: test.info().outputPath('four-attacks.png') });
   await page.evaluate(() => { window.__OPS_QA__!.getRun()!.player.hp = 0; });
@@ -254,24 +258,14 @@ test('pasos apoyados en el suelo y vuelta a reposo sin deslizamiento visual', as
 
 test('vida, defensa, regeneración, críticos y XP se reflejan en la interfaz y se reinician', async ({ page }) => {
   await page.locator('#start').click();
-  const offer = async (roll: number, hurt = false) => {
-    await page.evaluate(async ({ roll, hurt }) => {
-      const path = '/src/game/systems/progression.ts'; const { chooseUpgrades } = await import(/* @vite-ignore */ path);
-      const r = window.__OPS_QA__!.getRun()!;
-      if (hurt) r.player.hp = 40;
-      r.status = 'levelup'; r.player.choices = chooseUpgrades(r.player.taken, () => roll, r.player);
-      window.__OPS_QA__!.tick();
-    }, { roll, hurt });
-    await expect(page.locator('.upgrade-card')).toHaveCount(3);
-  };
-  await offer(0.2, true);
+  await offerChoice(page, 'heart', false, true);
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Espíritu/ }) }).click();
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.stats.maxHp)).toBe(120);
-  await offer(0.2);
+  await offerChoice(page, 'armor');
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Guardia/ }) }).click();
-  await offer(0.2);
+  await offerChoice(page, 'regen');
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Segundo aliento/ }) }).click();
-  await offer(0.55);
+  await offerChoice(page, 'critical');
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Golpe certero/ }) }).click();
   await page.locator('#pause').click();
   await expect(page.locator('#stat-armor')).toHaveText('3%');
@@ -286,4 +280,46 @@ test('vida, defensa, regeneración, críticos y XP se reflejan en la interfaz y 
   await expect(page.locator('#result')).toBeVisible(); await page.locator('#retry').click();
   const stats = await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.stats);
   expect(stats.maxHp).toBe(100); expect(stats.armor).toBe(0); expect(stats.critChance).toBe(0); expect(stats.regeneration).toBe(0.2);
+});
+
+test('quinta habilidad, combinación táctil, buffs constantes y ocho movimientos sin duplicados', async ({ page }) => {
+  await page.locator('#start').click();
+  for (const [id, name] of [['gatling', 'Gatling'], ['bazooka', 'Bazooka'], ['whip', 'Whip']]) {
+    await offerChoice(page, `ability:${id}`, true);
+    await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
+  }
+  await offerChoice(page, 'ability:fury', true);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Furia/ }) }).click();
+  await expect(page.locator('#combinations')).toBeVisible();
+  await expect(page.locator('#combination-done')).toBeDisabled();
+  const time = await page.evaluate(() => window.__OPS_QA__!.getRun()!.time);
+  await page.waitForTimeout(150); expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.time)).toBe(time);
+  await page.locator('#merge-from').selectOption('1'); await page.locator('#merge-to').selectOption('0'); await page.locator('#merge-apply').click();
+  await expect(page.locator('#combination-done')).toBeEnabled(); await page.locator('#combination-done').click();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.attacks.length)).toBe(5);
+  await page.locator('#manage-abilities').click();
+  const fury = page.locator('.component-detail').filter({ has: page.getByRole('heading', { name: /Furia/ }) });
+  await fury.locator('select').selectOption('0'); await fury.getByRole('button', { name: 'Mover', exact: true }).click();
+  await expect(page.locator('#combination-slots')).toContainText('CONSTANTE');
+  await page.locator('#combination-done').click();
+  await expect(page.locator('[data-ability="fury"]')).toHaveClass(/buff-constant/);
+  await offerChoice(page, 'ability:impulse', true);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Impulso/ }) }).click();
+  for (const [id, name, from, to] of [['balloon', 'Balloon', '2', '3'], ['axe', 'Axe', '1', '0']]) {
+    await offerChoice(page, `ability:${id}`, true);
+    await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
+    await expect(page.locator('#combinations')).toBeVisible();
+    await page.locator('#merge-from').selectOption(from); await page.locator('#merge-to').selectOption(to); await page.locator('#merge-apply').click();
+    await page.locator('#combination-done').click();
+  }
+  const data = await page.evaluate(async () => {
+    const p = window.__OPS_QA__!.getRun()!.player, path = '/src/game/systems/progression.ts'; const { chooseUpgrades } = await import(/* @vite-ignore */ path);
+    const offers = []; for (let i = 0; i < 20; i++) offers.push(...chooseUpgrades(p.taken, () => i / 20, p).map((c: { id: string }) => c.id));
+    return { states: p.attacks.length, unique: new Set(p.abilitySlots.flat()).size, buffs: p.learnedBuffs.length, slots: p.abilitySlots.map(s => s.length), offers };
+  });
+  expect(data.states).toBe(8); expect(data.unique).toBe(8); expect(data.buffs).toBe(2);
+  expect(data.slots.every(n => n <= 4)).toBe(true);
+  expect(data.offers).not.toContain('ability:fortress'); expect(data.offers).not.toContain('ability:frenzy');
+  await page.locator('#manage-abilities').click();
+  await page.screenshot({ path: test.info().outputPath('eight-movements.png') });
 });

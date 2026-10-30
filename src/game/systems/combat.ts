@@ -1,5 +1,6 @@
 import { ABILITIES } from '../../content/attacks.ts';
-import { STAT_LIMITS } from '../../content/stat-rules.ts';
+import { damageEnemy } from './hits.ts';
+import { castArea, type Effects } from './effects.ts';
 import { attackCooldown } from './stats.ts';
 import type { Enemy, Player, Strike } from '../core/types.ts';
 import type { CollisionWorld } from '../world/world.ts';
@@ -7,6 +8,7 @@ import type { SpatialGrid } from '../spatial/grid.ts';
 
 export function attack(player: Player, grid: SpatialGrid, abilityId: string, onKill: (enemy: Enemy) => void, world: CollisionWorld, level = 1, random: () => number = Math.random): Strike | undefined {
   const ability = ABILITIES[abilityId], params = ability.levels[level - 1];
+  if (ability.category === 'buff' || ability.behavior === 'guard' || ability.behavior === 'slam') return;
   const range = player.stats.range * params.range;
   let target: Enemy | undefined, closest = range ** 2;
   grid.visit(player.x, player.y, range, enemy => {
@@ -22,7 +24,7 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
     const dx = enemy.x - player.x, dy = enemy.y - player.y, distance = Math.hypot(dx, dy);
     if (distance > range + enemy.radius || !world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) return;
     const projection = dx * ax + dy * ay;
-    const line = ability.behavior === 'line' || ability.behavior === 'burst';
+    const line = ability.behavior === 'line' || ability.behavior === 'burst' && params.shape !== 'cone';
     if (line ? projection < 0 || Math.abs(dx * ay - dy * ax) > params.width + enemy.radius :
       distance > 1 && projection / distance < Math.cos(params.arc)) return;
     victims.push(enemy);
@@ -32,11 +34,7 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
   const damage = (enemy: Enemy, multiplier = 1) => {
     if (!enemy.active || hit.has(enemy.id)) return;
     hit.add(enemy.id);
-    const critical = player.stats.critChance > 0 && random() < Math.min(STAT_LIMITS.critChance, player.stats.critChance);
-    enemy.hp -= player.stats.damage * params.damage * multiplier * (critical ? STAT_LIMITS.critMultiplier : 1); enemy.flash = 0.15;
-    const dx = enemy.x - player.x, dy = enemy.y - player.y, distance = Math.max(1, Math.hypot(dx, dy));
-    world.moveCircle(enemy, dx / distance * params.knockback, dy / distance * params.knockback, enemy.radius);
-    if (enemy.hp <= 0) { enemy.active = false; player.kills++; onKill(enemy); }
+    damageEnemy(player, enemy, player.stats.damage * params.damage * multiplier, params.knockback, player, world, onKill, random);
   };
   for (const enemy of victims.slice(0, params.hits)) damage(enemy);
   if (params.splash) grid.visit(impactX, impactY, params.splash + 15, enemy => {
@@ -53,11 +51,28 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
 }
 
 export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionWorld, dt: number,
-  onKill: (enemy: Enemy) => void, emit: (strike: Strike) => void, random: () => number = Math.random): void {
+  onKill: (enemy: Enemy) => void, emit: (strike: Strike) => void, random: () => number = Math.random, effects?: Effects): void {
   for (const state of player.attacks) {
+    if (ABILITIES[state.id].category === 'buff') continue;
     const params = ABILITIES[state.id].levels[state.level - 1];
+    if (ABILITIES[state.id].behavior === 'guard') {
+      if (state.activationPending) {
+        state.activationPending = false;
+        const radius = player.stats.range * params.range;
+        grid.visit(player.x, player.y, radius + 15, enemy => {
+          const dx = enemy.x - player.x, dy = enemy.y - player.y, d = Math.max(1, Math.hypot(dx, dy));
+          if (d <= radius + enemy.radius && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) world.moveCircle(enemy, dx / d * params.knockback, dy / d * params.knockback, enemy.radius);
+        });
+        emit({ x: player.x, y: player.y, angle: 0, reach: radius, life: 0.25, ownerId: player.id, behavior: 'guard', evolved: state.level === 6, arc: Math.PI, splash: 0, impact: { x: player.x, y: player.y } });
+      }
+      continue;
+    }
     state.cooldown = Math.max(0, state.cooldown - dt);
     state.burstTimer = Math.max(0, state.burstTimer - dt);
+    if (ABILITIES[state.id].behavior === 'slam') {
+      if (state.cooldown <= 0 && effects && castArea(player, params, state.level, effects, grid, world)) state.cooldown = attackCooldown(ABILITIES[state.id].levels[0].cooldown, params.cooldown, player);
+      continue;
+    }
     if (state.pending > 0) {
       if (state.burstTimer > 0) continue;
       const strike = attack(player, grid, state.id, onKill, world, state.level, random);

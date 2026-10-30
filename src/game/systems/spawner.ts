@@ -24,9 +24,15 @@ export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: V
   }
   if (!found) return;
   const enemy = pool.acquire(); if (!enemy) return;
-  const def = ENEMIES[definition.enemyId], scale = definition.enemyScale;
+  const variants = definition.enemyVariants?.filter(v => seconds >= v.minSeconds);
+  let type = definition.enemyId;
+  if (variants && variants.length > 1) {
+    let roll = random() * variants.reduce((n, v) => n + v.weight, 0);
+    for (const v of variants) { roll -= v.weight; if (roll < 0) { type = v.id; break; } }
+  }
+  const def = ENEMIES[type], scale = definition.enemyScale;
   const threat = difficultyAt(seconds, definition.spawnInterval, definition.difficulty);
   Object.assign(enemy, { x, y, id, hp: def.hp * scale * threat.hp, maxHp: def.hp * scale * threat.hp,
     speed: def.speed * threat.speed, damage: def.damage * threat.damage, xp: def.xp, radius: def.radius, flash: 0,
-    targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
+    ranged: def.ranged, shotTimer: 1 + id % 5 * 0.2, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
 }
