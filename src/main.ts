@@ -135,5 +135,5 @@ window.addEventListener('orientationchange', () => requestAnimationFrame(resizeC
 window.visualViewport?.addEventListener('resize', () => requestAnimationFrame(resizeCanvas));
 
 // Solo en desarrollo o en compilación de QA explícita. No se incluye en producción.
-declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; start: (characterId?: string) => Promise<void>; metrics: () => { legSwing: number; footsteps: number; actorScaleY: number; actorAngle: number; actorTexture: string; actorDirection: string; actorFrame: number; renderedChunks: number; textureSlots: number } } } }
-if (import.meta.env.DEV || import.meta.env.VITE_QA === 'true') window.__OPS_QA__ = { getRun: () => run, store, tick: sync, start, metrics: () => scene.diagnostics };
+declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; draw: (deltaMs?: number) => void; start: (characterId?: string) => Promise<void>; metrics: () => { legSwing: number; footsteps: number; actorScaleY: number; actorAngle: number; actorTexture: string; actorDirection: string; actorFrame: number; renderedChunks: number; textureSlots: number } } } }
+if (import.meta.env.DEV || import.meta.env.VITE_QA === 'true') window.__OPS_QA__ = { getRun: () => run, store, tick: sync, draw: (delta = 0) => scene.update(performance.now(), delta), start, metrics: () => scene.diagnostics };

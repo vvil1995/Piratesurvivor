@@ -246,11 +246,14 @@ test('los cuatro efectos evolucionados se dibujan sin errores en combate', async
 
 test('pasos apoyados en el suelo y vuelta a reposo sin deslizamiento visual', async ({ page }) => {
   await page.locator('#start').click();
-  await page.keyboard.down('d');
-  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().footsteps)).toBeGreaterThan(0);
-  await expect.poll(() => page.evaluate(() => Math.abs(window.__OPS_QA__!.metrics().legSwing))).toBeGreaterThan(1);
+  const step = await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, p = qa.getRun()!.player; qa.draw(); let swing = 0;
+    for (let i = 0; i < 8; i++) { p.x += 6; qa.draw(); swing = Math.max(swing, Math.abs(qa.metrics().legSwing)); }
+    return { footsteps: qa.metrics().footsteps, swing };
+  });
+  expect(step.footsteps).toBeGreaterThan(0); expect(step.swing).toBeGreaterThan(1);
   await page.screenshot({ path: test.info().outputPath('grounded-walk.png') });
-  await page.keyboard.up('d');
+  await page.evaluate(() => { for (let i = 0; i < 20; i++) window.__OPS_QA__!.draw(1000 / 60); });
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().footsteps)).toBe(0);
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorScaleY)).toBeCloseTo(0.65);
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorAngle)).toBe(0);
@@ -415,16 +418,16 @@ test('paso articulado en ocho direcciones y Whip con pierna elástica en lugar d
   });
   for (const [direction, keys] of [['e', ['ArrowRight']], ['se', ['ArrowRight', 'ArrowDown']], ['s', ['ArrowDown']], ['sw', ['ArrowLeft', 'ArrowDown']], ['w', ['ArrowLeft']], ['nw', ['ArrowLeft', 'ArrowUp']], ['n', ['ArrowUp']], ['ne', ['ArrowRight', 'ArrowUp']]] as [string, string[]][]) {
     await page.evaluate(o => Object.assign(window.__OPS_QA__!.getRun()!.player, o), origin);
-    // Teclado y colisiones se prueban aparte. Desplazamiento por RAF acotado:
-    // no acabar contra un edificio mientras el runner procesa una captura.
-    const pose = await page.evaluate(async ({ keys }) => {
+    // Teclado/colisiones se prueban aparte. Actualizar la escena explícitamente
+    // evita leer una pose antigua cuando Phaser limita el render por software.
+    const pose = await page.evaluate(({ keys }) => {
       const qa = window.__OPS_QA__!, p = qa.getRun()!.player;
       const dx = keys.includes('ArrowRight') ? 2 : keys.includes('ArrowLeft') ? -2 : 0;
       const dy = keys.includes('ArrowDown') ? 2 : keys.includes('ArrowUp') ? -2 : 0;
-      let swing = 0;
+      let swing = 0; qa.draw();
       for (let i = 0; i < 12; i++) {
         p.x += dx; p.y += dy;
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        qa.draw();
         swing = Math.max(swing, Math.abs(qa.metrics().legSwing));
       }
       return { direction: qa.metrics().actorDirection, swing };

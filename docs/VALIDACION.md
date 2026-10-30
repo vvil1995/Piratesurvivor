@@ -155,7 +155,7 @@ Primera ejecuciónCI0.7.1:29 aprobadas,2 omisiones y3 fallidas en escritorio. Do
 Resultado de la repeticiónCI (commit aeded263, ejecución41082562805): **32 aprobadas y2 omisiones intencionales**, sin fallos. También correctos instalación, licencias, tipos, núcleo, build y empaquetado; artefactos browser-qa y navegador conservados. Capturas móviles de paso lateral y Whip descargadas y revisadas: se mantiene el sprite detallado y el efecto de Whip representa pierna/sandalia. Es una primera pasada; no demuestra un ciclo final convincente ni el acabado artístico de toda la tripulación. El nuevo candidato lateral sigue sin integrarse. Safari/dispositivos físicos y equilibrio de sesiones humanas pendientes.
 
 
-##0.7.2 — regresión de uniones de piernas
+## 0.7.2 — regresión de uniones de piernas
 
 La captura del usuario muestra huecos en las rodillas de todos los personajes. Causa: pivote central del lienzo en lugar de rodilla anatómica y traslación del maluc. Se detectan puntos opacos en cada pose, se fija el maluc al cuerpo y se comparte el mismo punto de rodilla entre segmentos, con nueve filas de solapamiento. Una pose no separable o en reposo usa el sprite completo. Caché de articulaciones por textura, sin lecturas por enemigo/frame ni nuevas imágenes.
 
@@ -163,3 +163,6 @@ Tests de núcleo comprueban pivotes alejados de x48, unión de segmentos y raíz
 
 
 La revisión de alpha también detecta poses de Zoro donde espada o brazo daban un falso punto de maluc. Se exige un camino opaco hasta la rodilla dentro del recorte; de no existir se usa el sprite entero. La nueva prueba de núcleo cubre puntos opacos separados por transparencia. Esta protección se aplica por pose, sin cambiar assets.
+
+
+CI32013954:32 pruebas aprobadas,2 omisiones y2 fallos en fixtures de animación de escritorio. La regresión nueva de uniones pasa en escritorio y móvil; capturas de los seis actores revisadas sin los cortes de la captura del usuario. La pose se consulta ahora tras actualización explícita de escena mediante un método solo de QA, evitando leer fotogramas antiguos o perder el instante breve de polvo en render por software. Teclado/joystick siguen en sus pruebas independientes. Pendiente repetir la suite; no se declara éxito completo de esta ejecución.
