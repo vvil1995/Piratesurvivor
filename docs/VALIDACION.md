@@ -441,3 +441,5 @@ Tipos y151 pruebas de lógica correctos. Nuevas pruebas: continuidad de material
 Regresiones de navegador:4/4 pruebas de cofres pequeños/grandes, berries guardadas y navegación/piratas de Orange en ambos formatos. Las probabilidades y recompensas no cambian.
 
 Cierre:151/151 tests, comprobación de tipos y build correctos; smoke de producción bajo `/Piratesurvivor/` en PC y móvil emulado, sin404, errores JS ni hook QA. Se conserva el aviso preexistente de tamaño del bundle. No se han añadido dependencias ni assets.
+
+Publicación ee0f6f2 verificada en la URL real de Pages en844×390 y1440×900: bundle con el pintado/composición nuevos, tres atlas de marines preservados, inicio/pausa funcionales y ninguna respuesta404/error JS. La CI general anterior falló en una fixture de selección de personajes porque el combate real recogió2 berries legítimas mientras comprobaba el perfil: se congela únicamente la simulación de esa fixture, sin tocar economía o guardado. Repetida4/4 (dos por formato), correcta. La CI completa se volverá a ejecutar; no se presenta como completada en esta validación local.

@@ -352,6 +352,8 @@ test('beta permite probar los cinco personajes sin compras ni cambios del perfil
     await expect(page.locator('#character-title')).toContainText(name.toUpperCase());
     await expect(page.locator('#train')).toBeEnabled();
     await page.locator('#start').click(); await expect(page.locator('#hud')).toBeVisible();
+    // Selection fixture: ambient combat can legitimately collect persistent berries.
+    await page.evaluate(()=>{window.__OPS_QA__!.getRun()!.update=()=>{};});
     await expect(page.locator('#character-name')).toHaveText(name.toUpperCase());
     await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.metrics().actorTexture)).toMatch(new RegExp(`^${visual}-(?:n|ne|e|se|s|sw|w|nw)-[01]$`));
     expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.stats.maxHp)).toBe(hp);
