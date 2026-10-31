@@ -45,15 +45,15 @@ El guardado no conserva una batalla en curso. Borrar datos del navegador elimina
 
 Dispositivo, versión de Android/iOS, navegador y versión, orientación, minuto de partida, número de enemigos aproximado y pasos para reproducirlo. Para una pantalla negra, adjunta el error de consola si puedes acceder a él. No incluyas datos de cuentas ni credenciales.
 
-## Alcance de 0.3
+## Alcance actual: beta0.12
 
-Solo Shells Town y la base del mundo infinito. No están disponibles Morgan, navegación a otras islas, Roger, otros personajes, taverna, nuevos drops de berries, cofres ni inventario. La economía visible conserva el comportamiento anterior del prototipo. Cada partida nueva reinicia nivel y mejoras; los récords y el entrenamiento existentes se conservan. Los cambios de semilla varían la distribución de barrios; volver a un fragmento en la misma partida lo reconstruye igual.
+Shells Town procedural, cinco personajes de prueba, habilidades, berries, cofres, un objeto, fruta Bomu y Morgan están disponibles. Orange Town es una llegada provisional; no están disponibles Buggy, el resto de la campaña, Roger ni la taverna. Cada partida nueva reinicia la build; se conservan berries, récords y entrenamiento existente. No se ha implementado todavía el nuevo entrenamiento individual. Volver a un fragmento de la misma partida reconstruye el mismo terreno y no regenera cofres consumidos.
 
-## Cuatro ataques de Luffy (fase 2A)
+## Ataques de Luffy
 
-Luffy empieza con Pistol. Al subir de nivel pueden salir cartas para aprender Gatling, Bazooka o Whip, además de pasivas y mejoras de los ataques equipados. Hay cuatro espacios visibles. Cada técnica llega a seis niveles y se convierte automáticamente en + sin objetos; ya no se ofrece después. Pistol+ perfora una fila; Gatling+ hace seis golpes que perforan dos objetivos; Bazooka+ añade onda de impacto; Whip+ gira360°. Son habilidades automáticas independientes, no una cadena desbloqueada.
+Luffy empieza con Pistol. Al subir de nivel pueden salir cartas para aprender Gatling, Bazooka, Whip, Balloon o Axe, además de pasivas y mejoras de los ataques equipados. Hay cuatro espacios visibles. Cada técnica llega a seis niveles y se convierte automáticamente en + sin objetos; ya no se ofrece después. Pistol+ perfora una fila; Gatling+ hace seis golpes que perforan dos objetivos; Bazooka+ añade onda de impacto; Whip+ gira360°. Son habilidades automáticas independientes, no una cadena desbloqueada.
 
-Probar tres partidas con elecciones diferentes; comprobar movimiento/joystick mientras se activan varios ataques, golpes detenidos por edificios, pausa durante ráfagas, cartas de nivel6 y reinicio que devuelve solo Pistol1. No se añaden berries recogibles ni personajes nuevos en esta entrega; la economía y pasivas antiguas permanecen pendientes de sus fases. Los números del combate son provisionales, no equilibrio final de campaña.
+Probar tres partidas con elecciones diferentes; comprobar movimiento/joystick mientras se activan varios ataques, golpes detenidos por edificios, pausa durante ráfagas, cartas de nivel6 y reinicio que devuelve solo Pistol1. Los números del combate son provisionales, no equilibrio final de campaña.
 
 ## 0.5 — pasivas y estadísticas
 
@@ -64,10 +64,10 @@ El equilibrio cambió: regeneración inicial0,2HP/s; daño/velocidad/cooldown te
 
 ## Beta de los cinco personajes
 
-Prueba una partida con cada uno. Aprender una quinta habilidad abre el menú de agrupación: une dos ranuras para dejar una libre y confirma. Cada técnica conserva su nivel y reloj; máximo dos buffs distintos por partida. Mejora una técnica hasta6 para comprobar su +. Revisa especialmente la carga de Zoro cerca de muros, el señuelo/robo de Nami, humo/proyectiles de Usopp y recogida de comida de Sanji. Abandonar no cobra ni suma recompensas. La taverna y el entrenamiento individual nuevo todavía no están disponibles.
+Prueba una partida con cada uno. Aprender una quinta habilidad abre el menú de agrupación: selecciona la primera carta y luego la segunda para unirlas y continuar automáticamente. Cada técnica conserva su nivel y reloj; máximo dos buffs distintos por partida. Mejora una técnica hasta6 para comprobar su +. Revisa especialmente la carga de Zoro cerca de muros, el señuelo/robo de Nami, humo/proyectiles de Usopp y recogida de comida de Sanji. Abandonar no cobra ni suma recompensas. La taverna y el entrenamiento individual nuevo todavía no están disponibles.
 
 
-En0.7.1, antes de la quinta habilidad el menú solo permite consultar/separar, no unir libremente. Al elegir una nueva con cuatro ranuras ocupadas puedes juntar dos existentes y confirmar, o usar «Juntar el nuevo y aprender». Cancelar devuelve la elección. Prueba especialmente si el doble de XP inicial y el crecimiento de recompensa por enemigo resistente permiten montar la build antes de la acumulación.
+Sin quinta habilidad ni recompensa de Morgan, el menú permite consultar/separar, pero no unir libremente. Con una nueva habilidad pendiente puedes escoger dos grupos existentes o la pendiente y un grupo. Volver en el segundo paso permite cambiar la primera selección; cancelar devuelve la elección de nivel. Prueba especialmente si el doble de XP inicial y el crecimiento de recompensa por enemigo resistente permiten montar la build antes de la acumulación.
 
 
 ## Beta0.8.0: tocar para elegir
@@ -76,7 +76,7 @@ Aprende Bazooka: Pistol sigue seleccionado y solo Pistol ataca. Toca Bazooka en 
 
 ## Beta0.9.0: tesoros
 
-Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el ataque seleccionado los apunta y rompe; recoge el botín. Los grandes son dorados y más grandes: acércate y espera a que el círculo del candado complete3s. Al alejarte se pausa; volver continúa. Escoge una de tres recompensas con ratón o tacto. Pausa para consultar los objetos equipados (seis espacios, nivel máximo3). Las berries se guardan al recogerlas y se conservan al abandonar/recargar; la build desaparece. Verifica que regresar a una zona no haga reaparecer cofres consumidos. Guardados de Netlify preview y producción están separados por dominio.
+Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el ataque seleccionado los apunta y rompe; recoge el botín. Los grandes son dorados y más grandes: acércate y espera a que el círculo del candado complete3s. Al alejarte se pausa; volver continúa. Recoge el botín directo, sin cartas de mejora. Puede aparecer un objeto o, raramente, una fruta. Solo se equipa un objeto; toca su icono junto a los ataques para consultarlo y conserva o sustituye al recoger otro. Las berries se guardan al recogerlas y se conservan al abandonar/recargar; la build desaparece. Verifica que regresar a una zona no haga reaparecer cofres consumidos. Guardados de Netlify preview y producción están separados por dominio.
 
 ## Beta0.10.0: Morgan
 
@@ -86,7 +86,7 @@ Al vencer, espera la caída. Se guarda la victoria y se concede una agrupación 
 
 ## Beta0.11.0
 
-Probar cadencia de los seis movimientos de Luffy, en particular Pistol y Gatling. Moverse mientras se dispara y comprobar que brazos/puños salen del actor. Balloon mantiene su función defensiva sin hinchar el sprite. Buffs muestran flechas de color y pequeños totales efectivos; consultar las cartas para magnitud y duración.
+Probar cadencia de los seis movimientos de Luffy, en particular Pistol y Gatling. Moverse mientras se dispara y comprobar que brazos/puños salen del actor. Balloon muestra una pose hinchada con inmunidad breve, daño ligero y lanzamiento de rivales. Buffs muestran flechas de color y pequeños totales efectivos; consultar las cartas para magnitud y duración.
 
 Buscar cofres más separados. Pequeños: moneda, poca XP y posible carne; grandes: círculo/candado de3s y botín directo, sin selección de mejoras. Recoger moneda/XP. Una subida de nivel por esa XP sigue abriendo cartas normales. Objeto ocasional entra directamente en un hueco libre; no aumenta un objeto equipado. Fruta rara Bomu Bomu: recogerla, aceptar o conservar build, probar explosiones al derrotar enemigos. Se pierde al reiniciar. Comprobar que comer cura sin superar HP máximo y que enemigos dejan carne ocasionalmente.
 
