@@ -54,7 +54,7 @@ test('pluja de ganivets deja huecos, no daña antes del aviso y cada zona explot
  tick(b,p,1.7);assert.equal(p.hp,100);tick(b,p,.2);assert.equal(p.hp,58);tick(b,p,.5);assert.equal(p.hp,58);
  b.cancel();assert.equal(b.hazards.length,0);assert.equal(b.parts.length,0);
 });
-test('Orange exige Morgan; carta propia, derrota con25HP y mismo mundo/cofres; victoria lleva a Syrup sin curar', () => {
+test('Orange exige Morgan; carta propia, derrota con25HP y mismo mundo/cofres; victoria ofrece Log Pose voluntario a Syrup sin curar', () => {
   assert.equal(new Run().beginBuggy(), false);
   const r = orange(), world = r.world; r.explorationChests!.sync(r.world, r.player); const field = r.explorationChests;
   improveAttack(r.player, 'bazooka'); equipItem(r.player, 'vest'); r.player.fruit = 'bomu'; r.player.collectedBerries = 37; r.player.level = 22; r.player.xp = 4;
@@ -65,7 +65,8 @@ test('Orange exige Morgan; carta propia, derrota con25HP y mismo mundo/cofres; v
   r.beginBuggy(); const b = r.encounter!; b.body.x = r.player.x + 40; b.body.y = r.player.y; b.body.hp = 1; r.player.attacks[0].cooldown = 0;
   r.update(1 / 60, axis); assert.ok(r.buggyDefeated); assert.equal(b.state, 'dead'); assert.ok(r.canJoinMovements);
   for (let i = 0; i < 100 && r.status === 'playing'; i++) r.update(1 / 60, axis);
-  const won = build(r), hp = r.player.hp; assert.equal(r.voyage?.destination, 'syrup'); finish(r);
+  assert.equal(r.voyage,undefined);assert.ok(r.exitSignal);assert.equal(r.zone,'buggy-arena');
+  Object.assign(r.player,r.exitSignal);r.update(1/60,axis);const won = build(r), hp = r.player.hp; assert.equal(r.voyage?.destination, 'syrup'); finish(r);
   assert.equal(r.zone, 'syrup-village'); assert.equal(build(r), won); assert.equal(r.player.hp, hp); assert.equal(r.beginBuggy(), false);
 });
 test('sesión de tres fases usa seis patrones y pools limitados sin atravesar obstáculos', () => {

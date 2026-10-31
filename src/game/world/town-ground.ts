@@ -1,5 +1,5 @@
 import { hash } from './seed.ts';
-export type TownTheme = 'shells' | 'orange';
+export type TownTheme = 'shells' | 'orange' | 'syrup';
 export type TownGround = 'stone' | 'earth' | 'grass';
 const smooth = (t: number) => t*t*(3-2*t);
 /** Global value noise: never restarts at a chunk edge, including negative coordinates. */
@@ -27,8 +27,8 @@ export function townRoadAt(seed:number,x:number,y:number):boolean{
  return false;
 }
 export function townGroundAt(seed:number,x:number,y:number,theme:TownTheme):TownGround{
- if(townRoadAt(seed,x,y))return 'stone';
+ if(townRoadAt(seed,x,y))return theme==='syrup'?'earth':'stone';
  const field=townNoise(seed^419,x/15,y/15)*.7+townNoise(seed^819,x/4,y/4)*.3;
- if(field>(theme==='orange'?.54:.43))return 'grass';
+ if(field>(theme==='syrup'?.30:theme==='orange'?.54:.43))return 'grass';
  return 'earth';
 }

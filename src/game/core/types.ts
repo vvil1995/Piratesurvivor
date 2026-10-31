@@ -1,9 +1,10 @@
-import type { Stats, StatModifiers, LevelChoice, AttackBehavior, StatusKind, RangedEnemyAttack } from '../../content/types.ts';
+import type { Stats, StatModifiers, LevelChoice, AttackBehavior, StatusKind, RangedEnemyAttack, EnemyDefinition } from '../../content/types.ts';
 export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'fruit' | 'item' | 'voyage';
 export interface Vector { x: number; y: number }
 export interface Player extends Vector {
   id: string; characterId: string;
   taken: Record<string, number>; choices: LevelChoice[]; attacks: EquippedAttack[]; abilitySlots: string[][]; selectedSlot: number; learnedBuffs: string[];
+  slowFor?:number; slowMultiplier?:number;
   hp: number; stats: Stats; baseStats: Stats;
   modifiers: { permanent: StatModifiers; temporary: StatModifiers; items: StatModifiers; fruit: StatModifiers; buffs: StatModifiers; skills: StatModifiers }; level: number; xp: number; xpNext: number;
   xpMultiplier?: number; berryMultiplier?: number; rerolls?: number; banCharges?: number; bannedAbilities?: string[]; lastHit?: string; damageNoticeFor?: number;
@@ -16,6 +17,7 @@ export interface Enemy extends Vector {
   speed: number; damage: number; xp: number; radius: number; flash: number;
   launchTime?: number; launchX?: number; launchY?: number;
   statuses?: Partial<Record<StatusKind, number>>; stolen?: boolean; lureIndex?: number; decoyHitTimer?: number;
+  melee?: EnemyDefinition['melee']; meleeTimer?:number; meleeWindup?:number; meleeHits?:number; meleeGap?:number; meleeAngle?:number;
   ranged?: RangedEnemyAttack; shotTimer?: number;
   shotWindup?: number; shotAngle?: number; shotRecovery?: number;
   targetId?: string; steeringTime?: number; steerX?: number; steerY?: number;
@@ -28,6 +30,7 @@ export interface RunResult {
 
 export interface Projectile extends Vector {
   active: boolean; vx: number; vy: number; radius: number; life: number; damage: number;
+  slow?: {multiplier:number;duration:number};
   hostile: boolean; ownerId: string; reflected: boolean; remainingHits: number; hit: Set<number>; abilityId?: string; level?: number; bounces?: number;
 }
 export interface AreaEffect extends Vector {

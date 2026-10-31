@@ -169,10 +169,11 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
-      const pirate = e.visual?.startsWith('buggy-');
+      const cat=e.visual?.startsWith('blackcat-');
+      const pirate = e.visual?.startsWith('buggy-')||cat;
       const marine = e.visual?.startsWith('marine-');
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000, !!marine);
-      const attacking = pirate && (e.ranged ? (e.shotTimer ?? 0) > e.ranged.interval - .18 : Math.hypot(e.x-worldX,e.y-worldY)<e.radius+22);
+      const attacking = cat && ((e.meleeWindup??0)>0||(e.meleeHits??0)>0||(e.shotWindup??0)>0||(e.shotRecovery??0)>0) || pirate && (e.ranged ? (e.shotTimer ?? 0) > e.ranged.interval - .18 : Math.hypot(e.x-worldX,e.y-worldY)<e.radius+22);
       let frame = attacking ? 4 : animation.frame ? pirate ? animation.frame - 1 : (animation.frame - 1) % 2 : 0;
       if (marine) frame = (e.shotWindup ?? 0) > 0 ? 5 : (e.shotRecovery ?? 0) > 0 ? e.ranged && e.shotRecovery! < .18 ? 0 : 6 : !e.ranged && Math.hypot(e.x-worldX,e.y-worldY)<e.radius+45 ? 5 : animation.frame;
       const facing = marine && ((e.shotWindup ?? 0)>0 || (e.shotRecovery ?? 0)>0) ? movementDirection(e.ranged ? Math.cos(e.shotAngle ?? 0) : worldX-e.x, e.ranged ? Math.sin(e.shotAngle ?? 0) : worldY-e.y) : attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction;
@@ -206,6 +207,7 @@ export class BattleScene extends Phaser.Scene {
       }
     }
     this.effects.clear();
+    for(const e of run?.enemies.items??[]){if(!e.active||!e.melee||!(e.meleeWindup!>0))continue;const x=e.x-origin.x,y=e.y-origin.y,a=e.meleeAngle??0;this.effects.fillStyle(0xe65971,.22);this.effects.beginPath();this.effects.moveTo(x,y);this.effects.arc(x,y,e.melee.reach,a-Math.PI/3,a+Math.PI/3);this.effects.closePath();this.effects.fillPath();}
     for (const e of run?.enemies.items ?? []) {
       if (!e.active || !e.ranged?.preparation || !(e.shotWindup! > 0)) continue;
       const x=e.x-origin.x, y=e.y-origin.y, angle=e.shotAngle ?? 0, arc=e.ranged.spread ?? .035;
@@ -215,7 +217,7 @@ export class BattleScene extends Phaser.Scene {
     }
     this.enemyDeaths.update(run, origin, delta/1000);
     this.bossRenderer.update(run?.encounter, origin, run?.arena, delta/1000, !!animate);
-    const signal = run && ['shells-town', 'orange-town'].includes(run.zone) ? run.navigationRoute.signal : undefined;
+    const signal = run?.navigationSignal;
     this.navigationSignal.setVisible(!!signal);
     if (signal) {
       const bob = this.bridge.reducedMotion() ? 0 : Math.sin((run?.time ?? 0) * 4) * 3;
@@ -256,6 +258,7 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const bullet of run.projectiles.items) if (bullet.active) {
         const x = bullet.x - origin.x, y = bullet.y - origin.y - 18;
+        if (bullet.hostile && bullet.slow){this.effects.lineStyle(3,0xa580ed,.95);this.effects.strokeCircle(x,y,9);this.effects.fillStyle(0xf7df8b);this.effects.fillCircle(x,y,5);this.effects.lineStyle(2,0xd7c6ff,.8);this.effects.lineBetween(x,y-8,x-bullet.vx*.06,y-12-bullet.vy*.06);continue;}
         if (bullet.hostile) {
           this.effects.lineStyle(7, 0x3b151f, .95); this.effects.lineBetween(x, y, x - bullet.vx * .07, y - bullet.vy * .07);
           this.effects.lineStyle(3, 0xff735f, 1); this.effects.lineBetween(x, y, x - bullet.vx * .07, y - bullet.vy * .07);

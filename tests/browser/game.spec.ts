@@ -752,6 +752,9 @@ test('Buggy: carta de Orange, cuatro avisos legibles, victoria y llegada a Syrup
     b.tick = Object.getPrototypeOf(b).tick; r.player.hp = 53; b.body.x = r.player.x; b.body.y = r.player.y - 40; b.body.hp = 1;
     r.player.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
   });
+  await expect.poll(()=>page.evaluate(()=>!!window.__OPS_QA__!.getRun()!.exitSignal)).toBe(true);
+  expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.zone)).toBe('buggy-arena');
+  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;Object.assign(r.player,r.exitSignal);r.update(1/60,{x:0,y:0});q.tick();});
   await expect(page.locator('#voyage-title')).toContainText('SYRUP VILLAGE');
   await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
   await expect(page.locator('#area-label')).toContainText('SYRUP VILLAGE');
@@ -1170,4 +1173,46 @@ test('pueblos orgánicos: distintas semillas, continuidad visual y arenas conser
  await expect(page.locator('#boss-name')).toHaveText('AXE-HAND MORGAN');await page.screenshot({path:info.outputPath('town-morgan-unchanged.png')});
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();q.draw();q.tick();});
  await expect(page.locator('#boss-name')).toHaveText('BUGGY');await page.screenshot({path:info.outputPath('town-buggy-unchanged.png')});expect(errors).toEqual([]);
+});
+
+test('Syrup completo: viaje voluntario, tres piratas, cinco patrones de Kuro y Baratie pendiente',async({page},info)=>{
+ test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#start').click();const zoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
+ await page.evaluate(async()=>{
+  const path='/src/game/systems/loadout.ts',{improveAttack}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!;
+  r.morganDefeated=true;r.boardToOrangeTown();improveAttack(r.player,'gatling');r.player.level=36;r.player.xp=7;r.player.collectedBerries=123;r.player.hp=70;
+  r.beginBuggy();r.encounter!.body.x=r.player.x+40;r.encounter!.body.y=r.player.y;r.encounter!.body.hp=1;r.player.attacks[0].cooldown=0;
+  for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.update=()=>{};q.draw();q.tick();
+ });
+ await expect(page.locator('#navigation-hint')).toContainText('SYRUP VILLAGE');
+ expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.zone)).toBe('buggy-arena');await page.screenshot({path:info.outputPath('syrup-voluntary-exit.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=Object.getPrototypeOf(r).update;Object.assign(r.player,r.exitSignal);r.update(1/60,{x:0,y:0});q.tick();});
+ await expect(page.locator('#voyage-title')).toContainText('SYRUP VILLAGE');
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.update=()=>{};q.draw();q.tick();});
+ await expect(page.locator('#area-label')).toContainText('SYRUP VILLAGE');
+ expect(await page.evaluate(()=>{const p=window.__OPS_QA__!.getRun()!.player;return [p.level,p.xp,p.collectedBerries,p.attacks.length];})).toEqual([36,7,123,2]);
+ await page.evaluate(async()=>{const path='/src/content/catalog.ts',{ENEMIES}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!;
+  for(const [i,id]of ['blackcat-pirate','blackcat-claw','blackcat-hypnotist'].entries()){const d=ENEMIES[id],e=r.enemies.acquire()!;Object.assign(e,d,{id:800+i,active:true,x:r.player.x-100+i*100,y:r.player.y+60,maxHp:d.hp,flash:0,shotTimer:0,shotWindup:0,shotRecovery:0,meleeTimer:0,meleeWindup:0,meleeHits:0});}
+  for(const a of r.player.attacks)a.cooldown=1e6;
+  for(let i=0;i<70;i++){r.player.hurtTimer=1;Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});}q.draw();q.tick();
+ });
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:info.outputPath('syrup-map-and-enemies.png')});
+ const textures=await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyTextures);for(const id of ['blackcat-pirate','blackcat-claw','blackcat-hypnotist'])expect(textures.some(t=>t.startsWith(id+'-'))).toBe(true);
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.beginKuro();q.draw();q.tick();});
+ await expect(page.locator('#boss-name')).toHaveText('CAPITÀ KURO');expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);await page.screenshot({path:info.outputPath('kuro-arena.png')});
+ for(const id of ['cross','pounce','ghost','shakushi','flurry']){
+  await page.evaluate(async id=>{const path='/src/content/bosses/kuro.ts',{KURO_ATTACKS}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;
+   b.cancel();b.body.x=1408;b.body.y=1090;b.body.hp=b.body.maxHp*.2;r.player.x=1558;r.player.y=1090;r.player.hurtTimer=1;
+   b.prepare(KURO_ATTACKS.find((a:{id:string})=>a.id===id)!,r.player,r.world);b.elapsed=b.telegraph!.attack.preparation-.15;b.telegraph!.elapsed=b.elapsed;b.phase=3;q.draw();q.tick();
+  },id);
+  await expect(page.locator('#boss-phase')).toHaveText('FASE 3/3');await page.screenshot({path:info.outputPath(`kuro-${id}-warning.png`)});
+  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<14;i++)r.encounter!.tick(1/60,r.player,r.world,()=>({x:0,y:0}),()=>{});q.draw();q.tick();});
+  await page.screenshot({path:info.outputPath(`kuro-${id}-impact.png`)});
+ }
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.cancel();b.state='approach';b.body.x=r.player.x+40;b.body.y=r.player.y;b.body.hp=1;r.player.attacks[0].cooldown=0;r.player.hurtTimer=1;
+  for(let i=0;i<100&&r.status==='playing';i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
+ await expect(page.locator('#combinations')).toBeVisible();await expect(page.locator('#combination-message')).toContainText('Kuro');await page.locator('#combination-done').click();
+ await expect(page.locator('#navigation-hint')).toContainText('BARATIE');
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.kuroDefeated,unlocked:r.baratieUnlocked,travel:r.sailToBaratie(),zone:r.zone};})).toEqual({won:true,unlocked:true,travel:false,zone:'kuro-arena'});
+ await page.screenshot({path:info.outputPath('kuro-victory-baratie-locked.png')});expect(errors).toEqual([]);
 });

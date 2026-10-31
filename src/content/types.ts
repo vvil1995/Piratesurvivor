@@ -9,11 +9,12 @@ export interface CharacterDefinition {
 }
 export interface RangedEnemyAttack {
   interval: number; speed: number; range: number;
+  slow?: {multiplier:number;duration:number};
   preparation?: number; pellets?: number; spread?: number; preferredDistance?: number; lifetime?: number;
 }
 export interface EnemyDefinition {
   id: string; hp: number; damage: number; speed: number;
-  xp: number; radius: number; visual: string; ranged?: RangedEnemyAttack;
+  xp: number; radius: number; visual: string; melee?: {preparation:number;interval:number;reach:number;hits:number;gap:number}; ranged?: RangedEnemyAttack;
 }
 export type AttackBehavior = 'line' | 'burst' | 'cone' | 'sweep' | 'buff' | 'guard' | 'slam' | 'dash' | 'focus' | 'alternating' | 'projectile' | 'decoy' | 'evade' | 'heal';
 export interface AttackLevel {

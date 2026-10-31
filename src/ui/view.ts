@@ -130,20 +130,20 @@ export class View {
       el('boss-panel').dataset.phase = String(boss.phase);
       el('boss-health-fill').style.width = `${percentage}%`;
       el('boss-panel').querySelector('[role="progressbar"]')!.setAttribute('aria-valuenow', String(Math.round(percentage)));
-      el('boss-pattern').textContent = boss.moveName;
+      el('boss-pattern').textContent = boss.state==='dead'&&boss.profile.id==='buggy'?'VICTORIA · LOG POSE A SYRUP':boss.moveName;
     }
-    const signal = run.navigationRoute.signal, targetBoss = run.zone === 'orange-town' ? 'Buggy' : 'Morgan';
-    el('navigation-hint').hidden = !signal || !['shells-town', 'orange-town'].includes(run.zone);
-    el('navigation-hint').textContent = !['shells-town', 'orange-town'].includes(run.zone) || run.buggyDefeated ? '' : signal ? `CARTA NÁUTICA · ${targetBoss} · ${Math.round(Math.hypot(signal.x - p.x, signal.y - p.y))}m · camina sobre ella` : run.navigationSeconds < MORGAN_ROUTE.availableAt ? `Ruta de ${targetBoss}: cartas a partir de05:00 en esta isla` : `Explora: puede aparecer una carta hacia ${targetBoss}`;
+    const signal=run.navigationSignal;
+    el('navigation-hint').hidden=!signal;
+    el('navigation-hint').textContent=signal?`${run.exitSignal?'LOG POSE':'CARTA NÁUTICA'} · ${run.navigationTarget} · ${Math.round(Math.hypot(signal.x-p.x,signal.y-p.y))}m · camina sobre ella`:run.navigationSeconds<MORGAN_ROUTE.availableAt?`Ruta de ${run.navigationTarget}: cartas a partir de05:00 en esta isla`:'';
     if (run.voyage) {
       const destination = run.voyage.destination;
-      el('voyage-title').textContent = destination === 'buggy' ? 'RUMBO A BUGGY' : destination === 'syrup' ? 'BUGGY DERROTADO · SYRUP VILLAGE' : destination === 'orange-return' ? 'REGRESO A ORANGE TOWN' : destination === 'morgan' ? 'RUMBO A MORGAN' : destination === 'orange' ? 'MORGAN DERROTADO · ORANGE TOWN' : 'REGRESO A SHELLS TOWN';
-      el('voyage-description').textContent = destination === 'buggy' ? 'Bombas y cuchillas: sal de las marcas rojas antes del impacto.' : destination === 'syrup' ? 'Conservas vida y build. Syrup es una llegada provisional; Kuro aún está pendiente.' : destination === 'orange-return' ? 'Regresas a Orange Town con25HP y tu build. Busca otra carta para reintentar Buggy.' : destination === 'shells' ? 'Regresas con25HP y tu build. Otra carta náutica permitirá reintentarlo.' : destination === 'orange' ? 'Conservas vida y build. Te esperan los piratas de Buggy y la ruta hacia su arena.' : 'Desembarcando en la base naval. Esquiva las marcas rojas de Morgan.';
+      el('voyage-title').textContent = destination === 'kuro' ? 'RUMBO A KURO' : destination==='syrup-return'?'REGRESO A SYRUP VILLAGE':destination === 'buggy' ? 'RUMBO A BUGGY' : destination === 'syrup' ? 'BUGGY DERROTADO · SYRUP VILLAGE' : destination === 'orange-return' ? 'REGRESO A ORANGE TOWN' : destination === 'morgan' ? 'RUMBO A MORGAN' : destination === 'orange' ? 'MORGAN DERROTADO · ORANGE TOWN' : 'REGRESO A SHELLS TOWN';
+      el('voyage-description').textContent = destination==='kuro'?'Jardines de Kaya: anticipa las trayectorias de Kuro.':destination==='syrup-return'?'Conservas tu build y regresas con25HP.':destination === 'buggy' ? 'Bombas y cuchillas: sal de las marcas rojas antes del impacto.' : destination === 'syrup' ? 'Conservas vida y build. Te esperan los Piratas del Gato Negro y Kuro.' : destination === 'orange-return' ? 'Regresas a Orange Town con25HP y tu build. Busca otra carta para reintentar Buggy.' : destination === 'shells' ? 'Regresas con25HP y tu build. Otra carta náutica permitirá reintentarlo.' : destination === 'orange' ? 'Conservas vida y build. Te esperan los piratas de Buggy y la ruta hacia su arena.' : 'Desembarcando en la base naval. Esquiva las marcas rojas de Morgan.';
       const progress = Math.min(1, run.voyage.elapsed / MORGAN_ROUTE.voyageSeconds);
       el('voyage').style.setProperty('--progress', String(progress));
       el('voyage-progress').style.width = `${progress * 100}%`;
     }
-    el('area-label').textContent = run.zone === 'buggy-arena' ? 'ORANGE TOWN · CIRCO DE BUGGY' : run.zone === 'syrup-village' ? 'SYRUP VILLAGE · LLEGADA PROVISIONAL' : run.zone === 'morgan-arena' ? 'BASE NAVAL · ARENA DE MORGAN' : run.zone === 'orange-town' ? 'ORANGE TOWN · PIRATAS DE BUGGY' : 'SHELLS TOWN · BASE NAVAL';
+    el('area-label').textContent = run.zone === 'buggy-arena' ? 'ORANGE TOWN · CIRCO DE BUGGY' : run.zone==='kuro-arena'?'JARDINES DE KAYA · CAPITÀ KURO':run.zone === 'syrup-village' ? 'SYRUP VILLAGE · PIRATAS DEL GATO NEGRO' : run.zone === 'morgan-arena' ? 'BASE NAVAL · ARENA DE MORGAN' : run.zone === 'orange-town' ? 'ORANGE TOWN · PIRATAS DE BUGGY' : 'SHELLS TOWN · BASE NAVAL';
     el('character-name').textContent = (run.character.shortName ?? run.character.name).toUpperCase();
     el('run-items').textContent = `OBJETO ${Object.keys(p.items).length}/1`;
     el('run-items').title = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objeto';

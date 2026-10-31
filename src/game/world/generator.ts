@@ -172,3 +172,22 @@ function composeTown(chunk:Chunk,seed:number,orange:boolean):Chunk{
 }
 export function generateChunk(seed:number,cx:number,cy:number):Chunk{return composeTown(generateLegacyChunk(seed,cx,cy),seed,false);}
 export function generateOrangeChunk(seed:number,cx:number,cy:number):Chunk{return composeTown(generateLegacyOrangeChunk(seed,cx,cy),seed,true);}
+
+/** Syrup shares the working connected plot composer, with its own rural props/materials. */
+export function generateSyrupChunk(seed:number,cx:number,cy:number):Chunk{
+ const c=generateOrangeChunk(seed,cx,cy);c.district=c.district==='orchard'||c.district==='circus'?'garden':'residential';
+ for(const o of c.obstacles){
+  if(o.kind==='house'||o.kind==='tent'){o.kind='house';o.art='syrup-house';}
+  else if(o.kind==='ruin'){o.kind='rock';o.art='syrup-cliff';}
+  else if(o.kind==='stall'){o.kind='crate';o.art='syrup-cart';}
+  else if(o.kind==='pennant'){o.kind='fence';o.art='coastal-fence';}
+  else if(o.kind==='tree')o.art='coastal-tree';
+ }
+ if(cx===0&&cy===0 || c.variation%19===0){
+  // Mansion stays in a corner lot, away from guaranteed avenues/spawn.
+  c.obstacles=c.obstacles.filter(o=>o.x>=cx*512+192||o.y>=cy*512+192);
+  c.obstacles.push({id:`${c.key}/mansion`,kind:'house',x:cx*512+32,y:cy*512+32,width:128,height:96,variant:0,art:'syrup-mansion'});
+  c.solids.fill(0);for(const o of c.obstacles){const x=o.x/32-cx*16,y=o.y/32-cy*16;for(let j=y;j<y+o.height/32;j++)for(let i=x;i<x+o.width/32;i++)c.solids[i+j*16]=1;}
+ }
+ return c;
+}

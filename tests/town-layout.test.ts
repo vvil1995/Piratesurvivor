@@ -4,7 +4,7 @@ import { townGroundAt, townRoadAt } from '../src/game/world/town-ground.ts';
 import { ProceduralWorld } from '../src/game/world/world.ts';
 import { FlowField } from '../src/game/navigation/flow-field.ts';
 import { ChestField } from '../src/game/systems/loot.ts';
-import { generateLegacyChunk } from '../src/game/world/generator.ts';
+import { generateSyrupChunk } from '../src/game/world/generator.ts';
 
 test('terreno y calles globales coinciden a ambos lados de cada borde, incluso en negativos',()=>{
  for(const seed of [3,42,73,887])for(const theme of ['shells','orange'] as const){
@@ -37,12 +37,12 @@ test('muchas semillas: espacios libres conectados, entradas anchas y obstáculos
  assert.ok(layouts.size>150);assert.deepEqual([...materials].sort(),['earth','grass','stone']);
  for(const art of ['naval-flag','naval-cannon','naval-tower','naval-crates'])assert.ok(arts.has(art),art);
 });
-test('cofres siguen teniendo espacio libre y terreno provisional de Syrup queda intacto',()=>{
+test('cofres siguen teniendo espacio libre y Syrup usa su generador rural independiente',()=>{
  for(const theme of ['shells','orange'] as const)for(const seed of [3,42,887]){
   const w=new ProceduralWorld(seed,theme),field=new ChestField();let found=0;
   for(let y=-4;y<4;y++)for(let x=-4;x<4;x++){
    field.sync(w,{x:x*512+256,y:y*512+256});for(const c of field.active){found++;assert.ok(w.canOccupy(c.x,c.y,18));}
   }assert.ok(found>0);
  }
- const w=new ProceduralWorld(42,'syrup');assert.deepEqual(w.getChunk(-2,1),generateLegacyChunk(42,-2,1));
+ const w=new ProceduralWorld(42,'syrup');assert.deepEqual(w.getChunk(-2,1),generateSyrupChunk(42,-2,1));
 });

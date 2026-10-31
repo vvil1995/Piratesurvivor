@@ -21,7 +21,9 @@ export const CHARACTERS: Record<string, CharacterDefinition> = {
 };
 const MARINE_BASE_HP = 32;
 export const ENEMIES: Record<string, EnemyDefinition> = {
-  'blackcat-pirate': { id: 'blackcat-pirate', hp: 105, damage: 25, speed: 90, xp: 18, radius: 13, visual: 'blackcat-pirate' },
+  'blackcat-pirate': { id: 'blackcat-pirate', hp: 85, damage: 20, speed: 88, xp: 14, radius: 13, visual: 'blackcat-pirate' },
+  'blackcat-claw': {id:'blackcat-claw',hp:110,damage:24,speed:96,xp:18,radius:14,visual:'blackcat-claw',melee:{preparation:.6,interval:2.6,reach:65,hits:2,gap:.28}},
+  'blackcat-hypnotist':{id:'blackcat-hypnotist',hp:75,damage:18,speed:72,xp:20,radius:13,visual:'blackcat-hypnotist',ranged:{interval:3.2,preparation:.8,speed:165,range:270,preferredDistance:210,slow:{multiplier:.72,duration:1.8}}},
   'blackcat-raider': { id: 'blackcat-raider', hp: 80, damage: 21, speed: 115, xp: 20, radius: 13, visual: 'blackcat-pirate' },
   'buggy-pirate': { id: 'buggy-pirate', hp: 65, damage: 17, speed: 78, xp: 10, radius: 13, visual: 'buggy-pirate' },
   'buggy-gunner': { id: 'buggy-gunner', hp: 52, damage: 16, speed: 70, xp: 12, radius: 13, visual: 'buggy-gunner', ranged: { interval: 2.6, speed: 220, range: 270 } },

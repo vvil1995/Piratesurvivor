@@ -1,3 +1,4 @@
+import type { KuroEncounter } from '../bosses/kuro.ts';
 import { BuggyRenderer } from './buggy-renderer.ts';
 import type { BuggyEncounter } from '../bosses/buggy.ts';
 import { ActorAnimation } from './actor-animation.ts';
@@ -28,6 +29,7 @@ export class BossRenderer {
   private showingBuggy = false;
   private motion = new ActorAnimation();
   private idleTime=0;
+  private echoes:Phaser.GameObjects.Image[];
   private body: Phaser.GameObjects.Image;
   private head: Phaser.GameObjects.Image;
   private arm: Phaser.GameObjects.Image;
@@ -36,6 +38,7 @@ export class BossRenderer {
   get texture(): string { return this.showingBuggy ? this.buggy.texture : this.body.texture.key; }
   constructor(scene: Phaser.Scene) {
     this.buggy = new BuggyRenderer(scene);
+    this.echoes=Array.from({length:12},()=>scene.add.image(0,0,'kuro-s-0').setOrigin(.5,120/128).setVisible(false));
     this.body = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
     this.head = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
     this.arm = scene.add.image(0, 0, 'morgan-axe').setOrigin(0.22, 0.88).setScale(1.1).setVisible(false);
@@ -44,7 +47,7 @@ export class BossRenderer {
     this.details = scene.add.graphics().setDepth(-950);
   }
   update(boss: PatternEncounter | undefined, origin: Vector, arena: ArenaDefinition = MORGAN_ARENA, dt=1/60, animate=true): void {
-    this.warnings.clear(); this.details.clear();
+    this.warnings.clear(); this.details.clear();for(const e of this.echoes)e.setVisible(false);
     this.showingBuggy = boss?.profile.id === 'buggy';
     if(this.showingBuggy){this.body.setVisible(false);this.head.setVisible(false);this.arm.setVisible(false);this.buggy.update(boss as BuggyEncounter,origin,dt,animate,drawDanger);return;}
     this.buggy.hide();
@@ -55,7 +58,7 @@ export class BossRenderer {
       this.details.lineStyle(3, 0x7ca6b4, 0.7); this.details.strokeRect(x - 22, y - 14, 44, 28);
       this.details.fillStyle(0x284b64, 0.55); this.details.fillTriangle(x - 10, y - 8, x + 10, y - 8, x, y + 9);
     }
-    this.body.setTexture(boss.profile.visual).setCrop().setScale(boss.profile.id === 'morgan' ? 1 : 1.1); this.arm.setTexture(boss.profile.weapon);
+    this.body.setOrigin(.5,.94).setTexture(boss.profile.visual).setCrop().setScale(boss.profile.id === 'morgan' ? 1 : 1.1); this.arm.setTexture(boss.profile.weapon);
     const dead = boss.state === 'dead', alpha = dead ? Math.max(0, 1 - boss.elapsed / 1.5) : 1;
     const x = boss.body.x - origin.x, y = boss.body.y - origin.y;
     this.body.setPosition(x, y).setDepth(y + 1000).setAlpha(alpha).setRotation(dead ? Math.min(Math.PI / 2, boss.elapsed * 2) : 0)
@@ -64,6 +67,12 @@ export class BossRenderer {
     const lift = preparing ? Math.min(1, boss.elapsed / 0.45) : 0;
     this.arm.setOrigin(boss.profile.id === 'morgan' ? 0.82 : 0.22, 0.88).setScale(boss.profile.id === 'morgan' ? 0.8 : 1.1).setPosition(x + (boss.profile.id === 'morgan' ? -22 : 21), y - 42 - lift * 12).setDepth(y + 1001).setAlpha(alpha)
       .setRotation(dead ? Math.PI / 2 : preparing ? -0.85 - lift * 0.7 : boss.state === 'impact' ? 1.1 : 0.1);
+    if(boss.profile.id==='kuro'){
+      this.motion.update(boss.body.id,boss.body.x,boss.body.y,animate,dt,true);
+      const d=this.motion.direction,frame=preparing||boss.state==='impact'?4:this.motion.frame?this.motion.frame-1:0;
+      this.body.setOrigin(.5,120/128).setTexture(`kuro-${d}-${frame}`).setScale(.9).setRotation(dead?Math.min(1.5,boss.elapsed*2):0);this.arm.setVisible(false);
+      for(const [i,t]of (boss as KuroEncounter).trails.entries())if(this.echoes[i])this.echoes[i].setTexture(`kuro-${d}-${frame}`).setPosition(t.x-origin.x,t.y-origin.y).setScale(.9).setAlpha(Math.min(.28,t.life)).setTint(0xb5d9eb).setDepth(t.y-origin.y+999).setVisible(true);
+    }
     if (boss.profile.id === 'morgan') {
       this.motion.update(boss.body.id, boss.body.x, boss.body.y, animate, dt);
       if (animate) this.idleTime += Math.min(dt,.1);
@@ -84,7 +93,7 @@ export class BossRenderer {
       else if (walking && !preparing) this.arm.setRotation(.1+Math.sin(this.motion.gaitPhase)*.16);
       else if (boss.state==='impact' && boss.impactZone?.shape==='arc') this.arm.setRotation(-1.4+Math.min(1,boss.elapsed/.2)*3.8);
     }
-    if (preparing && kind === 'split') {
+    if (preparing && kind === 'split' && boss.profile.id !== 'kuro') {
       this.body.setCrop(0, 25, 64, 55);
       this.head.setTexture(boss.profile.visual).setCrop(0, 0, 64, 25).setVisible(true).setPosition(x + Math.sin(boss.elapsed * 7) * 18, y - 13).setDepth(y + 1002).setAlpha(alpha);
       this.arm.setPosition(x + 40 + Math.sin(boss.elapsed * 9) * 12, y - 48).setRotation(-boss.elapsed * 5);

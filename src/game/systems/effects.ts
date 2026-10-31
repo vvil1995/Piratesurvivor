@@ -92,7 +92,9 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
         bullet.hostile = false; bullet.ownerId = actor.id; bullet.reflected = true; bullet.vx *= -1; bullet.vy *= -1; bullet.hit.clear(); reflected = true; break;
       }
       if (segmentDistance(actor.x, actor.y, ax, ay, bx, by) < 14 + bullet.radius) {
-        if (actor.hurtTimer <= 0 && !isInvulnerable(actor)) { if (!counterGuard(actor, bullet, grid, world, e => onKill(e, actor.id), random)) { const before = actor.hp; actor.hp = Math.max(0, actor.hp - receivedDamage(bullet.damage, actor.stats.armor)); if (actor.hp < before) { actor.lastHit = 'PROYECTIL'; actor.damageNoticeFor = 1.2; } } actor.hurtTimer = 0.65; }
+        if (actor.hurtTimer <= 0 && !isInvulnerable(actor)) { if (!counterGuard(actor, bullet, grid, world, e => onKill(e, actor.id), random)) { const before = actor.hp; actor.hp = Math.max(0, actor.hp - receivedDamage(bullet.damage, actor.stats.armor)); if (actor.hp < before) { actor.lastHit = 'PROYECTIL'; actor.damageNoticeFor = 1.2; } } actor.hurtTimer = 0.65;
+          if(bullet.slow&&actor.hp>0){actor.slowFor=Math.max(actor.slowFor??0,Math.min(2,bullet.slow.duration));actor.slowMultiplier=Math.max(.65,bullet.slow.multiplier);}
+        }
         bullet.active = false; break;
       }
     }
@@ -131,12 +133,12 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
 }
 
 export function spawnProjectile(effects: Effects, x: number, y: number, targetX: number, targetY: number,
-  damage: number, speed: number, ownerId: string, hostile = false, hits = 1, details?: { abilityId: string; level: number; bounces: number }, lifetime = 2.5): boolean {
+  damage: number, speed: number, ownerId: string, hostile = false, hits = 1, details?: { abilityId: string; level: number; bounces: number }, lifetime = 2.5, slow?: Projectile['slow']): boolean {
   const projectile = effects.projectiles.acquire(); if (!projectile) return false;
   const d = Math.max(1, Math.hypot(targetX - x, targetY - y));
   projectile.hit.clear();
   Object.assign(projectile, { x, y, vx: (targetX - x) / d * speed, vy: (targetY - y) / d * speed,
-    radius: 3, life: lifetime, damage, ownerId, hostile, reflected: false, remainingHits: hits, abilityId: details?.abilityId, level: details?.level ?? 1, bounces: details?.bounces ?? 0 });
+    radius: slow ? 7 : 3, life: lifetime, damage, ownerId, slow, hostile, reflected: false, remainingHits: hits, abilityId: details?.abilityId, level: details?.level ?? 1, bounces: details?.bounces ?? 0 });
   return true;
 }
 
