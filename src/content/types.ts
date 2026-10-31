@@ -7,9 +7,13 @@ export interface CharacterDefinition {
   id: string; name: string; shortName?: string; legacyTraining?: boolean; style?: string; title: string; stats: Stats;
   initialAbility: string; abilities: readonly string[]; visual: string;
 }
+export interface RangedEnemyAttack {
+  interval: number; speed: number; range: number;
+  preparation?: number; pellets?: number; spread?: number; preferredDistance?: number; lifetime?: number;
+}
 export interface EnemyDefinition {
   id: string; hp: number; damage: number; speed: number;
-  xp: number; radius: number; visual: string; ranged?: { interval: number; speed: number; range: number };
+  xp: number; radius: number; visual: string; ranged?: RangedEnemyAttack;
 }
 export type AttackBehavior = 'line' | 'burst' | 'cone' | 'sweep' | 'buff' | 'guard' | 'slam' | 'dash' | 'focus' | 'alternating' | 'projectile' | 'decoy' | 'evade' | 'heal';
 export interface AttackLevel {

@@ -1,3 +1,4 @@
+import { tickEnemyShot } from '../systems/enemy-shooting.ts';
 import { tickItem } from '../systems/item-effects.ts';
 import { itemValue, ITEM_RULES } from '../../content/items.ts';
 import { damageEnemy } from '../systems/hits.ts';
@@ -206,7 +207,7 @@ export class Run {
       const enemy = this.enemies.acquire(); if (!enemy) break;
       const def = ENEMIES[profile.reinforcementEnemy];
       Object.assign(enemy, { ...def, active: true, id: ++this.enemyId, ...gate, hp: def.hp * 1.5, maxHp: def.hp * 1.5, kind: undefined, flash: 0,
-        statuses: undefined, launchTime: 0, launchX: 0, launchY: 0, stolen: false, lureIndex: undefined, decoyHitTimer: 0, ranged: undefined, shotTimer: 0, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
+        statuses: undefined, launchTime: 0, launchX: 0, launchY: 0, stolen: false, lureIndex: undefined, decoyHitTimer: 0, ranged: undefined, shotTimer: 0, shotWindup: 0, shotAngle: 0, shotRecovery: 0, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
       remaining--;
     }
   }
@@ -305,7 +306,7 @@ export class Run {
   }
   readonly visualDeaths: { x:number;y:number;visual:string }[] = [];
   private dropXp(enemy: Enemy, ownerId: string, allowFruit = true): void {
-    if (enemy.visual?.startsWith('buggy-') && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
+    if ((enemy.visual?.startsWith('buggy-') || enemy.visual?.startsWith('marine-')) && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
     if (enemy.kind === 'boss') { this.defeatBoss(); return; }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
     const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;
@@ -406,7 +407,10 @@ export class Run {
       const aim = lure?.active && lure.kind === 'decoy' ? lure : target;
       const aimDistance = Math.hypot(aim.x - enemy.x, aim.y - enemy.y);
       const firing = (enemy.statuses?.stun ?? 0) <= 0 && (enemy.statuses?.confuse ?? 0) <= 0 && enemy.ranged && aimDistance < enemy.ranged.range && this.world.segmentClear(enemy.x, enemy.y, aim.x, aim.y, 3, 'attack');
-      const chase = firing ? nearest < 110 ? -1 : 0 : 1;
+      const preferred = enemy.ranged?.preferredDistance ?? 110;
+      const chase = !enemy.ranged?.preparation ? (firing ? nearest < 110 ? -1 : 0 : 1)
+        : (enemy.shotWindup ?? 0) > 0 ? 0 : firing ? nearest < preferred-25 ? -1 : nearest > preferred+25 ? 1 : 0 : 1;
+      if (enemy.visual === 'marine-sword') enemy.shotRecovery = Math.max(0, (enemy.shotRecovery ?? 0)-dt);
       let steerX = enemy.steerX ?? 0, steerY = enemy.steerY ?? 0;
       if ((enemy.statuses?.confuse ?? 0) > 0) { const turn = Math.sin(this.time * 3 + enemy.id) * 1.5, c = Math.cos(turn), s = Math.sin(turn); [steerX, steerY] = [steerX * c - steerY * s, steerX * s + steerY * c]; }
       const speed = enemy.speed * ((enemy.statuses?.slow ?? 0) > 0 ? 0.6 : 1);
@@ -416,10 +420,14 @@ export class Run {
       enemy.decoyHitTimer = Math.max(0, (enemy.decoyHitTimer ?? 0) - dt);
       if (aim !== target && aimDistance < enemy.radius + (lure?.radius ?? 0) && enemy.decoyHitTimer <= 0) { lure!.hp = (lure!.hp ?? 0) - enemy.damage; enemy.decoyHitTimer = 0.8; }
       if (enemy.ranged) {
-        enemy.shotTimer = Math.max(0, (enemy.shotTimer ?? 0) - dt);
-        if (!launched && firing && enemy.shotTimer <= 0 && spawnProjectile(this, enemy.x, enemy.y, aim.x, aim.y, enemy.damage, enemy.ranged.speed, '', true)) enemy.shotTimer = enemy.ranged.interval;
+        tickEnemyShot(enemy, aim, dt, !launched && !!firing, (angle, lifetime) => {
+          const x = enemy.ranged!.preparation ? enemy.x + Math.cos(angle)*100 : aim.x;
+          const y = enemy.ranged!.preparation ? enemy.y + Math.sin(angle)*100 : aim.y;
+          return spawnProjectile(this, enemy.x, enemy.y, x, y, enemy.damage, enemy.ranged!.speed, '', true, 1, undefined, lifetime);
+        });
       }
       if (!launched && !isInvulnerable(target) && (enemy.statuses?.stun ?? 0) <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
+        if (enemy.visual === 'marine-sword') enemy.shotRecovery = .3;
         if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) { const before = target.hp; target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor)); if (target.hp < before) { target.lastHit = 'CONTACTO'; target.damageNoticeFor = 1.2; } } target.hurtTimer = 0.65;
       }
     }

@@ -14,5 +14,17 @@
   "morgan.png": {
     "sha256": "00fd736f28ee9b939854dae498e221fa31c9684c21aae5b30856f817e1ef37bf",
     "bytes": 54131
+  },
+  "marine-sword.png": {
+    "sha256": "5b457cccc4233dbd2ab06449f6ddba3d9e3400d39b1ee1983f484c5f353f6987",
+    "bytes": 61425
+  },
+  "marine-rifle.png": {
+    "sha256": "f836fb9f6e8a30e38a244931420661109a681209b320c099131b0c21f70c40a7",
+    "bytes": 57355
+  },
+  "marine-veteran.png": {
+    "sha256": "7ac8d5719bbf21d23d053bd0055a8c9c236d4ab1bcbb9d0f83db02ee0f40d13c",
+    "bytes": 63855
   }
 }

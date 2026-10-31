@@ -24,16 +24,21 @@ export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: V
   }
   if (!found) return;
   const enemy = pool.acquire(); if (!enemy) return;
-  const variants = definition.enemyVariants?.filter(v => seconds >= v.minSeconds);
-  let type = definition.enemyId;
-  if (variants && variants.length > 1) {
-    let roll = random() * variants.reduce((n, v) => n + v.weight, 0);
-    for (const v of variants) { roll -= v.weight; if (roll < 0) { type = v.id; break; } }
-  }
+  const type = chooseEnemyType(definition, seconds, random);
   const def = ENEMIES[type], scale = definition.enemyScale;
   const threat = difficultyAt(seconds, definition.spawnInterval, definition.difficulty);
   Object.assign(enemy, { x, y, id, visual: def.visual, kind: undefined, hp: def.hp * scale * threat.hp, maxHp: def.hp * scale * threat.hp,
     speed: def.speed * threat.speed, damage: def.damage * threat.damage,
     xp: Math.max(1, Math.round(def.xp * (definition.xpMultiplier ?? 1) * (1 + (threat.hp - 1) * (definition.xpThreatScaling ?? 0)))), radius: def.radius, flash: 0,
-    launchTime: 0, launchX: 0, launchY: 0, stolen: false, statuses: undefined, lureIndex: undefined, decoyHitTimer: 0, ranged: def.ranged, shotTimer: 1 + id % 5 * 0.2, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
+    launchTime: 0, launchX: 0, launchY: 0, stolen: false, statuses: undefined, lureIndex: undefined, decoyHitTimer: 0, ranged: def.ranged, shotWindup: 0, shotAngle: 0, shotRecovery: 0, shotTimer: 1 + id % 5 * 0.2, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
+}
+
+/** Only chooses a type; never acquires an extra entity or changes spawn cadence. */
+export function chooseEnemyType(definition: WorldDefinition, seconds: number, random: () => number): string {
+  const stage = definition.distributions?.filter(s => seconds >= s.at).slice(-1)[0];
+  const variants = stage?.weights ?? definition.enemyVariants?.filter(v => seconds >= v.minSeconds);
+  if (!variants?.length) return definition.enemyId;
+  let roll = random() * variants.reduce((total, v) => total + v.weight, 0);
+  for (const v of variants) { roll -= v.weight; if (v.weight > 0 && roll < 0) return v.id; }
+  return variants.filter(v => v.weight > 0).slice(-1)[0]?.id ?? definition.enemyId;
 }

@@ -21,7 +21,7 @@ test('los enemigos tardíos nacen más fuertes sin depender de HP máximos del j
   function born(time: number, hp: number) {
     const run = new Run('luffy', 0, () => 0.5); run.player.stats.maxHp = hp;
     const field = new FlowField(run.world); field.update(run.player, 1);
-    spawnEnemy(run.enemies, [run.player], { centerX: 256, centerY: 256, width: 920, height: 600 }, run.world, field, run.definition, () => 0.5, 1, time);
+    spawnEnemy(run.enemies, [run.player], { centerX: 256, centerY: 256, width: 920, height: 600 }, run.world, field, run.definition, () => 0.1, 1, time);
     const e = run.enemies.items.find(e => e.active); assert.ok(e); return e;
   }
   const early = born(0, 100), late = born(600, 100), tank = born(600, 10000);

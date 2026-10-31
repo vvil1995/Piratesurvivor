@@ -1087,3 +1087,48 @@ test('piratas corregidos conservan figuras completas en ocho direcciones y cuatr
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){e.ranged=undefined;e.shotTimer=0;}q.draw(200);});await page.screenshot({path:info.outputPath('pirates-idle.png')});
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){r.visualDeaths.push({x:e.x,y:e.y,visual:e.visual!});e.active=false;}q.draw(100);});await page.screenshot({path:info.outputPath('pirates-death.png')});expect(errors).toEqual([]);
 });
+
+test('marines: tres armas, cuatro pasos sin recortes, preparación, disparo y derrota',async({page},info)=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#start').click();
+ await page.evaluate(async()=>{
+  const q=window.__OPS_QA__!,r=q.getRun()!,path='/src/content/catalog.ts',{ENEMIES}=await import(/* @vite-ignore */path);
+  r.enemies.clear();r.update=()=>{};r.player.hurtTimer=1e6;
+  for(const [i,id]of ['marine','marine-rifle','marine-veteran'].entries()){
+   const def=ENEMIES[id],e=r.enemies.acquire()!;Object.assign(e,{...def,id:800+i,active:true,x:r.player.x-80+i*80,y:r.player.y+70,maxHp:def.hp,flash:0,shotTimer:1,shotRecovery:0,shotWindup:0});
+  }const frames=new Set<string>();(window as unknown as {marineFrames:Set<string>}).marineFrames=frames;
+  r.update=dt=>{q.metrics().enemyTextures.forEach(k=>frames.add(k));for(const e of r.enemies.items)if(e.active){e.x+=66*dt;if(e.x>r.player.x+300)e.x=r.player.x-180;}};q.draw();q.tick();
+ });
+ const poses=new Set<string>();
+ for(let step=0;step<8;step++){
+  await page.waitForTimeout(200);
+  const keys=await page.evaluate(()=>{const q=window.__OPS_QA__!;q.draw(16);return q.metrics().enemyTextures;});keys.forEach(k=>poses.add(k));
+  await page.screenshot({path:info.outputPath(`marines-step-${step}.png`)});
+ }
+ const seen=await page.evaluate(()=>Array.from((window as unknown as {marineFrames:Set<string>}).marineFrames));seen.forEach(k=>poses.add(k));
+ for(const visual of ['marine-sword','marine-rifle','marine-veteran'])for(let frame=1;frame<=4;frame++)expect(poses.has(`${visual}-e-${frame}`)).toBe(true);
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=()=>{};let i=0;for(const e of r.enemies.items)if(e.active){e.x=r.player.x-80+(i++)*80;e.shotWindup=e.ranged?.preparation??0;e.shotAngle=-Math.PI/2;}q.draw(200);});
+ await page.screenshot({path:info.outputPath('marines-aiming.png')});
+ expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyTextures)).toEqual(expect.arrayContaining(['marine-rifle-n-5','marine-veteran-n-5']));
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){e.shotWindup=0;e.shotRecovery=.3;}q.draw(100);});
+ await page.screenshot({path:info.outputPath('marines-attack.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){e.flash=.15;e.shotRecovery=0;}q.draw(100);});
+ await page.screenshot({path:info.outputPath('marines-hurt.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){r.visualDeaths.push({x:e.x,y:e.y,visual:e.visual!});e.active=false;}q.draw(100);});
+ await page.screenshot({path:info.outputPath('marines-death.png')});
+ // Decode the actual Vite imports and check transparency/padding in all 192 packed cells.
+ const assets=await page.evaluate(async()=>{
+  const results=[];
+  for(const name of ['marine-sword','marine-rifle','marine-veteran']){
+   const path=`/src/assets/motion/${name}.png?url`,{default:url}=await import(/* @vite-ignore */path),im=new Image();im.src=url;await im.decode();
+   const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const ctx=c.getContext('2d')!;ctx.drawImage(im,0,0);let bad=0,empty=0;
+   for(let row=0;row<8;row++)for(let col=0;col<8;col++){
+    const a=ctx.getImageData(col*128,row*128,128,128).data;let count=0;
+    for(let y=0;y<128;y++)for(let x=0;x<128;x++){if(a[(y*128+x)*4+3]>96){count++;if(x<2||x>125||y<2||y>125)bad++;}}
+    if(!count)empty++;
+   }results.push({name,bad,empty,width:im.width,height:im.height});
+  }return results;
+ });
+ for(const a of assets){expect(a.bad).toBe(0);expect(a.empty).toBe(0);expect(a.width).toBe(1024);expect(a.height).toBe(1024);}
+ expect(errors).toEqual([]);
+});

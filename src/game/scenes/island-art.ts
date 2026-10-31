@@ -42,6 +42,9 @@ import knives from '../../assets/bosses/buggy-knives.png';
 import type Phaser from 'phaser';
 import morgan from '../../assets/bosses/morgan.png';
 import axe from '../../assets/bosses/morgan-axe.png';
+import marineSword from '../../assets/motion/marine-sword.png';
+import marineRifle from '../../assets/motion/marine-rifle.png';
+import marineVeteran from '../../assets/motion/marine-veteran.png';
 import pirate from '../../assets/motion/buggy-pirate.png';
 import gunner from '../../assets/motion/buggy-gunner.png';
 import bruiser from '../../assets/motion/buggy-bruiser.png';
@@ -55,6 +58,7 @@ import flags from '../../assets/worlds/orange-flags.png';
 import compass from '../../assets/worlds/navigation-chart.png';
 import { createPackedDirectionalArt } from './directional-art.ts';
 
+const marineActors = { 'marine-sword': marineSword, 'marine-rifle': marineRifle, 'marine-veteran': marineVeteran };
 const actors = { 'buggy-pirate': pirate, 'buggy-gunner': gunner, 'buggy-bruiser': bruiser };
 const props = { 'buggy-flag':buggyFlag, 'buggy-ground': buggyGround, 'buggy-motion-sheet': buggyMotion, 'buggy-head':buggyHead, 'buggy-hand-left':buggyLeft, 'buggy-hand-right':buggyRight, 'buggy-knife':buggyKnife, 'buggy-bomb':buggyBomb, 'morgan-motion-sheet': morganMotion, 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
   'ability-elastic-punch': pistolArt, 'ability-gatling': gatlingArt, 'ability-bazooka': bazookaArt, 'ability-whip': whipArt, 'ability-balloon': balloonArt, 'ability-axe': axeArt, buggy, 'buggy-knives': knives, morgan, 'morgan-axe': axe, 'orange-house-0': house, 'orange-house-1': shellsHouse,
@@ -62,7 +66,7 @@ const props = { 'buggy-flag':buggyFlag, 'buggy-ground': buggyGround, 'buggy-moti
   'orange-flags': flags, 'navigation-chart': compass };
 export function preloadIslandArt(scene: Phaser.Scene): void {
   for (const [key, url] of Object.entries(props)) scene.load.image(`island-source-${key}`, url);
-  for (const [key, url] of Object.entries(actors)) scene.load.image(`island-source-${key}`, url);
+  for (const [key, url] of Object.entries({ ...actors, ...marineActors })) scene.load.image(`island-source-${key}`, url);
 }
 // Normalización única. Las fuentes GPU se liberan tras crear texturas independientes.
 export function createIslandArt(scene: Phaser.Scene): void {
@@ -79,6 +83,9 @@ export function createIslandArt(scene: Phaser.Scene): void {
   const sheet = scene.textures.get('morgan-motion-sheet').getSourceImage() as HTMLCanvasElement;
   for (let i=0;i<16;i++) {const c=document.createElement('canvas');c.width=c.height=128;c.getContext('2d')!.drawImage(sheet,i%4*128,Math.floor(i/4)*128,128,128,0,0,128,128);scene.textures.addCanvas(`morgan-pose-${i}`,c);}
   scene.textures.remove('morgan-motion-sheet');
+  for (const key of Object.keys(marineActors)) {
+    createPackedDirectionalArt(scene, `island-source-${key}`, key, 8, 128); scene.textures.remove(`island-source-${key}`);
+  }
   for (const key of Object.keys(actors)) {
     for (const direction of ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']) for (let phase = 0; phase < 5; phase++) {
       if (scene.textures.exists(`${key}-${direction}-${phase}`)) scene.textures.remove(`${key}-${direction}-${phase}`);

@@ -184,3 +184,9 @@ Fuente del usuario: `13_sprites_entrenament_ben_retallats.zip`. Copiados sin mod
 ## Corrección de retalles de piratas ·2026-10-31
 
 Se conservan los tres diseños y fuentes originales de la sección de animaciones:3cb64a56 (espadachín),1129340d (fusilero),189cf55e (pesado). Sin generación nueva. La preparación anterior suponía8×5 en las tres fuentes; el pesado es realmente8×4 y las otras fuentes no respetan perfectamente divisiones uniformes. Reextracción por componentes de figura, excluyendo fragmentos vecinos y conservando borde alfa. Atlas1024×640, celdas128 y pies en120; escala común por actor, PNG transparente indexado256 colores. Pesado:caminar0/1/2/1, ataque3, sin inventar un cuarto dibujo. `pirate-crops.json` registra cajas originales, escala y correspondencia; `manifest.json` actualiza hashes. Ninguna modificación de Morgan ni Buggy.
+
+## Marines de Shells Town (2026-10-31)
+
+`src/assets/motion/marine-{sword,rifle,veteran}.png`: tres diseños generados para esta tarea con ImageGen, usando el marine existente como referencia de estilo. Fuentes: `exec-a82e10c3-5dfa-4a96-be0c-d1a1edc9db89.png` (armas/acciones) y `exec-3246dad7-dd4a-49c9-8e30-03503c45f12b.png` (marcha), conservadas en generated_images del espacio de trabajo. No se sustituyen los diseños de Orange Town ni los bosses.
+
+Extracción por componentes alpha para no tomar fragmentos vecinos. Normalización de altura corporal, muestreo nearest y alternancia de piernas sin mover el torso/arma; sin interpolación suavizada. Atlas PNG indexados con transparencia real:1024×1024, celdas128, pies120,8 poses (reposo,4 pasos,preparación,ataque,caída). Las diagonales comparten perfiles y el oeste usa poses reflejadas; no son ocho animaciones dibujadas independientemente. Reacción al daño mediante inclinación/flash breve del renderer. Hashes/tamaños en manifest.json; cajas fuente y reglas en marine-crops.json. Mismos derechos de franquicia que el resto de los personajes del proyecto.

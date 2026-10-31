@@ -171,15 +171,18 @@ export class BattleScene extends Phaser.Scene {
       const animation = this.enemyAnimations[i];
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000);
       const pirate = e.visual?.startsWith('buggy-');
+      const marine = e.visual?.startsWith('marine-');
       const attacking = pirate && (e.ranged ? (e.shotTimer ?? 0) > e.ranged.interval - .18 : Math.hypot(e.x-worldX,e.y-worldY)<e.radius+22);
-      const frame = attacking ? 4 : animation.frame ? pirate ? animation.frame - 1 : (animation.frame - 1) % 2 : 0;
-      sprite.setOrigin(.5, pirate ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction}-${frame}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
+      let frame = attacking ? 4 : animation.frame ? pirate ? animation.frame - 1 : (animation.frame - 1) % 2 : 0;
+      if (marine) frame = (e.shotWindup ?? 0) > 0 ? 5 : (e.shotRecovery ?? 0) > 0 ? e.ranged && e.shotRecovery! < .18 ? 0 : 6 : !e.ranged && Math.hypot(e.x-worldX,e.y-worldY)<e.radius+45 ? 5 : animation.frame;
+      const facing = marine && ((e.shotWindup ?? 0)>0 || (e.shotRecovery ?? 0)>0) ? movementDirection(e.ranged ? Math.cos(e.shotAngle ?? 0) : worldX-e.x, e.ranged ? Math.sin(e.shotAngle ?? 0) : worldY-e.y) : attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction;
+      sprite.setOrigin(.5, pirate || marine ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${facing}-${frame}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged && e.visual === 'marine' ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
-      if (pirate && !animation.frame && !attacking) sprite.setScale(.6,.6*(1+Math.sin(this.enemyIdle*2+e.id)*.01));
-      if (pirate && e.flash > 0) sprite.setAngle(-9 * e.flash/.15);
-      if (e.visual?.startsWith('buggy-')) { sprite.setCrop(); this.enemyRigs[i].hide(); }
+      if ((pirate || marine) && !animation.frame && !attacking && !(e.shotWindup! > 0) && !(e.shotRecovery! > 0)) sprite.setScale(.6,.6*(1+Math.sin(this.enemyIdle*2+e.id)*.01));
+      if ((pirate || marine) && e.flash > 0) sprite.setAngle(-9 * e.flash/.15);
+      if (pirate || marine) { sprite.setCrop(); this.enemyRigs[i].hide(); }
       else this.enemyRigs[i].update(sprite, animation, 0.6);
     }
     for (let i = 0; i < this.chestSprites.length; i++) {
@@ -203,6 +206,13 @@ export class BattleScene extends Phaser.Scene {
       }
     }
     this.effects.clear();
+    for (const e of run?.enemies.items ?? []) {
+      if (!e.active || !e.ranged?.preparation || !(e.shotWindup! > 0)) continue;
+      const x=e.x-origin.x, y=e.y-origin.y, angle=e.shotAngle ?? 0, arc=e.ranged.spread ?? .035;
+      this.effects.lineStyle(1.5, 0xffc47b, .65);
+      for (const a of [angle-arc/2, angle+arc/2]) this.effects.lineBetween(x,y,x+Math.cos(a)*e.ranged.range,y+Math.sin(a)*e.ranged.range);
+      this.effects.lineStyle(2, 0xff725c, .9); this.effects.strokeCircle(x,y-42,5+3*(1-e.shotWindup!/e.ranged.preparation));
+    }
     this.enemyDeaths.update(run, origin, delta/1000);
     this.bossRenderer.update(run?.encounter, origin, run?.arena, delta/1000, !!animate);
     const signal = run && ['shells-town', 'orange-town'].includes(run.zone) ? run.navigationRoute.signal : undefined;

@@ -19,14 +19,16 @@ export const CHARACTERS: Record<string, CharacterDefinition> = {
     abilities: ['collier', 'epaule', 'cotelette', 'selle', 'mouton-shot', 'combat-cooking'],
     stats: { maxHp: 105, speed: 210, damage: 25, cooldown: 0.72, range: 140, magnet: 105, armor: 0, regeneration: 0.3, critChance: 0.04 } },
 };
+const MARINE_BASE_HP = 32;
 export const ENEMIES: Record<string, EnemyDefinition> = {
   'blackcat-pirate': { id: 'blackcat-pirate', hp: 105, damage: 25, speed: 90, xp: 18, radius: 13, visual: 'blackcat-pirate' },
   'blackcat-raider': { id: 'blackcat-raider', hp: 80, damage: 21, speed: 115, xp: 20, radius: 13, visual: 'blackcat-pirate' },
   'buggy-pirate': { id: 'buggy-pirate', hp: 65, damage: 17, speed: 78, xp: 10, radius: 13, visual: 'buggy-pirate' },
   'buggy-gunner': { id: 'buggy-gunner', hp: 52, damage: 16, speed: 70, xp: 12, radius: 13, visual: 'buggy-gunner', ranged: { interval: 2.6, speed: 220, range: 270 } },
   'buggy-bruiser': { id: 'buggy-bruiser', hp: 110, damage: 24, speed: 59, xp: 16, radius: 13, visual: 'buggy-bruiser' },
-  'marine-rifle': { id: 'marine-rifle', hp: 32, damage: 10, speed: 66, xp: 7, radius: 13, visual: 'marine', ranged: { interval: 2.4, speed: 200, range: 250 } },
-  marine: { id: 'marine', hp: 32, damage: 10, speed: 66, xp: 5, radius: 13, visual: 'marine' },
+  'marine-veteran': { id: 'marine-veteran', hp: MARINE_BASE_HP * 1.4, damage: 14, speed: 58, xp: 9, radius: 14, visual: 'marine-veteran', ranged: { interval: 3.6, speed: 175, range: 195, preferredDistance: 135, preparation: .9, pellets: 5, spread: .7, lifetime: 1.3 } },
+  'marine-rifle': { id: 'marine-rifle', hp: MARINE_BASE_HP, damage: 10, speed: 66, xp: 7, radius: 13, visual: 'marine-rifle', ranged: { interval: 2.4, speed: 200, range: 280, preferredDistance: 215, preparation: .55 } },
+  marine: { id: 'marine', hp: MARINE_BASE_HP, damage: 10, speed: 66, xp: 5, radius: 13, visual: 'marine-sword' },
 };
 export { ABILITIES } from './attacks.ts';
 export const UPGRADES: UpgradeDefinition[] = [
