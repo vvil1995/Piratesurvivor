@@ -10,7 +10,7 @@ Repositorio: `vvil1995/Piratesurvivor`. URL prevista: https://vvil1995.github.io
 4. Abrir Actions → **GitHub Pages** → Run workflow → `main`. El primer intento anterior a activar Pages puede fallar en Configure Pages: repetirlo después de la activación.
 5. Esperar el trabajo deploy y abrir la URL mostrada en el environment `github-pages`. Cada push posterior a main vuelve a compilar, comprobar y publicar dist automáticamente.
 
-El repositorio permanece privado. GitHub Free permite Pages para repositorios públicos; para mantener un repositorio privado se necesita un plan compatible (Pro/Team/Enterprise). Si la opción Pages no está disponible, mantener Netlify mientras se decide entre un plan compatible o autorizar expresamente el cambio a público. No se cambia visibilidad automáticamente. Un repositorio privado no implica que el sitio de Pages tenga acceso privado: revisar su configuración de acceso antes de activarlo.
+En la comprobación final, GitHub ya informa que el repositorio es público; esta tarea no ha modificado su visibilidad. GitHub Free permite Pages para repositorios públicos; para mantener un repositorio privado se necesita un plan compatible (Pro/Team/Enterprise). Si la opción Pages no está disponible, mantener Netlify mientras se decide entre un plan compatible o autorizar expresamente el cambio a público. No se cambia visibilidad automáticamente. Un repositorio privado no implica que el sitio de Pages tenga acceso privado: revisar su configuración de acceso antes de activarlo.
 
 ## Configuración
 
