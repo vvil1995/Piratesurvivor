@@ -1,18 +1,34 @@
-import { TRAINING_COST, TRAINING_MAX } from '../../content/catalog.ts';
+import { TRAINING, emptyTraining, trainingCost, type CharacterTraining } from '../../content/training.ts';
+import { CHARACTERS } from '../../content/catalog.ts';
+import { TRAINING_MAX } from '../../content/catalog.ts';
 import type { RunResult } from '../../game/core/types.ts';
 
 export const SAVE_KEY = 'ops.progress.v1';
 export interface Progress {
+  characterTraining?: Record<string, CharacterTraining>;
   version: 1; coins: number; training: number; runs: number; wins: number;
   totalKills: number; bestTime: number; bestLevel: number;
   buggyVictories?: number; lastBuggyRunId?: string; morganVictories?: number; lastMorganRunId?: string; berryRunId?: string; berryRunAmount?: number; lastRunId: string; reducedMotion: boolean;
 }
 export interface StorageLike { getItem(key: string): string | null; setItem(key: string, value: string): void }
 export const freshProgress = (): Progress => ({ version: 1, coins: 0, training: 0, runs: 0, wins: 0, totalKills: 0, bestTime: 0, bestLevel: 1, lastRunId: '', reducedMotion: false });
+function validTraining(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return Object.entries(value).every(([id, p]) => {
+    if (!Object.hasOwn(CHARACTERS, id) || !p || typeof p !== 'object' || !p.levels || typeof p.levels !== 'object' || Array.isArray(p.levels)) return false;
+    const allowed = CHARACTERS[id].abilities, initial = p.levels.starter && p.starter || CHARACTERS[id].initialAbility;
+    return Object.entries(p.levels).every(([key, level]) => TRAINING[key] && Number.isInteger(level) && (level as number) >= 0 && (level as number) <= TRAINING[key].max) &&
+      (p.starter === undefined || allowed.includes(p.starter)) && (p.second === undefined || p.levels.repertoire && allowed.includes(p.second) && p.second !== initial) &&
+      (p.levels.starter || p.starter === undefined || p.starter === CHARACTERS[id].initialAbility) &&
+      Array.isArray(p.bans) && new Set(p.bans).size === p.bans.length && p.bans.length <= (p.levels.bans ?? 0) && p.bans.every((a: string) => allowed.includes(a)) &&
+      !p.bans.includes(initial) && !p.bans.includes(p.second);
+  });
+}
 function valid(value: unknown): value is Progress {
   if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
-  return v.version === 1 && ['coins', 'training', 'runs', 'wins', 'totalKills', 'bestTime', 'bestLevel'].every(key =>
+  return v.version === 1 && validTraining(v.characterTraining) && ['coins', 'training', 'runs', 'wins', 'totalKills', 'bestTime', 'bestLevel'].every(key =>
     typeof v[key] === 'number' && Number.isSafeInteger(v[key]) && (v[key] as number) >= 0 && (v[key] as number) <= 1e9) &&
     (v.training as number) <= TRAINING_MAX && typeof v.lastRunId === 'string' &&
     v.lastRunId.length < 150 && (v.berryRunId === undefined || typeof v.berryRunId === 'string' && v.berryRunId.length < 150) &&
@@ -81,10 +97,29 @@ export class SaveStore {
     this.progress.lastBuggyRunId = runId; this.progress.buggyVictories = Math.min(1e9, (this.progress.buggyVictories ?? 0) + 1);
     this.flush(); return true;
   }
-  train(): boolean {
-    const p = this.progress, cost = TRAINING_COST(p.training);
-    if (p.training >= TRAINING_MAX || p.coins < cost) return false;
-    p.coins -= cost; p.training++; this.flush(); return true;
+  getTraining(characterId: string): CharacterTraining {
+    if (!Object.hasOwn(CHARACTERS, characterId)) throw new Error('Personaje desconocido');
+    const profiles = this.progress.characterTraining ??= {};
+    if (!profiles[characterId]) {
+      profiles[characterId] = emptyTraining();
+      if (characterId === 'luffy' && this.progress.training) profiles[characterId].levels.vitality = this.progress.training;
+      this.flush();
+    }
+    return profiles[characterId];
+  }
+  buyTraining(characterId: string, id: string): boolean {
+    if (!Object.hasOwn(CHARACTERS, characterId) || !Object.hasOwn(TRAINING, id)) return false;
+    const p = this.getTraining(characterId), current = p.levels[id] ?? 0, cost = trainingCost(id, current);
+    if (current >= TRAINING[id].max || this.progress.coins < cost) return false;
+    p.levels[id] = current + 1; this.progress.coins -= cost;
+    if (id === 'repertoire') p.second = CHARACTERS[characterId].abilities.find(a => a !== (p.starter ?? CHARACTERS[characterId].initialAbility) && !p.bans.includes(a));
+    this.flush(); return true;
+  }
+  configureTraining(characterId: string, starter: string, second: string | undefined, bans: string[]): boolean {
+    if (!Object.hasOwn(CHARACTERS, characterId)) return false;
+    const p = this.getTraining(characterId), allowed = CHARACTERS[characterId].abilities;
+    if (!allowed.includes(starter) || !p.levels.starter && starter !== CHARACTERS[characterId].initialAbility || second && (!p.levels.repertoire || !allowed.includes(second) || second === starter) || bans.length > (p.levels.bans ?? 0) || new Set(bans).size !== bans.length || bans.some(id => !allowed.includes(id) || id === starter || id === second)) return false;
+    p.starter = starter; p.second = second; p.bans = [...bans]; this.flush(); return true;
   }
   export(): string { return JSON.stringify(this.progress, null, 2); }
   import(raw: string): boolean {

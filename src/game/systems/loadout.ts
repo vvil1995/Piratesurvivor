@@ -18,7 +18,7 @@ export function availableAbilities(player: Player): string[] {
   return [...CHARACTERS[player.characterId].abilities, ...Object.keys(ABILITIES).filter(id => ABILITIES[id].category === 'buff')];
 }
 export function canImproveAttack(player: Player, id: string): boolean {
-  if (!ABILITIES[id] || !availableAbilities(player).includes(id)) return false;
+  if (player.bannedAbilities?.includes(id) || !ABILITIES[id] || !availableAbilities(player).includes(id)) return false;
   const equipped = player.attacks.find(a => a.id === id);
   if (equipped) return equipped.level < ATTACK_MAX_LEVEL;
   return player.attacks.length < MAX_LEARNED_ABILITIES &&

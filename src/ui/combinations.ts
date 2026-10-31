@@ -15,7 +15,7 @@ export function renderCombinations(run: Run, actions: CombinationActions): void 
   const joinable = cards.some(a => cards.some(b => a !== b && a.ids.length + b.ids.length <= 4));
   let first: Card | undefined;
   const draw = () => {
-    node('combination-message').textContent = (!run.canJoinMovements || !joinable) ? 'Para juntar necesitas una quinta habilidad o una recompensa de Morgan. Tu recompensa se conserva hasta que puedas usarla.' : first ? '2/2 · ¿Con qué habilidad quieres juntarla?' : '1/2 · ¿Qué habilidades quieres juntar? Selecciona la primera.';
+    node('combination-message').textContent = (!run.canJoinMovements || !joinable) ? 'Necesitas un objeto de unión obtenido al vencer a Morgan u otro jefe. No se consigue aprendiendo un quinto movimiento.' : first ? '2/2 · ¿Con qué habilidad quieres juntarla?' : `Objeto de unión ×${run.unionTokens} · 1/2 · Selecciona la primera habilidad.`;
     const slots = node('combination-slots'); slots.replaceChildren();
     for (const card of cards) {
       if (card === first) continue;

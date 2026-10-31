@@ -53,7 +53,7 @@ export class PatternEncounter {
     if (this.hit.has(player.id) || !inDanger(zone, player) || this.attack?.cover && !world.segmentClear(zone.x, zone.y, player.x, player.y, 2)) return;
     this.hit.add(player.id);
     if (player.hurtTimer > 0 || isInvulnerable(player)) return;
-    player.hp = Math.max(0, player.hp - receivedDamage(this.attack!.damage, player.stats.armor)); player.hurtTimer = 0.65;
+    player.hp = Math.max(0, player.hp - receivedDamage(this.attack!.damage, player.stats.armor)); player.hurtTimer = 0.65; player.lastHit = this.attack!.name; player.damageNoticeFor = 1.2;
   }
   tick(dt: number, player: Player, world: CollisionWorld, direction: (from: Vector) => Vector, reinforce: () => void): void {
     if (player.hp <= 0) { this.cancel(); return; }

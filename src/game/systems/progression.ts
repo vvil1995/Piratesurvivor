@@ -2,14 +2,14 @@ import { UPGRADES } from '../../content/catalog.ts';
 import type { LevelChoice, UpgradeDefinition } from '../../content/types.ts';
 import type { Player } from '../core/types.ts';
 import { ABILITIES } from '../../content/attacks.ts';
-import { availableAbilities, canImproveAttack, improveAttack } from './loadout.ts';
+import { availableAbilities, canImproveAttack, improveAttack, hasFreeSlot } from './loadout.ts';
 import { refreshStats, regenerationLimit, resolveStats } from './stats.ts';
 export const xpForLevel = (level: number): number => Math.round(12 + level * 7 + level ** 1.35 * 2);
 export function chooseUpgrades(taken: Record<string, number>, random: () => number, player?: Player): LevelChoice[] {
   const pool: LevelChoice[] = UPGRADES.filter(u => (taken[u.id] || 0) < u.max && (!player || canGainStat(player, u)))
     .map(u => player && u.stat === 'regeneration' && player.stats.regeneration >= regenerationLimit(player.stats.maxHp) - 1e-8
       ? { ...u, description: 'Regeneración limitada. +0,02 HP/s acumulados en la build, sujetos a topes: este nivel puede no aumentar el efecto actual.' } : u);
-  if (player) for (const id of availableAbilities(player)) {
+  if (player && hasFreeSlot(player)) for (const id of availableAbilities(player).filter(id => !player.bannedAbilities?.includes(id))) {
     if (!canImproveAttack(player, id)) continue;
     const ability = ABILITIES[id], current = player.attacks.find(a => a.id === id)?.level ?? 0;
     const next = current + 1, params = ability.levels[next - 1];

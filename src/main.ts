@@ -1,3 +1,4 @@
+import { renderTraining } from './ui/training.ts';
 import { ITEMS } from './content/items.ts';
 import { itemImage } from './ui/item-art.ts';
 import { FRUITS } from './content/fruits.ts';
@@ -26,7 +27,7 @@ const controller = new Controller(() => run?.status === 'playing', pause);
 const orientation = new MobileOrientation(() => !!run && !['defeat', 'victory'].includes(run.status), pause);
 function sync(): void {
   if (!run) return;
-  store.bank(run.id, run.player.collectedBerries);
+  store.bank(run.id, Math.floor(run.player.collectedBerries));
   if (run.morganDefeated) store.recordMorganVictory(run.id);
   if (run.buggyDefeated) store.recordBuggyVictory(run.id);
   const now = performance.now();
@@ -72,7 +73,7 @@ async function start(characterId = selectedCharacter): Promise<void> {
   try {
     await scene.ensureActorArt(CHARACTERS[characterId].visual);
     selectedCharacter = characterId;
-    run = new Run(characterId, CHARACTERS[characterId].legacyTraining ? store.progress.training : 0); previousStatus = ''; hudAt = 0;
+    run = new Run(characterId, store.getTraining(characterId)); previousStatus = ''; hudAt = 0;
     view.refreshArt(store, selectedCharacter); view.showModal(); view.setPlaying(true);
     (document.activeElement as HTMLElement)?.blur(); sync(); orientation.sync();
   } catch {
@@ -80,7 +81,7 @@ async function start(characterId = selectedCharacter): Promise<void> {
   } finally { el('loading').hidden = true; }
 }
 function home(): void {
-  if (run) store.bank(run.id, run.player.collectedBerries);
+  if (run) store.bank(run.id, Math.floor(run.player.collectedBerries));
   controller.reset(); run = undefined; previousStatus = ''; view.showModal(); view.setPlaying(false); view.home(store, selectedCharacter); orientation.sync(); el('start').focus();
 }
 el('start').addEventListener('click', () => { void start(); }); el('retry').addEventListener('click', () => { void start(); });
@@ -106,7 +107,10 @@ document.addEventListener('keydown', event => {
   if (!event.ctrlKey && !event.metaKey && !event.altKey && /^[1-4]$/.test(event.key) && !event.repeat && !orientation.blocked && run?.selectSlot(Number(event.key) - 1)) view.hud(run);
 });
 el('resume').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); view.showModal(); (document.activeElement as HTMLElement)?.blur(); sync(); });
-el('train').addEventListener('click', () => { if (!CHARACTERS[selectedCharacter].legacyTraining) return; store.train(); view.home(store, selectedCharacter); });
+const trainingRefresh = () => { view.home(store, selectedCharacter); renderTraining(store, selectedCharacter, trainingRefresh); };
+el('train').addEventListener('click', () => { if (run) return; trainingRefresh(); view.showModal('training'); });
+el('training-close').addEventListener('click', () => { view.showModal(); view.home(store, selectedCharacter); });
+el('reroll').addEventListener('click', () => { if (!orientation.blocked && run?.rerollChoices()) { previousStatus = ''; sync(); } });
 el<HTMLSelectElement>('beta-character').addEventListener('change', async event => {
   const id = (event.target as HTMLSelectElement).value; if (!CHARACTERS[id] || run) return;
   selectedCharacter = id; el<HTMLButtonElement>('start').disabled = true;
@@ -142,7 +146,7 @@ el('fullscreen').addEventListener('click', async () => {
   catch { el('fullscreen').title = 'Este navegador no permite pantalla completa. Puedes usar el navegador normalmente.'; }
 });
 if (!document.documentElement.requestFullscreen) el('fullscreen').hidden = true;
-window.addEventListener('pagehide', () => { if (run) store.bank(run.id, run.player.collectedBerries); store.flush(); });
+window.addEventListener('pagehide', () => { if (run) store.bank(run.id, Math.floor(run.player.collectedBerries)); store.flush(); });
 view.home(store, selectedCharacter);
 const scene = new BattleScene({ run: () => run, axis: () => controller.axis(), tick: sync,
   ready: () => { view.refreshArt(store, selectedCharacter); el('loading').hidden = true; }, reducedMotion: () => store.progress.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches });

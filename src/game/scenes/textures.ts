@@ -23,6 +23,11 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0xd8b861); g.fillRect(6, 7, 3, 19); g.fillRect(23, 7, 3, 19); g.fillRect(13, 13, 7, 7);
   g.fillStyle(0x493724); g.fillRect(16, 16, 2, 3);
   g.generateTexture('small-chest', 32, 32); g.clear();
+  // Barril original, distinto del cofre grande dorado.
+  g.fillStyle(0x2e2421); g.fillRoundedRect(4, 1, 24, 32, 7); g.fillStyle(0x8d5a35); g.fillRoundedRect(6, 3, 20, 28, 6);
+  g.fillStyle(0xc59052); g.fillRect(10, 5, 4, 24); g.fillStyle(0xb27b45); g.fillRect(17, 4, 4, 25);
+  g.fillStyle(0x493529); g.fillRect(15, 5, 2, 25); g.fillStyle(0x48555b); g.fillRect(5, 9, 22, 4); g.fillRect(5, 23, 22, 4);
+  g.fillStyle(0xb2aaa0); g.fillRect(7, 9, 17, 1); g.fillRect(7, 23, 17, 1); g.generateTexture('barrel', 32, 36); g.clear();
   g.fillStyle(0x274e67, 0.5); g.fillEllipse(26, 32, 52, 12);
   g.fillStyle(0x4e342b); g.fillPoints([{x:3,y:22},{x:48,y:22},{x:39,y:35},{x:14,y:35}],true);
   g.fillStyle(0xb8834b); g.fillRect(7, 23, 37, 3); g.fillStyle(0x724a32); g.fillRect(13, 29, 26, 4);
@@ -73,11 +78,12 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0x4b3328); g.fillRect(0, 0, 64, 64); g.fillStyle(0x976740); g.fillRect(3, 3, 58, 58);
   g.lineStyle(3, 0xd1a367); g.strokeRect(5, 5, 54, 54); g.lineBetween(7, 7, 57, 57); g.lineBetween(57, 7, 7, 57);
   g.generateTexture('crate', 64, 64); g.clear();
-  // Muslo de carne con hueso: dibujo pixelado propio, curación reconocible.
-  g.fillStyle(0xe9dfbd); g.fillRect(1, 7, 16, 4); g.fillRect(0, 5, 4, 8); g.fillRect(14, 5, 4, 8);
-  g.fillStyle(0x6e332b); g.fillRect(4, 3, 10, 12); g.fillRect(3, 5, 12, 8);
-  g.fillStyle(0xbc6340); g.fillRect(5, 4, 8, 9); g.fillStyle(0xe19a5c); g.fillRect(5, 4, 5, 3);
-  g.fillStyle(0xf4d39a); g.fillRect(6, 5, 3, 1); g.generateTexture('food', 18, 18); g.clear();
+  // Muslo de ave pixelado original: carne redonda y hueso expuesto.
+  g.fillStyle(0xe6d8b5); g.fillRect(12, 14, 10, 5); g.fillCircle(22, 14, 4); g.fillCircle(23, 20, 4);
+  g.fillStyle(0x603128); g.fillEllipse(10, 10, 19, 19); g.fillStyle(0xac5835); g.fillEllipse(10, 9, 16, 16);
+  g.fillStyle(0xd88748); g.fillEllipse(8, 7, 10, 8); g.fillStyle(0xf2bc6e); g.fillRect(5, 4, 6, 2);
+  g.fillStyle(0x7c3d2b); g.fillRect(8, 13, 6, 2); g.fillStyle(0xffe6ac); g.fillRect(20, 13, 3, 2);
+  g.generateTexture('food', 28, 26); g.clear();
   g.fillStyle(0x61376e); g.fillCircle(9, 11, 7); g.fillStyle(0xbe6ac1); g.fillCircle(8, 10, 6);
   g.lineStyle(1, 0xeab8d4); g.strokeCircle(8, 10, 3); g.lineBetween(8, 7, 10, 10);
   g.fillStyle(0x90b864); g.fillRect(8, 0, 2, 5); g.fillTriangle(10, 2, 17, 0, 13, 5);

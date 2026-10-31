@@ -1,126 +1,61 @@
-# Cómo probar el prototipo
+# Cómo probar la beta0.15
 
-## Sin herramientas de desarrollo
+## Abrir el juego
 
-1. Descomprime el paquete de navegador.
-2. Abre `One-Piece-Survivor.html` en Chrome, Edge, Firefox o Safari moderno.
-3. Escoge Luffy, Zoro, Nami, Usopp o Sanji en el selector BETA (sin compras) y pulsa **Zarpar a Shells Town**. No hay que instalar nada ni crear una cuenta.
+En ordenador, descomprime el paquete y abre `One-Piece-Survivor.html`: funciona sin herramientas, internet ni cuenta. `index.html` es la variante para servidor estático y necesita su carpeta `assets/`; no abrir esa variante por doble clic. En móvil, usar la URL HTTPS de Netlify: algunos gestores de archivos solo previsualizan el HTML sin ejecutarlo. Sin Firebase, Supabase ni backend.
 
-El HTML autónomo funciona sin internet y contiene todos los recursos de ejecución. `index.html` es la variante para un servidor estático y debe conservar su carpeta `assets/`. No abras ese `index.html` por doble clic: utiliza el archivo autónomo.
-
-En móviles, los gestores de archivos de iOS y algunos de Android pueden previsualizar el HTML sin ejecutarlo. Para comprobar el juego en Safari iOS/Chrome Android, utiliza una URL HTTP(S) de la carpeta compilada desde un servidor estático privado. No se necesita Firebase, Supabase ni otro backend. En desarrollo, el móvil puede abrir la IP de tu ordenador en la misma Wi-Fi y el puerto que muestre `npm run dev`.
-
-La apertura local `file://` y las direcciones HTTP(S) tienen almacenamientos independientes. En `file://`, el comportamiento de LocalStorage depende del navegador y la ruta del archivo. Para conservar progreso entre versiones, usa **? → Exportar progreso** y luego impórtalo en la nueva copia. La URL estable por HTTPS es la opción preferida para las pruebas habituales en móvil.
+Los dominios de previews y producción guardan progreso por separado, igual que `file://`. Para transferirlo usa **? → Exportar progreso** e importar después en la otra URL. Importar sustituye el progreso actual. No se sincroniza entre dispositivos y una batalla en curso no se recupera al cerrar. Borrar datos del navegador elimina el guardado local.
 
 ## Controles
 
-| Acción | Ordenador | Móvil/tableta |
+| Acción | Ordenador | Móvil |
 | --- | --- | --- |
-| Moverse | WASD o flechas | Arrastrar en la zona izquierda, debajo del HUD |
-| Atacar | Automático: solo ranura seleccionada | Automático: solo ranura seleccionada |
-| Elegir ranura | Clic o teclas1–4 | Tocar el cuadrado inferior |
-| Elegir mejora | Clic o Tab y Enter | Tocar una tarjeta |
-| Pausar | Esc, P o botón Ⅱ | Botón Ⅱ |
-| Reanudar | Botón Volver a la batalla | Mismo botón |
+| Mover | WASD/flechas | Arrastrar en zona izquierda |
+| Ataque seleccionado | Automático | Automático |
+| Cambiar ranura | Clic o1–4 | Tocar cuadrado inferior |
+| Elegir mejora | Clic/Tab/Enter | Tocar carta |
+| Pausa | Esc/P/botónⅡ | BotónⅡ |
+| Uniones/detalles | Icono de enlaces | Mismo icono |
 
-Al cambiar de aplicación o pestaña la batalla se pausa. Reanudar requiere una acción explícita. El puerto se puede consultar en vertical; la batalla móvil se juega en horizontal. Si arrancas en vertical, aparece el aviso de giro y se pausa el reloj. Pulsa el botón de pantalla completa y girar, o gira físicamente el dispositivo; al volver a horizontal, pulsa reanudar. En iPhone el navegador puede no permitir bloquear la orientación automáticamente. El botón de pantalla completa aparece solo cuando la API está disponible.
+La batalla móvil se juega en horizontal. Girar, cambiar de pestaña o aplicación pausa la partida, incluida una travesía; reanudar requiere una acción explícita. En iPhone puede no permitirse bloquear el giro automáticamente: gira físicamente y desactiva el bloqueo de orientación. Pantalla completa solo cuando el navegador ofrece esa API.
 
-## Recorrido recomendado
+## Ataques, cartas y uniones
 
-1. Mueve a Luffy y confirma que no se desplaza más rápido en diagonal.
-2. Acércate a los marines: el puño los golpea automáticamente.
-3. Recoge los cristales turquesa y elige una de tres mejoras.
-4. Pausa; comprueba que el reloj y los enemigos se detienen.
-5. Cambia de aplicación y vuelve; comprueba pausa y liberación del joystick.
-6. Pierde una partida: revisa tiempo, bajas, nivel y monedas. Reinicia.
-7. Vuelve al puerto, entrena si tienes 30 monedas y recarga la página. Deben mantenerse monedas, récords y entrenamiento.
-8. Recorre varias calles y gira en distintas direcciones. El mundo continúa: no hay victoria al llegar a diez minutos.
-9. Intenta atravesar casas, árboles, rocas y muros. Rodea una casa y comprueba que los marines buscan otra ruta; los golpes tampoco deben atravesar edificios.
-10. En móvil, gira durante movimiento y con las tarjetas abiertas. Deben seguir visibles y utilizables.
-11. Exporta/importa el progreso desde **?**. Importar sustituye el progreso actual por el del archivo seleccionado.
+Cada técnica tiene icono propio. Solo ataca la ranura seleccionada. Aprender otra no la combina ni activa automáticamente. Cada técnica llega a6 y evoluciona a+; máximo dos buffs distintos aprendidos. Un buff individual alterna actividad/descanso; combinado aporta efecto constante menor cuando su grupo está seleccionado.
 
-El guardado no conserva una batalla en curso. Borrar datos del navegador elimina el progreso local. Si aparece un aviso de almacenamiento, exporta la partida antes de cerrar. No hay sincronización entre dispositivos; puedes usar la exportación para transferirlo manualmente.
+Mientras haya una ranura vacía, las cartas pueden ofrecer habilidades nuevas o mejoras de las aprendidas, además de pasivas. **Con las cuatro ocupadas solo aparecen pasivas**, incluso aunque los ataques no estén al máximo. No aparece una quinta habilidad ni concede unión gratuita. Vida temporal:+20HP y cura20; regeneración moderada, ambas sin límite de elecciones, con topes globales del efecto. Las demás pasivas tienen límites.
 
-## Datos útiles al comunicar un problema
+Vencer a Morgan otorga un **objeto de unión de ataques** (nombre provisional); los siguientes jefes también. No ocupa el espacio de equipo. Su cantidad se ve en el icono de enlaces. Toca el icono, elige primera carta y luego segunda: consume uno y agrupa sus componentes, conservando niveles y cooldowns. Máximo cuatro componentes por ranura. Cancelar antes de elegir la pareja no gasta el objeto. La unión puede dejar un hueco y vuelven a ofrecerse habilidades mientras ese hueco exista. No se guarda entre partidas.
 
-Dispositivo, versión de Android/iOS, navegador y versión, orientación, minuto de partida, número de enemigos aproximado y pasos para reproducirlo. Para una pantalla negra, adjunta el error de consola si puedes acceder a él. No incluyas datos de cuentas ni credenciales.
+## Entrenamiento permanente
 
-## Alcance actual: beta0.14
+En el puerto elige personaje y pulsa **ENTRENAR**. Panel de estadísticas con icono, efecto por nivel, segmentos, nivel/máximo y coste siguiente. Las compras son independientes por personaje y gastan berries. El nivel permanente mostrado es1 más la suma de niveles comprados, no una barra de XP permanente. Es la única vía de mejora permanente del poder. Se conservan también berries y récords.
 
-Shells Town procedural, cinco personajes de prueba, habilidades, berries, cofres, un objeto, fruta Bomu y Morgan están disponibles. Orange Town tiene tres variantes de piratas y el jefe Buggy. Syrup Village es una llegada provisional con dos variantes de enemigos; Kuro, el resto de la campaña, Roger y la taverna siguen pendientes. Cada partida nueva reinicia la build; se conservan berries, récords y entrenamiento existente. No se ha implementado todavía el nuevo entrenamiento individual. Volver a un fragmento de la misma partida reconstruye el mismo terreno y no regenera cofres consumidos.
+Coste de cada estadística: redondeo al siguiente múltiplo de5 de `base × crecimiento^nivelActual`. Datos modificables en `content/training.ts`; precios provisionales. Primeros costes: Vitalidad30, Fuerza35, Imán25; los siguientes crecen. Regeneración:+0,04HP/s por nivel, deliberadamente moderada. Límites combinados: defensa60%, reducción de cooldown50%, velocidad+75%; regeneración≤0,5%HP máximo/s y≤3HP/s. Las compras no ignoran esos límites.
 
-## Ataques de Luffy
+Entrenamiento permite comprar cambios de cartas por partida, capacidad de vetos, elección del ataque inicial y repertorio para empezar con dos distintos. Configura ataques/vetos en la parte inferior. No se puede vetar un ataque inicial ni repetir ambos. Los cambios de cartas se reponen al comenzar otra partida. Los vetos configurados no aparecen en las cartas. Los personajes siguen disponibles para beta sin taverna.
 
-Luffy empieza con Pistol. Al subir de nivel pueden salir cartas para aprender Gatling, Bazooka, Whip, Balloon o Axe, además de pasivas y mejoras de los ataques equipados. Hay cuatro espacios visibles. Cada técnica llega a seis niveles y se convierte automáticamente en + sin objetos; ya no se ofrece después. Pistol+ perfora una fila; Gatling+ hace seis golpes que perforan dos objetivos; Bazooka+ añade onda de impacto; Whip+ gira360°. Son habilidades automáticas independientes, no una cadena desbloqueada.
+Guardados anteriores: los niveles de entrenamiento antiguos de Luffy se convierten en niveles de Vitalidad, sin volver a cobrar; el nuevo efecto es+8HP por nivel. Se mantienen berries y récords. Los otros personajes empiezan sin compras. No existe además el antiguo botón de+5HP.
 
-Probar tres partidas con elecciones diferentes; comprobar movimiento/joystick mientras se activan varios ataques, golpes detenidos por edificios, pausa durante ráfagas, cartas de nivel6 y reinicio que devuelve solo Pistol1. Los números del combate son provisionales, no equilibrio final de campaña.
+## Botín y daño
 
-## 0.5 — pasivas y estadísticas
+- Barriles de madera: se rompen atacándolos, dan berries, poca XP y posible muslo de ave curativo. Su densidad candidata es1/3chunks, el doble que antes.
+- Cofres grandes dorados: mismo candado/círculo de3s; alejarse pausa, volver continúa. Densidad candidata1/32chunks, triple que antes. Botín directo: más berries/XP, posible objeto y fruta rara. No dan cartas propias; la XP sí puede provocar la subida normal.
+- Un solo objeto equipado junto a los ataques: tocar para consultar. Otro objeto permite conservar o sustituir, quitando el efecto anterior.
+- Comida: muslo con hueso, cura y da1XP base. Aproximadamente10% de enemigos pueden dejarlo.
+- Radio base:105px (Nami120), también atrae comida. La atracción no atraviesa paredes. Boni de Imán/objeto se suman con topes.
+- Proyectiles hostiles: estela roja con centro claro/contorno oscuro. Un aviso breve distingue CONTACTO, PROYECTIL o el patrón del jefe cuando realmente baja la vida. La pierna/brazo extendido no forma parte de la hurtbox.
 
-En las cartas probar vida (+20máximo y cura20), regeneración, armadura y crítico. Pausar para ver los efectos efectivos, que ya respetan topes. La XP se ve arriba con valor numérico y barra; al subir de nivel se reinicia el progreso. Vida/regen no tienen máximo de elecciones; las demás sí. Reiniciar debe borrar estas pasivas y conservar solo el perfil anterior.
+Cofres/barriles tienen identidad e historial por isla: alejarse, volver o reintentar un jefe no regenera recompensas. Hay límites de pools e historial. Berries solo se guardan al recogerlas. Fortuna acumula fracciones durante la partida, guardando unidades enteras sin duplicarlas al terminar.
 
-El equilibrio cambió: regeneración inicial0,2HP/s; daño/velocidad/cooldown temporales ahora se suman sobre la base, no se multiplican repetidamente. Los números son provisionales y necesitan partidas humanas con y sin mejoras. El enemigo recibe más estadísticas y más frecuencia por tiempo, hasta los topes de0.4.1. El reloj no obliga a cambiar de isla ni concede victoria. La carta desde05:00 permite entrar en Morgan si la recoges; vencerlo sí inicia el viaje automático.
+## Morgan, Orange y Buggy
 
+Sobrevive hasta05:00 en Shells. Entre05:00 y05:45 puede aparecer una carta náutica cercana sobre terreno alcanzable. Camina encima para viajar3s en barco a Morgan; se pausa reloj/combate/cooldowns. Puedes ignorarla: se programará otra. Nivel20 orientativo, sin requisito. Aprende rectángulo, barrido, carga, refuerzos y onda; usa cobertura y esquiva las zonas rojas.
 
-## Beta de los cinco personajes
+Perder en Morgan devuelve al mismo Shells con25HP,2,5s de gracia y build conservada; otra carta45–90s después permite reintentar. Vencer concede objeto de unión, registra victoria y lleva automáticamente a Orange sin curar. En Orange hay piratas básicos, tiradores y resistentes; desde cinco minutos en esa isla puede aparecer la carta de Buggy.
 
-Prueba una partida con cada uno. Aprender una quinta habilidad abre el menú de agrupación: selecciona la primera carta y luego la segunda para unirlas y continuar automáticamente. Cada técnica conserva su nivel y reloj; máximo dos buffs distintos por partida. Mejora una técnica hasta6 para comprobar su +. Revisa especialmente la carga de Zoro cerca de muros, el señuelo/robo de Nami, humo/proyectiles de Usopp y recogida de comida de Sanji. Abandonar no cobra ni suma recompensas. La taverna y el entrenamiento individual nuevo todavía no están disponibles.
+Buggy: cuchillas por corredor, bomba fijada al suelo, barrido, cuerpo desmontable hacia círculo anunciado, refuerzos y bombardeo triple. Fases65%/30%. Perder devuelve a Orange con25HP/build; ganar concede unión y viaja a Syrup sin curar. Syrup es llegada provisional con enemigos: Kuro, Baratie, Arlong y Roger siguen pendientes. Morir explorando sí termina la partida y reinicia nivel/build, conservando solo progreso permanente.
 
+## Qué comunicar al probar
 
-Sin quinta habilidad ni recompensa de Morgan, el menú permite consultar/separar, pero no unir libremente. Con una nueva habilidad pendiente puedes escoger dos grupos existentes o la pendiente y un grupo. Volver en el segundo paso permite cambiar la primera selección; cancelar devuelve la elección de nivel. Prueba especialmente si el doble de XP inicial y el crecimiento de recompensa por enemigo resistente permiten montar la build antes de la acumulación.
-
-
-## Beta0.8.0: tocar para elegir
-
-Aprende Bazooka: Pistol sigue seleccionado y solo Pistol ataca. Toca Bazooka en el HUD y comprueba borde dorado/etiqueta ACTIVA; vuelve a Pistol tocándolo. En PC también1–4. Antes del quinto movimiento no puedes unirlos. Al desbloquear una combinación, elige su ranura para que funcionen juntos sus componentes; seleccionar otra deja ese grupo en reserva. Cambiar no reinicia cooldowns. Prueba especialmente el ataque inicial de Zoro contra marines cercanos, lejanos y detrás de muros.
-
-## Beta0.9.0: tesoros
-
-Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el ataque seleccionado los apunta y rompe; recoge el botín. Los grandes son dorados y más grandes: acércate y espera a que el círculo del candado complete3s. Al alejarte se pausa; volver continúa. Recoge el botín directo, sin cartas de mejora. Puede aparecer un objeto o, raramente, una fruta. Solo se equipa un objeto; toca su icono junto a los ataques para consultarlo y conserva o sustituye al recoger otro. Las berries se guardan al recogerlas y se conservan al abandonar/recargar; la build desaparece. Verifica que regresar a una zona no haga reaparecer cofres consumidos. Guardados de Netlify preview y producción están separados por dominio.
-
-## Beta0.10.0: Morgan
-
-Desde05:00 puede aparecer una carta náutica cerca del personaje. Camina sobre ella para viajar en barco3s a Morgan; no existe botón de acceso directo. Nivel20 recomendado, sin requisito. Aprende rectángulo de destral y arco; en fases2/3 aparecen carga, refuerzos y onda. Rojo tenue: preparación; contorno intenso: último aviso; naranja: impacto efectivo. Sal de la zona antes del golpe y usa cajas contra cargas/ondas. Comprueba que Morgan no las atraviesa y puede rodearlas. Mira tu vida y las tres fases de la barra del jefe.
-
-Al vencer, espera la caída: se guarda la victoria, se concede una agrupación y el barco te lleva automáticamente a Orange Town sin curación ni reiniciar la build. Allí aparecen piratas básicos, tiradores y resistentes; Buggy ya está disponible mediante otra carta desde cinco minutos en Orange. Si pierdes contra Morgan, el barco te devuelve al mismo Shells Town con25HP, nivel/build/berries conservados y una nueva oportunidad aleatoria tras45–90s de juego. Morir fuera de la arena sigue terminando la partida. Prueba entrada, esquiva y travesía en móvil horizontal y PC; al interrumpir/girar debe pausarse también el barco.
-
-## Beta0.11.0
-
-Probar cadencia de los seis movimientos de Luffy, en particular Pistol y Gatling. Moverse mientras se dispara y comprobar que brazos/puños salen del actor. Balloon muestra una pose hinchada con inmunidad breve, daño ligero y lanzamiento de rivales. Buffs muestran flechas de color y pequeños totales efectivos; consultar las cartas para magnitud y duración.
-
-Buscar cofres más separados. Pequeños: moneda, poca XP y posible carne; grandes: círculo/candado de3s y botín directo, sin selección de mejoras. Recoger moneda/XP. Una subida de nivel por esa XP sigue abriendo cartas normales. Objeto ocasional entra directamente en un hueco libre; no aumenta un objeto equipado. Fruta rara Bomu Bomu: recogerla, aceptar o conservar build, probar explosiones al derrotar enemigos. Se pierde al reiniciar. Comprobar que comer cura sin superar HP máximo y que enemigos dejan carne ocasionalmente.
-
-La carne también aporta1XP. Comprobar la subida normal si esa pequeña cantidad completa la barra.
-
-## Beta0.12.0
-
-Balloon: ver torso hinchado, cabeza/pies sin deformar, rivales dañados y despedidos. Probar contacto, rifle y Morgan durante la ventana de inmunidad; después vuelve a poder recibir daño. El lanzamiento debe frenarse ante sólidos.
-
-Quinta habilidad: aparecen cuatro grupos y la nueva pendiente. Tocar primera carta y luego otra; se combina y continúa automáticamente. También puede elegirse la pendiente. Volver desde el segundo paso no debe gastar nada. Con recompensa de Morgan se hace igual aunque haya menos habilidades. Grupos llenos no se combinan por encima de cuatro.
-
-Solo un objeto junto a los ataques. Tocar su icono para consultar efecto. Si aparece otro, recogerlo y conservar/sustituir; la estadística anterior debe desaparecer al sustituir. Los grandes son mucho más raros (1/96 chunks). La entrada a Morgan cambia en0.13 según el recorrido siguiente.
-
-
-## Beta0.13.0 — cartas y reintentos de Morgan
-
-1. Sobrevive hasta05:00. Entre05:00 y05:45 puede aparecer la primera carta náutica, sobre suelo transitable cerca del actor; el HUD indica su distancia. Antes no hay acceso al jefe.
-2. Camina sobre la carta: animación de barco3s y entrada a la arena. El combate/reloj se congelan durante la travesía. Prueba Pausar travesía y reanudar, además de cambiar de pestaña o girar el móvil.
-3. Pierde contra Morgan: desaparecen sus avisos/refuerzos y regresas con25HP a Shells Town. Comprueba nivel, ataques, combinaciones, buffs, objeto, fruta y berries. El terreno/cofres consumidos no se reinician. Hay2,5s de protección al volver.
-4. Sigue jugando: otra carta puede aparecer45–90s después. Si ignoras una carta90s o te alejas demasiado, desaparece y se programa otra oportunidad. El nuevo Morgan empieza con toda su vida.
-5. Vence: viaje automático a Orange Town conservando la vida actual/build y una recompensa de combinación. Comprueba que hay piratas con bandana y rayas, incluidos tiradores y resistentes. Su apariencia es provisional; Buggy se añade en0.14.
-
-Las cartas son la representación de navegación de East Blue; no un Log Pose canónico de Grand Line. El momento de aparición no obliga a entrar: puedes rodear/ignorar la carta.
-
-
-## Beta0.14.0 — Buggy
-
-Tras Morgan, sigue jugando en Orange Town. Desde cinco minutos en esa isla puede aparecer otra carta, con el mismo sistema aleatorio y sin requisito de nivel. Recógela para viajar a la arena del circo.
-
-- Mano de cuchillas: corredor rojo y mano separada que lo recorre. Sal lateralmente.
-- Bomba del payaso: círculo fijado sobre tu posición. Muévete antes de explotar; una caja puede protegerte.
-- Abanico: barrido frontal amplio; busca su espalda o aléjate.
-- Asalto desmontable: se separa durante el aviso y se recompone en el círculo anunciado, solo si hay trayecto libre.
-- Orden: refuerzos piratas limitados, por las puertas.
-- Bombardeo: tres círculos simultáneos, aviso de2s y recuperación larga.
-
-Comprueba las fases65%/30%, el nombre/barra de Buggy, visibilidad de todos los círculos y la pausa en móvil horizontal. Perder devuelve a Orange con25HP y build conservada; otra carta permite reintentar. Vencer otorga una combinación, registra la victoria local y viaja automáticamente a Syrup sin curar. Syrup tiene enemigos provisionales, pero Kuro aún no existe. Los cofres de cada isla tienen historial independiente y no se regeneran por reintentar el jefe.
+Dispositivo, Android/iOS, navegador/versión, orientación, versión visible de la beta, minuto y pasos para reproducir. Revisar especialmente origen de golpes al desplazarse, lectura de proyectiles, compra/recarga de entrenamiento y cartas al llenar cuatro ranuras. No se han medido FPS ni confirmado Safari/teléfonos físicos desde el entorno de desarrollo.

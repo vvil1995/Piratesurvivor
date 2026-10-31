@@ -1,3 +1,5 @@
+import { trainingLevel, trainingModifiers } from '../content/training.ts';
+import { resolveStats } from '../game/systems/stats.ts';
 import { MORGAN_ROUTE } from '../content/navigation.ts';
 import { itemImage } from './item-art.ts';
 import { isInvulnerable } from '../game/systems/guards.ts';
@@ -7,7 +9,7 @@ import { ITEMS } from '../content/items.ts';
 import type { Run } from '../game/core/run.ts';
 import type { RunResult } from '../game/core/types.ts';
 import type { SaveStore } from '../platform/persistence/save.ts';
-import { CHARACTERS, TRAINING_COST, TRAINING_MAX } from '../content/catalog.ts';
+import { CHARACTERS } from '../content/catalog.ts';
 import { artUrl, pixelIcon, upgradeIcon } from './pixel-art.ts';
 import { abilityIcon } from './ability-icon.ts';
 import { combined } from '../game/systems/buffs.ts';
@@ -38,7 +40,7 @@ export class View {
   showModal(id?: string): void {
     if (id === this.modal) return;
     if (!this.modal && id) this.lastFocus = document.activeElement as HTMLElement;
-    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'fruit-found', 'item-found', 'item-info', 'voyage']) el(name).hidden = name !== id;
+    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'fruit-found', 'item-found', 'item-info', 'voyage', 'training']) el(name).hidden = name !== id;
     this.modal = id;
     el('home').inert = !!id;
     el('topbar').inert = !!id;
@@ -49,23 +51,19 @@ export class View {
   }
   get modalId(): string | undefined { return this.modal; }
   home(store: SaveStore, characterId = 'luffy'): void {
-    const character = CHARACTERS[characterId], trained = !!character.legacyTraining;
+    const character = CHARACTERS[characterId], profile = store.getTraining(characterId);
     el('character-title').textContent = character.name.toUpperCase(); el('character-tagline').textContent = character.title;
-    el('character-style').textContent = character.style ?? 'SUPERVIVENCIA'; el('character-initial').textContent = ABILITIES[character.initialAbility].shortName.toUpperCase();
+    el('character-style').textContent = character.style ?? 'SUPERVIVENCIA'; el('character-initial').textContent = ABILITIES[profile.levels.starter && profile.starter || character.initialAbility].shortName.toUpperCase();
     el('portrait-index').textContent = String(Object.keys(CHARACTERS).indexOf(characterId) + 1).padStart(2, '0');
     const p = store.progress;
     el('best-time').textContent = timeLabel(p.bestTime);
     el('run-count').textContent = p.runs.toString().padStart(2, '0');
     el('win-count').textContent = p.wins.toString().padStart(2, '0');
     el('coins').textContent = p.coins.toString();
-    el('training-level').textContent = trained ? `${p.training}/5` : '—';
-    el('starting-hp').textContent = (character.stats.maxHp + (trained ? p.training * 5 : 0)).toString();
-    const train = el<HTMLButtonElement>('train');
-    train.disabled = !trained || p.training >= TRAINING_MAX || p.coins < TRAINING_COST(p.training);
-    train.replaceChildren(document.createTextNode(!trained ? 'BETA' : p.training >= TRAINING_MAX ? 'MÁXIMO' : `${TRAINING_COST(p.training)} `));
-    el('training-description').textContent = trained ? '+5 de vida inicial por nivel' : 'Acceso de prueba sin entrenamiento comprado';
-    if (trained && artUrl('coin') && p.training < TRAINING_MAX) train.append(pixelIcon('coin'));
-    train.setAttribute('aria-label', p.training >= TRAINING_MAX ? 'Entrenamiento al máximo' : `Entrenar por ${TRAINING_COST(p.training)} monedas`);
+    el('training-level').textContent = `NV. ${trainingLevel(profile)}`;
+    el('starting-hp').textContent = String(resolveStats(character.stats, [trainingModifiers(profile)]).maxHp);
+    el<HTMLButtonElement>('train').disabled = false; el('train').textContent = 'ENTRENAR';
+    el('training-description').textContent = 'Mejoras permanentes de este personaje';
     el<HTMLInputElement>('reduced-motion').checked = p.reducedMotion;
     document.body.classList.toggle('reduced-motion', p.reducedMotion);
     this.warning(store.warning);
@@ -76,6 +74,7 @@ export class View {
     const avatar = document.createElement('img'); avatar.src = artUrl(`${visual}-face`); avatar.alt = '';
     el('captain-avatar').replaceChildren(avatar);
     el('coin-icon').replaceChildren(pixelIcon('coin'));
+    el('union-icon').replaceChildren(pixelIcon('union'));
     this.home(store, characterId);
   }
   warning(message: string): void { el('storage-warning').hidden = !message; el('storage-warning').textContent = message; }
@@ -97,6 +96,9 @@ export class View {
     }
     el('buff-strip').replaceChildren(...badges);
     el('fruit-active').textContent = p.fruit ? `FRUTA: ${FRUITS[p.fruit].name}` : '';
+    el('damage-feedback').textContent = (p.damageNoticeFor ?? 0) > 0 ? `DAÑO · ${p.lastHit}` : '';
+    el('union-count').textContent = String(run.unionTokens);
+    el('manage-abilities').title = `Objeto de unión: ${run.unionTokens}. Se obtiene al vencer a Morgan u otro jefe.`;
     el('loot-notice').textContent = run.lootNoticeFor > 0 ? run.lootNotice : '';
     const boss = run.encounter;
     el('hud').classList.toggle('boss-active', !!boss);
@@ -132,7 +134,7 @@ export class View {
       else { slot.textContent = '+ OBJETO'; slot.setAttribute('aria-label', 'Espacio de objeto vacío'); }
     }
     el('inventory-list').textContent = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objeto';
-    el('run-berries').textContent = p.collectedBerries.toString();
+    el('run-berries').textContent = Math.floor(p.collectedBerries).toString();
     const signature = run.id + ':' + p.selectedSlot + ':' + p.abilitySlots.map(slot => slot.join(',')).join('|') + p.attacks.map(a => `${a.id}:${a.level}:${a.activeFor > 0}`).join('|');
     if (signature !== this.attackSignature) {
       this.attackSignature = signature;
@@ -189,6 +191,7 @@ export class View {
     }
   }
   upgrades(run: Run, choose: (id: string) => void): void {
+    el<HTMLButtonElement>('reroll').disabled = !(run.player.rerolls ?? 0); el('reroll').textContent = `Cambiar cartas (${run.player.rerolls ?? 0})`;
     const holder = el('upgrade-choices'); holder.replaceChildren();
     for (const upgrade of run.choices) {
       const button = document.createElement('button'); button.className = 'upgrade-card';

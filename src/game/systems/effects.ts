@@ -92,7 +92,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
         bullet.hostile = false; bullet.ownerId = actor.id; bullet.reflected = true; bullet.vx *= -1; bullet.vy *= -1; bullet.hit.clear(); reflected = true; break;
       }
       if (segmentDistance(actor.x, actor.y, ax, ay, bx, by) < 14 + bullet.radius) {
-        if (actor.hurtTimer <= 0 && !isInvulnerable(actor)) { if (!counterGuard(actor, bullet, grid, world, e => onKill(e, actor.id), random)) actor.hp = Math.max(0, actor.hp - receivedDamage(bullet.damage, actor.stats.armor)); actor.hurtTimer = 0.65; }
+        if (actor.hurtTimer <= 0 && !isInvulnerable(actor)) { if (!counterGuard(actor, bullet, grid, world, e => onKill(e, actor.id), random)) { const before = actor.hp; actor.hp = Math.max(0, actor.hp - receivedDamage(bullet.damage, actor.stats.armor)); if (actor.hp < before) { actor.lastHit = 'PROYECTIL'; actor.damageNoticeFor = 1.2; } } actor.hurtTimer = 0.65; }
         bullet.active = false; break;
       }
     }

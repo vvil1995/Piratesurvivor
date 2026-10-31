@@ -74,7 +74,7 @@ export class BattleScene extends Phaser.Scene {
   create(): void {
     createTextures(this);
     this.worldRenderer = new WorldRenderer(this);
-    for (let i = 0; i < 18; i++) this.chestSprites.push(this.add.image(0, 0, 'small-chest').setOrigin(0.5, 0.8).setVisible(false));
+    for (let i = 0; i < 18; i++) this.chestSprites.push(this.add.image(0, 0, 'barrel').setOrigin(0.5, 0.8).setVisible(false));
     for (let i = 0; i < 12; i++) this.dust.push({ sprite: this.add.image(0, 0, 'foot-dust').setDepth(-999).setVisible(false), x: 0, y: 0, life: 0 });
     for (let i = 0; i < SHELLS_TOWN.pickupCap; i++) this.crystals.push(this.add.image(0, 0, 'xp').setVisible(false).setDepth(2));
     for (let i = 0; i < SHELLS_TOWN.enemyCap; i++) {
@@ -164,14 +164,14 @@ export class BattleScene extends Phaser.Scene {
     for (let i = 0; i < this.chestSprites.length; i++) {
       const chest = run?.visibleChests[i], sprite = this.chestSprites[i];
       sprite.setVisible(!!chest?.active);
-      if (chest?.active) sprite.setPosition(chest.x - origin.x, chest.y - origin.y).setScale(chest.large ? 1.35 : 1).setTint(chest.large ? 0xffdc8a : 0xffffff).setDepth(chest.y - origin.y + 1000);
+      if (chest?.active) sprite.setTexture(chest.large ? 'small-chest' : 'barrel').setPosition(chest.x - origin.x, chest.y - origin.y).setScale(chest.large ? 1.35 : 1).setTint(chest.large ? 0xffdc8a : 0xffffff).setDepth(chest.y - origin.y + 1000);
     }
     for (let i = 0; i < this.crystals.length; i++) {
       const pickup = run?.pickups.items[i], sprite = this.crystals[i];
       sprite.setVisible(!!pickup?.active);
       if (pickup?.active) {
         const kind = pickup.kind ?? 'xp', factor = kind === 'xp' && pickup.value >= 20 ? 1.3 : 1;
-        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : 18) * factor, 18 * factor);
+        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : kind === 'food' ? 26 : 18) * factor, (kind === 'food' ? 24 : 18) * factor);
       }
     }
     this.effects.clear();
@@ -203,7 +203,7 @@ export class BattleScene extends Phaser.Scene {
           for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; this.effects.lineBetween(x + Math.cos(a) * radius * 0.4, y + Math.sin(a) * radius * 0.4, x + Math.cos(a) * radius, y + Math.sin(a) * radius); }
           continue;
         }
-        if (area.visual === 'rubber-axe') { drawAxe(this.effects, x, y, area.delay, area.life, area.radius); continue; }
+        if (area.visual === 'rubber-axe') { const actor = run.players.get(area.ownerId); drawAxe(this.effects, x, y, area.delay, area.life, area.radius, actor ? { x: actor.x - origin.x, y: actor.y - origin.y } : undefined); continue; }
         this.effects.fillStyle(area.kind === 'smoke' ? 0xa2adba : area.kind === 'decoy' ? 0xc3936c : area.triggered ? 0x8ae0ce : 0xedbd67, area.triggered ? area.life * 0.6 : 0.12);
         this.effects.fillCircle(x, y, area.radius); this.effects.lineStyle(2, area.triggered ? 0xd1fff0 : 0xedbd67, 0.8); this.effects.strokeCircle(x, y, area.radius);
         if (area.kind === 'decoy') {
@@ -217,6 +217,11 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const bullet of run.projectiles.items) if (bullet.active) {
         const x = bullet.x - origin.x, y = bullet.y - origin.y - 18;
+        if (bullet.hostile) {
+          this.effects.lineStyle(7, 0x3b151f, .95); this.effects.lineBetween(x, y, x - bullet.vx * .07, y - bullet.vy * .07);
+          this.effects.lineStyle(3, 0xff735f, 1); this.effects.lineBetween(x, y, x - bullet.vx * .07, y - bullet.vy * .07);
+          this.effects.fillStyle(0x401c27); this.effects.fillCircle(x, y, 7); this.effects.fillStyle(0xffdf9d); this.effects.fillCircle(x, y, 4); continue;
+        }
         const ammo = bullet.abilityId ? ABILITIES[bullet.abilityId].levels[(bullet.level ?? 1) - 1] : undefined;
         const color = bullet.hostile ? 0xffa0a0 : bullet.reflected ? 0xf9dc79 : ammo?.status === 'confuse' ? 0xadb6c7 : ammo?.splash ? 0xf1ad68 : ammo?.status ? 0xb0d991 : 0xc3e7ef;
         this.effects.lineStyle(2, color, 0.8); this.effects.lineBetween(x, y, x - bullet.vx * 0.035, y - bullet.vy * 0.035);
@@ -237,10 +242,11 @@ export class BattleScene extends Phaser.Scene {
     for (const fist of this.fists) fist.setVisible(false);
     if (run) for (const [index, strike] of run.strikes.entries()) {
       const alpha = Math.min(1, strike.life / 0.08);
-      const x = strike.x - origin.x, y = strike.y - origin.y;
+      const actor = run.players.get(strike.ownerId);
+      const x = (actor?.x ?? strike.x) - origin.x, y = (actor?.y ?? strike.y) - origin.y;
       const color = strike.evolved ? 0xf8d76c : strike.behavior === 'sweep' ? 0x9bd8d5 : 0xf1d1ab;
-      const owner = run.players.get(strike.ownerId), attached = strike.visual?.startsWith('rubber-') && strike.visual !== 'rubber-kick' && owner;
-      if (drawElasticStrike(this.effects, strike, attached ? owner.x - origin.x : x, attached ? owner.y - origin.y : y, attached ? { direction: owner.id === player?.id ? pose.direction : movementDirection(Math.cos(owner.facing), Math.sin(owner.facing)), targetX: x + Math.cos(strike.angle) * strike.reach, targetY: y - 26 + Math.sin(strike.angle) * strike.reach } : undefined)) continue;
+      const owner = run.players.get(strike.ownerId), attached = strike.visual?.startsWith('rubber-') && owner;
+      if (drawElasticStrike(this.effects, strike, attached ? owner.x - origin.x : x, attached ? owner.y - origin.y : y, attached ? { direction: owner.id === player?.id ? pose.direction : movementDirection(Math.cos(owner.facing), Math.sin(owner.facing)), targetX: x + Math.cos(strike.angle) * strike.reach, targetY: y - 26 + Math.sin(strike.angle) * strike.reach, angle: this.captain.angle, scaleX: this.captain.scaleX, scaleY: this.captain.scaleY } : undefined)) continue;
       if (drawWeaponSweep(this.effects, strike, x, y)) continue;
       if (strike.behavior === 'guard') {
         this.effects.lineStyle(3, 0x92c8ed, alpha); for (const side of [-1, 1]) { this.effects.lineBetween(x + side * 24, y - 36, x + side * 24, y - 12); this.effects.lineBetween(x + side * 24, y - 36, x + side * 16, y - 36); } continue;
@@ -266,7 +272,12 @@ export class BattleScene extends Phaser.Scene {
         continue;
       }
       if (strike.visual === 'staff') { this.effects.lineStyle(5, 0xc19b69, alpha); this.effects.lineBetween(x, y - 19, endX, endY - 19); this.effects.fillStyle(0xe8cca1, alpha); this.effects.fillCircle(endX, endY - 19, 5); continue; }
-      if (strike.visual === 'kick') { this.effects.lineStyle(3, 0xe1e4c4, alpha); this.effects.lineBetween(x, y - 19, endX, endY - 19); this.fists[index].setTexture('boot').setDisplaySize(26, 26).setTint(color).setVisible(true).setPosition(endX, endY - 19).setAlpha(alpha).setRotation(strike.angle); continue; }
+      if (strike.visual === 'kick') {
+        this.effects.lineStyle(9, 0x28313b, alpha); this.effects.lineBetween(x, y - 13, endX, endY - 19);
+        this.effects.lineStyle(2, 0x6c7781, alpha); this.effects.lineBetween(x - 2, y - 13, endX - 2, endY - 21);
+        this.effects.fillStyle(0x101923, alpha); this.effects.fillRoundedRect(endX - 11, endY - 24, 26, 12, 3);
+        this.effects.lineStyle(2, 0xb9b8a6, alpha); this.effects.lineBetween(endX - 10, endY - 11, endX + 13, endY - 11); continue;
+      }
       this.effects.lineStyle(9, 0x7c503b, alpha); this.effects.lineBetween(x, y - 19, endX, endY - 19);
       this.effects.lineStyle(5, 0xefc69a, alpha); this.effects.lineBetween(x, y - 21, endX, endY - 21);
       this.fists[index].setTexture('fist').setDisplaySize(strike.evolved ? 36 : 27, strike.evolved ? 36 : 27).setTint(color).setVisible(true).setPosition(endX, endY - 21).setAlpha(alpha).setRotation(strike.angle + Math.PI / 4);

@@ -30,20 +30,14 @@ test('Balloon también evita el golpe de Morgan y la inmunidad termina al desinf
   for (let i = 0; i < 73; i++) r.update(1 / 60, axis);
   assert.ok(r.player.hp < hp - 30);
 });
-function fifth(r: Run) {
-  for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(r.player, id);
+test('la quinta carta no abre unión; solo el objeto de jefe permite juntar sin alterar cooldowns', () => {
+  const r = new Run(); for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(r.player, id);
   r.status = 'levelup'; r.player.choices = [{ kind: 'ability', id: 'ability:fury', abilityId: 'fury', name: 'Furia', description: '', symbol: '', max: 6 }];
-  r.selectUpgrade('ability:fury');
-}
-test('pareja del quinto: validación atómica, aprendizaje único y cooldowns/niveles intactos', () => {
-  const r = new Run(); fifth(r); const state = r.player.attacks[1]; state.level = 3; state.cooldown = 4.2;
-  const slots = JSON.stringify(r.player.abilitySlots);
-  assert.equal(r.joinPair(0, 0), false); assert.equal(r.joinPair('pending', 99), false); assert.equal(JSON.stringify(r.player.abilitySlots), slots);
-  assert.equal(r.joinPair(1, 0), true); assert.equal(r.status, 'playing'); assert.equal(r.player.attacks.length, 5);
-  assert.equal(state.level, 3); assert.equal(state.cooldown, 4.2); assert.equal(r.player.taken['ability:fury'], 1);
-  assert.equal(r.joinPair(0, 1), false);
-  const other = new Run(); fifth(other); assert.equal(other.joinPair('pending', 0), true);
-  assert.deepEqual(other.player.abilitySlots[0], ['elastic-punch', 'fury']);
+  assert.equal(r.selectUpgrade('ability:fury'), false); assert.equal(r.pendingAbility, undefined);
+  r.status = 'playing'; r.openCombinations(); const state = r.player.attacks[1]; state.level = 3; state.cooldown = 4.2;
+  const slots = JSON.stringify(r.player.abilitySlots); assert.equal(r.joinPair(1, 0), false); assert.equal(JSON.stringify(r.player.abilitySlots), slots);
+  r.grantCombinationReward(); assert.equal(r.joinPair(0, 0), false); assert.equal(r.joinPair('pending', 0), false);
+  assert.equal(r.joinPair(1, 0), true); assert.equal(r.player.attacks.length, 4); assert.equal(state.level, 3); assert.equal(state.cooldown, 4.2); assert.equal(r.unionTokens, 0);
 });
 test('pareja por recompensa de jefe funciona con menos de cinco y se consume una vez', () => {
   const r = new Run(); improveAttack(r.player, 'gatling'); r.grantCombinationReward(); r.openCombinations();

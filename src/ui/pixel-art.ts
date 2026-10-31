@@ -1,6 +1,7 @@
+import { abilityCanvases } from './ability-art.ts';
 // Atlas original generado para el proyecto. Recortes lógicos: el PNG fuente no se modifica.
 import { combatIcons, type CombatIcon } from './combat-icons.ts';
-export type IconName = 'fist' | 'heart' | 'boot' | 'armor' | 'clock' | 'magnet' | 'arm' | 'coin' | CombatIcon;
+export type IconName = 'fist' | 'heart' | 'boot' | 'armor' | 'clock' | 'magnet' | 'arm' | 'coin' | CombatIcon | `ability-${string}` | 'union';
 export const ICONS: IconName[] = ['fist', 'heart', 'boot', 'armor', 'clock', 'magnet', 'arm', 'coin', 'swords', 'staff', 'slingshot'];
 const urls = new Map<string, string>();
 type Region = readonly [number, number, number, number];
@@ -15,7 +16,7 @@ const characters: Record<string, Region> = {
   'marine-walk2': [664, 352, 237, 342],
   'marine-attack': [950, 352, 304, 342],
 };
-const items: Record<Exclude<IconName, CombatIcon>, Region> = {
+const items: Record<Exclude<IconName, CombatIcon | `ability-${string}` | 'union'>, Region> = {
   fist: [45, 716, 235, 232], heart: [345, 720, 250, 230],
   boot: [647, 717, 270, 234], armor: [963, 713, 278, 239],
   clock: [38, 954, 251, 287], magnet: [345, 962, 260, 278],
@@ -34,6 +35,7 @@ export function rasterizeArt(source: CanvasImageSource): Map<string, HTMLCanvasE
     urls.set(name, canvas.toDataURL('image/png')); result.set(name, canvas);
   }
   for (const [name, canvas] of combatIcons()) { urls.set(name, canvas.toDataURL('image/png')); result.set(name, canvas); }
+  for (const [name, canvas] of abilityCanvases(result)) { urls.set(name, canvas.toDataURL('image/png')); result.set(name, canvas); }
   return result;
 }
 export const artUrl = (name: string): string => urls.get(name) || '';

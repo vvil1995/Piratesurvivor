@@ -1,3 +1,4 @@
+import { trainingModifiers, type CharacterTraining } from '../../content/training.ts';
 import { BuggyEncounter } from '../bosses/buggy.ts';
 import type { PatternEncounter } from '../bosses/pattern-encounter.ts';
 import { SYRUP_VILLAGE } from '../../content/worlds/syrup-village.ts';
@@ -75,10 +76,10 @@ export class Run {
   status: RunStatus = 'playing';
   pendingAbility?: AbilityChoice;
   private combinationRewards = 0;
-  private pendingCombinationUsed = false;
   private slotsBeforeLearning?: string[][];
   private selectedBeforeLearning = 0;
-  get canJoinMovements(): boolean { return !!this.pendingAbility && !this.pendingCombinationUsed || this.combinationRewards > 0; }
+  get canJoinMovements(): boolean { return this.combinationRewards > 0; }
+  get unionTokens(): number { return this.combinationRewards; }
   // Punto de integración futuro: solo una recompensa real de jefe debe llamar aquí.
   grantCombinationReward(): void { this.combinationRewards++; }
   private combinationOrigin: 'playing' | 'paused' | 'levelup' = 'playing';
@@ -97,7 +98,7 @@ export class Run {
   get player(): Player { return this.players.get(this.localPlayerId)!; }
   get taken(): Record<string, number> { return this.player.taken; }
   get choices() { return this.players.get(this.choicePlayerId)!.choices; }
-  constructor(characterId = 'luffy', training = 0, random: () => number = Math.random, options: RunOptions = {}) {
+  constructor(characterId = 'luffy', training: number | CharacterTraining = 0, random: () => number = Math.random, options: RunOptions = {}) {
     this.random = random; this.character = CHARACTERS[characterId];
     if (!this.character) throw new Error('Personaje desconocido');
     this.id = globalThis.crypto?.randomUUID?.() || `run-${Date.now()}-${random()}`;
@@ -107,10 +108,15 @@ export class Run {
     this.enemies = new Pool<Enemy>(this.definition.enemyCap, () => ({ active: false, id: 0, x: 0, y: 0, hp: 0, maxHp: 0, speed: 0, damage: 0, xp: 0, radius: 13, flash: 0 }));
     this.pickups = new Pool<Pickup>(this.definition.pickupCap, () => ({ active: false, x: 0, y: 0, value: 0, kind: 'xp' }));
     const baseStats = { ...this.character.stats };
-    const modifiers = { permanent: { maxHp: Math.min(5, Math.max(0, training)) * 5 }, temporary: {}, items: {}, fruit: {}, buffs: {}, skills: {} };
+    const profile = typeof training === 'number' ? undefined : training;
+    const modifiers = { permanent: profile ? trainingModifiers(profile) : { maxHp: Math.min(5, Math.max(0, training as number)) * 5 }, temporary: {}, items: {}, fruit: {}, buffs: {}, skills: {} };
     const stats = resolveStats(baseStats, Object.values(modifiers));
-    this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], attacks: [newAttack(this.character.initialAbility)], abilitySlots: [[this.character.initialAbility], [], [], []], selectedSlot: 0, learnedBuffs: [], x: 256, y: 256,
+    this.players.set(this.localPlayerId, { id: this.localPlayerId, characterId, taken: {}, choices: [], attacks: [newAttack(profile?.levels.starter && profile.starter || this.character.initialAbility)], abilitySlots: [[profile?.levels.starter && profile.starter || this.character.initialAbility], [], [], []], selectedSlot: 0, learnedBuffs: [], x: 256, y: 256,
       items: {}, collectedBerries: 0, hp: stats.maxHp, stats, baseStats, modifiers, level: 1, xp: 0, xpNext: xpForLevel(1), kills: 0, hurtTimer: 0, facing: 0 });
+    this.player.xpMultiplier = 1 + (profile?.levels.experience ?? 0) * .05;
+    this.player.berryMultiplier = 1 + (profile?.levels.fortune ?? 0) * .08;
+    this.player.rerolls = profile?.levels.rerolls ?? 0; this.player.bannedAbilities = [...(profile?.bans ?? [])];
+    if (profile?.levels.repertoire && profile.second && profile.second !== this.player.attacks[0].id) improveAttack(this.player, profile.second);
     this.chests.sync(this.world, this.player);
     this.fieldFor(this.player).update(this.player, 1);
   }
@@ -141,7 +147,7 @@ export class Run {
   boardToOrangeTown(): boolean {
     if (!this.morganDefeated || this.zone === 'orange-town' || !['playing', 'paused', 'voyage'].includes(this.status)) return false;
     this.clearBattlefield(); this.encounter = undefined; this.zone = 'orange-town';
-    this.lootNotice = 'Morgan derrotado. Recompensa: una combinación en Gestionar habilidades.'; this.lootNoticeFor = 8;
+    this.lootNotice = 'Morgan derrotado · objeto de unión ganado. Toca el icono de enlaces para juntar dos ataques.'; this.lootNoticeFor = 8;
     this.definition = ORANGE_TOWN; this.zoneTime = 0; this.spawnTimer = 0; this.voyage = undefined;
     this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x42756767, 'orange'); this.orangeWorld = this.world;
     Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
@@ -158,7 +164,7 @@ export class Run {
       this.clearBattlefield(); this.encounter = undefined; this.zone = 'syrup-village'; this.definition = SYRUP_VILLAGE;
       this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x4b75726f, 'syrup'); this.zoneTime = 0; this.spawnTimer = 0; this.voyage = undefined;
       Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1);
-      this.lootNotice = 'Buggy derrotado. Una combinación ganada. Syrup: llegada provisional; Kuro pendiente.'; this.lootNoticeFor = 8; return;
+      this.lootNotice = 'Buggy derrotado · objeto de unión ganado. Syrup: llegada provisional; Kuro pendiente.'; this.lootNoticeFor = 8; return;
     }
     if (destination === 'orange-return') {
       this.clearBattlefield(); this.encounter = undefined; this.world = this.orangeWorld!; this.definition = ORANGE_TOWN; this.zone = 'orange-town';
@@ -211,15 +217,16 @@ export class Run {
     for (let i = this.strikes.length - 1; i >= 0; i--) if (this.strikes[i].ownerId === this.player.id) this.strikes.splice(i, 1);
     tickBuffs(this.player, 0); tickGuards(this.player, 0); return true;
   }
+  rerollChoices(): boolean {
+    if (this.status !== 'levelup' || (this.player.rerolls ?? 0) <= 0) return false;
+    this.player.rerolls!--; this.player.choices = chooseUpgrades(this.player.taken, this.random, this.player); return true;
+  }
   selectUpgrade(id: string, playerId = this.choicePlayerId): boolean {
     if (this.status !== 'levelup' || playerId !== this.choicePlayerId) return false;
     const actor = this.players.get(playerId)!;
     const upgrade = actor.choices.find(choice => choice.id === id);
     if (!upgrade || 'kind' in upgrade && !canImproveAttack(actor, upgrade.abilityId)) return false;
-    if ('kind' in upgrade && !actor.attacks.some(a => a.id === upgrade.abilityId) && !hasFreeSlot(actor)) {
-      this.slotsBeforeLearning = actor.abilitySlots.map(slot => [...slot]); this.selectedBeforeLearning = actor.selectedSlot; this.pendingCombinationUsed = false;
-      this.pendingAbility = upgrade; this.combinationOrigin = 'levelup'; this.status = 'combining'; return true;
-    }
+    if ('kind' in upgrade && !hasFreeSlot(actor)) return false;
     applyUpgrade(actor, upgrade); actor.taken[id] = (actor.taken[id] || 0) + 1;
     actor.choices = []; this.status = 'playing'; this.checkLevel(); return true;
   }
@@ -251,10 +258,7 @@ export class Run {
     if (joining && !this.canJoinMovements) return false;
     const changed = moveAbility(actor, id, to); if (changed) { if (joining) this.consumeCombination(); updateBuffModifiers(actor); } return changed;
   }
-  private consumeCombination(): void {
-    if (this.pendingAbility && !this.pendingCombinationUsed) this.pendingCombinationUsed = true;
-    else this.combinationRewards = Math.max(0, this.combinationRewards - 1);
-  }
+  private consumeCombination(): void { this.combinationRewards = Math.max(0, this.combinationRewards - 1); }
   finishCombinations(joinSlot?: number): boolean {
     if (this.status !== 'combining') return false;
     const actor = this.players.get(this.choicePlayerId)!;
@@ -273,7 +277,7 @@ export class Run {
       const actor = this.players.get(this.choicePlayerId)!;
       actor.abilitySlots = this.slotsBeforeLearning; actor.selectedSlot = this.selectedBeforeLearning; updateBuffModifiers(actor);
     }
-    this.slotsBeforeLearning = undefined; this.pendingCombinationUsed = false;
+    this.slotsBeforeLearning = undefined;
     this.pendingAbility = undefined; this.status = this.combinationOrigin;
   }
   private checkLevel(): void {
@@ -314,6 +318,7 @@ export class Run {
     this.fruitCooldown = Math.max(0, this.fruitCooldown - dt); this.lootNoticeFor = Math.max(0, this.lootNoticeFor - dt);
     const living = [...this.players.values()].filter(actor => actor.hp > 0);
     for (const actor of living) {
+      actor.damageNoticeFor = Math.max(0, (actor.damageNoticeFor ?? 0) - dt);
       tickBuffs(actor, dt); tickGuards(actor, dt);
       const axis = 'x' in movement ? actor.id === this.localPlayerId ? movement : { x: 0, y: 0 } : movement.get(actor.id) ?? { x: 0, y: 0 };
       const length = Math.max(1, Math.hypot(axis.x, axis.y));
@@ -391,7 +396,7 @@ export class Run {
         if (!launched && firing && enemy.shotTimer <= 0 && spawnProjectile(this, enemy.x, enemy.y, aim.x, aim.y, enemy.damage, enemy.ranged.speed, '', true)) enemy.shotTimer = enemy.ranged.interval;
       }
       if (!launched && !isInvulnerable(target) && (enemy.statuses?.stun ?? 0) <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
-        if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor)); target.hurtTimer = 0.65;
+        if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) { const before = target.hp; target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor)); if (target.hp < before) { target.lastHit = 'CONTACTO'; target.damageNoticeFor = 1.2; } } target.hurtTimer = 0.65;
       }
     }
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
@@ -415,13 +420,13 @@ export class Run {
       if (d < 20) {
         if (pickup.kind === 'item' && pickup.itemId && ITEMS[pickup.itemId]) { this.pendingItem = pickup.itemId; this.status = 'item'; }
         else if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { this.pendingFruit = pickup.fruitId; this.status = 'fruit'; }
-        else if (pickup.kind === 'food') { actor.xp += LOOT.foodXp; actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
-        else if (pickup.kind === 'berry') actor.collectedBerries += pickup.value;
-        else actor.xp += pickup.value;
+        else if (pickup.kind === 'food') { actor.xp += LOOT.foodXp * (actor.xpMultiplier ?? 1); actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
+        else if (pickup.kind === 'berry') { actor.collectedBerries += pickup.value * (actor.berryMultiplier ?? 1); actor.collectedBerries = Math.round(actor.collectedBerries * 1000) / 1000; }
+        else actor.xp += pickup.value * (actor.xpMultiplier ?? 1);
         pickup.active = false;
         if (this.status === 'fruit' || this.status === 'item') break;
       }
-      else if (pickup.kind !== 'food' && d < actor.stats.magnet && this.world.segmentClear(pickup.x, pickup.y, actor.x, actor.y, 2)) {
+      else if (d < actor.stats.magnet && this.world.segmentClear(pickup.x, pickup.y, actor.x, actor.y, 2)) {
         const step = Math.min(d, dt * 350); pickup.x += dx / d * step; pickup.y += dy / d * step;
       }
     }
@@ -445,6 +450,6 @@ export class Run {
   result(): RunResult | undefined {
     if (this.status !== 'defeat' && this.status !== 'victory') return;
     return { id: this.id, outcome: this.status, seconds: Math.floor(this.time), kills: this.player.kills, level: this.player.level,
-      coins: this.player.collectedBerries };
+      coins: Math.floor(this.player.collectedBerries) };
   }
 }

@@ -6,6 +6,7 @@ export interface Player extends Vector {
   taken: Record<string, number>; choices: LevelChoice[]; attacks: EquippedAttack[]; abilitySlots: string[][]; selectedSlot: number; learnedBuffs: string[];
   hp: number; stats: Stats; baseStats: Stats;
   modifiers: { permanent: StatModifiers; temporary: StatModifiers; items: StatModifiers; fruit: StatModifiers; buffs: StatModifiers; skills: StatModifiers }; level: number; xp: number; xpNext: number;
+  xpMultiplier?: number; berryMultiplier?: number; rerolls?: number; banCharges?: number; bannedAbilities?: string[]; lastHit?: string; damageNoticeFor?: number;
   fruit?: string; items: Record<string, number>; collectedBerries: number; kills: number; hurtTimer: number; facing: number;
 }
 export interface EquippedAttack { id: string; level: number; cooldown: number; pending: number; burstTimer: number; activeFor: number; activationPending?: boolean; targetId?: number; counterUsed?: boolean }

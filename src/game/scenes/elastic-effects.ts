@@ -22,22 +22,22 @@ export function sandal(g: Phaser.GameObjects.Graphics, x: number, y: number, alp
   g.lineStyle(2 * size, 0x8a4134, alpha); g.lineBetween(x - 6 * size, y - 4 * size, x + 2 * size, y + 2 * size); g.lineBetween(x + 2 * size, y + 2 * size, x + 6 * size, y - 4 * size);
 }
 // Presentación por familia visual, sin consultar nombres de personajes en el motor.
-export function drawElasticStrike(g: Phaser.GameObjects.Graphics, strike: Strike, x: number, y: number, actor?: { direction: Direction; targetX: number; targetY: number }): boolean {
+export function drawElasticStrike(g: Phaser.GameObjects.Graphics, strike: Strike, x: number, y: number, actor?: { direction: Direction; targetX: number; targetY: number; angle?: number; scaleX?: number; scaleY?: number }): boolean {
   if (!strike.visual?.startsWith('rubber-')) return false;
   const kick = strike.visual === 'rubber-kick', total = kick ? 0.36 : 0.24;
   const progress = Math.max(0, Math.min(1, 1 - strike.life / total)), alpha = Math.min(1, strike.life / 0.07);
   const extension = Math.min(1, progress / 0.22) * Math.min(1, (1 - progress) / 0.18);
   if (kick) {
+    const hip = { x: x + (actor?.direction.includes('w') ? -5 : 5), y: y - 14 };
     const angle = strike.angle - strike.arc + progress * strike.arc * 2;
-    const length = Math.max(22, strike.reach * extension), ex = x + Math.cos(angle) * length, ey = y - 10 + Math.sin(angle) * length * 0.7;
+    const length = Math.max(22, strike.reach * extension), ex = hip.x + Math.cos(angle) * length, ey = hip.y + Math.sin(angle) * length * 0.7;
     // Estelas parciales acompañan el pie, nunca un círculo completo sustituyendo la patada.
     for (let i = 1; i <= 3; i++) {
       const previous = angle - i * 0.16;
       g.lineStyle(2, 0xffefbd, alpha * (0.45 - i * 0.09));
       g.beginPath(); g.arc(x, y - 10, length * 0.86, previous - 0.24, previous); g.strokePath();
     }
-    limb(g, x, y - 12, ex, ey, alpha, strike.evolved ? 11 : 8);
-    g.fillStyle(0x315d9e, alpha); g.fillRect(x - 7, y - 19, 14, 9); // pantalón del arranque
+    limb(g, hip.x, hip.y, ex, ey, alpha, strike.evolved ? 11 : 8);
     sandal(g, ex, ey, alpha, strike.evolved ? 1.25 : 1);
     return true;
   }
@@ -46,7 +46,8 @@ export function drawElasticStrike(g: Phaser.GameObjects.Graphics, strike: Strike
     const offset = (i - (count - 1) / 2), angle = strike.angle + (strike.visual === 'rubber-flurry' ? offset * 0.13 : 0);
     const side = strike.visual === 'rubber-double' ? offset * 15 : offset * 7;
     const socket = armSocket(actor?.direction ?? 's', count === 1 ? Math.cos(angle) < 0 ? -1 : 1 : i % 2 === 0 ? -1 : 1);
-    const sx = x + socket.x, sy = y + socket.y;
+    const turn = (actor?.angle ?? 0) * Math.PI / 180, ox = socket.x * (actor?.scaleX ?? .65) / .65, oy = socket.y * (actor?.scaleY ?? .65) / .65;
+    const sx = x + ox * Math.cos(turn) - oy * Math.sin(turn), sy = y + ox * Math.sin(turn) + oy * Math.cos(turn);
     const length = Math.max(12, strike.reach * extension * (1 - Math.abs(offset) * 0.08));
     const ex = actor ? sx + (actor.targetX - sx - Math.sin(angle) * side) * extension : sx + Math.cos(angle) * length;
     const ey = actor ? sy + (actor.targetY - sy + Math.cos(angle) * side) * extension : sy + Math.sin(angle) * length;
@@ -57,12 +58,12 @@ export function drawElasticStrike(g: Phaser.GameObjects.Graphics, strike: Strike
   }
   return true;
 }
-export function drawAxe(g: Phaser.GameObjects.Graphics, x: number, y: number, delay: number, life: number, radius: number): void {
+export function drawAxe(g: Phaser.GameObjects.Graphics, x: number, y: number, delay: number, life: number, radius: number, actor?: { x: number; y: number }): void {
   if (delay > 0) {
     g.lineStyle(2, 0xe5bd73, 0.35); g.strokeEllipse(x, y, radius * 2, radius); return;
   }
   const alpha = Math.max(0, life / 0.3), drop = Math.min(1, (0.3 - life) / 0.08);
-  limb(g, x + 4, y - 105, x, y - 80 * (1 - drop), alpha, 12); sandal(g, x, y - 80 * (1 - drop), alpha, 1.5);
+  limb(g, actor?.x ?? x + 4, actor ? actor.y - 14 : y - 105, x, y - 80 * (1 - drop), alpha, 12); sandal(g, x, y - 80 * (1 - drop), alpha, 1.5);
   g.lineStyle(3, 0x7b6652, alpha);
   for (let i = 0; i < 7; i++) { const a = i / 7 * TAU, r = radius * Math.min(1, (0.3 - life) * 7); g.lineBetween(x + Math.cos(a) * 12, y + Math.sin(a) * 7, x + Math.cos(a) * r, y + Math.sin(a) * r * 0.55); }
 }

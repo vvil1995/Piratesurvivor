@@ -83,7 +83,7 @@ test('cofres escasos: densidad determinista baja y sin duplicación al volver', 
     field.sync(r.world, { x: x * 512 + 256, y: 256 });
     small += field.active.filter(c => !c.large).length; big += field.active.filter(c => c.large).length;
   }
-  assert.ok(small < 90, `${small} pequeños en270 chunks`); assert.ok(big < 25, `${big} grandes en270 chunks`);
+  assert.ok(small >= 60 && small <= 120, `${small} pequeños en270 chunks`); assert.ok(big > 0 && big < 25, `${big} grandes en270 chunks`);
 });
 test('botín grande: berries/XP, objeto nuevo ocasional sin mejorar equipado y fruta rara', () => {
   const r = new Run(), chest = { x: r.player.x + 100, y: r.player.y } as never;

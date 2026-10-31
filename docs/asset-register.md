@@ -112,3 +112,9 @@ Carta náutica32×30 dibujada en `textures.ts` y barco/olas/isla CSS en `style.c
 ### Beta0.14 — Buggy y llegada a Syrup
 
 Buggy64×80 y mano/cuchillas36×42 dibujados con gráficos propios en `textures.ts`: sombrero naranja, pelo azul, nariz roja y rayas. Bomba/fusible en `boss-renderer.ts`; separación visual de cabeza/mano usando esos mismos recortes. Arte provisional sin material descargado ni sprites oficiales. Gato Negro:16 variantes de color en memoria del mismo atlas propio, alpha y piernas intactos; no aumenta los archivos fuente. Sin dependencias, música ni fuentes nuevas. Derechos sobre One Piece siguen perteneciendo a sus titulares.
+
+### Beta0.15 — técnicas, buffs y botín
+
+34 miniilustraciones48×48 independientes, compuestas en `ui/ability-art.ts` con dibujos propios y recortes del atlas original aprobado del proyecto. Marco/paleta coherentes; puños/brazos, sandalia, cuerpo inflado, espadas, bastón/cuerda/señuelo/moneda, munición/humo/martillo y zapatos negros de Sanji. Buffs: emblema de estadística con flechas discretas; icono de enlaces para unión. No se copian píxeles de las capturas de PokéSurvivor ni recursos ajenos. Las capturas solo orientan el funcionamiento del entrenamiento.
+
+Barril32×36 y muslo de ave28×26 propios en textures.ts; el cofre dorado existente se conserva. Trayectoria hostil con contorno/centro de alta visibilidad. No se descargan imágenes, música, fuentes ni librerías; no cambia la licencia/procedencia de los recursos anteriores.

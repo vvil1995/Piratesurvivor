@@ -83,9 +83,9 @@ test('guardado, premio idempotente, entrenamiento y recarga', () => {
   const memory = storage(), store = new SaveStore(memory);
   const result = { id: 'test-run', outcome: 'victory' as const, seconds: 600, kills: 60, level: 9, coins: 110 };
   assert.equal(store.record(result), true); assert.equal(store.record(result), false);
-  assert.equal(store.progress.coins, 110); assert.equal(store.train(), true); assert.equal(store.progress.coins, 80);
-  const loaded = new SaveStore(memory); assert.equal(loaded.progress.training, 1); assert.equal(loaded.progress.wins, 1);
-  const trained = new Run('luffy', loaded.progress.training); assert.equal(trained.player.hp, 105);
+  assert.equal(store.progress.coins, 110); assert.equal(store.buyTraining('luffy', 'vitality'), true); assert.equal(store.progress.coins, 80);
+  const loaded = new SaveStore(memory); assert.equal(loaded.getTraining('luffy').levels.vitality, 1); assert.equal(loaded.progress.wins, 1);
+  const trained = new Run('luffy', loaded.getTraining('luffy')); assert.equal(trained.player.hp, 108);
 });
 test('guardado corrupto recupera copia; sin almacenamiento sigue jugable', () => {
   const memory = storage(); memory.setItem(`${SAVE_KEY}.backup`, JSON.stringify({ ...freshProgress(), coins: 10 })); memory.setItem(SAVE_KEY, '{bad');

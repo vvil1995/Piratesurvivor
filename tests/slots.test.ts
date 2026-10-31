@@ -52,17 +52,11 @@ test('ranuras no admiten duplicados ni más de4 componentes y un aprendizaje no 
   assert.equal(validLoadout(p), true);
 });
 
-test('la quinta habilidad pausa para agrupar y se aprende exactamente una vez al confirmar', () => {
-  const run = new Run(), p = run.player;
-  for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(p, id);
+test('cuatro ranuras llenas solo ofrecen pasivas y rechazan una quinta habilidad', () => {
+  const run = new Run(), p = run.player; for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(p, id);
+  for (let i = 0; i < 20; i++) assert.ok(chooseUpgrades({}, () => i / 20, p).every(c => !('kind' in c)));
   run.status = 'levelup'; p.choices = [{ kind: 'ability', id: 'ability:fury', abilityId: 'fury', name: 'Furia', description: '', symbol: '', max: 6 }];
-  assert.equal(run.selectUpgrade('ability:fury'), true); assert.equal(run.status, 'combining');
-  assert.equal(p.attacks.length, 4); assert.equal(run.finishCombinations(), false);
-  const time = run.time; run.update(1, { x: 1, y: 0 }); assert.equal(run.time, time);
-  const first = p.attacks[0]; first.cooldown = 3.5;
-  assert.equal(run.combine(1, 0), true); assert.equal(run.finishCombinations(), true);
-  assert.equal(p.attacks.length, 5); assert.equal(first.cooldown, 3.5); assert.equal(p.taken['ability:fury'], 1);
-  assert.equal(run.finishCombinations(), false); assert.equal(p.taken['ability:fury'], 1); assert.equal(validLoadout(p), true);
+  assert.equal(run.selectUpgrade('ability:fury'), false); assert.equal(run.status, 'levelup'); assert.equal(run.canJoinMovements, false);
 });
 
 test('cancelar aprendizaje devuelve las cartas sin consumir nivel ni buff', () => {
@@ -84,17 +78,12 @@ test('una carta aprende solo un movimiento, en ranura propia; no se puede juntar
   run.finishCombinations(); assert.equal(p.attacks.length, 2);
 });
 
-test('quinto movimiento concede una agrupación, cancelar revierte y la recompensa futura se consume una vez', () => {
-  const run = new Run(), p = run.player;
-  for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(p, id);
-  const before = p.abilitySlots.map(s => [...s]);
-  run.status = 'levelup'; p.choices = [{ kind: 'ability', id: 'ability:fury', abilityId: 'fury', name: 'Furia', description: '', symbol: '', max: 6 }];
-  run.selectUpgrade('ability:fury'); assert.equal(run.canJoinMovements, true);
-  assert.equal(run.combine(1, 0), true); assert.equal(run.canJoinMovements, false); assert.equal(run.combine(2, 0), false);
-  run.cancelCombinations(); assert.deepEqual(p.abilitySlots, before); assert.equal(p.attacks.length, 4);
-  run.selectUpgrade('ability:fury'); run.combine(1, 0); run.finishCombinations(); run.openCombinations();
-  assert.equal(run.combine(2, 0), false);
-  run.grantCombinationReward(); assert.equal(run.combine(2, 0), true); assert.equal(run.combine(3, 0), false);
+test('solo recompensas reales permiten agrupar y cancelar antes de elegir no consume el objeto', () => {
+  const run = new Run(), p = run.player; for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(p, id);
+  run.grantCombinationReward(); run.openCombinations(); const before = p.abilitySlots.map(s => [...s]); run.cancelCombinations();
+  assert.deepEqual(p.abilitySlots, before); assert.equal(run.unionTokens, 1);
+  run.openCombinations(); assert.equal(run.joinPair(1, 0), true); assert.equal(run.unionTokens, 0); assert.equal(improveAttack(p, 'fury'), true);
+  run.openCombinations(); assert.equal(run.combine(2, 0), false); run.grantCombinationReward(); assert.equal(run.combine(2, 0), true);
 });
 
 test('capacidad futura real de dieciséis componentes, cuatro por ranura, sin reiniciar recargas', async () => {
@@ -108,9 +97,7 @@ test('capacidad futura real de dieciséis componentes, cuatro por ranura, sin re
     for (const id of extra) {
       if (p.abilitySlots.some(s => !s.length)) assert.equal(improveAttack(p, id), true);
       else {
-        run.status = 'levelup'; p.choices = [{ kind: 'ability', id: `ability:${id}`, abilityId: id, name: id, description: '', symbol: '', max: 6 }];
-        assert.equal(run.selectUpgrade(`ability:${id}`), true);
-        assert.equal(run.finishCombinations(p.abilitySlots.findIndex(s => s.length < 4)), true);
+        assert.equal(improveAttack(p, id, p.abilitySlots.findIndex(s => s.length < 4)), true);
       }
     }
     assert.equal(MAX_LEARNED_ABILITIES, 16); assert.equal(p.attacks.length, 16); assert.equal(validLoadout(p), true);
