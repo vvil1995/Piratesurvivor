@@ -582,6 +582,8 @@ test('Morgan: carta, aviso visible, victoria y viaje automático sin curación',
     b.tick = Object.getPrototypeOf(b).tick; p.hp = 43; b.body.x = p.x; b.body.y = p.y - 40; b.body.hp = 1;
     p.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); qa.draw();
   });
+  await expect(page.locator('#combinations')).toBeVisible();
+  await page.locator('#combination-done').click();
   await expect(page.locator('#voyage')).toBeVisible();
   await expect(page.locator('#voyage-title')).toContainText('ORANGE TOWN');
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.zone)).toBe('morgan-arena');
@@ -917,4 +919,14 @@ test('Morgan naval: zoom de exploración, seguimiento y límites de cámara', as
   const geometry = await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {w:r.arena.width,h:r.arena.height,blocked:r.arena.covers.every(c=>!r.world.canOccupy(c.x+16,c.y+16,14)),bound:!r.world.canOccupy(-10,200,14)};});
   expect(geometry.blocked).toBe(true);expect(geometry.bound).toBe(true);expect(geometry.w).toBeGreaterThan(page.viewportSize()!.width/zoom);expect(geometry.h).toBeGreaterThan(page.viewportSize()!.height/zoom);
   expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);
+});
+
+test('recompensa de Morgan permite unir Pistol y Gatling antes del viaje',async({page})=>{
+ await page.locator('#start').click();
+ await page.evaluate(async()=>{const path='/src/game/systems/loadout.ts',{improveAttack}=await import(/* @vite-ignore */path);const qa=window.__OPS_QA__!,r=qa.getRun()!;improveAttack(r.player,'gatling');r.player.attacks[0].level=6;r.player.attacks[1].level=3;r.beginMorgan();const b=r.encounter!;b.body.x=r.player.x+40;b.body.y=r.player.y;b.body.hp=1;r.update(1/60,{x:0,y:0});qa.tick();});
+ await expect(page.locator('#combinations')).toBeVisible();
+ await page.locator('[data-join="0"]').click();await page.locator('[data-join="1"]').click();
+ await expect(page.locator('#voyage')).toBeVisible();await expect(page.locator('#voyage')).toBeHidden({timeout:15000});
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {zone:r.zone,levels:r.player.attacks.map(a=>a.level),group:r.player.abilitySlots.some(s=>s.includes('elastic-punch')&&s.includes('gatling'))};})).toEqual({zone:'orange-town',levels:[6,3],group:true});
+ await expect(page.locator('.attack-slot .ability-component')).toHaveCount(2);
 });

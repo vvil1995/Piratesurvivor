@@ -82,6 +82,7 @@ export class Run {
   get unionTokens(): number { return this.combinationRewards; }
   // Punto de integración futuro: solo una recompensa real de jefe debe llamar aquí.
   grantCombinationReward(): void { this.combinationRewards++; }
+  bossCombinationReward = false;
   private combinationOrigin: 'playing' | 'paused' | 'levelup' = 'playing';
   pendingItem?: string;
   pendingFruit?: string;
@@ -269,10 +270,13 @@ export class Run {
       actor.taken[this.pendingAbility.id] = (actor.taken[this.pendingAbility.id] ?? 0) + 1;
       this.pendingAbility = undefined; this.slotsBeforeLearning = undefined; actor.choices = []; this.status = 'playing';
     } else this.status = this.combinationOrigin === 'paused' ? 'paused' : 'playing';
-    updateBuffModifiers(actor); this.checkLevel(); return true;
+    updateBuffModifiers(actor);
+    if (this.bossCombinationReward) { this.bossCombinationReward = false; this.startVoyage('orange'); return true; }
+    this.checkLevel(); return true;
   }
   cancelCombinations(): void {
     if (this.status !== 'combining') return;
+    if (this.bossCombinationReward) { this.finishCombinations(); return; }
     if (this.pendingAbility && this.slotsBeforeLearning) {
       const actor = this.players.get(this.choicePlayerId)!;
       actor.abilitySlots = this.slotsBeforeLearning; actor.selectedSlot = this.selectedBeforeLearning; updateBuffModifiers(actor);
@@ -345,7 +349,9 @@ export class Run {
       if (this.player.hp <= 0) { this.defeat(); return; }
     } else if (this.encounter) {
       this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
-      if (this.encounter.elapsed >= 1.3) { this.startVoyage(this.zone === 'buggy-arena' ? 'syrup' : 'orange'); return; }
+      if (this.encounter.elapsed >= 1.3) {
+        if (this.zone === 'morgan-arena') { this.openCombinations(); this.bossCombinationReward = true; return; }
+        this.startVoyage(this.zone === 'buggy-arena' ? 'syrup' : 'orange'); return; }
     }
     this.grid.rebuild(this.enemies.items);
     for (const enemy of this.enemies.items) {

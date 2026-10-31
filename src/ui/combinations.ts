@@ -15,7 +15,7 @@ export function renderCombinations(run: Run, actions: CombinationActions): void 
   const joinable = cards.some(a => cards.some(b => a !== b && a.ids.length + b.ids.length <= 4));
   let first: Card | undefined;
   const draw = () => {
-    node('combination-message').textContent = (!run.canJoinMovements || !joinable) ? 'Necesitas un objeto de unión obtenido al vencer a Morgan u otro jefe. No se consigue aprendiendo un quinto movimiento.' : first ? '2/2 · ¿Con qué habilidad quieres juntarla?' : `Objeto de unión ×${run.unionTokens} · 1/2 · Selecciona la primera habilidad.`;
+    node('combination-message').textContent = run.bossCombinationReward && !joinable ? 'Morgan derrotado · No hay dos grupos compatibles. Puedes continuar sin combinar.' : (!run.canJoinMovements || !joinable) ? 'Necesitas un objeto de unión obtenido al vencer a Morgan u otro jefe. No se consigue aprendiendo un quinto movimiento.' : first ? '2/2 · ¿Con qué habilidad quieres juntarla?' : `${run.bossCombinationReward ? 'Morgan derrotado · Recompensa · ' : ''}Objeto de unión ×${run.unionTokens} · 1/2 · Selecciona la primera habilidad.`;
     const slots = node('combination-slots'); slots.replaceChildren();
     for (const card of cards) {
       if (card === first) continue;
@@ -44,6 +44,7 @@ export function renderCombinations(run: Run, actions: CombinationActions): void 
     details.append(row);
   }
   node<HTMLButtonElement>('combination-done').hidden = !!run.pendingAbility;
+  node('combination-done').textContent = run.bossCombinationReward ? 'Continuar a Orange Town' : 'Continuar';
   node('combination-done').onclick = actions.done;
   draw();
 }

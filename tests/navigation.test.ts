@@ -54,7 +54,7 @@ test('victoria viaja automáticamente a Orange, conserva HP/build y genera sus t
   const r = new Run('luffy', 0, () => 0.5); r.beginMorgan();
   const b = r.encounter!; b.body.x = r.player.x + 40; b.body.y = r.player.y; b.body.hp = 1; r.player.hp = 61;
   r.update(1 / 60, axis); assert.ok(r.morganDefeated); r.player.attacks.forEach(a => a.cooldown = 1e6);
-  step(r, 1.4); assert.equal(r.status, 'voyage'); assert.equal(r.voyage?.destination, 'orange');
+  step(r, 1.4); assert.equal(r.status, 'combining'); assert.ok(r.bossCombinationReward); r.finishCombinations(); assert.equal(r.status, 'voyage'); assert.equal(r.voyage?.destination, 'orange');
   const before = snapshot(r), hp = r.player.hp;
   finish(r); assert.equal(r.zone, 'orange-town'); assert.equal(r.definition, ORANGE_TOWN); assert.equal(r.player.hp, hp); assert.equal(snapshot(r), before);
   assert.equal(r.encounter, undefined); assert.equal(r.canJoinMovements, true);
