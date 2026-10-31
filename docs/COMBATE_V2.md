@@ -1,5 +1,10 @@
 # Combate v2 — referencia vigente
 
+## Regla vigente0.15 — sustituye la quinta habilidad
+
+Con cuatro ranuras llenas, cartas solo de pasivas (también se ocultan mejoras de ataques hasta dejar un hueco). Run rechaza aprender una quinta con ranuras llenas. Solo un objeto temporal de unión, obtenido al derrotar a Morgan u otro jefe, permite juntar dos ranuras/grupos. Se consume uno por pareja y no ocupa el espacio de equipo. Aprender movimientos no concede objetos ni une gratis. Los componentes mantienen identidad, niveles y cooldowns; solo se ejecuta la ranura seleccionada. El motor conserva capacidad4×4, pero esa capacidad no habilita cartas ilegales. Ver PROBAR.md para el recorrido actual; las referencias a aprendizaje pendiente siguientes son historial de versiones anteriores.
+
+
 **Regla vigente0.8.0:** las cuatro ranuras son seleccionables y solo UNA se ejecuta automáticamente. Aprender un movimiento no lo selecciona ni lo une al anterior. Tocar su cuadrado cambia de opción. Las combinaciones desbloqueadas ejecutan únicamente los componentes del grupo seleccionado; el resto queda en reserva. Esto sustituye las cuatro ranuras atacando simultáneamente de las versiones anteriores.
 
 **Corrección0.7.1 del usuario:** capacidad estructural4×4=16 componentes para futuros catálogos; hoy solo6 exclusivas +2 buffs distintos. Agrupar requiere el aprendizaje de otro movimiento con cuatro ranuras ocupadas o una recompensa real de jefe. No se ofrece unión libre desde el menú. Una oportunidad permite una unión; los componentes conservan sus relojes. El nuevo también puede juntarse explícitamente con una ranura existente para no bloquear la capacidad futura. Cancelar aprendizaje revierte las ranuras anteriores. Los jefes todavía no existen.

@@ -22,11 +22,26 @@ export function abilityCanvases(base: Map<string, HTMLCanvasElement>): Map<strin
       else if (index === 3 || index === 5) { stroke('#402b28', 9, index === 3 ? [8, 14, 15, 23, 35, 25] : [24, 8, 24, 30]); stroke('#efbb83', 5, index === 3 ? [8, 14, 15, 23, 35, 25] : [24, 8, 24, 30]); rect('#4f2d28', index === 3 ? 28 : 15, index === 3 ? 23 : 30, 17, 8); rect('#dfb474', index === 3 ? 29 : 16, index === 3 ? 25 : 32, 15, 3); stroke('#f0d69e', 2, index === 3 ? [9, 34, 21, 39, 36, 35] : [9, 41, 15, 36, 24, 43, 36, 37]); }
       else { stroke('#e9b37c', 7, [8, 36, 25, 20]); image('fist', 14, 3, 31); }
     } else if (character?.id === 'sanji') {
-      // Zapato de vestir unido a pantalón negro; jamás icono de velocidad.
-      const x = 13 + index % 3 * 4, y = 11 + Math.floor(index / 3) * 4;
-      if (index === 5) { rect('#e5cf9a', 8, 30, 32, 4); rect('#734832', 15, 17, 21, 12); rect('#d6a15f', 17, 18, 16, 7); stroke('#e9e2c4', 3, [11, 29, 11, 10]); stroke('#e9e2c4', 2, [7, 11, 15, 11]); }
-      else { stroke('#101923', 11, [x, y, x + 6, y + 17]); stroke('#647784', 2, [x - 2, y, x + 3, y + 16]); rect('#0b1520', x + 2, y + 13, 19, 10); rect('#c0bca6', x + 2, y + 22, 20, 2);
-        const arcs = index === 2 || index === 4 ? 3 : 1; for (let i = 0; i < arcs; i++) stroke(accent, 2, [6 + i * 3, 35 + i * 3, 21, 39, 39, 30 - i * 2]); }
+      const shoe = (x: number, y: number, scale: number, angle: number) => {
+        g.save(); g.translate(x, y); g.rotate(angle); g.scale(scale, scale);
+        rect('#09141e', -7, -16, 11, 24); rect('#243b48', -5, -15, 7, 22); rect('#66808d', -4, -14, 2, 18);
+        g.fillStyle = '#09141e'; g.beginPath(); g.moveTo(-7, 2); g.lineTo(3, 1); g.lineTo(7, 5); g.lineTo(16, 7); g.lineTo(18, 12); g.lineTo(-7, 12); g.closePath(); g.fill();
+        rect('#36505c', 0, 5, 7, 3); rect('#4c6570', 8, 8, 6, 2); rect('#b6c4bc', -6, 12, 23, 2); rect('#182e3b', -6, 10, 22, 2);
+        stroke('#829592', 1, [2, 5, 4, 8]); g.restore();
+      };
+      if (index === 0) { shoe(23, 25, 1, -.75); stroke(accent, 2, [9, 36, 18, 39, 37, 22]); }
+      if (index === 1) { shoe(20, 18, .9, .5); stroke('#f0d4a2', 2, [9, 39, 14, 34, 23, 42, 30, 35, 40, 39]); }
+      if (index === 2) { shoe(12, 15, .58, -.4); shoe(23, 24, .68, -.35); shoe(32, 33, .65, -.3); stroke(accent, 1, [5, 28, 10, 32]); stroke(accent, 1, [15, 38, 22, 41]); }
+      if (index === 3) { g.strokeStyle = accent; g.lineWidth = 2; g.beginPath(); g.arc(24, 24, 18, .2, 5.7); g.stroke(); shoe(24, 23, .9, Math.PI / 2); }
+      if (index === 4) { shoe(21, 26, 1.12, -.55); for (const [x, y] of [[33, 7],[40, 14],[36, 23],[26, 5]]) stroke('#f5d48d', 2, [x, y, x + 3, y - 3]); }
+      if (index === 5) {
+        g.fillStyle = '#4a6570'; g.beginPath(); g.ellipse(24, 34, 18, 6, 0, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#e9d9ac'; g.beginPath(); g.ellipse(24, 32, 16, 4, 0, 0, Math.PI * 2); g.fill();
+        rect('#e3d5b2', 26, 22, 12, 4); g.fillStyle = '#eee0b9'; g.beginPath(); g.arc(37, 21, 3, 0, Math.PI * 2); g.arc(38, 27, 3, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#633528'; g.beginPath(); g.ellipse(20, 21, 10, 11, -.4, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#c87940'; g.beginPath(); g.ellipse(19, 20, 8, 9, -.4, 0, Math.PI * 2); g.fill(); rect('#f0ba74', 14, 14, 8, 3);
+        stroke('#c5d8cb', 1, [19, 7, 17, 4]); stroke('#c5d8cb', 1, [26, 8, 24, 4]);
+      }
     } else if (character?.id === 'zoro') { g.save(); g.translate(24, 24); g.rotate(index * .16); g.translate(-24, -24); image(index === 4 ? 'armor' : 'swords', 7, 6, 34); for (let i = 0; i <= index % 3; i++) stroke(accent, 2, [7, 37 - i * 6, 23, 23 - i * 3, 40, 13 + i * 4]); g.restore(); if (index === 5) { g.strokeStyle = accent; g.lineWidth = 2; g.beginPath(); g.arc(24, 24, 17, .3, 5.8); g.stroke(); } }
     else if (character?.id === 'nami') {
       image(index === 3 ? 'coin' : index === 5 ? 'boot' : 'staff', 7, 7, 32);

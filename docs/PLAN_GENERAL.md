@@ -1,5 +1,14 @@
 # Plan maestro — modo individual
 
+## Actualización prioritaria0.15 — calidad y progreso individual
+
+Bloque implementado antes de seguir ampliando Kuro: icono original por técnica, buffs más legibles, origen de golpes ligado al actor, proyectiles hostiles visibles e indicador de daño. Recogida mayor incluyendo comida, barriles en lugar de cofres pequeños y densidad ajustada. Cuatro ranuras llenas ofrecen solo pasivas; unión exclusivamente por objeto temporal de jefe. No hay quinta carta que la regale.
+
+Entrenamiento por estadística/personaje es la única mejora permanente de poder. Nivel permanente=1+suma de compras; no XP permanente adicional. Precios/máximos/efectos en content/training.ts; starter, repertorio, vetos y cambios de cartas forman parte de esas compras. Monedas, personajes de beta y récords se conservan; build/objetos/frutas/uniones se reinician. Migración de niveles anteriores de Luffy a Vitalidad sin borrar saldo/récords. El acceso a Morgan sigue desde05:00 por carta; no se añade atajo de menú.
+
+Pendiente: validación humana del equilibrio/arte y teléfono real, Kuro y resto de East Blue. Sin multijugador, monetización ni nuevos servicios. Las decisiones anteriores contradictorias quedan sustituidas por esta actualización y PROBAR.md.
+
+
 **Vigente0.8.0:** cuatro ranuras seleccionables, solo una en uso. Aprender no activa ni combina. Los grupos desbloqueados actúan al seleccionar su ranura. Esta regla sustituye cualquier referencia histórica a cuatro ranuras disparando simultáneamente.
 
 Actualizado con las últimas decisiones del usuario. Sustituye el plan anterior de 1.000 berries, evoluciones por recetas y preparación específica de cooperativo. Estado auditado: commit 5e198bf; nuevos atlas direccionales posteriores documentados en AUDITORIA_FASE_0.md.

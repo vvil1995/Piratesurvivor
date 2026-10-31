@@ -764,7 +764,7 @@ test('Buggy: derrota vuelve a Orange con25HP y conserva nivel/berries para otra 
   await expect(page.locator('#navigation-hint')).toContainText('CARTA NÁUTICA');
 });
 
-test('entrenamiento por estadística/personaje, configuración inicial, veto y cambio de cartas', async ({ page }, info) => {
+test('entrenamiento por estadística/personaje, configuración inicial, veto y cambio de cartas', async ({ page, isMobile }, info) => {
   await page.evaluate(() => { const store = window.__OPS_QA__!.store; store.progress.coins = 10000; store.flush(); });
   await page.locator('#train').click(); await expect(page.locator('.training-card')).toHaveCount(14);
   await expect(page.locator('#training-title')).toContainText('NIVEL 1');
@@ -775,6 +775,17 @@ test('entrenamiento por estadística/personaje, configuración inicial, veto y c
   await page.screenshot({ path: info.outputPath('training-configuration.png') });
   await page.locator('.training-dialog').evaluate(el => { el.scrollTop = 0; });
   await page.screenshot({ path: info.outputPath('permanent-training.png') });
+  expect(await page.locator('.training-card').evaluateAll(cards => cards.every(card => {
+    const progress = card.querySelector('.training-segments')!.getBoundingClientRect(), buy = card.querySelector('button')!.getBoundingClientRect();
+    return progress.right <= buy.left - 2;
+  }))).toBe(true);
+  if (isMobile) {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const box = await page.locator('.training-dialog').boundingBox(); expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+    await page.screenshot({ path: info.outputPath('permanent-training-portrait.png') });
+    await page.setViewportSize({ width: 844, height: 390 });
+  }
+
   await page.locator('#training-close').click(); await expect(page.locator('#starting-hp')).toHaveText('108');
   await page.locator('#beta-character').selectOption('zoro'); await expect(page.locator('#start')).toBeEnabled();
   await page.locator('#train').click(); await expect(page.locator('#training-title')).toContainText('NIVEL 1');

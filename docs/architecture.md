@@ -1,5 +1,14 @@
 # Arquitectura
 
+## Estado actual0.15
+
+La descripción histórica de0.1 que sigue ya no limita el contenido: hoy hay cinco personajes de beta, mapa por chunks, ataques por comportamientos, Morgan/Buggy y navegación por cartas. `game/core` y `systems` siguen sin Phaser/DOM/storage.
+
+`content/training.ts` define costes/límites/efectos del entrenamiento; `SaveStore` conserva perfiles independientes y valida/migra guardados v1. Run recibe el perfil como datos, calcula modificadores permanentes y configura ataques iniciales/vetos/cambios. UI de entrenamiento en HTML/CSS (`ui/training.ts`). XP y moneda aplican sus multiplicadores al recoger, guardando moneda entera por diferencia. No hay otra progresión permanente de poder.
+
+`ui/ability-art.ts` compone miniassets originales y los comparte con la escena vía rasterizeArt; no se descargan recursos. Las poses aprobadas no cambian. Visuales ofensivos siguen al actor y no son hurtboxes. Uniones solo con recompensa de jefe; cartas llenas filtran a pasivas. PROBAR.md es la guía actual y VALIDACION.md contiene evidencias reales.
+
+
 Flujo: puerto → partida → pausa / mejora / resultado → puerto o nueva partida.
 
 `Run` contiene el estado de una sola batalla y recibe vectores de movimiento y pasos de tiempo. Es TypeScript sin Phaser ni DOM. El tiempo avanza solo en `playing`; el estado termina en `defeat` o `victory`. Un nivel pendiente se procesa después de elegir la mejora actual, sin perder XP acumulada.
