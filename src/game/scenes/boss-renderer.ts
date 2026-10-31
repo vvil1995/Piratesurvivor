@@ -6,7 +6,7 @@ import { MORGAN_ARENA, type ArenaDefinition } from '../world/arena.ts';
 
 // Un único renderizador de formas: el motor usa exactamente esos parámetros.
 export function drawDanger(g: Phaser.GameObjects.Graphics, zone: DangerZone, origin: Vector, color: number, alpha: number): void {
-  g.fillStyle(color, alpha); g.lineStyle(2, 0xffd7cc, Math.min(1, alpha * 2));
+  g.fillStyle(color, alpha); g.lineStyle(3, 0xffd7cc, Math.min(1, alpha * 2.5));
   if (zone.shape === 'circle') { g.fillCircle(zone.x - origin.x, zone.y - origin.y, zone.radius); g.strokeCircle(zone.x - origin.x, zone.y - origin.y, zone.radius); return; }
   const transform = (x: number, y: number) => ({ x: zone.x - origin.x + Math.cos(zone.angle) * x - Math.sin(zone.angle) * y, y: zone.y - origin.y + Math.sin(zone.angle) * x + Math.cos(zone.angle) * y });
   const points: Vector[] = [];
@@ -63,7 +63,7 @@ export class BossRenderer {
     }
     if (boss.telegraph) {
       const warning = boss.telegraph, final = boss.stage === 'final';
-      const intensity = final ? 0.34 + (Math.floor(boss.elapsed * 12) % 2) * 0.16 : 0.19;
+      const intensity = final ? 0.48 + (Math.floor(boss.elapsed * 12) % 2) * 0.16 : 0.32;
       if (kind !== 'order') for (const zone of [warning.zone, ...boss.extraWarnings]) drawDanger(this.warnings, zone, origin, 0xf23f46, intensity);
       else for (const gate of arena.gates) { this.warnings.lineStyle(final ? 4 : 2, 0xffb26a, 0.85); this.warnings.strokeCircle(gate.x - origin.x, gate.y - origin.y, 28); }
       if (kind === 'bomb') for (const zone of [warning.zone, ...boss.extraWarnings]) {
