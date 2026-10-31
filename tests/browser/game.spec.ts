@@ -800,7 +800,7 @@ test('34 iconos propios distintos, buffs legibles y barril/muslo/cofre reconocib
   await page.screenshot({ path: info.outputPath('ability-gallery.png') }); await page.locator('#qa-icon-gallery').evaluate(el => el.remove());
   await page.locator('#start').click(); await isolateWalk(page);
   await page.evaluate(() => {
-    const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player; r.pause();
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player; r.update = () => {};
     r.chests.active.push({ active: true, id: -888, kind: 'chest', large: false, x: p.x + 70, y: p.y, hp: 24, maxHp: 24, speed: 0, damage: 0, xp: 0, radius: 14, flash: 0 }, { active: true, id: -889, kind: 'chest', large: true, x: p.x + 140, y: p.y, hp: 24, maxHp: 24, speed: 0, damage: 0, xp: 0, radius: 14, flash: 0 });
     const food = r.pickups.acquire()!; Object.assign(food, { x: p.x - 70, y: p.y, kind: 'food', value: 12, life: 20 });
     const bullet = r.projectiles.acquire()!; Object.assign(bullet, { x: p.x + 40, y: p.y - 70, vx: 120, vy: 40, hostile: true, life: 3, radius: 3 }); qa.draw();
