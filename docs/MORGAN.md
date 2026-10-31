@@ -1,6 +1,6 @@
 # Morgan — primer combate de campaña
 
-Entrada voluntaria desde «BASE DE MORGAN» en Shells Town. Confirmación explícita; nivel20 orientativo, sin bloqueo. La exploración previa y sus monedas funcionan igual. No se ofrece acceso desde el menú a campañas avanzadas.
+Desde05:00 de partida puede aparecer una carta náutica sobre suelo alcanzable en Shells Town (demora inicial0–45s). Caminar sobre ella inicia una travesía de3s hacia la arena. No existe acceso por botón ni desde el menú. Nivel20 orientativo, sin bloqueo. Puedes ignorar la carta: tras90s o al alejarte, se programa otra oportunidad. Esta decisión0.13 sustituye la navegación manual anterior.
 
 ## Arquitectura
 
@@ -9,6 +9,7 @@ Entrada voluntaria desde «BASE DE MORGAN» en Shells Town. Confirmación explí
 - `game/bosses/morgan.ts`: controlador específico, una acción a la vez y tiempos de simulación; sin timers DOM.
 - `game/world/arena.ts`: mundo de colisiones y chunks de piedra, muros y dos coberturas. Usa movimiento/segmentos existentes.
 - `game/scenes/boss-renderer.ts`: formas a partir de la misma zona del motor y representación original provisional del jefe.
+- `content/navigation.ts` y `game/systems/navigation-signal.ts`: ventanas aleatorias, una carta activa, recogida y reaparición; sin timers de navegador.
 - `Run`: entrada, integración con impactos existentes, refuerzos, victoria y navegación. El jefe no es un marine con HP ampliado.
 
 ## Reglas
@@ -23,9 +24,11 @@ Refuerzos: hasta4 por orden, máximo5 vivos; puertas marcadas y elección de ent
 
 Sin curación automática. Muerte de Morgan: cancelar avisos/onda, eliminar refuerzos y proyectiles, animación breve de caída, registrar victoria local una sola vez por partida y conceder una oportunidad de agrupación. No termina la campaña ni se registra como victoria completa de East Blue.
 
-Después el jugador escoge volver a explorar Shells Town o embarcar. El vaixell es visible y la navegación se activa mediante botón explícito; no obliga a viajar ni a hacerlo inmediatamente. La transición conserva HP actual, nivel/XP, habilidades/niveles, ranuras, cooldowns, buffs y objetos. Se limpian objetivos y peligros del escenario anterior. Nueva partida reinicia la victoria de campaña.
+Después de1,3s de caída empieza automáticamente la travesía hacia Orange Town. El barco dura3s, pausa combate/reloj/cooldowns y admite pausa/reanudación o interrupción por giro/cambio de aplicación. La transición conserva HP actual, nivel/XP, habilidades/niveles, ranuras, cooldowns, buffs y objetos. Se limpian objetivos y peligros del escenario anterior. Nueva partida reinicia la victoria de campaña.
 
-Orange Town es solo una llegada procedural provisional de paleta cálida, sin piratas/Buggy ni nuevas recompensas. No se presenta como segunda isla terminada. Este bloque no implementa el resto de East Blue.
+Orange Town tiene terreno procedural de paleta cálida y tres variantes provisionales de piratas de Buggy: básico, tirador y resistente, con datos de XP y dificultad propios. Su presión por tiempo comienza al llegar. No incluye todavía a Buggy ni se presenta como segunda isla terminada; el resto de East Blue sigue pendiente.
+
+Perder contra Morgan no termina la partida: cancela sus peligros, vuelve en barco al mismo Shells Town y deja25HP, con2,5s de gracia y build/berries conservados. El historial de cofres no se reinicia. La siguiente oportunidad se programa45–90s de juego después; otro intento crea un Morgan completo. Morir explorando sí termina la partida. No hay penalización ni recompensa de victoria por perder contra Morgan.
 
 ## Pendiente de equilibrio y arte
 

@@ -59,7 +59,7 @@ Probar tres partidas con elecciones diferentes; comprobar movimiento/joystick mi
 
 En las cartas probar vida (+20máximo y cura20), regeneración, armadura y crítico. Pausar para ver los efectos efectivos, que ya respetan topes. La XP se ve arriba con valor numérico y barra; al subir de nivel se reinicia el progreso. Vida/regen no tienen máximo de elecciones; las demás sí. Reiniciar debe borrar estas pasivas y conservar solo el perfil anterior.
 
-El equilibrio cambió: regeneración inicial0,2HP/s; daño/velocidad/cooldown temporales ahora se suman sobre la base, no se multiplican repetidamente. Los números son provisionales y necesitan partidas humanas con y sin mejoras. El enemigo recibe más estadísticas y más frecuencia por tiempo, hasta los topes de0.4.1. No hay viajes automáticos ni victoria por reloj.
+El equilibrio cambió: regeneración inicial0,2HP/s; daño/velocidad/cooldown temporales ahora se suman sobre la base, no se multiplican repetidamente. Los números son provisionales y necesitan partidas humanas con y sin mejoras. El enemigo recibe más estadísticas y más frecuencia por tiempo, hasta los topes de0.4.1. El reloj no obliga a cambiar de isla ni concede victoria. La carta desde05:00 permite entrar en Morgan si la recoges; vencerlo sí inicia el viaje automático.
 
 
 ## Beta de los cinco personajes
