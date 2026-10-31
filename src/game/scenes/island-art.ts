@@ -83,6 +83,6 @@ export function createIslandArt(scene: Phaser.Scene): void {
     for (const direction of ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']) for (let phase = 0; phase < 5; phase++) {
       if (scene.textures.exists(`${key}-${direction}-${phase}`)) scene.textures.remove(`${key}-${direction}-${phase}`);
     }
-    createPackedDirectionalArt(scene, `island-source-${key}`, key, 5); scene.textures.remove(`island-source-${key}`);
+    createPackedDirectionalArt(scene, `island-source-${key}`, key, 5, 128); scene.textures.remove(`island-source-${key}`);
   }
 }

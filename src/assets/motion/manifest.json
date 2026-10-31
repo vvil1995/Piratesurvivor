@@ -1,15 +1,15 @@
 {
   "buggy-pirate.png": {
-    "sha256": "18c0b32c90e664b2a34d935acce7748cea9a2f4a1ec9408c3d17603c88f47530",
-    "bytes": 108859
+    "sha256": "94b83b9cf3eb0b7666104b77ab0e0930d49fd106d75650455029c661c2f4ce0e",
+    "bytes": 103220
   },
   "buggy-bruiser.png": {
-    "sha256": "e910d146584cd71bff576a72c26844ab1ececf043ba0a57e174da4ceb428687c",
-    "bytes": 87088
+    "sha256": "78426dc400997f55505a00e74b2323d927ea6d8f9177fffe1440c4bb35efce08",
+    "bytes": 97383
   },
   "buggy-gunner.png": {
-    "sha256": "e6af1bc0bec820ec46cd6bb3e8dedac1d142a75da9d9beecebfd2cce0e9c5737",
-    "bytes": 87079
+    "sha256": "72c8f722f0a377277e1dd3e5a83ee093065abc26f60d5f6bfb0ed161fad3eda6",
+    "bytes": 93779
   },
   "morgan.png": {
     "sha256": "00fd736f28ee9b939854dae498e221fa31c9684c21aae5b30856f817e1ef37bf",

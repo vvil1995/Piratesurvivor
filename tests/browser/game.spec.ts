@@ -1070,3 +1070,20 @@ test('entrenamiento uniforme:13 PNG originales,14 tarjetas y progreso conservado
  await page.setViewportSize({width:844,height:390});await page.locator('[data-buy-training="vitality"]').click();await expect(page.locator('[data-training="vitality"] .bought')).toHaveCount(4);await expect(page.locator('#training-wallet')).toHaveText('905 berries');
  await page.reload();await expect(page.locator('#loading')).toBeHidden();await page.locator('#train').click();await expect(page.locator('[data-training="vitality"] .bought')).toHaveCount(4);await expect(page.locator('#training-wallet')).toHaveText('905 berries');
 });
+
+test('piratas corregidos conservan figuras completas en ocho direcciones y cuatro pasos',async({page},info)=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.locator('#start').click();
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.enemies.clear();r.lootNoticeFor=0;r.update=()=>{};
+ for(const [i,visual]of ['buggy-pirate','buggy-gunner','buggy-bruiser'].entries()){const e=r.enemies.acquire()!;Object.assign(e,{id:700+i,visual,x:r.player.x-100+i*100,y:r.player.y+80,hp:100,maxHp:100,radius:13,flash:0,speed:0,damage:0,ranged:undefined});}q.draw();q.tick();});
+ const poses=new Set<string>();
+ for(const [dx,dy]of [[24,0],[24,24],[0,24],[-24,24],[-24,0],[-24,-24],[0,-24],[24,-24]]){
+  for(let step=0;step<4;step++){
+   const keys=await page.evaluate(({dx,dy})=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){e.x+=dx;e.y+=dy;}q.draw(100);return q.metrics().enemyTextures;},{dx,dy});keys.forEach(k=>poses.add(k));
+  }
+ }
+ expect(poses.size).toBeGreaterThanOrEqual(24);await page.screenshot({path:info.outputPath('pirates-walking.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active)e.flash=.15;q.draw();});await page.screenshot({path:info.outputPath('pirates-hurt.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){e.flash=0;e.ranged={interval:2,speed:200,range:250};e.shotTimer=1.95;}q.draw(100);});await page.screenshot({path:info.outputPath('pirates-attack.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){e.ranged=undefined;e.shotTimer=0;}q.draw(200);});await page.screenshot({path:info.outputPath('pirates-idle.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(const e of r.enemies.items)if(e.active){r.visualDeaths.push({x:e.x,y:e.y,visual:e.visual!});e.active=false;}q.draw(100);});await page.screenshot({path:info.outputPath('pirates-death.png')});expect(errors).toEqual([]);
+});

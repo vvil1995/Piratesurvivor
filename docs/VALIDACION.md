@@ -385,3 +385,17 @@ Validación realizada:
 - Registro de procedencia/licencias actualizado; sin dependencias nuevas.
 
 Pendiente: validación en Safari/Android físicos. Esta tarea no modifica el renderizador ni resuelve por sí sola la incidencia visual del mapa reportada previamente, aún pendiente de reproducir con el navegador/URL afectados.
+
+## Ajuste parcial de cofres24 (2026-10-31)
+
+Candidato grande cada24 chunks; pequeño cada3. Sin cambios en ubicación libre, recompensas ni apertura3s. En `battle.ts` el cofre accesible por distancia/segmento libre se eleva sobre decoración colgante y restaura explícitamente opacidad/crop; el resto conserva profundidad por pies. Esto aborda ocultación por capas, sin acreditar que explique todos los casos reportados de transparencia.
+
+Tipos,142 pruebas de lógica y build correctos. Pruebas de navegador de cofres/objetos ejecutadas en escritorio y móvil emulado; no se afirma reproducción exacta del caso transparente del usuario. Pendientes: animación de apertura, revisión de atlas de piratas y tres marines diferenciados. No se han publicado estos cambios parciales.
+
+## Piratas: retalles y alineación (2026-10-31)
+
+Confirmado visualmente en atlas anteriores:fragmentos vecinos en espadachín/fusilero; pesado de4 filas procesado como5, cortando figuras y mezclando ataques con pasos. Se reconstruyen los tres PNG desde sus originales, sin sustituir diseños; celdas128 con margen, pies120, escala común. Cargador parametrizado por celda para estos tres actores; los demás conservan96. Origen de pies actualizado en representación y muerte. No cambian IA, estadísticas ni ataques.
+
+142 pruebas de lógica y comprobación de tipos correctas. Navegador:movimiento de los tres piratas en ocho direcciones, cuatro pasos, reposo, pose de ataque, reacción de daño y caída. Capturas de PC/móvil emulado; no se afirma prueba en teléfonos físicos. Compilación y smoke de Pages se ejecutan al cerrar. Los cambios previos de cofres24 y elevación al estar accesibles se conservan; los nuevos marines siguen pendientes.
+
+Cierre de piratas:2/2 pruebas de navegador superadas con capturas de movimiento/ataque/daño/reposo/caída. Atlas revisados visualmente y margen mínimo4px tras corregir el pesado. Build y smoke bajo `/Piratesurvivor/` correctos, sin404 ni errores JS. Se publica junto al ajuste de cofres24 ya comprobado en4 pruebas de navegador; no se presenta el conjunto de marines nuevos como terminado.

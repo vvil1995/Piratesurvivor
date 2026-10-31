@@ -173,7 +173,7 @@ export class BattleScene extends Phaser.Scene {
       const pirate = e.visual?.startsWith('buggy-');
       const attacking = pirate && (e.ranged ? (e.shotTimer ?? 0) > e.ranged.interval - .18 : Math.hypot(e.x-worldX,e.y-worldY)<e.radius+22);
       const frame = attacking ? 4 : animation.frame ? pirate ? animation.frame - 1 : (animation.frame - 1) % 2 : 0;
-      sprite.setTexture(`${e.visual ?? 'marine'}-${attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction}-${frame}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
+      sprite.setOrigin(.5, pirate ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction}-${frame}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged && e.visual === 'marine' ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
@@ -185,7 +185,14 @@ export class BattleScene extends Phaser.Scene {
     for (let i = 0; i < this.chestSprites.length; i++) {
       const chest = run?.visibleChests[i], sprite = this.chestSprites[i];
       sprite.setVisible(!!chest?.active);
-      if (chest?.active) sprite.setTexture(chest.large ? 'small-chest' : 'barrel').setPosition(chest.x - origin.x, chest.y - origin.y).setScale(chest.large ? 1.35 : 1).setTint(chest.large ? 0xffdc8a : 0xffffff).setDepth(chest.y - origin.y + 1000);
+      if (chest?.active) {
+        const reachable = !!player && Math.hypot(chest.x-player.x,chest.y-player.y) <= LOOT.largeOpenRadius && run!.world.segmentClear(chest.x,chest.y,player.x,player.y,2);
+        // Nearby interactable loot must remain visible above overhanging scenery.
+        sprite.setTexture(chest.large ? 'small-chest' : 'barrel').setCrop().setAlpha(1)
+          .setPosition(chest.x-origin.x,chest.y-origin.y).setScale(chest.large ? 1.35 : 1)
+          .setTint(reachable ? 0xffefb0 : chest.large ? 0xffdc8a : 0xffffff)
+          .setDepth(reachable ? 8990 : chest.y-origin.y+1001);
+      }
     }
     for (let i = 0; i < this.crystals.length; i++) {
       const pickup = run?.pickups.items[i], sprite = this.crystals[i];
