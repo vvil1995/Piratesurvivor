@@ -194,3 +194,7 @@ Extracción por componentes alpha para no tomar fragmentos vecinos. Normalizaci�
 ### Corrección de marcha de marines (2026-10-31)
 
 Se editó la fuente de marcha con ImageGen (`exec-e0273981-02f5-4b31-b9d3-642574d92fb7.png`) conservando los tres diseños/armas. Se eliminó la reflexión parcial de piernas de los pasos3–4 que torcía rodillas. Se extraen figuras completas, con escala común por orientación, eje horizontal del casco centrado y pies120. El reposo toma la pose de apoyo de su propia orientación. Solo se reemplazan filas0–4; filas5–7 de preparación/ataque/caída son idénticas píxel a píxel al atlas anterior. PNG RGBA para conservar esos píxeles y alpha sin otra cuantización. Manifest y cajas fuente actualizados.
+
+### Composición urbana procedural (2026-10-31)
+
+No se incorporan ni modifican PNGs: se reutilizan casas, árboles, palmeras, mercado, suelo de piedra/tierra/césped, cajas y recursos navales existentes. Cañón, bandera y torre ya registrados se usan también en puntos ocasionales de Shells Town. Variaciones de distribución y desgaste de suelo deterministas; sin recursos externos ni nuevas dependencias.

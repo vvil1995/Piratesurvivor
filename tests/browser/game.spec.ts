@@ -1147,3 +1147,25 @@ test('marines: tres armas, cuatro pasos sin recortes, preparación, disparo y de
  for(const a of assets){expect(a.bad).toBe(0);expect(a.empty).toBe(0);expect(a.width).toBe(1024);expect(a.height).toBe(1024);}
  expect(errors).toEqual([]);
 });
+
+test('pueblos orgánicos: distintas semillas, continuidad visual y arenas conservadas',async({page},info)=>{
+ test.setTimeout(90000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#start').click();
+ for(const theme of ['shells','orange'] as const)for(const [seed,x,y]of [[3,-256,256],[42,256,256],[887,768,-256]]){
+  const metrics=await page.evaluate(async({theme,seed,x,y})=>{
+   const worldPath='/src/game/world/world.ts',shellPath='/src/content/worlds/shells-town.ts',orangePath='/src/content/worlds/orange-town.ts';
+   const {ProceduralWorld}=await import(/* @vite-ignore */worldPath),{SHELLS_TOWN}=await import(/* @vite-ignore */shellPath),{ORANGE_TOWN}=await import(/* @vite-ignore */orangePath);
+   const q=window.__OPS_QA__!,r=q.getRun()!;r.update=()=>{};r.enemies.clear();r.projectiles.clear();r.areas.clear();r.strikes.length=0;r.world=new ProceduralWorld(seed,theme);r.zone=theme==='orange'?'orange-town':'shells-town';r.definition=theme==='orange'?ORANGE_TOWN:SHELLS_TOWN;r.player.x=x;r.player.y=y;r.player.hurtTimer=0;q.draw();q.tick();return q.metrics();
+  },{theme,seed,x,y});
+  expect(metrics.renderedChunks).toBeGreaterThan(4);expect(metrics.textureSlots).toBeLessThanOrEqual(36);
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  const view=page.viewportSize()!,hero=await page.screenshot({clip:{x:view.width/2-32,y:view.height/2-70,width:64,height:80}});
+  const red=await page.evaluate(async png=>{const im=new Image();im.src='data:image/png;base64,'+png;await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const ctx=c.getContext('2d')!;ctx.drawImage(im,0,0);const a=ctx.getImageData(0,0,c.width,c.height).data;let red=0;for(let i=0;i<a.length;i+=4)if(a[i]>100&&a[i]>a[i+1]*1.6&&a[i]>a[i+2]*1.6)red++;return red;},hero.toString('base64'));
+  expect(red,`Luffy visible: ${theme}/${seed}`).toBeGreaterThan(12);
+  await page.screenshot({path:info.outputPath(`town-${theme}-${seed}.png`)});
+ }
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.zone='shells-town';r.beginMorgan();q.draw();q.tick();});
+ await expect(page.locator('#boss-name')).toHaveText('AXE-HAND MORGAN');await page.screenshot({path:info.outputPath('town-morgan-unchanged.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();q.draw();q.tick();});
+ await expect(page.locator('#boss-name')).toHaveText('BUGGY');await page.screenshot({path:info.outputPath('town-buggy-unchanged.png')});expect(errors).toEqual([]);
+});

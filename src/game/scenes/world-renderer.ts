@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { townGroundAt } from '../world/town-ground.ts';
 import { ArenaWorld } from '../world/arena.ts';
 import type { Vector } from '../core/types.ts';
 import type { View } from '../systems/spawner.ts';
@@ -26,9 +27,11 @@ export class WorldRenderer {
     ctx.imageSmoothingEnabled = false;
     const ground = Object.fromEntries(['stone','earth','grass','water'].map(name => [name, ctx.createPattern(this.scene.textures.get(`ground-${name}`).getSourceImage() as HTMLCanvasElement, 'repeat')!]));
     const orange = this.world?.theme === 'orange', coastal = this.world?.theme !== 'syrup';
+    const organic = !(this.world instanceof ArenaWorld) && (this.world?.theme === 'shells' || orange) && chunk.district !== 'harbor';
     const orchard = chunk.district === 'orchard' || chunk.district === 'garden', circus = chunk.district === 'circus';
     const grass = chunk.district === 'garden' ? ['#719063', '#759568', '#6e8c60'] : ['#b9b39a', '#b5b096', '#bdb79d'];
-    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    if (organic) this.paintTownGround(ctx, chunk, ground, orange);
+    else for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
       const h = hash(chunk.variation, x, y), road = roadTile(x, y) || chunk.district === 'plaza';
       ctx.fillStyle = road ? (this.world?.theme === 'orange' ? ['#d5bb9c', '#d9c3a5', '#cfb596'] : ['#c6c2ad', '#cbc7b4', '#c2bfac'])[h % 3] : grass[h % 3];
       ctx.fillRect(x * 16, y * 16, 16, 16);
@@ -96,7 +99,7 @@ export class WorldRenderer {
     }
     // Detalles decorativos sin colisión, pintados una sola vez por chunk.
     // Las sendas del jardín conectan con las avenidas; la plaza marca otro barrio.
-    if (chunk.district === 'garden') {
+    if (!organic && chunk.district === 'garden') {
       ctx.fillStyle = '#b0ac85';
       for (const q of [24, 168]) { ctx.fillRect(q, 58, 64, 5); ctx.fillRect(q, 194, 64, 5); }
       for (let i = 0; i < 22; i++) {
@@ -105,7 +108,7 @@ export class WorldRenderer {
         ctx.fillStyle = ['#e1bd70', '#d9d8bd', '#b68892'][h % 3]; ctx.fillRect(x, y, 2, 2);
       }
     }
-    if (chunk.district === 'plaza' && !(this.world instanceof ArenaWorld && orange)) {
+    if (!organic && chunk.district === 'plaza' && !(this.world instanceof ArenaWorld && orange)) {
       ctx.strokeStyle = '#9eaa9d'; ctx.lineWidth = 2;
       ctx.strokeRect(96, 96, 64, 64); ctx.strokeRect(103, 103, 50, 50);
       ctx.fillStyle = '#8a9f9b';
@@ -137,7 +140,7 @@ export class WorldRenderer {
       const sprite = slot.decorations[i];
       if (obstacle.kind === 'water') { sprite.setVisible(false); continue; }
       const own = orange && ['house', 'tree', 'tent', 'stall', 'ruin'].includes(obstacle.kind);
-      sprite.setTexture(this.world instanceof ArenaWorld && orange && obstacle.art ? obstacle.art : naval ? obstacle.art ?? (obstacle.kind === 'wall' ? 'naval-wall' : 'naval-crates') : obstacle.kind === 'ship' ? 'naval-ship' : obstacle.kind === 'lamp' ? 'coastal-lamp' : obstacle.kind === 'fence' ? 'coastal-fence' : obstacle.kind === 'crate' && coastal ? 'coastal-crates' : obstacle.kind === 'wall' && coastal ? 'coastal-wall' : obstacle.kind === 'dock' ? 'wooden-dock' : obstacle.kind === 'quay' ? 'stone-quay' : !orange && coastal && obstacle.kind === 'house' ? obstacle.variant === 3 ? 'shells-base' : 'shells-house' : obstacle.kind === 'tree' && coastal && (obstacle.variant === 1 || !orange) ? obstacle.variant === 1 && orange ? 'coastal-palm' : 'coastal-tree' : obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
+      sprite.setTexture(this.world instanceof ArenaWorld && orange && obstacle.art ? obstacle.art : naval ? obstacle.art ?? (obstacle.kind === 'wall' ? 'naval-wall' : 'naval-crates') : organic && obstacle.art ? obstacle.art : obstacle.kind === 'ship' ? 'naval-ship' : obstacle.kind === 'lamp' ? 'coastal-lamp' : obstacle.kind === 'fence' ? 'coastal-fence' : obstacle.kind === 'crate' && coastal ? 'coastal-crates' : obstacle.kind === 'wall' && coastal ? 'coastal-wall' : obstacle.kind === 'dock' ? 'wooden-dock' : obstacle.kind === 'quay' ? 'stone-quay' : !orange && coastal && obstacle.kind === 'house' ? obstacle.variant === 3 ? 'shells-base' : 'shells-house' : obstacle.kind === 'tree' && coastal && (obstacle.variant === 1 || !orange) ? obstacle.variant === 1 && orange ? 'coastal-palm' : 'coastal-tree' : obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
       if (obstacle.kind === 'ship') sprite.setDisplaySize(obstacle.width, obstacle.width * sprite.height / sprite.width);
       else if (obstacle.kind === 'lamp') sprite.setDisplaySize(28, 84);
       else if (obstacle.kind === 'fence') sprite.setDisplaySize(obstacle.width, 48);
@@ -154,11 +157,25 @@ export class WorldRenderer {
         const width = obstacle.kind === 'tent' ? obstacle.width + 32 : sprite.displayWidth;
         sprite.setDisplaySize(width, width * sprite.height / sprite.width);
       }
+      if (organic && obstacle.art) sprite.setDisplaySize(obstacle.width, obstacle.width * sprite.height / sprite.width);
       if (naval) { const w = obstacle.width; sprite.setDisplaySize(w, obstacle.art ? w * sprite.height / sprite.width : obstacle.kind === 'wall' ? obstacle.height + 24 : obstacle.height); }
       if (this.world instanceof ArenaWorld && orange && obstacle.art) sprite.setDisplaySize(obstacle.width, obstacle.width * sprite.height / sprite.width);
       sprite.setVisible(true);
     }
     for (let i = chunk.obstacles.length; i < slot.decorations.length; i++) slot.decorations[i].setVisible(false);
+  }
+  private paintTownGround(ctx: CanvasRenderingContext2D, chunk: Chunk, ground: Record<string, CanvasPattern>, orange: boolean): void {
+    // Half-tile material boundaries are sampled in world space, never per-chunk rectangles.
+    for (let y=0;y<32;y++) for(let x=0;x<32;x++) {
+      const wx=chunk.cx*16+(x+.5)/2,wy=chunk.cy*16+(y+.5)/2;
+      const material=townGroundAt(this.world!.seed,wx,wy,orange?'orange':'shells');
+      ctx.fillStyle=ground[material];ctx.fillRect(x*8,y*8,8,8);
+      const wear=hash(this.world!.seed^421,chunk.cx*32+x,chunk.cy*32+y);
+      if(material==='stone'&&wear%11===0){
+        ctx.fillStyle=wear%2?'rgba(93,105,72,.17)':'rgba(114,89,61,.14)';ctx.fillRect(x*8,y*8,8,8);
+        ctx.fillStyle='rgba(70,66,57,.25)';ctx.fillRect(x*8+2,y*8+4,4,1);
+      }
+    }
   }
   update(world: ProceduralWorld, view: View, origin: Vector): void {
     if (this.world !== world) { for (const slot of this.active.values()) this.release(slot); this.active.clear(); this.world = world; }

@@ -427,3 +427,17 @@ Se detectó además un fallo de la CI anterior en la prueba visual de cuatro ata
 La prueba de efectos evolucionados pasa4/4 (dos repeticiones por formato) tras inicializar correctamente la fixture. Las habilidades del juego no se han modificado.
 
 Cierre: build correcto y smoke de producción bajo `/Piratesurvivor/` en ambos formatos sin404 ni errores JS. Se mantiene el aviso preexistente de tamaño del bundle. No hay cambios en dependencias ni persistencia.
+
+## Composición procedural de Shells Town y Orange Town (2026-10-31)
+
+Auditoría: la cruz de4 celdas y cuatro parcelas fijas se repetían por chunk; el terreno se elegía por distrito, marcando rectángulos y fronteras. Se conservan assets y motor de chunks. Se añade terreno continuo por coordenadas globales (ruido suave compartido), calles de piedra con pequeños desvíos/anchos variables, cruces abiertos ocasionales y ramales interiores opcionales. Césped y tierra se mezclan en contornos de media celda; desgaste sobre el pavimento existente, pintado solo al cargar el chunk.
+
+Las viviendas/puestos varían en posición, huella y presencia, dejando claros; huertos/jardines agrupan árboles. En barracones se reutilizan cajas, banderas, cañones y torres existentes, con un único punto militar por composición, sin llenar el pueblo. Se conservan las dársenas/puertos funcionales. Las cuatro celdas centrales y el perímetro se mantienen libres para tránsito; las composiciones respetan las calles visibles y separación entre obstáculos. Una comprobación local de conectividad retira obstáculos que pudiesen cerrar huecos. Límite explícito de20 obstáculos por composición. IDs y propietarios únicos dentro de su chunk.
+
+El hash original se traslada sin cambios a seed.ts y se reexporta desde generator.ts para compatibilidad; terreno/composición no dependen de la UI. Syrup sigue usando la generación anterior y las arenas no usan el pintado nuevo. No se modifican HUD, personajes, habilidades, combatientes, recompensas, progresión ni probabilidades/apertura de cofres.
+
+Tipos y151 pruebas de lógica correctos. Nuevas pruebas: continuidad de material/calle a ambos lados de bordes positivos/negativos;250 chunks de ambos pueblos con cinco semillas, espacios libres conectados, avenidas libres, IDs y caché; navegación mediante campo de flujo, cofres con espacio18px y conservación del generador provisional de Syrup. Navegador2/2 en escritorio y móvil emulado: tres semillas por pueblo, coordenadas negativas, capturas de composición, reutilización acotada de texturas y renderizado de las dos arenas. Se espera a completar los renders de cámara antes de capturar y se comprueban píxeles visibles de Luffy para no dar por válido un terreno sin personaje. Capturas inspeccionadas visualmente; no se acredita FPS en teléfono físico ni Safari.
+
+Regresiones de navegador:4/4 pruebas de cofres pequeños/grandes, berries guardadas y navegación/piratas de Orange en ambos formatos. Las probabilidades y recompensas no cambian.
+
+Cierre:151/151 tests, comprobación de tipos y build correctos; smoke de producción bajo `/Piratesurvivor/` en PC y móvil emulado, sin404, errores JS ni hook QA. Se conserva el aviso preexistente de tamaño del bundle. No se han añadido dependencias ni assets.
