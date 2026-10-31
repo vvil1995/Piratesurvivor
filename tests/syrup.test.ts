@@ -73,10 +73,10 @@ test('hipnosis: proyectil real aplica slow breve sin acumularse y el pool no lo 
  for(let i=0;i<20;i++)r.update(1/60,axis);assert.ok((p.slowFor??0)>0);assert.equal(p.slowMultiplier,.72);const before=p.x;r.update(1/30,{x:1,y:0});assert.ok(p.x-before<p.stats.speed/30*.8);
  p.slowFor=.01;r.update(1/30,axis);assert.equal(p.slowFor,0);r.projectiles.clear();spawnProjectile(r,0,0,100,0,1,165,'',true);assert.equal(r.projectiles.items.find(b=>b.active)!.slow,undefined);
 });
-test('victoria de Kuro: unión, mismo estado, Baratie bloqueado sin mapa ficticio; derrota vuelve a Syrup',()=>{
+test('victoria de Kuro: unión, mismo estado, Baratie voluntario con build conservada; derrota vuelve a Syrup',()=>{
  const r=syrup(),world=r.world;preset(r);r.beginKuro();r.player.hp=0;step(r,.02);assert.equal(r.voyage?.destination,'syrup-return');for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);assert.equal(r.world,world);assert.equal(r.player.hp,25);
  r.beginKuro();r.encounter!.body.x=r.player.x+40;r.encounter!.body.y=r.player.y;r.encounter!.body.hp=1;r.player.attacks[0].cooldown=0;r.player.hurtTimer=100;step(r,.02);assert.ok(r.kuroDefeated);step(r,1.4);assert.equal(r.status,'combining');assert.ok(r.exitSignal);const token=r.unionTokens;
- assert.ok(r.joinPair(0,1));assert.equal(r.unionTokens,token-1);assert.equal(r.status,'playing');assert.equal(r.player.abilitySlots.filter(s=>s.length).length,1);assert.ok(r.baratieUnlocked);assert.equal(r.sailToBaratie(),false);assert.equal(r.zone,'kuro-arena');assert.equal(r.voyage,undefined);
+ assert.ok(r.joinPair(0,1));assert.equal(r.unionTokens,token-1);assert.equal(r.status,'playing');assert.equal(r.player.abilitySlots.filter(s=>s.length).length,1);assert.ok(r.baratieUnlocked);assert.equal(r.zone,'kuro-arena');assert.equal(r.voyage,undefined);assert.equal(r.sailToBaratie(),true);assert.equal(r.voyage?.destination,'baratie');
 });
 function preset(r:Run){improveAttack(r.player,'gatling');}
 

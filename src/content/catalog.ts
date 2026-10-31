@@ -21,6 +21,9 @@ export const CHARACTERS: Record<string, CharacterDefinition> = {
 };
 const MARINE_BASE_HP = 32;
 export const ENEMIES: Record<string, EnemyDefinition> = {
+  'krieg-saber':{id:'krieg-saber',hp:105,speed:91,damage:23,xp:18,radius:13,visual:'krieg-saber',melee:{preparation:.55,interval:1.9,reach:60,hits:1,gap:.3}},
+  'krieg-gunner':{id:'krieg-gunner',hp:95,speed:73,damage:24,xp:22,radius:13,visual:'krieg-gunner',ranged:{interval:3.3,preparation:.8,speed:180,range:340,preferredDistance:230,pellets:3,spread:.24}},
+  'krieg-armored':{id:'krieg-armored',hp:180,speed:56,damage:32,xp:29,radius:16,visual:'krieg-armored',frontalReduction:.25,melee:{preparation:.9,interval:2.8,reach:75,hits:1,gap:.3}},
   'blackcat-pirate': { id: 'blackcat-pirate', hp: 85, damage: 20, speed: 88, xp: 14, radius: 13, visual: 'blackcat-pirate' },
   'blackcat-claw': {id:'blackcat-claw',hp:110,damage:24,speed:96,xp:18,radius:14,visual:'blackcat-claw',melee:{preparation:.6,interval:2.6,reach:65,hits:2,gap:.28}},
   'blackcat-hypnotist':{id:'blackcat-hypnotist',hp:75,damage:18,speed:72,xp:20,radius:13,visual:'blackcat-hypnotist',ranged:{interval:3.2,preparation:.8,speed:165,range:270,preferredDistance:210,slow:{multiplier:.72,duration:1.8}}},

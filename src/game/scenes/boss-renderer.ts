@@ -1,3 +1,4 @@
+import { KriegEncounter,gasZone } from '../bosses/krieg.ts';
 import type { KuroEncounter } from '../bosses/kuro.ts';
 import { BuggyRenderer } from './buggy-renderer.ts';
 import type { BuggyEncounter } from '../bosses/buggy.ts';
@@ -81,6 +82,20 @@ export class BossRenderer {
       if(boss.body.flash>0&&!dead)this.body.setRotation(-.1).setTint(0xffc9c9);
       for(const [i,t]of (boss as KuroEncounter).trails.entries())if(this.echoes[i])this.echoes[i].setTexture(`kuro-${d}-${frame}`).setPosition(t.x-origin.x,t.y-origin.y).setScale(.9).setAlpha(Math.min(.28,t.life)).setTint(0x535967).setDepth(t.y-origin.y+999).setVisible(true);
     }
+    if(boss instanceof KriegEncounter){
+      this.motion.update(boss.body.id,boss.body.x,boss.body.y,animate,dt,true);
+      const frame=(preparing||boss.state==='impact')&&['spear','gun'].includes(boss.attackId??'')?4:this.motion.frame?this.motion.frame-1:0;
+      this.body.setOrigin(.5,120/128).setTexture(`don-krieg-${this.motion.direction}-${frame}`).setScale(1.55).setRotation(dead?Math.min(1.5,boss.elapsed*2):boss.body.flash>0?-.08:0).setTint(boss.body.flash>0?0xffcdb5:boss.armorStage==='broken'?0xa3b4bd:boss.armorStage==='cracked'?0xc9a87b:0xffffff);this.arm.setVisible(false);
+      if(boss.armorStage!=='intact'&&!dead){
+        this.warnings.lineStyle(2,0x292238,.9);this.warnings.lineBetween(x-12,y-80,x+5,y-66);this.warnings.lineBetween(x+5,y-66,x-3,y-54);
+        if(boss.armorStage==='broken'){this.warnings.lineBetween(x+13,y-88,x-4,y-71);this.warnings.fillStyle(0xe8bd61,.8);this.warnings.fillRect(x-23,y-12,5,4);this.warnings.fillRect(x+20,y-5,4,3);}
+      }
+      if(boss.body.defense!.frontal>0){const zone={x:boss.body.x,y:boss.body.y-35,shape:'arc' as const,angle:boss.body.defense!.angle,length:0,width:0,radius:64,innerRadius:50,arc:boss.body.defense!.arc};drawDanger(this.warnings,zone,origin,0xffd456,.45);}
+      if(boss.attackId==='mh5'&&!dead)this.body.setTint(0xd6e8a3);
+      for(const h of boss.hazards){const zone=h.kind==='blast'?h.zone:gasZone(h);drawDanger(this.warnings,zone,origin,h.kind==='blast'?0xffb15b:h.kind==='mh5'?0x9fc33b:0x65b94c,h.kind==='blast'?.45:.25);
+        if(h.kind!=='blast'){this.warnings.fillStyle(h.kind==='mh5'?0xadd94d:0x7ccc67,.25);for(let i=0;i<7;i++){const cx=zone.shape==='circle'?zone.x+Math.cos(i*2.4)*zone.radius*.4:zone.x+zone.length*(i+.5)/7,cy=zone.y+Math.sin(i*3+boss.elapsed*2)*(zone.shape==='circle'?zone.radius*.4:zone.width*.16);this.warnings.fillCircle(cx-origin.x,cy-origin.y,Math.min(18,(zone.shape==='circle'?zone.radius:zone.width)*.16));}}
+      }
+    }
     if (boss.profile.id === 'morgan') {
       this.motion.update(boss.body.id, boss.body.x, boss.body.y, animate, dt);
       if (animate) this.idleTime += Math.min(dt,.1);
@@ -113,7 +128,7 @@ export class BossRenderer {
     if (boss.telegraph) {
       const warning = boss.telegraph, final = boss.stage === 'final';
       const intensity = final ? 0.48 + (Math.floor(boss.elapsed * 12) % 2) * 0.16 : 0.32;
-      if (kind !== 'order') for (const zone of [warning.zone, ...boss.extraWarnings]) drawDanger(this.warnings, zone, origin, 0xf23f46, intensity);
+      if (kind !== 'order'||boss.profile.id==='krieg') for (const zone of [warning.zone, ...boss.extraWarnings]) drawDanger(this.warnings, zone, origin, 0xf23f46, intensity);
       else for (const gate of arena.gates) { this.warnings.lineStyle(final ? 4 : 2, 0xffb26a, 0.85); this.warnings.strokeCircle(gate.x - origin.x, gate.y - origin.y, 28); }
       if (kind === 'bomb') for (const zone of [warning.zone, ...boss.extraWarnings]) {
         const bx = zone.x - origin.x, by = zone.y - origin.y;

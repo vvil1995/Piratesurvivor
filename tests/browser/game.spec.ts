@@ -1221,8 +1221,8 @@ test('Syrup completo: viaje voluntario, tres piratas, seis patrones de Kuro y Ba
   for(let i=0;i<100&&r.status==='playing';i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
  await expect(page.locator('#combinations')).toBeVisible();await expect(page.locator('#combination-message')).toContainText('Kuro');await page.locator('#combination-done').click();
  await expect(page.locator('#navigation-hint')).toContainText('BARATIE');
- expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.kuroDefeated,unlocked:r.baratieUnlocked,travel:r.sailToBaratie(),zone:r.zone};})).toEqual({won:true,unlocked:true,travel:false,zone:'kuro-arena'});
- await page.screenshot({path:info.outputPath('kuro-victory-baratie-locked.png')});expect(errors).toEqual([]);
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.kuroDefeated,unlocked:r.baratieUnlocked,travel:!!r.exitSignal,zone:r.zone};})).toEqual({won:true,unlocked:true,travel:true,zone:'kuro-arena'});
+ await page.screenshot({path:info.outputPath('kuro-victory-baratie-ready.png')});expect(errors).toEqual([]);
 });
 
 test('HUD minimalista compartido: tres bosses sin panel ni textos secundarios, móvil y escritorio',async({page},info)=>{
@@ -1253,4 +1253,55 @@ test('HUD minimalista compartido: tres bosses sin panel ni textos secundarios, m
   const overlap=await page.evaluate(()=>{const a=document.querySelector('#boss-panel')!.getBoundingClientRect(),b=document.querySelector('.player-status')!.getBoundingClientRect();const c=document.querySelector('.run-clock')!.getBoundingClientRect();return {overlap:a.x<b.right&&a.right>b.x&&a.y<b.bottom&&a.bottom>b.y,belowClock:a.y>=c.bottom};});expect(overlap.overlap).toBe(false);expect(overlap.belowClock).toBe(true);
  }
  expect(errors).toEqual([]);
+});
+
+test('Baratie completo: Log Pose voluntario, flota conectada, Krieg seis patrones y Arlong pendiente',async({page},info)=>{
+ test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
+ await page.locator('#start').click();const zoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
+ await page.evaluate(()=>{
+  const q=window.__OPS_QA__!,r=q.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.defeated();
+  for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.sailToSyrup();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.beginKuro();
+  r.player.hp=70;r.player.level=42;r.player.xp=9;r.player.collectedBerries=321;r.player.hurtTimer=10;
+  r.encounter!.body.hp=1;r.encounter!.body.x=r.player.x+35;r.encounter!.body.y=r.player.y;r.player.attacks[0].cooldown=0;
+  for(let i=0;i<100&&r.status==='playing';i++)r.update(1/60,{x:0,y:0});r.update=()=>{};q.draw();q.tick();
+ });
+ await expect(page.locator('#combinations')).toBeVisible();await page.locator('#combination-done').click();await expect(page.locator('#navigation-hint')).toContainText('BARATIE');
+ expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.zone)).toBe('kuro-arena');
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=Object.getPrototypeOf(r).update;Object.assign(r.player,r.exitSignal);r.update(1/60,{x:0,y:0});q.tick();});
+ await expect(page.locator('#voyage-title')).toContainText('BARATIE');
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.update=()=>{};q.draw();q.tick();});
+ await expect(page.locator('#area-label')).toContainText('BARATIE');expect(await page.evaluate(()=>{const p=window.__OPS_QA__!.getRun()!.player;return [p.level,p.xp,p.collectedBerries];})).toEqual([42,9,321]);
+ await page.evaluate(async()=>{const path='/src/content/catalog.ts',{ENEMIES}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!;
+  for(const [i,id]of ['krieg-saber','krieg-gunner','krieg-armored'].entries()){const d=ENEMIES[id],e=r.enemies.acquire()!;Object.assign(e,d,{id:900+i,active:true,x:r.player.x-60+i*70,y:r.player.y+75,maxHp:d.hp,flash:0,shotTimer:0,shotWindup:0,shotRecovery:0,meleeTimer:0,meleeWindup:0,meleeHits:0});}
+  q.draw();q.tick();
+ });
+ await page.screenshot({path:info.outputPath('baratie-fleet-enemies.png')});
+ const textures=await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyTextures);for(const id of ['krieg-saber','krieg-gunner','krieg-armored'])expect(textures.some(t=>t.startsWith(id))).toBe(true);
+ // Recorrido sobre la cubierta y las pasarelas usando entrada real de simulación.
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.hurtTimer=1e6;for(const a of r.player.attacks)a.cooldown=1e6;
+  const keys=[{x:1,y:0},{x:0,y:1},{x:-1,y:0},{x:0,y:-1}];for(const d of keys)for(let i=0;i<120;i++){Object.getPrototypeOf(r).update.call(r,1/60,d);if(!r.world.canOccupy(r.player.x,r.player.y,14))throw Error('El jugador pisa el mar');}q.draw();q.tick();
+ });
+ await page.screenshot({path:info.outputPath('baratie-explored.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.beginKrieg();q.draw();q.tick();});
+ await expect(page.locator('#boss-name')).toHaveText('DON KRIEG');expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);await expect(page.locator('#boss-phase,#boss-pattern,#boss-hp')).toHaveCount(0);
+ await page.screenshot({path:info.outputPath('krieg-arena.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.y=256;for(let i=0;i<40;i++)q.draw(33);q.tick();});
+ await page.screenshot({path:info.outputPath('krieg-arena-sea-restaurant.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.y=1216;for(let i=0;i<40;i++)q.draw(33);q.tick();});
+ for(const id of ['spear','gun','naval','shield','poison','mh5']){
+  const prep=await page.evaluate(async id=>{const path='/src/content/bosses/krieg.ts',{KRIEG_ATTACKS}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;
+   b.cancel();b.body.x=1536;b.body.y=1024;b.body.hp=b.body.maxHp*.2;r.player.x=1536;r.player.y=1250;r.player.hurtTimer=10;
+   b.prepare(KRIEG_ATTACKS.find((a:{id:string})=>a.id===id)!,r.player,r.world);b.elapsed=b.telegraph!.attack.preparation-.15;b.telegraph!.elapsed=b.elapsed;q.draw();q.tick();return b.telegraph!.attack.preparation;
+  },id);expect(prep).toBeGreaterThanOrEqual(.35);
+  await page.screenshot({path:info.outputPath(`krieg-${id}-warning.png`)});
+  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<20;i++)r.encounter!.tick(.01,r.player,r.world,()=>({x:0,y:0}),()=>{});q.draw();q.tick();});
+  await page.screenshot({path:info.outputPath(`krieg-${id}-impact.png`)});
+ }
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.body.defense!.armor!.remaining=1000;q.draw();q.tick();});await page.screenshot({path:info.outputPath('krieg-armor-cracked.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.body.defense!.armor!.remaining=0;q.draw();q.tick();});await page.screenshot({path:info.outputPath('krieg-armor-broken.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.cancel();b.state='approach';b.body.x=r.player.x+35;b.body.y=r.player.y;b.body.hp=1;r.player.attacks[0].cooldown=0;r.player.hurtTimer=10;
+  for(let i=0;i<100&&r.status==='playing';i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
+ await expect(page.locator('#combinations')).toBeVisible();await expect(page.locator('#combination-message')).toContainText('Krieg');await page.locator('#combination-done').click();await expect(page.locator('#navigation-hint')).toContainText('ARLONG');
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.kriegDefeated,unlocked:r.arlongUnlocked,travel:r.sailToArlong(),zone:r.zone,projectiles:r.projectiles.count};})).toEqual({won:true,unlocked:true,travel:false,zone:'krieg-arena',projectiles:0});
+ await page.screenshot({path:info.outputPath('krieg-victory-arlong-pending.png')});await page.locator('#pause').click();await expect(page.locator('#paused')).toBeVisible();expect(errors).toEqual([]);
 });

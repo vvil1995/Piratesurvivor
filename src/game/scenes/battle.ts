@@ -169,7 +169,7 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
-      const cat=e.visual?.startsWith('blackcat-');
+      const cat=e.visual?.startsWith('blackcat-')||e.visual?.startsWith('krieg-');
       const pirate = e.visual?.startsWith('buggy-')||cat;
       const marine = e.visual?.startsWith('marine-');
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000, !!marine);

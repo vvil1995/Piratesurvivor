@@ -10,7 +10,7 @@ La ruta de Kuro sigue el sistema existente: cartas desde05:00 de tiempo en Syrup
 
 Kuro:8500HP, velocidad260 con incremento moderado por fase, umbrales66/33%. Dos cortes cruzados en X; carga fijada; pasos fantasma sin daño; Shakushi de cinco pasadas, cada una avisada; combo de cuatro golpes con recuperaciones y urpes sorpresa tras reposicionamiento. No tiene invulnerabilidad especial. Se reutiliza PatternEncounter y su geometría única de aviso/impacto. Estelas limitadas a12 imágenes. Si se pierde, se vuelve a Syrup con25HP, misma build/mundo/cofres y posibilidad de otra carta.
 
-La victoria concede el token de unión existente y abre su menú. No concede ataques. Con un solo ataque permite continuar. Al cerrar se conserva la build y aparece el Log Pose de Baratie. Baratie queda desbloqueado dentro de esa partida, pero el viaje devuelve un aviso de contenido pendiente: no cambia de mapa ni consume el progreso. No se implementa el mundo4. El jugador puede revisar la build o salir por pausa al completar esta beta.
+La victoria concede el token de unión existente y abre su menú. No concede ataques. Con un solo ataque permite continuar. Al cerrar se conserva la build y aparece el Log Pose de Baratie. Baratie queda desbloqueado dentro de esa partida y ahora está implementado: al visitar el Log Pose, el viaje voluntario conserva la build y continúa al mundo4. Véase BARATIE.md.
 
 Archivos principales: `content/worlds/syrup-village.ts`, `content/bosses/kuro.ts`, `content/catalog.ts`, `game/bosses/kuro.ts`, `game/systems/enemy-melee.ts`, ampliaciones de Run/transiciones y del renderer/arena existentes. La revisión posterior del HUD y presión final se describe a continuación; las arenas y ataques de Morgan/Buggy se conservan.
 

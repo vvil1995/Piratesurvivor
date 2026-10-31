@@ -13,6 +13,7 @@ export interface Player extends Vector {
 }
 export interface EquippedAttack { id: string; level: number; cooldown: number; pending: number; burstTimer: number; activeFor: number; activationPending?: boolean; targetId?: number; counterUsed?: boolean }
 export interface Enemy extends Vector {
+  defense?:{angle:number;frontal:number;arc:number;armor?:{remaining:number;max:number;reduction:number}};
   active: boolean; id: number; visual?: string; kind?: 'chest' | 'boss'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
   speed: number; damage: number; xp: number; radius: number; flash: number;
   launchTime?: number; launchX?: number; launchY?: number;

@@ -1,3 +1,5 @@
+import { deckAt } from '../world/baratie.ts';
+import type { Obstacle } from '../world/generator.ts';
 import Phaser from 'phaser';
 import { townGroundAt, townRoadAt } from '../world/town-ground.ts';
 import { ArenaWorld } from '../world/arena.ts';
@@ -6,14 +8,15 @@ import type { View } from '../systems/spawner.ts';
 import { cellKey, CHUNK_SIZE, hash, roadTile, type Chunk } from '../world/generator.ts';
 import type { ProceduralWorld } from '../world/world.ts';
 
-interface Slot { ground: Phaser.GameObjects.Image; texture: Phaser.Textures.CanvasTexture; decorations: Phaser.GameObjects.Image[]; chunk?: Chunk }
+interface Slot { ground: Phaser.GameObjects.Image; texture: Phaser.Textures.CanvasTexture; decorations: Phaser.GameObjects.Image[]; chunk?: Chunk; props?:Obstacle[] }
 export class WorldRenderer {
   private active = new Map<string, Slot>();
   private free: Slot[] = [];
   private world?: ProceduralWorld;
   private serial = 0;
+  private waves:Phaser.GameObjects.Graphics;
   private scene: Phaser.Scene;
-  constructor(scene: Phaser.Scene) { this.scene = scene; }
+  constructor(scene: Phaser.Scene) { this.scene = scene;this.waves=scene.add.graphics().setDepth(-1900); }
   get activeChunks(): number { return this.active.size; }
   get allocatedChunks(): number { return this.serial; }
   private createSlot(): Slot {
@@ -22,6 +25,7 @@ export class WorldRenderer {
     return { texture, ground: this.scene.add.image(0, 0, key).setOrigin(0).setScale(2).setDepth(-2000), decorations: [] };
   }
   private paint(slot: Slot, chunk: Chunk): void {
+    slot.props=undefined;if(this.world?.theme==='baratie'){this.paintFleet(slot,chunk);return;}
     const naval = this.world instanceof ArenaWorld && this.world.theme === 'shells';
     const ctx = slot.texture.context;
     ctx.imageSmoothingEnabled = false;
@@ -165,6 +169,31 @@ export class WorldRenderer {
     }
     for (let i = chunk.obstacles.length; i < slot.decorations.length; i++) slot.decorations[i].setVisible(false);
   }
+  private fleetFloor(tx:number,ty:number):boolean{
+    if(this.world instanceof ArenaWorld){const a=this.world.arena,inset=a.edgeInset??32;return tx*32>=inset&&ty*32>=inset&&tx*32<a.width-inset&&ty*32<a.height-inset;}
+    return deckAt(this.world!.seed,tx,ty);
+  }
+  private paintFleet(slot:Slot,chunk:Chunk):void{
+    const ctx=slot.texture.context;ctx.imageSmoothingEnabled=false;ctx.fillStyle='#126f9c';ctx.fillRect(0,0,256,256);
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+      const tx=chunk.cx*16+x,ty=chunk.cy*16+y,h=hash(this.world!.seed,tx,ty);
+      if(!this.fleetFloor(tx,ty)){ctx.fillStyle=h%2?'#147ba4':'#12749d';ctx.fillRect(x*16,y*16,16,16);continue;}
+      ctx.fillStyle=['#ad7948','#b7834f','#a87543'][h%3];ctx.fillRect(x*16,y*16,16,16);
+      for(let j=0;j<4;j++){ctx.fillStyle='#69462e';ctx.fillRect(x*16,y*16+j*4,16,1);ctx.fillStyle='#d2a46c';ctx.fillRect(x*16,y*16+j*4+1,16,1);ctx.fillStyle='#775336';ctx.fillRect(x*16+(h+j*5)%15,y*16+j*4,1,4);}
+      for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1]])if(!this.fleetFloor(tx+dx,ty+dy)){
+        ctx.fillStyle='#4b3025';ctx.fillRect(x*16+(dx===1?13:0),y*16+(dy===1?13:0),dx?3:16,dy?3:16);
+        ctx.fillStyle='#e5bd7c';ctx.fillRect(x*16+(dx===1?14:0),y*16+(dy===1?14:0),dx?1:16,dy?1:16);
+        ctx.fillStyle='#5e4027';ctx.fillRect(x*16+(dx===1?11:0),y*16+(dy===1?11:0),4,4);
+      }
+    }
+    slot.texture.refresh();slot.chunk=chunk;slot.props=chunk.obstacles.filter(o=>o.kind!=='water'&&o.kind!=='wall');
+    for(const [i,o]of slot.props.entries()){
+      const sprite=slot.decorations[i]??(slot.decorations[i]=this.scene.add.image(0,0,'coastal-crates').setOrigin(.5,1));
+      const width=o.art==='baratie-mast'?160:o.art==='krieg-flag'?Math.max(56,o.width):o.width;
+      sprite.setTexture(o.art??'coastal-crates').setDisplaySize(width,width*sprite.height/sprite.width).setVisible(true);
+    }
+    for(let i=slot.props.length;i<slot.decorations.length;i++)slot.decorations[i].setVisible(false);
+  }
   private paintTownGround(ctx: CanvasRenderingContext2D, chunk: Chunk, ground: Record<string, CanvasPattern>, orange: boolean): void {
     // Half-tile material boundaries are sampled in world space, never per-chunk rectangles.
     for (let y=0;y<32;y++) for(let x=0;x<32;x++) {
@@ -179,6 +208,13 @@ export class WorldRenderer {
     }
   }
   update(world: ProceduralWorld, view: View, origin: Vector): void {
+    this.waves.clear().setVisible(world.theme==='baratie');
+    if(world.theme==='baratie'){
+      const phase=this.scene.time.now/900;this.waves.lineStyle(1,0x9fe3e3,.45);
+      for(let y=Math.floor((view.centerY-view.height/2)/96)*96;y<view.centerY+view.height/2;y+=96)for(let x=Math.floor((view.centerX-view.width/2)/96)*96;x<view.centerX+view.width/2;x+=96){
+        if(world.canOccupy(x,y,1))continue;const sx=x-origin.x+Math.sin(phase+y)*5,sy=y-origin.y;this.waves.lineBetween(sx,sy,sx+16,sy);this.waves.lineBetween(sx+16,sy,sx+21,sy-2);
+      }
+    }
     if (this.world !== world) { for (const slot of this.active.values()) this.release(slot); this.active.clear(); this.world = world; }
     const minX = Math.floor((view.centerX - view.width / 2) / CHUNK_SIZE) - 1;
     const maxX = Math.floor((view.centerX + view.width / 2) / CHUNK_SIZE) + 1;
@@ -193,7 +229,7 @@ export class WorldRenderer {
       let slot = this.active.get(key);
       if (!slot) { slot = this.free.pop() ?? this.createSlot(); this.paint(slot, world.getChunk(cx, cy)); this.active.set(key, slot); }
       slot.ground.setVisible(true).setPosition(cx * CHUNK_SIZE - origin.x, cy * CHUNK_SIZE - origin.y);
-      const obstacles = slot.chunk!.obstacles;
+      const obstacles = slot.props??slot.chunk!.obstacles;
       for (let i = 0; i < obstacles.length; i++) {
         const obstacle = obstacles[i], y = obstacle.y + obstacle.height - origin.y;
         slot.decorations[i].setPosition(obstacle.x + obstacle.width / 2 - origin.x, y).setDepth(y + 1000);

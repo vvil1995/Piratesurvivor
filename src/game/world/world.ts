@@ -1,3 +1,4 @@
+import { generateBaratieChunk } from './baratie.ts';
 import type { Vector } from '../core/types.ts';
 import { cellKey, CHUNK_SIZE, generateChunk, generateOrangeChunk, generateSyrupChunk, TILE, type Chunk } from './generator.ts';
 
@@ -11,14 +12,14 @@ export class ProceduralWorld implements CollisionWorld {
   private chunks = new Map<string, Chunk>();
   readonly maxChunks = 128;
   readonly seed: number;
-  readonly theme: 'shells' | 'orange' | 'syrup';
-  constructor(seed: number, theme: 'shells' | 'orange' | 'syrup' = 'shells') { this.seed = seed; this.theme = theme; }
+  readonly theme: 'shells' | 'orange' | 'syrup' | 'baratie';
+  constructor(seed: number, theme: 'shells' | 'orange' | 'syrup' | 'baratie' = 'shells') { this.seed = seed; this.theme = theme; }
   get chunkCount(): number { return this.chunks.size; }
   getChunk(cx: number, cy: number): Chunk {
     const key = cellKey(cx, cy);
     let chunk = this.chunks.get(key);
     if (!chunk) {
-      chunk = this.theme === 'orange' ? generateOrangeChunk(this.seed, cx, cy) : this.theme === 'syrup' ? generateSyrupChunk(this.seed,cx,cy) : generateChunk(this.seed, cx, cy);
+      chunk = this.theme === 'baratie' ? generateBaratieChunk(this.seed,cx,cy) : this.theme === 'orange' ? generateOrangeChunk(this.seed, cx, cy) : this.theme === 'syrup' ? generateSyrupChunk(this.seed,cx,cy) : generateChunk(this.seed, cx, cy);
       if (this.chunks.size >= this.maxChunks) this.chunks.delete(this.chunks.keys().next().value!);
       this.chunks.set(key, chunk);
     }

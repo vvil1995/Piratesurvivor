@@ -476,3 +476,22 @@ Comprobaciones realizadas:
 - PNG decorativos verificados con transparencia real(alpha0–255); fuentes SVG originales conservadas.
 
 Límites: no se han medido FPS en teléfono físico, Safari ni realizado una campaña manual completa de los cinco personajes. Las animaciones de Kuro reutilizan sus poses y transformaciones funcionales; no se entregan nueve secuencias artísticas nuevas. Se requiere equilibrado mediante partidas reales. Baratie sigue pendiente intencionadamente.
+
+## 2026-10-31 · Baratie y Don Krieg
+
+Implementación sobre los sistemas de mundos/bosses existentes. Nuevo bioma marítimo determinista, tres piratas diferenciados, Don Krieg con seis patrones, tres fases, armadura independiente y escudo temporal. Se conserva el HUD minimalista. Kuro→Baratie es un viaje voluntario; Krieg→Arlong muestra el contenido pendiente sin crear un mundo vacío. No se cambian datos de Morgan, Buggy o Kuro ni mapas de los mundos anteriores. La ampliación de `shells-town.ts` solo incorpora el literal del nuevo bioma al tipo compartido.
+
+Comprobaciones realizadas:
+- `npm run check` y `npm test`:189/189. `tests/baratie.test.ts` añade17 casos con243 chunks deterministas de tres semillas, continuidad de puertos, conectividad de todas las superficies, navegación en ocho semillas y48 simulaciones reales de steering con los tres enemigos a30/60Hz. Esto valida simulación, no mide FPS de un teléfono.
+- Se detectó y corrigió una oscilación al centrar enemigos en las esquinas de los puentes. El centrado se activa solo en Baratie. Los enemigos blindados comprueban su radio real al aparecer; no se permite caminar sobre agua.
+- Cofres candidatos3/24, posiciones libres y alcanzables, persistencia del registro tras descarga. Spawns válidos, tipos por minuto, melee preparado, ráfagas y recarga; guardia frontal del blindado fijada durante su preparación, permitiendo flanquearlo.
+- Los cinco personajes conservan estado completo al viajar voluntariamente desde Kuro y entrar en la arena de Krieg: HP, XP, nivel, moneda, habilidades evolucionadas, cooldowns, combinaciones, buffs, objeto y fruta. La derrota conserva mundo/build/cofres y devuelve25HP. Se verifican carta desde05:00, victoria, unión y salida pendiente a Arlong.
+- Scheduler real de Krieg: seis patrones/tres fases, cancelación de hazards y proyectiles. Siete disparos fijos; bombardeo5/7; lanza sin daño duplicado. Armadura3000 independiente, rotura permanente por intento, escudo3s y reducción combinada máxima70%. MH5 con expansión compartida entre render y colisión, daño cada0,8s, salida navegable en más de60 posiciones de prueba y recuperación1,5s sin escalado. Avisos de fase3 al70%, mínimo global0,35s/MH51,2s.
+- Chromium:12/12 pruebas de integración/regresión en escritorio y móvil horizontal emulado, incluyendo Morgan, Buggy, pueblos anteriores, Syrup/Kuro, HUD y Baratie/Krieg. Repetición final de Baratie:2/2 tras colocar el boss lateralmente para hacerlo visible al entrar en móvil y capturar el borde con mar/restaurante. Se inspeccionaron imágenes reales de exploración, enemigos, arena, gas y degradación de armadura.
+- `PAGES_BASE_PATH=/Piratesurvivor/ npm run build`: correcto, HTML autónomo10,34MiB. Permanece el aviso previo de tamaño del bundle.
+- `scripts/check-pages.mjs`: producción bajo `/Piratesurvivor/`, PC/móvil emulado, cinco personajes, entrenamiento y arranque/pausa, sin404, errores JS ni hookQA.
+- Nuevos assets originales y su procedencia/recortes constan en `asset-register.md` y `motion/baratie-manifest.json`. No se añaden dependencias ni servicios externos.
+
+Archivos principales: `content/{worlds/baratie,bosses/krieg,catalog,types}.ts`; `game/world/{baratie,world,arena}.ts`; `game/bosses/krieg.ts`; `game/core/{run,types}.ts`; `game/navigation/flow-field.ts`; `game/systems/{hits,spawner}.ts`; `game/scenes/{battle,boss-renderer,island-art,world-renderer}.ts`; textos de viaje/recompensa en `ui/{view,combinations}.ts`; ocho PNG, manifiesto y pruebas de Baratie/regresión. Detalle de cifras y reglas en `BARATIE.md`.
+
+Pendiente de validación manual: campaña completa sin fixtures con los cinco personajes, equilibrio económico/de combate, controles y FPS en teléfonos físicos/Safari. Los sprites, animaciones y acabados de cubierta son provisionales; no se presentan como arte definitivo ni se afirma haber completado una sesión manual de toda la campaña.

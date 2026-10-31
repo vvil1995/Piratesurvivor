@@ -16,7 +16,8 @@ export class FlowField {
   readonly world: CollisionWorld;
   rebuilds = 0;
   private clearance: number;
-  constructor(world: CollisionWorld, clearance = 14) { this.world = world; this.clearance = clearance; this.distances.fill(-1); }
+  private centerWaypoints:boolean;
+  constructor(world: CollisionWorld, clearance = 14, centerWaypoints=false) { this.world = world; this.clearance = clearance;this.centerWaypoints=centerWaypoints; this.distances.fill(-1); }
   update(target: Vector, dt: number): void {
     this.elapsed += dt;
     const tx = Math.floor(target.x / TILE), ty = Math.floor(target.y / TILE);
@@ -44,9 +45,9 @@ export class FlowField {
   }
   reachable(point: Vector): boolean { const at = this.index(point); return at >= 0 && this.distances[at] >= 0; }
   direction(from: Vector, target: Vector, radius: number): Vector {
-    let dx = target.x - from.x, dy = target.y - from.y;
+    let dx = target.x - from.x, dy = target.y - from.y;let waypoint=false;
     if (!this.world.segmentClear(from.x, from.y, target.x, target.y, radius)) {
-      const at = this.index(from);
+      waypoint=true;const at = this.index(from);
       if (at < 0 || this.distances[at] < 0) return { x: 0, y: 0 };
       let best = at, distance = this.distances[at];
       const x = at % SIDE, y = Math.floor(at / SIDE);
@@ -63,6 +64,7 @@ export class FlowField {
       dx = bx - from.x; dy = by - from.y;
     }
     const d = Math.hypot(dx, dy);
+    if(this.centerWaypoints&&waypoint)return {x:dx/Math.max(4,d),y:dy/Math.max(4,d)};
     return d < 0.5 ? { x: 0, y: 0 } : { x: dx / d, y: dy / d };
   }
 }

@@ -1,3 +1,6 @@
+import { BARATIE } from '../../content/worlds/baratie.ts';
+import { KriegEncounter } from '../bosses/krieg.ts';
+import { KRIEG,KRIEG_RULES } from '../../content/bosses/krieg.ts';
 import { KuroEncounter } from '../bosses/kuro.ts';
 import { KURO } from '../../content/bosses/kuro.ts';
 import { tickEnemyMelee } from '../systems/enemy-melee.ts';
@@ -15,7 +18,7 @@ import { ORANGE_TOWN } from '../../content/worlds/orange-town.ts';
 import { ITEMS } from '../../content/items.ts';
 import { replaceItem } from '../systems/items.ts';
 import { MorganEncounter } from '../bosses/morgan.ts';
-import { ArenaWorld, MORGAN_ARENA, BUGGY_ARENA, KURO_ARENA } from '../world/arena.ts';
+import { ArenaWorld, MORGAN_ARENA, BUGGY_ARENA, KURO_ARENA, KRIEG_ARENA } from '../world/arena.ts';
 import { MORGAN } from '../../content/bosses/morgan.ts';
 import { ENEMIES } from '../../content/catalog.ts';
 import { FRUITS } from '../../content/fruits.ts';
@@ -51,20 +54,22 @@ export class Run {
   readonly route = new NavigationRoute();
   readonly buggyRoute = new NavigationRoute();
   readonly kuroRoute = new NavigationRoute();
-  exitSignal?:Vector; kuroDefeated=false; baratieUnlocked=false;
+  readonly kriegRoute = new NavigationRoute();
+  exitSignal?:Vector; kuroDefeated=false; baratieUnlocked=false; kriegDefeated=false; arlongUnlocked=false;
   get navigationSignal():Vector|undefined{return this.exitSignal??(!this.inArena?this.navigationRoute.signal:undefined);}
-  get navigationTarget():string{return this.exitSignal?this.kuroDefeated?"BARATIE · PRÓXIMAMENTE":"SYRUP VILLAGE":this.zone==='syrup-village'?'Kuro':this.zone==='orange-town'?'Buggy':'Morgan';}
-  get navigationRoute(): NavigationRoute { return this.zone==='syrup-village'?this.kuroRoute:this.zone === 'orange-town' ? this.buggyRoute : this.route; }
+  get navigationTarget():string{return this.exitSignal?this.kriegDefeated?"ARLONG PARK · PRÓXIMAMENTE":this.kuroDefeated?"BARATIE":"SYRUP VILLAGE":this.zone==='baratie'?'Don Krieg':this.zone==='syrup-village'?'Kuro':this.zone==='orange-town'?'Buggy':'Morgan';}
+  get navigationRoute(): NavigationRoute { return this.zone==='baratie'?this.kriegRoute:this.zone==='syrup-village'?this.kuroRoute:this.zone === 'orange-town' ? this.buggyRoute : this.route; }
   get navigationSeconds(): number { return this.zone === 'shells-town' ? this.time : this.zoneTime; }
-  get inArena(): boolean { return this.zone === 'morgan-arena' || this.zone === 'buggy-arena' || this.zone === 'kuro-arena'; }
+  get inArena(): boolean { return this.zone === 'morgan-arena' || this.zone === 'buggy-arena' || this.zone === 'kuro-arena' || this.zone==='krieg-arena'; }
   get arena() { return this.world instanceof ArenaWorld ? this.world.arena : MORGAN_ARENA; }
-  voyage?: { destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return'; elapsed: number };
+  voyage?: { destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return' | 'baratie' | 'krieg' | 'baratie-return'; elapsed: number };
   private zoneTime = 0;
   world: ProceduralWorld;
   private shellsWorld: ProceduralWorld;
   private orangeWorld?: ProceduralWorld;
   private syrupWorld?:ProceduralWorld;
-  zone: 'shells-town' | 'morgan-arena' | 'orange-town' | 'buggy-arena' | 'syrup-village' | 'kuro-arena' = 'shells-town';
+  private baratieWorld?:ProceduralWorld;
+  zone: 'shells-town' | 'morgan-arena' | 'orange-town' | 'buggy-arena' | 'syrup-village' | 'kuro-arena' | 'baratie' | 'krieg-arena' = 'shells-town';
   encounter?: PatternEncounter;
   morganDefeated = false; buggyDefeated = false;
   readonly enemies: Pool<Enemy>;
@@ -135,7 +140,7 @@ export class Run {
   }
   private fieldFor(actor: Player): FlowField {
     let field = this.fields.get(actor.id);
-    if (!field) { field = new FlowField(this.world); this.fields.set(actor.id, field); }
+    if (!field) { field = new FlowField(this.world,14,this.world.theme==='baratie'); this.fields.set(actor.id, field); }
     return field;
   }
   private clearBattlefield(): void {
@@ -175,9 +180,21 @@ export class Run {
     if(!this.buggyDefeated||this.zone!=='buggy-arena'||this.encounter?.state!=='dead'||this.status!=='playing')return false;
     this.startVoyage('syrup');return true;
   }
+  beginKrieg():boolean{
+    if(!['playing','paused','voyage'].includes(this.status)||this.zone!=='baratie'||!this.kuroDefeated||this.kriegDefeated)return false;
+    this.kriegRoute.consume();this.clearBattlefield();this.lootNoticeFor=0;this.baratieWorld=this.world;
+    this.world=new ArenaWorld(this.world.seed,KRIEG_ARENA,'baratie');this.zone='krieg-arena';
+    this.encounter=new KriegEncounter({fire:(from,angle,damage)=>spawnProjectile(this,from.x,from.y,from.x+Math.cos(angle)*100,from.y+Math.sin(angle)*100,damage,KRIEG_RULES.bulletSpeed,'',true,1,undefined,KRIEG_RULES.bulletRange/KRIEG_RULES.bulletSpeed),clear:()=>this.projectiles.clear()});
+    Object.assign(this.encounter.body,KRIEG_ARENA.bossSpawn);Object.assign(this.player,KRIEG_ARENA.playerSpawn);
+    this.bossField=new FlowField(this.world,KRIEG.radius,true);this.status='playing';this.voyage=undefined;this.fieldFor(this.player).update(this.player,1);return true;
+  }
   sailToBaratie():boolean{
-    if(!this.kuroDefeated)return false;
-    this.lootNotice='Baratie desbloqueado · el mundo4 todavía no está disponible. Has completado el mundo3 de esta beta. Puedes revisar tu build o salir desde pausa.';this.lootNoticeFor=6;return false;
+    if(!this.kuroDefeated||this.zone!=='kuro-arena'||this.encounter?.state!=='dead'||this.status!=='playing')return false;
+    this.startVoyage('baratie');return true;
+  }
+  sailToArlong():boolean{
+    if(!this.kriegDefeated||this.zone!=='krieg-arena')return false;
+    this.lootNotice='Arlong Park desbloqueado · el mundo5 todavía no está disponible. Has completado Baratie.';this.lootNoticeFor=6;return false;
   }
   private placeExit():void{
     if(this.exitSignal)return;
@@ -195,13 +212,14 @@ export class Run {
     this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x42756767, 'orange'); this.orangeWorld = this.world;
     Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
   }
-  private startVoyage(destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return'): void {
+  private startVoyage(destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return' | 'baratie' | 'krieg' | 'baratie-return'): void {
     this.encounter?.cancel(); this.exitSignal=undefined;this.clearBattlefield();
     this.voyage = { destination, elapsed: 0 }; this.status = 'voyage';
   }
   private finishVoyage(): void {
     const destination = this.voyage!.destination;
     if (destination === 'morgan') { this.beginMorgan(); return; }
+    if(destination==='krieg'){this.beginKrieg();return;}
     if (destination === 'kuro') {this.beginKuro();return;}
     if (destination === 'buggy') { this.beginBuggy(); return; }
     if (destination === 'syrup') {
@@ -209,6 +227,17 @@ export class Run {
       this.world = this.syrupWorld??new ProceduralWorld(this.shellsWorld.seed ^ SYRUP_VILLAGE.seedSalt, 'syrup');this.syrupWorld=this.world; this.zoneTime = 0; this.spawnTimer = 0; this.voyage = undefined;
       Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1);
       this.lootNotice = 'Syrup Village · busca la ruta a Kuro después de05:00 en esta isla. Conservas tu vida y tu build.'; this.lootNoticeFor = 8; return;
+    }
+    if(destination==='baratie'){
+      this.clearBattlefield();this.encounter=undefined;this.zone='baratie';this.definition=BARATIE;
+      this.world=this.baratieWorld??new ProceduralWorld(this.shellsWorld.seed^BARATIE.seedSalt,'baratie');this.baratieWorld=this.world;
+      this.zoneTime=0;this.spawnTimer=1;this.voyage=undefined;Object.assign(this.player,{x:256,y:256});this.status='playing';this.fieldFor(this.player).update(this.player,1);
+      this.lootNotice='Baratie · cubiertas y pasarelas. Busca la ruta a Don Krieg después de05:00 en esta isla.';this.lootNoticeFor=8;return;
+    }
+    if(destination==='baratie-return'){
+      this.clearBattlefield();this.encounter=undefined;this.world=this.baratieWorld!;this.definition=BARATIE;this.zone='baratie';
+      Object.assign(this.player,{x:256,y:256,hp:MORGAN_ROUTE.recoveryHp,hurtTimer:MORGAN_ROUTE.recoveryGrace});
+      this.spawnTimer=1;this.kriegRoute.retry(this.zoneTime,this.random);this.voyage=undefined;this.status='playing';this.fieldFor(this.player).update(this.player,1);return;
     }
     if(destination==='syrup-return'){
       this.clearBattlefield();this.encounter=undefined;this.world=this.syrupWorld!;this.definition=SYRUP_VILLAGE;this.zone='syrup-village';
@@ -232,7 +261,7 @@ export class Run {
   }
   private defeatBoss(): void {
     if (this.encounter?.state === 'dead') return;
-    if(this.zone==='kuro-arena'){this.kuroDefeated=true;this.baratieUnlocked=true;}else if (this.zone === 'buggy-arena') this.buggyDefeated = true; else this.morganDefeated = true; this.encounter!.defeated(); this.enemies.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
+    if(this.zone==='krieg-arena'){this.kriegDefeated=true;this.arlongUnlocked=true;}else if(this.zone==='kuro-arena'){this.kuroDefeated=true;this.baratieUnlocked=true;}else if (this.zone === 'buggy-arena') this.buggyDefeated = true; else this.morganDefeated = true; this.encounter!.defeated(); this.enemies.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
     this.grantCombinationReward();
   }
   private callReinforcements(): void {
@@ -344,7 +373,7 @@ export class Run {
   }
   readonly visualDeaths: { x:number;y:number;visual:string }[] = [];
   private dropXp(enemy: Enemy, ownerId: string, allowFruit = true): void {
-    if ((enemy.visual?.startsWith('buggy-') || enemy.visual?.startsWith('marine-') || enemy.visual?.startsWith('blackcat-')) && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
+    if ((enemy.visual?.startsWith('buggy-') || enemy.visual?.startsWith('marine-') || enemy.visual?.startsWith('blackcat-') || enemy.visual?.startsWith('krieg-')) && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
     if (enemy.kind === 'boss') { this.defeatBoss(); return; }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
     const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;
@@ -389,6 +418,7 @@ export class Run {
       this.startVoyage('morgan'); return;
     }
     if (this.zone === 'orange-town' && !this.buggyDefeated && this.buggyRoute.tick(this.zoneTime, this.player, this.world, this.random, p => this.fieldFor(this.player).reachable(p))) { this.startVoyage('buggy'); return; }
+    if(this.zone==='baratie'&&!this.kriegDefeated&&this.kriegRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('krieg');return;}
     if(this.zone==='syrup-village'&&!this.kuroDefeated&&this.kuroRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('kuro');return;}
     const threatTime = this.zone === 'shells-town' ? this.time : this.zoneTime;
     this.spawnTimer -= dt;
@@ -410,11 +440,11 @@ export class Run {
       this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
       if (this.encounter.elapsed >= 1.3) {
         if (this.zone === 'morgan-arena') { this.openCombinations(); this.bossCombinationReward = true; return; }
-        if(this.zone==='buggy-arena'||this.zone==='kuro-arena'){
+        if(this.zone==='buggy-arena'||this.zone==='kuro-arena'||this.zone==='krieg-arena'){
           const first=!this.exitSignal;this.placeExit();
-          if(first){this.lootNotice=this.zone==='buggy-arena'?'Buggy derrotado · camina hasta el Log Pose para navegar a Syrup.':'Kuro derrotado · unión ganada. Baratie queda desbloqueado para una próxima actualización.';this.lootNoticeFor=8;
-            if(this.zone==='kuro-arena'){this.openCombinations();this.bossCombinationReward=true;return;}}
-          if(this.exitSignal&&Math.hypot(this.player.x-this.exitSignal.x,this.player.y-this.exitSignal.y)<=MORGAN_ROUTE.radius){if(this.zone==='buggy-arena')this.sailToSyrup();else this.sailToBaratie();}
+          if(first){this.lootNotice=this.zone==='buggy-arena'?'Buggy derrotado · camina hasta el Log Pose para navegar a Syrup.':this.zone==='krieg-arena'?'Don Krieg derrotado · unión ganada. Arlong Park estará disponible próximamente.':'Kuro derrotado · unión ganada. Camina hasta el Log Pose para navegar a Baratie.';this.lootNoticeFor=8;
+            if(this.zone==='kuro-arena'||this.zone==='krieg-arena'){this.openCombinations();this.bossCombinationReward=true;return;}}
+          if(this.exitSignal&&Math.hypot(this.player.x-this.exitSignal.x,this.player.y-this.exitSignal.y)<=MORGAN_ROUTE.radius){if(this.zone==='buggy-arena')this.sailToSyrup();else if(this.zone==='kuro-arena')this.sailToBaratie();else this.sailToArlong();}
           return;
         }
         return; }
@@ -425,6 +455,7 @@ export class Run {
       let target = living[0], nearest = Infinity;
       for (const actor of living) { const d = Math.hypot(actor.x - enemy.x, actor.y - enemy.y); if (d < nearest) { nearest = d; target = actor; } }
       if (!this.inArena && nearest > 1400) { enemy.active = false; continue; }
+      if(enemy.defense&&!(enemy.meleeWindup!>0)&&!(enemy.meleeHits!>0)&&!(enemy.shotRecovery!>0))enemy.defense.angle=Math.atan2(target.y-enemy.y,target.x-enemy.x);
       tickStatus(enemy, dt);
       enemy.flash = Math.max(0, enemy.flash - dt);
       enemy.steeringTime = (enemy.steeringTime ?? 0) - dt;
@@ -533,7 +564,7 @@ export class Run {
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }
   }
   private defeat(): void {
-    if (this.inArena && this.encounter?.state !== 'dead') { this.startVoyage(this.zone==='kuro-arena'?'syrup-return':this.zone === 'buggy-arena' ? 'orange-return' : 'shells'); return; }
+    if (this.inArena && this.encounter?.state !== 'dead') { this.startVoyage(this.zone==='krieg-arena'?'baratie-return':this.zone==='kuro-arena'?'syrup-return':this.zone === 'buggy-arena' ? 'orange-return' : 'shells'); return; }
     this.status = 'defeat'; this.encounter?.cancel(); this.strikes.length = 0;
     for (const p of this.projectiles.items) { p.active = false; p.hit.clear(); }
     for (const a of this.areas.items) a.active = false;

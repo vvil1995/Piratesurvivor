@@ -1,3 +1,11 @@
+import krieg_saber from '../../assets/motion/krieg-saber.png';
+import krieg_gunner from '../../assets/motion/krieg-gunner.png';
+import krieg_armored from '../../assets/motion/krieg-armored.png';
+import don_krieg from '../../assets/motion/don-krieg.png';
+import baratie_restaurant from '../../assets/worlds/baratie-restaurant.png';
+import baratie_mast from '../../assets/worlds/baratie-mast.png';
+import krieg_cannon from '../../assets/worlds/krieg-cannon.png';
+import krieg_flag from '../../assets/worlds/krieg-flag.png';
 import blackcatBanner from '../../assets/worlds/blackcat-banner.png';
 import kayaStatue from '../../assets/worlds/kaya-cat-statue.png';
 import syrup_house from '../../assets/worlds/syrup-house.png';
@@ -69,8 +77,8 @@ import compass from '../../assets/worlds/navigation-chart.png';
 import { createPackedDirectionalArt } from './directional-art.ts';
 
 const marineActors = { 'marine-sword': marineSword, 'marine-rifle': marineRifle, 'marine-veteran': marineVeteran };
-const actors = { 'blackcat-pirate':blackcat_pirate,'blackcat-claw':blackcat_claw,'blackcat-hypnotist':blackcat_hypnotist,kuro, 'buggy-pirate': pirate, 'buggy-gunner': gunner, 'buggy-bruiser': bruiser };
-const props = { 'blackcat-banner':blackcatBanner,'kaya-cat-statue':kayaStatue, 'syrup-house':syrup_house,'syrup-mansion':syrup_mansion,'syrup-cart':syrup_cart,'syrup-cliff':syrup_cliff, 'buggy-flag':buggyFlag, 'buggy-ground': buggyGround, 'buggy-motion-sheet': buggyMotion, 'buggy-head':buggyHead, 'buggy-hand-left':buggyLeft, 'buggy-hand-right':buggyRight, 'buggy-knife':buggyKnife, 'buggy-bomb':buggyBomb, 'morgan-motion-sheet': morganMotion, 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
+const actors = { 'krieg-saber':krieg_saber,'krieg-gunner':krieg_gunner,'krieg-armored':krieg_armored,'don-krieg':don_krieg, 'blackcat-pirate':blackcat_pirate,'blackcat-claw':blackcat_claw,'blackcat-hypnotist':blackcat_hypnotist,kuro, 'buggy-pirate': pirate, 'buggy-gunner': gunner, 'buggy-bruiser': bruiser };
+const props = { 'baratie-restaurant':baratie_restaurant,'baratie-mast':baratie_mast,'krieg-cannon':krieg_cannon,'krieg-flag':krieg_flag, 'blackcat-banner':blackcatBanner,'kaya-cat-statue':kayaStatue, 'syrup-house':syrup_house,'syrup-mansion':syrup_mansion,'syrup-cart':syrup_cart,'syrup-cliff':syrup_cliff, 'buggy-flag':buggyFlag, 'buggy-ground': buggyGround, 'buggy-motion-sheet': buggyMotion, 'buggy-head':buggyHead, 'buggy-hand-left':buggyLeft, 'buggy-hand-right':buggyRight, 'buggy-knife':buggyKnife, 'buggy-bomb':buggyBomb, 'morgan-motion-sheet': morganMotion, 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
   'ability-elastic-punch': pistolArt, 'ability-gatling': gatlingArt, 'ability-bazooka': bazookaArt, 'ability-whip': whipArt, 'ability-balloon': balloonArt, 'ability-axe': axeArt, buggy, 'buggy-knives': knives, morgan, 'morgan-axe': axe, 'orange-house-0': house, 'orange-house-1': shellsHouse,
   'orange-tent': tent, 'orange-stall': stall, 'orange-tree': tree, 'orange-ruin': ruin,
   'orange-flags': flags, 'navigation-chart': compass };

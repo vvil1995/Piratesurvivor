@@ -209,3 +209,9 @@ Extracción por componentes alpha para no mezclar figuras; escala común por act
 - `src/assets/worlds/blackcat-banner.svg` y `kaya-cat-statue.svg`: dibujos vectoriales originales creados para este proyecto, sin recursos externos. Formas alineadas a píxeles y transparencia.
 - PNG homónimos (48×96 y64×96): exportación a escala1 mediante Chromium, sin interpolar ni modificar los sprites existentes. Solo se usan en la arena de Kuro.
 - Se reutiliza íntegro `motion/kuro.png`; las poses de preparación, golpe, desplazamiento, daño, agotamiento y caída se distinguen mediante el renderizador existente. No son nueve secuencias dibujadas nuevas.
+
+## Baratie · cuatro actores y cuatro props originales
+- Fuente de actores generada para este proyecto: `exec-30c91eda-878e-4b5a-a297-a3b2682a1aeb.png`(4×4 poses). Fuente de props: `exec-0cb8ca25-3f0a-4a88-9153-8b85613276a6.png`(2×2). No se recortan ni copian los fondos de las referencias del usuario.
+- `motion/{krieg-saber,krieg-gunner,krieg-armored,don-krieg}.png`: atlas1024×640, celdas128px, pies120px, extracción por componentes conectados para evitar fragmentos vecinos, escala común por actor, nearest-neighbor y transparencia real. Perfiles compartidos entre direcciones sin reflejar las armas; ciclo provisional con pasos alternos.
+- `worlds/{baratie-restaurant,baratie-mast,krieg-cannon,krieg-flag}.png`: módulos independientes con transparencia, reducidos a384/128/96/64px de ancho, sin suavizado.
+- `motion/baratie-manifest.json` conserva cajas de origen, tamaños y SHA256. Peso conjunto inferior a150KiB; no se sustituyen assets anteriores.
