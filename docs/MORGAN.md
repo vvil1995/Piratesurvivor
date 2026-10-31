@@ -6,7 +6,7 @@ Desde05:00 de partida puede aparecer una carta náutica sobre suelo alcanzable e
 
 - `content/bosses/morgan.ts`: HP, velocidades, secuencias, umbrales, dimensiones, daños, avisos, recuperaciones y refuerzos.
 - `game/bosses/telegraphs.ts`: formas genéricas y colisión geométrica, preparación/aviso final/impacto, sin Phaser.
-- `game/bosses/morgan.ts`: controlador específico, una acción a la vez y tiempos de simulación; sin timers DOM.
+- `game/bosses/morgan.ts`: envoltorio del perfil original de Morgan. Desde0.14, `pattern-encounter.ts` comparte secuenciación, colisión y tiempos de simulación con Buggy; sin timers DOM.
 - `game/world/arena.ts`: mundo de colisiones y chunks de piedra, muros y dos coberturas. Usa movimiento/segmentos existentes.
 - `game/scenes/boss-renderer.ts`: formas a partir de la misma zona del motor y representación original provisional del jefe.
 - `content/navigation.ts` y `game/systems/navigation-signal.ts`: ventanas aleatorias, una carta activa, recogida y reaparición; sin timers de navegador.
@@ -26,7 +26,7 @@ Sin curación automática. Muerte de Morgan: cancelar avisos/onda, eliminar refu
 
 Después de1,3s de caída empieza automáticamente la travesía hacia Orange Town. El barco dura3s, pausa combate/reloj/cooldowns y admite pausa/reanudación o interrupción por giro/cambio de aplicación. La transición conserva HP actual, nivel/XP, habilidades/niveles, ranuras, cooldowns, buffs y objetos. Se limpian objetivos y peligros del escenario anterior. Nueva partida reinicia la victoria de campaña.
 
-Orange Town tiene terreno procedural de paleta cálida y tres variantes provisionales de piratas de Buggy: básico, tirador y resistente, con datos de XP y dificultad propios. Su presión por tiempo comienza al llegar. No incluye todavía a Buggy ni se presenta como segunda isla terminada; el resto de East Blue sigue pendiente.
+Orange Town tiene terreno procedural de paleta cálida y tres variantes provisionales de piratas de Buggy: básico, tirador y resistente, con datos de XP y dificultad propios. Su presión por tiempo comienza al llegar. Desde0.14 incluye a Buggy mediante su propia carta y arena; ver BUGGY.md. El resto de East Blue sigue pendiente y Syrup es solo llegada provisional.
 
 Perder contra Morgan no termina la partida: cancela sus peligros, vuelve en barco al mismo Shells Town y deja25HP, con2,5s de gracia y build/berries conservados. El historial de cofres no se reinicia. La siguiente oportunidad se programa45–90s de juego después; otro intento crea un Morgan completo. Morir explorando sí termina la partida. No hay penalización ni recompensa de victoria por perder contra Morgan.
 
