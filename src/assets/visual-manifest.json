@@ -1,0 +1,62 @@
+{
+  "actors/buggy-gunner-atlas.png": {
+    "sha256": "0c805b5e1ce5efce8c6be2129775de9180d66e82a2c3568a314f0e72f9b91eb9",
+    "bytes": 32879
+  },
+  "actors/buggy-bruiser-atlas.png": {
+    "sha256": "67c6102d0e9433e77a2342dfef820f4e6672b5df51a1781f1e88e54f06e33c52",
+    "bytes": 40126
+  },
+  "actors/buggy-pirate-atlas.png": {
+    "sha256": "d608afd353268c7a1cfcf21bca5a711c49313f829768d32b3f0a796e37b4a553",
+    "bytes": 43854
+  },
+  "bosses/buggy.png": {
+    "sha256": "cb7f973f637477beff8991534e59a5fde484c68012d51c0a8868c9538509f791",
+    "bytes": 3058
+  },
+  "bosses/morgan-axe.png": {
+    "sha256": "2d0f4718226b1d41d565ce1d850bed58c5712bbec1d0bf25d4caea4da18ce804",
+    "bytes": 2071
+  },
+  "bosses/morgan.png": {
+    "sha256": "e816030bdb6fd543134991f4b112fa0e94d655d4acb1ec3b695cd86e78238353",
+    "bytes": 4474
+  },
+  "bosses/buggy-knives.png": {
+    "sha256": "85d9b24b90882e34d2113a4fa5ac1883e2029cc99439eb91e13878acd02c72df",
+    "bytes": 1624
+  },
+  "worlds/orange-tent.png": {
+    "sha256": "7549e84fe1f958debb27ead29c41edf0d727cd5eaca69fc874bcc69902fdfb9c",
+    "bytes": 11847
+  },
+  "worlds/orange-tree.png": {
+    "sha256": "ab55ad117405dee7deb7e550b8c6cd20241fe9de399b5d494af1b8c3acc7fd11",
+    "bytes": 7010
+  },
+  "worlds/orange-flags.png": {
+    "sha256": "b027d70355847bc59e5af98480b91fb7f73bd16a4d1b2f7e1c388e045e6328a9",
+    "bytes": 3058
+  },
+  "worlds/orange-house-0.png": {
+    "sha256": "fb545e3732503e37414681fe47144384708068400fc00146d3890d94c0f72578",
+    "bytes": 12878
+  },
+  "worlds/orange-house-1.png": {
+    "sha256": "f047b33ae2f8b5448a95b91723dfa4e6137a0e3958d7261a361c03bd1dc85402",
+    "bytes": 12423
+  },
+  "worlds/orange-stall.png": {
+    "sha256": "e6acee7cb9c76dad3939a0c57d3a5622e4cec14dc753578821949b5c62d6c06b",
+    "bytes": 7228
+  },
+  "worlds/navigation-chart.png": {
+    "sha256": "e1d80bebb394c04dd7b964df85aabaa22c4272e59ea92a8f3995c6d0804d33bf",
+    "bytes": 1997
+  },
+  "worlds/orange-ruin.png": {
+    "sha256": "114185dffb1c9ee2a403364b4e8830f2a6ff4436a90bee4b6a31ef68c6b1e386",
+    "bytes": 11994
+  }
+}

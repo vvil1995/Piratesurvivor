@@ -23,8 +23,8 @@ export const ENEMIES: Record<string, EnemyDefinition> = {
   'blackcat-pirate': { id: 'blackcat-pirate', hp: 105, damage: 25, speed: 90, xp: 18, radius: 13, visual: 'blackcat-pirate' },
   'blackcat-raider': { id: 'blackcat-raider', hp: 80, damage: 21, speed: 115, xp: 20, radius: 13, visual: 'blackcat-pirate' },
   'buggy-pirate': { id: 'buggy-pirate', hp: 65, damage: 17, speed: 78, xp: 10, radius: 13, visual: 'buggy-pirate' },
-  'buggy-gunner': { id: 'buggy-gunner', hp: 52, damage: 16, speed: 70, xp: 12, radius: 13, visual: 'buggy-pirate', ranged: { interval: 2.6, speed: 220, range: 270 } },
-  'buggy-bruiser': { id: 'buggy-bruiser', hp: 110, damage: 24, speed: 59, xp: 16, radius: 13, visual: 'buggy-pirate' },
+  'buggy-gunner': { id: 'buggy-gunner', hp: 52, damage: 16, speed: 70, xp: 12, radius: 13, visual: 'buggy-gunner', ranged: { interval: 2.6, speed: 220, range: 270 } },
+  'buggy-bruiser': { id: 'buggy-bruiser', hp: 110, damage: 24, speed: 59, xp: 16, radius: 13, visual: 'buggy-bruiser' },
   'marine-rifle': { id: 'marine-rifle', hp: 32, damage: 10, speed: 66, xp: 7, radius: 13, visual: 'marine', ranged: { interval: 2.4, speed: 200, range: 250 } },
   marine: { id: 'marine', hp: 32, damage: 10, speed: 66, xp: 5, radius: 13, visual: 'marine' },
 };

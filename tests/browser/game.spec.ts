@@ -589,7 +589,7 @@ test('Morgan: carta, aviso visible, victoria y viaje automático sin curación',
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.hp)).toBeLessThan(45);
   await expect(page.locator('#challenge-morgan')).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.getRun()!.enemies.count)).toBeGreaterThan(0);
-  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.enemies.items.filter(e => e.active).every(e => e.visual === 'buggy-pirate'))).toBe(true);
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.enemies.items.filter(e => e.active).every(e => e.visual?.startsWith('buggy-')))).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('orange-pirates.png') });
   await page.reload(); await expect(page.locator('#loading')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.morganVictories)).toBe(1);
@@ -824,4 +824,47 @@ test('34 iconos propios distintos, buffs legibles y barril/muslo/cofre reconocib
   await expect(page.locator('#levelup')).toBeVisible();
   expect(await page.locator('.upgrade-card').evaluateAll(cards => cards.every(card => card.querySelector('img')!.getBoundingClientRect().bottom <= card.querySelector('h3')!.getBoundingClientRect().top - 2))).toBe(true);
   await page.screenshot({ path: info.outputPath('buff-cards.png') });
+});
+
+test('Orange Town: cuatro barrios propios, tres piratas distintos y navegación con esfera', async ({ page }, info) => {
+  await page.locator('#start').click(); await isolateWalk(page);
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; r.morganDefeated = true; r.boardToOrangeTown(); r.player.hurtTimer = 1e6;
+    r.update = () => {}; qa.tick(); qa.draw();
+  });
+  await expect(page.locator('#area-label')).toContainText('ORANGE TOWN');
+  const districts = await page.evaluate(() => {
+    const r = window.__OPS_QA__!.getRun()!; return [...new Set(Array.from({length: 30}, (_, i) => r.world.getChunk(i - 15, 0).district))].sort();
+  });
+  expect(districts).toEqual(['circus', 'market', 'occupied', 'orchard']);
+  for (const district of districts) {
+    await page.evaluate(async ({ district }) => {
+      const qa = window.__OPS_QA__!, r = qa.getRun()!;
+      const chunk = Array.from({length: 80}, (_, i) => r.world.getChunk(i - 40, 0)).find(c => c.district === district)!;
+      r.player.x = chunk.cx * 512 + 256; r.player.y = 256;
+      const path = '/src/content/catalog.ts', { ENEMIES } = await import(/* @vite-ignore */ path);
+      r.enemies.clear();
+      ['buggy-pirate','buggy-gunner','buggy-bruiser'].forEach((id, i) => {
+        const enemy = r.enemies.acquire()!;
+        Object.assign(enemy, ENEMIES[id], { id: 810 + i, visual: id, x: r.player.x - 70 + i * 70, y: r.player.y + 60, maxHp: ENEMIES[id].hp, flash: 0, launchTime: 0, statuses: undefined });
+      });
+      qa.draw(); qa.tick();
+    }, { district });
+    await page.screenshot({ path: info.outputPath(`orange-${district}.png`) });
+  }
+  // Los tres atlas son distintos y tienen las16 poses normalizadas, sin descargas externas.
+  const frames = await page.evaluate(async () => {
+    const atlas = ['/src/assets/actors/buggy-pirate-atlas.png', '/src/assets/actors/buggy-gunner-atlas.png', '/src/assets/actors/buggy-bruiser-atlas.png'];
+    return Promise.all(atlas.map(async url => {
+      const image = new Image(); image.src = url; await image.decode();
+      const canvas = document.createElement('canvas'); canvas.width = 768; canvas.height = 192;
+      const ctx = canvas.getContext('2d')!; ctx.drawImage(image, 0, 0);
+      return { size: [image.width, image.height], frames: Array.from({length:16}, (_, i) => {
+        const pixels = ctx.getImageData(i % 8 * 96, Math.floor(i / 8) * 96, 96, 96).data;
+        return pixels.filter((_, j) => j % 4 === 3 && pixels[j] > 128).length;
+      }), pixels: canvas.toDataURL() };
+    }));
+  });
+  expect(new Set(frames.map(a => a.pixels)).size).toBe(3);
+  for (const atlas of frames) { expect(atlas.size).toEqual([768,192]); expect(atlas.frames.every(n => n > 500)).toBe(true); }
 });

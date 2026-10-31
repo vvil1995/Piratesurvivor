@@ -1,3 +1,4 @@
+import { createIslandArt } from './island-art.ts';
 import { createPirateArt } from './pirate-art.ts';
 import Phaser from 'phaser';
 import { createPackedDirectionalArt } from './directional-art.ts';
@@ -33,48 +34,6 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0xb8834b); g.fillRect(7, 23, 37, 3); g.fillStyle(0x724a32); g.fillRect(13, 29, 26, 4);
   g.fillStyle(0x493c32); g.fillRect(24, 1, 3, 24); g.fillStyle(0xece1bf); g.fillTriangle(28, 2, 28, 21, 44, 21);
   g.fillStyle(0xc2a364); g.fillRect(26, 2, 2, 20); g.generateTexture('departure-boat', 52, 40); g.clear();
-  // Carta náutica original: pergamino, ruta punteada y destino naval.
-  g.fillStyle(0x5c4534); g.fillRect(1, 2, 30, 25); g.fillStyle(0xe5cb8d); g.fillRect(3, 3, 26, 22);
-  g.fillStyle(0xf8e1a5); g.fillRect(3, 3, 26, 3); g.fillStyle(0x77a7a1); g.fillRect(6, 9, 8, 5); g.fillRect(18, 17, 8, 5);
-  g.fillStyle(0xb45d49); for (let i = 0; i < 4; i++) g.fillRect(10 + i * 3, 19 - i * 3, 2, 2);
-  g.fillStyle(0x42545c); g.fillRect(21, 6, 3, 7); g.fillRect(18, 9, 9, 2); g.generateTexture('navigation-chart', 32, 30); g.clear();
-  // Buggy provisional original: sombrero naranja, pelo azul, nariz roja y camiseta a rayas.
-  g.fillStyle(0x242637); g.fillRect(17, 55, 12, 19); g.fillRect(35, 55, 12, 19); g.fillRect(13, 71, 18, 6); g.fillRect(34, 71, 18, 6);
-  g.fillStyle(0x426f8c); g.fillRect(18, 56, 9, 14); g.fillRect(37, 56, 9, 14);
-  g.fillStyle(0xab3e43); g.fillRoundedRect(10, 24, 44, 34, 7); g.fillStyle(0xf1d6a5); g.fillRect(19, 28, 26, 28);
-  g.fillStyle(0x97699a); for (let y = 29; y < 53; y += 8) g.fillRect(19, y, 26, 4);
-  g.fillStyle(0xe4af73); g.fillCircle(11, 43, 5); g.fillCircle(54, 43, 5);
-  g.fillStyle(0x276084); g.fillCircle(20, 16, 10); g.fillCircle(44, 16, 10); g.fillStyle(0xf0cc9c); g.fillEllipse(32, 15, 24, 25);
-  g.fillStyle(0xece9d0); g.fillRect(23, 11, 18, 11); g.fillStyle(0x273749); g.fillRect(25, 11, 3, 3); g.fillRect(36, 11, 3, 3);
-  g.fillStyle(0xb43d48); g.fillCircle(32, 16, 4); g.fillRect(27, 22, 11, 2);
-  g.fillStyle(0x8a4a36); g.fillRoundedRect(8, 1, 48, 8, 4); g.fillStyle(0xe79d4a); g.fillRect(15, 0, 34, 6); g.fillStyle(0xf2d791); g.fillRect(17, 4, 30, 2);
-  g.generateTexture('buggy', 64, 80); g.clear();
-  g.fillStyle(0xd7ae7c); g.fillCircle(17, 26, 8); g.fillStyle(0x784a35); g.fillRect(12, 29, 11, 7);
-  for (const x of [5, 16, 27]) { g.fillStyle(0x314956); g.fillRect(x - 1, 7, 6, 18); g.fillStyle(0xd6e9dd); g.fillTriangle(x, 22, x + 4, 22, x + 2, 0); }
-  g.generateTexture('buggy-knives', 36, 42); g.clear();
-  // Pixel art provisional original de Morgan: abrigo, mandíbula metálica y brazo-destral.
-  g.fillStyle(0x18222f); g.fillRect(16, 53, 13, 17); g.fillRect(33, 53, 13, 17);
-  g.fillStyle(0x38455e); g.fillRect(18, 54, 7, 13); g.fillRect(35, 54, 7, 13);
-  g.fillStyle(0x111b28); g.fillRect(13, 67, 16, 6); g.fillRect(33, 67, 17, 6);
-  g.fillStyle(0x697780); g.fillRect(14, 72, 14, 2); g.fillRect(34, 72, 15, 2);
-  g.fillStyle(0x30394c); g.fillRect(11, 23, 42, 35);
-  g.fillStyle(0xe3decb); g.fillRect(9, 24, 12, 33); g.fillRect(43, 24, 12, 33); g.fillRect(12, 21, 40, 5);
-  g.fillStyle(0xaaa998); g.fillRect(10, 29, 4, 27); g.fillRect(48, 29, 5, 27);
-  g.fillStyle(0xf5edd9); g.fillRect(14, 25, 5, 29); g.fillRect(44, 25, 4, 29);
-  g.fillStyle(0x687ba4); g.fillRect(22, 27, 20, 25); g.fillStyle(0x93a0bb); g.fillRect(24, 29, 7, 19);
-  g.fillStyle(0xcfa35d); g.fillRect(9, 23, 13, 5); g.fillRect(42, 23, 13, 5); g.fillRect(21, 50, 22, 5);
-  g.fillStyle(0xedd095); for (let y = 30; y < 48; y += 6) { g.fillRect(31, y, 2, 2); g.fillRect(36, y, 2, 2); }
-  g.fillStyle(0xa66e53); g.fillRect(23, 5, 20, 18); g.fillStyle(0xe4b58a); g.fillRect(25, 6, 15, 12);
-  g.fillStyle(0xf0ca9b); g.fillRect(26, 7, 7, 6); g.fillStyle(0xc1a263); g.fillRect(21, 2, 24, 6);
-  g.fillStyle(0xe6d69d); g.fillRect(23, 1, 20, 4); g.fillStyle(0x283040); g.fillRect(26, 10, 5, 2); g.fillRect(36, 10, 4, 2);
-  g.fillStyle(0x566774); g.fillRect(22, 16, 22, 7); g.fillStyle(0xc0cbd0); g.fillRect(24, 17, 18, 3);
-  g.fillStyle(0xf0e9cd); g.fillRect(25, 18, 3, 1); g.fillRect(37, 18, 3, 1);
-  g.generateTexture('morgan', 64, 80); g.clear();
-  g.fillStyle(0x293c48); g.fillRect(5, 16, 8, 37); g.fillStyle(0x80959e); g.fillRect(6, 17, 5, 35);
-  g.fillStyle(0xc1cdd0); g.fillRect(7, 17, 2, 31); g.fillStyle(0x455d69); g.fillRect(0, 4, 12, 23);
-  g.fillStyle(0x9fbdc3); g.fillPoints([{x:9,y:7},{x:26,y:0},{x:35,y:5},{x:35,y:25},{x:25,y:32},{x:9,y:23}],true);
-  g.fillStyle(0xe6eeee); g.fillRect(31, 6, 4, 18); g.fillStyle(0x617b88); g.fillRect(11, 10, 16, 12);
-  g.fillStyle(0xd7d8b4); g.fillRect(4, 45, 10, 7); g.generateTexture('morgan-axe', 40, 58); g.clear();
   g.fillStyle(0x4b3328); g.fillRect(0, 0, 64, 64); g.fillStyle(0x976740); g.fillRect(3, 3, 58, 58);
   g.lineStyle(3, 0xd1a367); g.strokeRect(5, 5, 54, 54); g.lineBetween(7, 7, 57, 57); g.lineBetween(57, 7, 7, 57);
   g.generateTexture('crate', 64, 64); g.clear();
@@ -133,4 +92,5 @@ export function createTextures(scene: Phaser.Scene): void {
   g.lineStyle(2, 0x465e54, 0.5);
   for (let y = 12; y < 64; y += 16) { g.lineBetween(0, y, 64, y); const x = y % 32 ? 16 : 32; g.lineBetween(x, y, x, y + 16); }
   g.generateTexture('wall', 64, 64); g.destroy();
+  createIslandArt(scene);
 }

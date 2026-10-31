@@ -43,14 +43,14 @@ export class BossRenderer {
       this.details.lineStyle(3, 0x7ca6b4, 0.7); this.details.strokeRect(x - 22, y - 14, 44, 28);
       this.details.fillStyle(0x284b64, 0.55); this.details.fillTriangle(x - 10, y - 8, x + 10, y - 8, x, y + 9);
     }
-    this.body.setTexture(boss.profile.visual).setCrop(); this.arm.setTexture(boss.profile.weapon);
+    this.body.setTexture(boss.profile.visual).setCrop().setScale(boss.profile.id === 'morgan' ? 1 : 1.1); this.arm.setTexture(boss.profile.weapon);
     const dead = boss.state === 'dead', alpha = dead ? Math.max(0, 1 - boss.elapsed / 1.5) : 1;
     const x = boss.body.x - origin.x, y = boss.body.y - origin.y;
     this.body.setPosition(x, y).setDepth(y + 1000).setAlpha(alpha).setRotation(dead ? Math.min(Math.PI / 2, boss.elapsed * 2) : 0)
       .setTint(boss.body.flash > 0 ? 0xffd1bd : boss.phase === 3 ? 0xffd0c2 : 0xffffff);
     const preparing = boss.state === 'preparing', kind = boss.telegraph?.attack.animation;
     const lift = preparing ? Math.min(1, boss.elapsed / 0.45) : 0;
-    this.arm.setPosition(x + 21, y - 42 - lift * 12).setDepth(y + 1001).setAlpha(alpha)
+    this.arm.setOrigin(boss.profile.id === 'morgan' ? 0.82 : 0.22, 0.88).setScale(boss.profile.id === 'morgan' ? 0.8 : 1.1).setPosition(x + (boss.profile.id === 'morgan' ? -22 : 21), y - 42 - lift * 12).setDepth(y + 1001).setAlpha(alpha)
       .setRotation(dead ? Math.PI / 2 : preparing ? -0.85 - lift * 0.7 : boss.state === 'impact' ? 1.1 : 0.1);
     if (preparing && kind === 'split') {
       this.body.setCrop(0, 25, 64, 55);

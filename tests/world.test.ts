@@ -94,3 +94,32 @@ test('barrios variados y parcelas con geometrías diferentes, sin ocupar avenida
   }
   assert.equal(districts.size, 4); assert.ok(layouts.size > 25);
 });
+
+test('Orange Town tiene barrios y obstáculos propios, rutas conectadas y regeneración estable', () => {
+  const orange = new ProceduralWorld(73, 'orange'), shells = new ProceduralWorld(73);
+  const districts = new Set<string>(), kinds = new Set<string>();
+  for (let cy = -4; cy <= 4; cy++) for (let cx = -4; cx <= 4; cx++) {
+    const chunk = orange.getChunk(cx, cy);
+    assert.notDeepEqual(chunk.obstacles, shells.getChunk(cx, cy).obstacles);
+    districts.add(chunk.district); chunk.obstacles.forEach(o => kinds.add(o.kind));
+    const queue = [0], seen = new Set(queue);
+    for (let i = 0; i < queue.length; i++) {
+      const at = queue[i], x = at % 16, y = Math.floor(at / 16);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy, id = nx + ny * 16;
+        if (nx < 0 || ny < 0 || nx >= 16 || ny >= 16 || chunk.solids[id] || seen.has(id)) continue;
+        queue.push(id); seen.add(id);
+      }
+    }
+    for (let i = 0; i < 256; i++) if (!chunk.solids[i]) assert.ok(seen.has(i), `${cx},${cy}/${i}`);
+    for (const obstacle of chunk.obstacles) assert.equal(orange.canOccupy(obstacle.x + 16, obstacle.y + 16, 13), false);
+  }
+  assert.deepEqual([...districts].sort(), ['circus', 'market', 'occupied', 'orchard']);
+  for (const kind of ['tent', 'stall', 'ruin', 'tree', 'house']) assert.ok(kinds.has(kind));
+  const original = structuredClone(orange.getChunk(-2, -3));
+  for (let i = -200; i < 200; i++) { orange.getChunk(i, 10); assert.ok(orange.chunkCount <= orange.maxChunks); }
+  assert.deepEqual(orange.getChunk(-2, -3), original);
+  for (let i = -50; i < 50; i++) {
+    assert.ok(orange.canOccupy(i * 32 + 16, 256, 14)); assert.ok(orange.canOccupy(256, i * 32 + 16, 14));
+  }
+});

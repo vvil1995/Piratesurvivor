@@ -1,10 +1,10 @@
 export const TILE = 32;
 export const CHUNK_TILES = 16;
 export const CHUNK_SIZE = TILE * CHUNK_TILES;
-export type ObstacleKind = 'house' | 'tree' | 'rock' | 'wall' | 'crate';
+export type ObstacleKind = 'house' | 'tree' | 'rock' | 'wall' | 'crate' | 'tent' | 'stall' | 'ruin' | 'pennant';
 export interface Obstacle { id: string; kind: ObstacleKind; x: number; y: number; width: number; height: number; variant: number }
 export interface Chunk {
-  key: string; cx: number; cy: number; district: 'residential' | 'garden' | 'barracks' | 'plaza';
+  key: string; cx: number; cy: number; district: 'residential' | 'garden' | 'barracks' | 'plaza' | 'market' | 'circus' | 'orchard' | 'occupied';
   solids: Uint8Array; obstacles: Obstacle[]; variation: number;
 }
 export const cellKey = (x: number, y: number): string => `${x},${y}`;
@@ -14,6 +14,35 @@ export function hash(seed: number, x: number, y: number): number {
   return (h ^ h >>> 16) >>> 0;
 }
 export const roadTile = (x: number, y: number): boolean => (x >= 6 && x <= 9) || (y >= 6 && y <= 9);
+// Orange Town conserva las conexiones entre chunks, pero tiene parcelas y usos propios.
+// La calle central y el perímetro garantizan rutas incluso con coordenadas negativas.
+export function generateOrangeChunk(seed: number, cx: number, cy: number): Chunk {
+  const variation = hash(seed ^ 0x4f5247, cx, cy), key = cellKey(cx, cy);
+  const district = (['market', 'circus', 'orchard', 'occupied'] as const)[variation % 4];
+  const chunk: Chunk = { key, cx, cy, district, variation, solids: new Uint8Array(256), obstacles: [] };
+  const add = (kind: ObstacleKind, x: number, y: number, w: number, h: number, variant = 0) => {
+    chunk.obstacles.push({ id: `${key}/${chunk.obstacles.length}`, kind, x: (cx * 16 + x) * TILE, y: (cy * 16 + y) * TILE, width: w * TILE, height: h * TILE, variant });
+    for (let ty = y; ty < y + h; ty++) for (let tx = x; tx < x + w; tx++) chunk.solids[tx + ty * 16] = 1;
+  };
+  for (const [i, [x, y]] of [[1, 1], [10, 1], [1, 10], [10, 10]].entries()) {
+    const v = hash(variation, i, 31);
+    if (district === 'circus') {
+      if (i === variation % 4) add('tent', x, y, 4, 4);
+      else { add('stall', x + 1, y + 1, 2, 1); add(v % 2 ? 'crate' : 'pennant', x + 3, y + 3, 1, 1); }
+    } else if (district === 'market') {
+      if (i % 2) add('stall', x, y + 1, 3, 2);
+      else add('house', x + 1, y, 3, 3, v % 2);
+      add('crate', x + 3, y + 3, 1, 1);
+    } else if (district === 'orchard') {
+      add('tree', x + 1, y + 1, 1, 1); add('tree', x + 3, y + 3, 1, 1);
+      if (i === 0) add('stall', x + 2, y, 2, 1);
+    } else {
+      add(i % 2 ? 'ruin' : 'house', x, y, 3, 3, v % 2);
+      if (v % 2) add('crate', x + 3, y + 3, 1, 1);
+    }
+  }
+  return chunk;
+}
 export function generateChunk(seed: number, cx: number, cy: number): Chunk {
   const variation = hash(seed, cx, cy), key = cellKey(cx, cy);
   const district = (['residential', 'garden', 'barracks', 'plaza'] as const)[variation % 4];

@@ -1,5 +1,5 @@
 import type { Vector } from '../core/types.ts';
-import { cellKey, CHUNK_SIZE, generateChunk, TILE, type Chunk } from './generator.ts';
+import { cellKey, CHUNK_SIZE, generateChunk, generateOrangeChunk, TILE, type Chunk } from './generator.ts';
 
 export interface CollisionWorld {
   canOccupy(x: number, y: number, radius: number): boolean;
@@ -17,7 +17,7 @@ export class ProceduralWorld implements CollisionWorld {
     const key = cellKey(cx, cy);
     let chunk = this.chunks.get(key);
     if (!chunk) {
-      chunk = generateChunk(this.seed, cx, cy);
+      chunk = this.theme === 'orange' ? generateOrangeChunk(this.seed, cx, cy) : generateChunk(this.seed, cx, cy);
       if (this.chunks.size >= this.maxChunks) this.chunks.delete(this.chunks.keys().next().value!);
       this.chunks.set(key, chunk);
     }

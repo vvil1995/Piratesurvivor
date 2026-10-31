@@ -22,12 +22,30 @@ export class WorldRenderer {
   private paint(slot: Slot, chunk: Chunk): void {
     const ctx = slot.texture.context;
     ctx.imageSmoothingEnabled = false;
+    const orange = this.world?.theme === 'orange';
+    const orchard = chunk.district === 'orchard', circus = chunk.district === 'circus';
     const grass = chunk.district === 'garden' ? ['#719063', '#759568', '#6e8c60'] : ['#b9b39a', '#b5b096', '#bdb79d'];
     for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
       const h = hash(chunk.variation, x, y), road = roadTile(x, y) || chunk.district === 'plaza';
       ctx.fillStyle = road ? (this.world?.theme === 'orange' ? ['#d5bb9c', '#d9c3a5', '#cfb596'] : ['#c6c2ad', '#cbc7b4', '#c2bfac'])[h % 3] : grass[h % 3];
       ctx.fillRect(x * 16, y * 16, 16, 16);
-      if (road) {
+      if (orange) {
+        // Calles adoquinadas estrechas, tierra de feria y huertos: otra trama,
+        // no la cuadrícula naval recoloreada. Se rasteriza solo al cargar el chunk.
+        ctx.fillStyle = road ? ['#b59c80', '#bba58a', '#b19a81'][h % 3]
+          : orchard ? ['#688952', '#718e57', '#78925c'][h % 3]
+          : circus ? ['#b8a178', '#baa57f', '#b19a74'][h % 3] : ['#a99070', '#b49b79', '#b9a17f'][h % 3];
+        ctx.fillRect(x * 16, y * 16, 16, 16);
+        if (road) for (let row = 0; row < 2; row++) {
+          for (let col = 0; col < 3; col++) {
+            const px = x * 16 + col * 6 - (row % 2 ? 3 : 0), py = y * 16 + row * 8;
+            ctx.fillStyle = '#887b69'; ctx.fillRect(Math.max(x * 16, px), py, Math.min(5, x * 16 + 16 - px), 7);
+            ctx.fillStyle = ['#c9b89a', '#c1ae91', '#bfab8e'][(h + col + row) % 3];
+            ctx.fillRect(Math.max(x * 16, px), py, Math.min(5, x * 16 + 16 - px), 5);
+          }
+        }
+        else if (h % 3 === 0) { ctx.fillStyle = orchard ? '#526e43' : '#8b795c'; ctx.fillRect(x * 16 + 5, y * 16 + 9, 3, 1); }
+      } else if (road) {
         ctx.fillStyle = '#a5a58f'; ctx.fillRect(x * 16, y * 16, 16, 1); ctx.fillRect(x * 16, y * 16, 1, 16);
         ctx.fillStyle = '#dedbc6'; ctx.fillRect(x * 16 + 2, y * 16 + 2, 11, 1);
       } else if (h % 4 === 0) {
@@ -35,9 +53,18 @@ export class WorldRenderer {
         ctx.fillRect(x * 16 + 5, y * 16 + 8, 1, 3); ctx.fillRect(x * 16 + 7, y * 16 + 6, 1, 4);
       }
       // Bordillos alineados con la trama de calles.
-      ctx.fillStyle = '#9d9e86';
+      ctx.fillStyle = orange ? '#8b775d' : '#9d9e86';
       if ((x === 5 || x === 10) && !roadTile(0, y)) ctx.fillRect(x * 16 + (x === 5 ? 14 : 0), y * 16, 2, 16);
       if ((y === 5 || y === 10) && !roadTile(x, 0)) ctx.fillRect(x * 16, y * 16 + (y === 5 ? 14 : 0), 16, 2);
+    }
+    if (orange && (circus || chunk.district === 'plaza')) {
+      // Pista de feria y banderines; los avisos de combate se dibujan por encima.
+      ctx.strokeStyle = '#87564f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(128, 128, 27, 20, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ebce91'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(128, 128, 23, 16, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (orange && (chunk.district === 'market' || circus)) {
+      ctx.strokeStyle = '#665044'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(83, 85); ctx.quadraticCurveTo(128, 96, 173, 85); ctx.stroke();
+      for (let i = 0; i < 9; i++) { const x = 87 + i * 10, y = 86 + Math.round(Math.sin(i / 8 * Math.PI) * 5); ctx.fillStyle = ['#a94c47', '#ead3a0', '#76618a'][i % 3]; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 7, y); ctx.lineTo(x + 4, y + 7); ctx.fill(); }
     }
     // Detalles decorativos sin colisión, pintados una sola vez por chunk.
     // Las sendas del jardín conectan con las avenidas; la plaza marca otro barrio.
@@ -61,8 +88,12 @@ export class WorldRenderer {
       const obstacle = chunk.obstacles[i];
       if (!slot.decorations[i]) slot.decorations.push(this.scene.add.image(0, 0, 'tree').setOrigin(0.5, 1));
       const sprite = slot.decorations[i];
-      sprite.setTexture(obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
-      if (obstacle.kind === 'house') sprite.setDisplaySize(obstacle.width, obstacle.height + 32);
+      const own = orange && ['house', 'tree', 'tent', 'stall', 'ruin'].includes(obstacle.kind);
+      sprite.setTexture(obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
+      if (obstacle.kind === 'house' || obstacle.kind === 'ruin') sprite.setDisplaySize(obstacle.width, obstacle.height + 32);
+      else if (obstacle.kind === 'tent') sprite.setDisplaySize(obstacle.width, obstacle.height + 48);
+      else if (obstacle.kind === 'stall') sprite.setDisplaySize(obstacle.width, obstacle.height + 24);
+      else if (obstacle.kind === 'pennant') sprite.setDisplaySize(30, 80);
       else if (obstacle.kind === 'tree') sprite.setDisplaySize(76, 98);
       else if (obstacle.kind === 'rock') sprite.setDisplaySize(obstacle.width + 12, obstacle.height + 16);
       else sprite.setDisplaySize(obstacle.width, obstacle.height + 10);

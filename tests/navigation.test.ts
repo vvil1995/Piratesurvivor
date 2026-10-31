@@ -59,8 +59,9 @@ test('victoria viaja automáticamente a Orange, conserva HP/build y genera sus t
   finish(r); assert.equal(r.zone, 'orange-town'); assert.equal(r.definition, ORANGE_TOWN); assert.equal(r.player.hp, hp); assert.equal(snapshot(r), before);
   assert.equal(r.encounter, undefined); assert.equal(r.canJoinMovements, true);
   // Variantes definidas, con XP mayor que los marines y sin reaplicar presión de20min al llegar.
-  for (const v of ORANGE_TOWN.enemyVariants!) { assert.ok(ENEMIES[v.id]); assert.equal(ENEMIES[v.id].visual, 'buggy-pirate'); }
-  step(r, 2); assert.ok(r.enemies.count > 0); assert.ok(r.enemies.items.filter(e => e.active).every(e => e.visual === 'buggy-pirate' && e.xp >= 28));
+  for (const v of ORANGE_TOWN.enemyVariants!) { assert.ok(ENEMIES[v.id]); assert.equal(ENEMIES[v.id].visual, v.id); }
+  assert.equal(new Set(ORANGE_TOWN.enemyVariants!.map(v => ENEMIES[v.id].visual)).size, 3);
+  step(r, 2); assert.ok(r.enemies.count > 0); assert.ok(r.enemies.items.filter(e => e.active).every(e => e.visual?.startsWith('buggy-') && e.xp >= 28));
 });
 test('morir explorando sigue terminando la partida; pausa no genera cartas', () => {
   const r = new Run(); r.time = 299; r.pause(); step(r, 10); assert.equal(r.time, 299); assert.equal(r.route.signal, undefined);

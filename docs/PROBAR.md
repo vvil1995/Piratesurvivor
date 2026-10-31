@@ -59,3 +59,14 @@ Buggy: cuchillas por corredor, bomba fijada al suelo, barrido, cuerpo desmontabl
 ## Qué comunicar al probar
 
 Dispositivo, Android/iOS, navegador/versión, orientación, versión visible de la beta, minuto y pasos para reproducir. Revisar especialmente origen de golpes al desplazarse, lectura de proyectiles, compra/recarga de entrenamiento y cartas al llenar cuatro ranuras. No se han medido FPS ni confirmado Safari/teléfonos físicos desde el entorno de desarrollo.
+
+## Beta0.16 · Morgan y Orange Town
+
+1. Confirmar **BETA0.16.0** al recargar. El progreso local existente debe conservarse.
+2. A partir de05:00 localizar el punto de navegación: esfera de vidrio, agulla roja y correa, en lugar de pergamino.
+3. Entrar en Morgan: cuerpo detallado y brazo-destral animado. Comprobar que la preparación sigue siendo visible y coincide con las marcas del suelo. Sus estadísticas/patrones no se han rebajado.
+4. Tras ganar, recorrer Orange Town: mercados con toldos, carpas, huertos de naranjos y casas ocupadas/en ruinas. Debe tener otra arquitectura, no solo otro color de suelo.
+5. Distinguir espadachín con bandana, tirador con tricornio/mosquete y pesado con maza. Probar movimiento en ocho direcciones y colisiones entre edificios.
+6. Visitar Buggy: sprite/cuchillos nuevos, patrones conservados. Probar en móvil horizontal y ordenador; avisar de sprites cortados, halos, obstáculos que no coincidan visualmente y avisos ocultos.
+
+Las capturas automatizadas usan fixtures para llegar a los combates; no validan su dificultad ni equivalen a probar Safari o un teléfono físico.

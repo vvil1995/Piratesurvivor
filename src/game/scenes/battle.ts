@@ -1,3 +1,4 @@
+import { preloadIslandArt } from './island-art.ts';
 import { BalloonRig } from './balloon-rig.ts';
 import { BUFF_LOOK } from '../../ui/buff-info.ts';
 import { BossRenderer } from './boss-renderer.ts';
@@ -67,6 +68,7 @@ export class BattleScene extends Phaser.Scene {
     try { await promise; } catch (error) { this.actorLoads.delete(visual); throw error; }
   }
   preload(): void {
+    preloadIslandArt(this);
     this.load.image('source-atlas', atlasUrl);
     this.load.image('luffy-directions-source', luffyDirectionsUrl);
     this.load.image('marine-directions-source', marineDirectionsUrl);
@@ -158,8 +160,9 @@ export class BattleScene extends Phaser.Scene {
       sprite.setTexture(`${e.visual ?? 'marine'}-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
-      sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
-      this.enemyRigs[i].update(sprite, animation, 0.6);
+      sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged && e.visual === 'marine' ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
+      if (e.visual?.startsWith('buggy-')) { sprite.setCrop(); this.enemyRigs[i].hide(); }
+      else this.enemyRigs[i].update(sprite, animation, 0.6);
     }
     for (let i = 0; i < this.chestSprites.length; i++) {
       const chest = run?.visibleChests[i], sprite = this.chestSprites[i];
