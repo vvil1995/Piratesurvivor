@@ -226,7 +226,7 @@ export class Run {
     const actor = this.players.get(playerId)!;
     const upgrade = actor.choices.find(choice => choice.id === id);
     if (!upgrade || 'kind' in upgrade && !canImproveAttack(actor, upgrade.abilityId)) return false;
-    if ('kind' in upgrade && !hasFreeSlot(actor)) return false;
+    if ('kind' in upgrade && !actor.attacks.some(a => a.id === upgrade.abilityId) && !hasFreeSlot(actor)) return false;
     applyUpgrade(actor, upgrade); actor.taken[id] = (actor.taken[id] || 0) + 1;
     actor.choices = []; this.status = 'playing'; this.checkLevel(); return true;
   }
@@ -381,7 +381,7 @@ export class Run {
       const lure = enemy.lureIndex !== undefined ? this.areas.items[enemy.lureIndex] : undefined;
       const aim = lure?.active && lure.kind === 'decoy' ? lure : target;
       const aimDistance = Math.hypot(aim.x - enemy.x, aim.y - enemy.y);
-      const firing = (enemy.statuses?.stun ?? 0) <= 0 && (enemy.statuses?.confuse ?? 0) <= 0 && enemy.ranged && aimDistance < enemy.ranged.range && this.world.segmentClear(enemy.x, enemy.y, aim.x, aim.y, 3);
+      const firing = (enemy.statuses?.stun ?? 0) <= 0 && (enemy.statuses?.confuse ?? 0) <= 0 && enemy.ranged && aimDistance < enemy.ranged.range && this.world.segmentClear(enemy.x, enemy.y, aim.x, aim.y, 3, 'attack');
       const chase = firing ? nearest < 110 ? -1 : 0 : 1;
       let steerX = enemy.steerX ?? 0, steerY = enemy.steerY ?? 0;
       if ((enemy.statuses?.confuse ?? 0) > 0) { const turn = Math.sin(this.time * 3 + enemy.id) * 1.5, c = Math.cos(turn), s = Math.sin(turn); [steerX, steerY] = [steerX * c - steerY * s, steerX * s + steerY * c]; }

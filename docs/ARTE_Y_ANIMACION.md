@@ -38,3 +38,11 @@ La primera pasada de efectos por código ayuda a distinguir la mecánica, pero n
 Conservar originales y procedencia, normalizar a atlas compactos con transparencia, píxeles nítidos y ancla estable. Reutilizar texturas, cargar por personaje elegido y limitar efectos simultáneos. Medir en móvil real el coste del rig de muslo/pantorrilla antes de darlo por definitivo.
 
 Candidato lateral de Luffy generado el30-10-2026: dos iteraciones revisadas; la segunda diferencia mejor las fases de paso. No incorporado a la compilación: pendiente comparar proporciones/estilo con el atlas aprobado y revisar el ciclo a escala real. No se presenta como trabajo ya terminado para los otros personajes.
+
+## Dirección costera · beta0.17
+
+Shells Town toma la referencia del puerto y base naval: edificio con cubierta azul, casas con toldos, árboles frondosos, vallas, mampostería y dársenas con barcos. Orange Town utiliza tierra cálida, carpa del payaso, toldos rojos, palmeras, puestos, banderines y casas reparadas. Los materiales son imágenes originales, no grandes rectángulos coloreados. Se conserva la proporción natural de los sprites, especialmente la carpa, evitando deformarla al tamaño del collider.
+
+El mapa sigue siendo procedural: la referencia no se convierte en un fondo plano sin colisiones. Los caminos conectan chunks; el puerto estrecha sus pasarelas y mantiene agua no transitable. El agua permite línea de tiro; casas y barcos continúan dando cobertura. Las máscaras de ataque se cachean por chunk con WeakMap y desaparecen al descargarlo.
+
+Los seis ataques de Luffy tienen ilustraciones específicas96×96, compartidas entre HUD y cartas. No son animaciones de combate nuevas: los efectos elásticos y las animaciones que ya funcionaban se mantienen. Las ilustraciones de los demás personajes continúan pendientes de una revisión equivalente. No se considera terminado el diseño de todas las sagas por esta primera pasada costera; Syrup sigue siendo provisional. El reparto de puntos de interés, repetición de parcelas y transiciones de terreno deben seguir puliéndose con partidas reales.

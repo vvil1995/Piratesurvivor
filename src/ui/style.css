@@ -43,3 +43,6 @@
 
 .training-card{display:grid;grid-template-columns:42px minmax(0,1fr) 64px}.training-card>div{width:100%;overflow:hidden}.training-segments{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%;min-width:0}.training-segments i{display:block;min-width:0;max-width:none;width:100%}.training-dialog>header .secondary-button{width:auto;flex:0 0 auto;margin-top:0!important}.training-dialog>header>div{min-width:0}.training-buy{width:64px}
 .upgrade-symbol{display:block;height:56px!important;min-height:56px}.upgrade-symbol>.pixel-icon{width:54px;height:54px;margin:0}.levelup-content{max-height:calc(100svh - 36px);overflow:auto}@media(max-width:680px) and (orientation:portrait){.upgrade-card{padding-left:84px!important}.upgrade-card .upgrade-symbol{left:16px!important}}
+
+/* La textura del mundo ya aporta detalle: no superponer scanlines al combate. */
+.in-run .grain{display:none}.hud-top{background:none!important}.player-status,.run-clock,.hud-actions{background:#102635e8;border:1px solid #526878;border-radius:6px;padding:6px}.hud-actions{align-self:flex-start}#attack-selection-label,#run-items{background:#102635e8;border-radius:3px;padding:3px 5px}

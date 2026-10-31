@@ -242,7 +242,7 @@ test('cuatro ataques equipados, evolución +, cartas válidas y reinicio de buil
     await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
   }
   await expect(page.locator('.attack-slot.empty')).toHaveCount(0);
-  expect(await page.evaluate(async () => { const path = '/src/game/systems/progression.ts', { chooseUpgrades } = await import(/* @vite-ignore */ path); const p = window.__OPS_QA__!.getRun()!.player; return chooseUpgrades(p.taken, Math.random, p).every((c: object) => !('kind' in c)); })).toBe(true);
+  expect(await page.evaluate(async () => { const path = '/src/game/systems/progression.ts', { chooseUpgrades } = await import(/* @vite-ignore */ path); const p = window.__OPS_QA__!.getRun()!.player; return chooseUpgrades(p.taken, Math.random, p).every((c: { kind?: string; abilityId?: string }) => !c.kind || c.abilityId !== 'elastic-punch' && p.attacks.some(a => a.id === c.abilityId && a.level < 6)); })).toBe(true);
   await page.screenshot({ path: test.info().outputPath('four-attacks.png') });
   await page.evaluate(() => { window.__OPS_QA__!.getRun()!.player.hp = 0; });
   await expect(page.locator('#result')).toBeVisible(); await page.locator('#retry').click();
@@ -399,17 +399,19 @@ test('las técnicas evolucionadas de la tripulación se integran con sprites, HU
   expect(errors).toEqual([]);
 });
 
-test('con cuatro ranuras las cartas son pasivas y no habilitan una unión gratis', async ({ page }) => {
+test('con cuatro ranuras se mejoran los ataques aprendidos sin aprender un quinto ni unir gratis', async ({ page }) => {
   await page.locator('#start').click();
   await page.evaluate(async () => {
     const path = '/src/game/systems/loadout.ts', progression = '/src/game/systems/progression.ts';
     const { improveAttack } = await import(/* @vite-ignore */ path), { chooseUpgrades } = await import(/* @vite-ignore */ progression);
     const qa = window.__OPS_QA__!, r = qa.getRun()!; for (const id of ['gatling','bazooka','whip']) improveAttack(r.player, id);
-    r.player.choices = chooseUpgrades({}, Math.random, r.player); r.status = 'levelup'; qa.tick();
+    r.player.choices = chooseUpgrades({}, Math.random, r.player); qa.tick();
   });
+  await offerChoice(page, 'ability:elastic-punch');
   await expect(page.locator('#levelup')).toBeVisible(); await expect(page.locator('.upgrade-card')).toHaveCount(3);
-  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.choices.every(c => !('kind' in c)))).toBe(true);
-  await page.locator('.upgrade-card').first().click(); await expect(page.locator('#combinations')).toBeHidden();
+  expect(await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; return r.choices.every(c => !('kind' in c) || r.player.attacks.some(a => a.id === c.abilityId)); })).toBe(true);
+  await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Pistol/ }) }).click(); await expect(page.locator('#combinations')).toBeHidden();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.attacks[0].level)).toBe(2);
   await page.locator('#manage-abilities').click(); await expect(page.locator('.combination-card').first()).toBeDisabled();
   await expect(page.locator('#combination-message')).toContainText('objeto de unión');
 });
@@ -867,4 +869,34 @@ test('Orange Town: cuatro barrios propios, tres piratas distintos y navegación 
   });
   expect(new Set(frames.map(a => a.pixels)).size).toBe(3);
   for (const atlas of frames) { expect(atlas.size).toEqual([768,192]); expect(atlas.frames.every(n => n > 500)).toBe(true); }
+});
+
+test('referencia costera: base naval, puerto, seis ilustraciones de Luffy y comida con hueso', async ({ page }, info) => {
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.locator('#start').click(); await isolateWalk(page);
+  await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; r.update = () => {}; });
+  for (const district of ['barracks','harbor','plaza']) {
+    await page.evaluate(({ district }) => {
+      const qa = window.__OPS_QA__!, r = qa.getRun()!;
+      let chunk = r.world.getChunk(0, district === 'harbor' ? 3 : 0);
+      if (district === 'plaza') chunk = Array.from({length:60}, (_, i) => r.world.getChunk(i - 30, 0)).find(c => c.district === 'plaza')!;
+      r.player.x = chunk.cx * 512 + 256; r.player.y = chunk.cy * 512 + 256; qa.draw(); qa.tick();
+    }, { district });
+    await page.screenshot({ path: info.outputPath(`shells-${district}.png`) });
+  }
+  await page.evaluate(async () => {
+    const path = '/src/ui/pixel-art.ts', { artUrl } = await import(/* @vite-ignore */ path);
+    const gallery = document.createElement('div'); gallery.id = 'luffy-art-review';
+    Object.assign(gallery.style, { position:'fixed', inset:'14px', background:'#102635', zIndex:'40000', display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'8px', padding:'12px', overflow:'auto' });
+    for (const id of ['elastic-punch','gatling','bazooka','whip','balloon','axe']) {
+      const item = document.createElement('div'), image = document.createElement('img'), title = document.createElement('div');
+      image.src = artUrl('ability-' + id); image.width = image.height = 96; image.style.imageRendering = 'pixelated'; title.textContent = id;
+      item.append(image,title); gallery.append(item);
+    }
+    const food = new Image(); food.src = '/src/assets/worlds/food.png'; food.width = 96; food.height = 84; food.style.imageRendering='pixelated'; food.alt = 'Carne con hueso blanco'; gallery.append(food); document.body.append(gallery);
+    await Promise.all(Array.from(gallery.querySelectorAll('img')).map(image => image.decode()));
+  });
+  expect(await page.locator('#luffy-art-review img').evaluateAll(images => new Set(images.map(image => (image as HTMLImageElement).src)).size)).toBe(7);
+  await page.screenshot({ path: info.outputPath('luffy-six-illustrations-food.png') });
+  expect(errors).toEqual([]);
 });

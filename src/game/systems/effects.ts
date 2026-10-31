@@ -10,11 +10,11 @@ import { applySkillHit, applyStatus } from './status.ts';
 import { receivedDamage } from './stats.ts';
 export const PROJECTILE_CAP = 96, AREA_CAP = 24;
 export interface Effects { projectiles: Pool<Projectile>; areas: Pool<AreaEffect> }
-export function nearestTarget(player: Player, grid: SpatialGrid, world: CollisionWorld, range: number, clearance = 2): Enemy | undefined {
+export function nearestTarget(player: Player, grid: SpatialGrid, world: CollisionWorld, range: number, clearance = 2, layer: 'movement' | 'attack' = 'attack'): Enemy | undefined {
   let target: Enemy | undefined, best = range * range;
   grid.visit(player.x, player.y, range, enemy => {
     const d = (player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2;
-    if (d <= best && world.segmentClear(player.x, player.y, enemy.x, enemy.y, clearance)) { target = enemy; best = d; }
+    if (d <= best && world.segmentClear(player.x, player.y, enemy.x, enemy.y, clearance, layer)) { target = enemy; best = d; }
   });
   return target;
 }
@@ -43,7 +43,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
       if (area.tickTimer <= 0) {
         area.tickTimer = 0.2;
         grid.visit(area.x, area.y, area.radius + 15, enemy => {
-          if (Math.hypot(enemy.x - area.x, enemy.y - area.y) <= area.radius + enemy.radius && world.segmentClear(area.x, area.y, enemy.x, enemy.y, 2)) applyStatus(enemy, 'confuse', 0.4);
+          if (Math.hypot(enemy.x - area.x, enemy.y - area.y) <= area.radius + enemy.radius && world.segmentClear(area.x, area.y, enemy.x, enemy.y, 2, 'attack')) applyStatus(enemy, 'confuse', 0.4);
         });
       }
       if (area.life <= 0) area.active = false; continue;
@@ -65,7 +65,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
       grid.visit(area.x, area.y, Math.max(area.radius, area.shockRadius) + 15, enemy => {
         const d = Math.hypot(enemy.x - area.x, enemy.y - area.y);
         const factor = d <= area.radius + enemy.radius ? 1 : d <= area.shockRadius + enemy.radius ? 0.55 : 0;
-        if (factor && world.segmentClear(area.x, area.y, enemy.x, enemy.y, 2)) {
+        if (factor && world.segmentClear(area.x, area.y, enemy.x, enemy.y, 2, 'attack')) {
           if (area.status) applyStatus(enemy, area.status, area.statusDuration ?? 0.5);
           damageEnemy(owner, enemy, area.damage * factor, area.knockback, area, world, e => onKill(e, owner.id), random);
         }
@@ -77,7 +77,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
     if (!bullet.active) continue;
     bullet.life -= dt; if (bullet.life <= 0) { bullet.active = false; continue; }
     const ax = bullet.x, ay = bullet.y, bx = ax + bullet.vx * dt, by = ay + bullet.vy * dt;
-    if (!world.segmentClear(ax, ay, bx, by, bullet.radius)) { bullet.active = false; continue; }
+    if (!world.segmentClear(ax, ay, bx, by, bullet.radius, 'attack')) { bullet.active = false; continue; }
     let reflected = false;
     if (bullet.hostile) for (const lure of effects.areas.items) {
       if (lure.active && lure.kind === 'decoy' && segmentDistance(lure.x, lure.y, ax, ay, bx, by) < lure.radius + bullet.radius) { lure.hp = (lure.hp ?? 0) - bullet.damage; bullet.active = false; break; }
@@ -111,7 +111,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
         chain(enemy);
         if (params?.duration && params.status === 'confuse') spawnZone(effects, owner, params, 'smoke', enemy.x, enemy.y, bullet.level ?? 1);
         if (params?.splash) grid.visit(enemy.x, enemy.y, params.splash + 15, other => {
-          if (!other.active || bullet.hit.has(other.id) || Math.hypot(other.x - enemy.x, other.y - enemy.y) > params.splash! + other.radius || !world.segmentClear(enemy.x, enemy.y, other.x, other.y, 2)) return;
+          if (!other.active || bullet.hit.has(other.id) || Math.hypot(other.x - enemy.x, other.y - enemy.y) > params.splash! + other.radius || !world.segmentClear(enemy.x, enemy.y, other.x, other.y, 2, 'attack')) return;
           bullet.hit.add(other.id); applySkillHit(owner, other, params);
           damageEnemy(owner, other, bullet.damage * 0.7, params.knockback, enemy, world, e => onKill(e, owner.id), random); chain(other);
         });
@@ -119,7 +119,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
           let next: Enemy | undefined, best = 160;
           grid.visit(enemy.x, enemy.y, 160, candidate => {
             const d = Math.hypot(candidate.x - enemy.x, candidate.y - enemy.y);
-            if (!bullet.hit.has(candidate.id) && d < best && world.segmentClear(enemy.x, enemy.y, candidate.x, candidate.y, 3)) { best = d; next = candidate; }
+            if (!bullet.hit.has(candidate.id) && d < best && world.segmentClear(enemy.x, enemy.y, candidate.x, candidate.y, 3, 'attack')) { best = d; next = candidate; }
           });
           if (next) { const speed = Math.hypot(bullet.vx, bullet.vy), d = Math.max(1, Math.hypot(next.x - bx, next.y - by)); bullet.vx = (next.x - bx) / d * speed; bullet.vy = (next.y - by) / d * speed; bullet.bounces = Math.max(0, (bullet.bounces ?? 0) - 1); }
         }

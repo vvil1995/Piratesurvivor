@@ -52,9 +52,17 @@ test('ranuras no admiten duplicados ni más de4 componentes y un aprendizaje no 
   assert.equal(validLoadout(p), true);
 });
 
-test('cuatro ranuras llenas solo ofrecen pasivas y rechazan una quinta habilidad', () => {
+test('cuatro ranuras permiten maximizar ataques aprendidos, sin quinto ataque ni unión gratis', () => {
   const run = new Run(), p = run.player; for (const id of ['gatling', 'bazooka', 'whip']) improveAttack(p, id);
-  for (let i = 0; i < 20; i++) assert.ok(chooseUpgrades({}, () => i / 20, p).every(c => !('kind' in c)));
+  let offered = false;
+  for (let i = 0; i < 40; i++) for (const c of chooseUpgrades({}, () => i / 40, p)) if ('kind' in c) { assert.ok(p.attacks.some(a => a.id === c.abilityId)); offered = true; }
+  assert.ok(offered);
+  const pistol = p.attacks[0]; pistol.level = 5;
+  const card = chooseUpgrades({}, () => 0.999, p).find(c => 'kind' in c);
+  assert.ok(card);
+  run.status = 'levelup'; p.choices = [{ kind: 'ability', id: `ability:${pistol.id}`, abilityId: pistol.id, name: 'Pistol+', description: '', symbol: '', max: 6 }];
+  assert.equal(run.selectUpgrade(`ability:${pistol.id}`), true); assert.equal(pistol.level, 6);
+  for (let i = 0; i < 40; i++) assert.ok(chooseUpgrades({}, () => i / 40, p).every(c => !('kind' in c) || c.abilityId !== pistol.id));
   run.status = 'levelup'; p.choices = [{ kind: 'ability', id: 'ability:fury', abilityId: 'fury', name: 'Furia', description: '', symbol: '', max: 6 }];
   assert.equal(run.selectUpgrade('ability:fury'), false); assert.equal(run.status, 'levelup'); assert.equal(run.canJoinMovements, false);
 });

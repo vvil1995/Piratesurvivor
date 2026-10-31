@@ -47,3 +47,7 @@ Cinco personajes seleccionables, seis técnicas exclusivas cada uno y cuatro buf
 Ejecutores compartidos: cargas con colisión, golpes enfocados sobre un objetivo, cortes alternos, proyectiles perforantes/abanico/rebote, explosiones secundarias limitadas, humo, inmovilización/interrupción, señuelo con atracción y explosión, evasión con trampa, guardia/contraataque, desvío y comida recogible. Robo marca al enemigo: máximo una berry por víctima, incluso sin matarla. Sanji prepara comida que caduca en8s; debe recogerse, y su + añade regeneración por4s respetando topes. Muerte limpia comida, zonas, balas y activaciones; Run nueva reinicia habilidades/berries temporales.
 
 La munición de humo/irritante es adaptación explícita por falta de verificación de su uso temprano. Ningún Gear, Haki, Clima-Tact ni Diable Jambe. Balance de los cinco, duración de sesiones y dificultad quedan experimentales. No confundir cobertura automatizada con diversión o rendimiento físico ya validados.
+
+## Regla de cartas vigente desde beta0.17
+
+Con cuatro ranuras ocupadas dejan de aparecer habilidades nuevas, pero siguen ofreciéndose mejoras individuales de las aprendidas hasta nivel6/versión+. Una habilidad a6 desaparece de las ofertas. La comprobación se aplica tanto al generar cartas como al seleccionarlas. No se obtiene ninguna unión gratis por subir de nivel; el objeto del jefe continúa siendo necesario para agrupar movimientos. Esta regla sustituye la restricción de0.15 que ofrecía únicamente pasivas al ocupar cuatro ranuras.

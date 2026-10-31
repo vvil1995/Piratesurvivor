@@ -32,7 +32,7 @@ test('exploración larga con caché acotada y regeneración idéntica al volver'
 test('cada celda caminable tiene salida: las parcelas no encierran huecos', () => {
   const world = new ProceduralWorld(73);
   for (let cy = -2; cy <= 2; cy++) for (let cx = -2; cx <= 2; cx++) {
-    const chunk = world.getChunk(cx, cy), seen = new Set<number>([0]), queue = [0];
+    const chunk = world.getChunk(cx, cy), seen = new Set<number>([chunk.solids.findIndex(v => !v)]), queue = [chunk.solids.findIndex(v => !v)];
     for (let i = 0; i < queue.length; i++) {
       const at = queue[i], x = at % 16, y = Math.floor(at / 16);
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -88,11 +88,11 @@ test('barrios variados y parcelas con geometrías diferentes, sin ocupar avenida
   for (let cy = -5; cy <= 5; cy++) for (let cx = -5; cx <= 5; cx++) {
     const c = generateChunk(42, cx, cy); districts.add(c.district);
     layouts.add(JSON.stringify(c.obstacles.map(o => [o.kind, o.x - cx * CHUNK_SIZE, o.y - cy * CHUNK_SIZE, o.width, o.height])));
-    for (let i = 0; i < 16; i++) for (let lane = 6; lane <= 9; lane++) {
+    for (let i = 0; i < 16; i++) for (let lane = c.district === 'harbor' ? 7 : 6; lane <= (c.district === 'harbor' ? 8 : 9); lane++) {
       assert.equal(c.solids[i + lane * 16], 0); assert.equal(c.solids[lane + i * 16], 0);
     }
   }
-  assert.equal(districts.size, 4); assert.ok(layouts.size > 25);
+  assert.equal(districts.size, 5); assert.ok(layouts.size > 25);
 });
 
 test('Orange Town tiene barrios y obstáculos propios, rutas conectadas y regeneración estable', () => {
@@ -122,4 +122,31 @@ test('Orange Town tiene barrios y obstáculos propios, rutas conectadas y regene
   for (let i = -50; i < 50; i++) {
     assert.ok(orange.canOccupy(i * 32 + 16, 256, 14)); assert.ok(orange.canOccupy(256, i * 32 + 16, 14));
   }
+});
+
+test('puerto: agua sólida, pasarelas conectadas y muelle accesible desde tierra', () => {
+  const world = new ProceduralWorld(42);
+  for (const cy of [-5, -4, 3, 4]) for (const cx of [-1, 0, 1]) {
+    const chunk = world.getChunk(cx, cy); assert.equal(chunk.district, 'harbor');
+    assert.equal(chunk.obstacles.filter(o => o.kind === 'water').length, 4);
+    for (const water of chunk.obstacles) assert.equal(world.canOccupy(water.x + 32, water.y + 32, 14), false);
+    for (let i = 0; i < 16; i++) {
+      assert.ok(world.canOccupy(cx * 512 + i * 32 + 16, cy * 512 + 256, 14));
+      assert.ok(world.canOccupy(cx * 512 + 256, cy * 512 + i * 32 + 16, 14));
+    }
+  }
+  let dock;
+  for (let cx = -30; cx < 30 && !dock; cx++) dock = world.getChunk(cx, 0).obstacles.find(o => o.kind === 'dock');
+  assert.ok(dock);
+  assert.ok(world.canOccupy(dock.x + 32, dock.y + dock.height + 16, 14));
+  assert.ok(world.segmentClear(dock.x + 32, dock.y + dock.height + 16, dock.x + 32, dock.y + 16, 14));
+});
+
+test('el mar impide caminar pero permite disparar; edificios y barcos siguen dando cobertura', () => {
+  const world = new ProceduralWorld(42), y = 3 * 512;
+  assert.equal(world.segmentClear(256, y + 384, 384, y + 256, 3), false);
+  assert.equal(world.segmentClear(256, y + 384, 384, y + 256, 3, 'attack'), true);
+  assert.equal(world.segmentClear(128, y + 96, 200, y + 190, 3, 'attack'), false);
+  const house = world.getChunk(0, 0).obstacles.find(o => o.kind === 'house')!;
+  assert.equal(world.segmentClear(house.x - 20, house.y + 16, house.x + house.width + 20, house.y + 16, 3, 'attack'), false);
 });

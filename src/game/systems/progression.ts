@@ -9,9 +9,10 @@ export function chooseUpgrades(taken: Record<string, number>, random: () => numb
   const pool: LevelChoice[] = UPGRADES.filter(u => (taken[u.id] || 0) < u.max && (!player || canGainStat(player, u)))
     .map(u => player && u.stat === 'regeneration' && player.stats.regeneration >= regenerationLimit(player.stats.maxHp) - 1e-8
       ? { ...u, description: 'Regeneración limitada. +0,02 HP/s acumulados en la build, sujetos a topes: este nivel puede no aumentar el efecto actual.' } : u);
-  if (player && hasFreeSlot(player)) for (const id of availableAbilities(player).filter(id => !player.bannedAbilities?.includes(id))) {
+  if (player) for (const id of availableAbilities(player).filter(id => !player.bannedAbilities?.includes(id))) {
     if (!canImproveAttack(player, id)) continue;
     const ability = ABILITIES[id], current = player.attacks.find(a => a.id === id)?.level ?? 0;
+    if (!current && !hasFreeSlot(player)) continue;
     const next = current + 1, params = ability.levels[next - 1];
     pool.push({ kind: 'ability', id: `ability:${id}`, abilityId: id,
       name: `${ability.shortName}${next === 6 ? ' +' : ''} · NV. ${next}`,

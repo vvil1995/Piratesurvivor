@@ -146,3 +146,7 @@ XP Shells Town: multiplicador2 y escalado0,5 de la resistencia extra por tiempo.
 El usuario aclara que aprender un movimiento nuevo debe ofrecer una alternativa elegible en el HUD, no disparar dos a la vez. Cuatro ranuras seleccionables, una activa; grupos desbloqueados ejecutan sus componentes solo al elegir su ranura. Se mantienen acceso por quinto aprendizaje o recompensa real de jefe futuro, máximo4 componentes y16 estructurales. Relojes por componente; cambio de selección sin reiniciar recargas y cancelando ráfagas pendientes. Buff temporal activado dura hasta agotarse, sin reactivación en reserva; constante solo con su grupo activo.
 
 Básicos:0,8–0,9s salvo carga de Zoro1,2s, con reducción progresiva por nivel y topes globales existentes. Zoro elige blanco a distancia realmente alcanzable, comprueba el recorrido antes de moverse y no consume cooldown si no puede acertar. El personaje mira al blanco al atacar en reposo; caminar conserva su dirección. No se modifica el rig de piernas aceptado.
+
+## Ajuste vigente · beta0.17
+
+Prioridad visual: referencia costera aportada por el jugador, base/puerto de Shells Town y feria pirata de Orange Town. Primera entrega con materiales y edificios propios y seis ilustraciones reales de ataques de Luffy; los demás personajes recibirán una revisión equivalente progresivamente. Con cuatro ranuras completas se ofrecen mejoras de ataques ya aprendidos hasta+, junto a pasivas, pero no ataques nuevos. La unión sigue dependiendo de la recompensa del jefe.

@@ -174,7 +174,7 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(!!pickup?.active);
       if (pickup?.active) {
         const kind = pickup.kind ?? 'xp', factor = kind === 'xp' && pickup.value >= 20 ? 1.3 : 1;
-        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : kind === 'food' ? 26 : 18) * factor, (kind === 'food' ? 24 : 18) * factor);
+        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : kind === 'food' ? 30 : 18) * factor, (kind === 'food' ? 27 : 18) * factor);
       }
     }
     this.effects.clear();

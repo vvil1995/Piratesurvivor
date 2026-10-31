@@ -126,6 +126,21 @@ Recursos originales generados con la herramienta de imágenes de esta sesión, s
 - Morgan: cuerpo y brazo-destral independientes, fuente generada `exec-491fb619-1839-4470-9913-ad4732d312e7.png`, a partir de la primera propuesta original `exec-137303ef-1b4c-488c-bf23-ca7e78f09015.png`.
 - Buggy y cuchillos: fuente propia `exec-28ff320c-238c-463a-9ca5-cd8ed2505941.png`. Se conserva el formato64×80 para la separación de cabeza/cuerpo del renderizador.
 - Espadachín, tirador y pesado: tres hojas propias,16 poses cada una, fuentes `exec-a70a6c8e-d9e6-4755-804b-5575ffb1b561.png`, `exec-8e03d9b2-3725-4711-b23c-c9e5197b7f13.png`, `exec-5b4aceca-8ef6-4602-89ad-9f4d90dd5054.png`. No son variantes cromáticas de los marines. Atlas normalizados768×192; ocho orientaciones y dos pasos. No se aplica el recorte articulado de piernas del marine a estos cuerpos nuevos.
-- Escenario: casas comerciales, toldo, carpa, tarongero, ruina, banderines y brújula con esfera de vidrio. Fuente `exec-406a3647-3716-4bd9-a8a0-f68b3f9858ee.png`, revisión de transparencia `exec-f04eeb32-bc35-4f84-871b-42750759e92c.png`.
+- Escenario: casas comerciales, toldo, carpa, naranjo, ruina, banderines y brújula con esfera de vidrio. Fuente `exec-406a3647-3716-4bd9-a8a0-f68b3f9858ee.png`, revisión de transparencia `exec-f04eeb32-bc35-4f84-871b-42750759e92c.png`.
 - Preparación: recortes transparentes, ajuste al tamaño de ejecución con vecino más cercano y PNG indexado256 colores. No se descargaron herramientas ni dependencias de ejecución nuevas. Las fuentes de generación permanecen en `/workspace/generated_images`; los recortes finales y sus SHA-256/tamaños se conservan en `src/assets/visual-manifest.json`.
 - La brújula adopta deliberadamente la apariencia de un Log Pose por petición visual del jugador. El sistema sigue siendo la carta/punto de viaje existente; no pretende afirmar que East Blue requiera un Log Pose ni añade mecánicas de Grand Line.
+
+## Referencia costera e ilustraciones de Luffy · beta0.17 · 31-10-2026
+
+Las capturas aportadas por el usuario se utilizan como referencia estética. Los recursos de esta entrega se han generado expresamente para el proyecto; no se ha extraído ni descargado ningún sprite de ellas, de un juego comercial o de PokéSurvivor. No se añaden bibliotecas ni recursos remotos. Los derechos de One Piece siguen reservados a sus titulares; no se atribuye licencia MIT a estas representaciones.
+
+| Recursos de ejecución | Fuente generada en esta sesión |
+| --- | --- |
+| Base naval, casa con toldo azul, casa pirata, carpa del payaso, árbol, palmera, muelle de piedra y embarcadero | `exec-b80e7116-b46d-4085-8556-ce665341f6d5.png` |
+| Seis ilustraciones96×96 de Pistol, Gatling, Bazooka, Whip, Balloon y Axe | `exec-4d92acee-3059-425c-8ff4-21301e591c7f.png` |
+| Carne con hueso blanco32×28, mostrada a30×27 | `exec-61d68e66-0409-4738-ad9e-dfc86a0c6ef2.png` |
+| Puesto de mercado, casa reparada, farola, cajas, muro y valla | `exec-7a64ac7d-302a-43db-92e0-9295ace14fdd.png` |
+| Materiales de suelo64×64: adoquín irregular, tierra, hierba y mar | `exec-fb4dd41d-3da3-4afb-a599-58b02d48ec2d.png` |
+| Barco naval decorativo con emblema de ave original | `exec-14b0e406-5bef-4776-91f8-2a05bfd543ba.png` |
+
+Preparación: recorte, normalización por vecino más cercano y PNG indexado256 colores. Se conserva la relación de aspecto de edificios/vegetación; las ilustraciones sustituyen los iconos procedurales de Luffy en cartas y HUD. Los originales permanecen en `/workspace/generated_images`. El manifiesto `src/assets/visual-manifest.json` recoge SHA-256 y tamaño de cada recorte final. Se elimina la casa morada sin uso; la variante con toldo azul comparte el mismo recurso de ejecución, sin duplicar la imagen.

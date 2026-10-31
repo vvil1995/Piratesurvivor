@@ -34,7 +34,7 @@ export function counterGuard(player: Player, origin: Vector, grid: SpatialGrid, 
     const angle = Math.atan2(origin.y - player.y, origin.x - player.x), radius = player.stats.range * p.range;
     grid.visit(player.x, player.y, radius + 15, enemy => {
       const dx = enemy.x - player.x, dy = enemy.y - player.y, d = Math.max(1, Math.hypot(dx, dy));
-      if (d <= radius + enemy.radius && (dx * Math.cos(angle) + dy * Math.sin(angle)) / d >= Math.cos(p.counterArc ?? 0.8) && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) damageEnemy(player, enemy, player.stats.damage * p.counterDamage!, 15, player, world, onKill, random);
+      if (d <= radius + enemy.radius && (dx * Math.cos(angle) + dy * Math.sin(angle)) / d >= Math.cos(p.counterArc ?? 0.8) && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2, 'attack')) damageEnemy(player, enemy, player.stats.damage * p.counterDamage!, 15, player, world, onKill, random);
     });
     return true;
   }

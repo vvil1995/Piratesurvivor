@@ -37,12 +37,6 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0x4b3328); g.fillRect(0, 0, 64, 64); g.fillStyle(0x976740); g.fillRect(3, 3, 58, 58);
   g.lineStyle(3, 0xd1a367); g.strokeRect(5, 5, 54, 54); g.lineBetween(7, 7, 57, 57); g.lineBetween(57, 7, 7, 57);
   g.generateTexture('crate', 64, 64); g.clear();
-  // Muslo de ave pixelado original: carne redonda y hueso expuesto.
-  g.fillStyle(0xe6d8b5); g.fillRect(12, 14, 10, 5); g.fillCircle(22, 14, 4); g.fillCircle(23, 20, 4);
-  g.fillStyle(0x603128); g.fillEllipse(10, 10, 19, 19); g.fillStyle(0xac5835); g.fillEllipse(10, 9, 16, 16);
-  g.fillStyle(0xd88748); g.fillEllipse(8, 7, 10, 8); g.fillStyle(0xf2bc6e); g.fillRect(5, 4, 6, 2);
-  g.fillStyle(0x7c3d2b); g.fillRect(8, 13, 6, 2); g.fillStyle(0xffe6ac); g.fillRect(20, 13, 3, 2);
-  g.generateTexture('food', 28, 26); g.clear();
   g.fillStyle(0x61376e); g.fillCircle(9, 11, 7); g.fillStyle(0xbe6ac1); g.fillCircle(8, 10, 6);
   g.lineStyle(1, 0xeab8d4); g.strokeCircle(8, 10, 3); g.lineBetween(8, 7, 10, 10);
   g.fillStyle(0x90b864); g.fillRect(8, 0, 2, 5); g.fillTriangle(10, 2, 17, 0, 13, 5);

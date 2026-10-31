@@ -1,3 +1,26 @@
+import ship from '../../assets/worlds/naval-ship.png';
+import groundstone from '../../assets/worlds/ground-stone.png';
+import groundearth from '../../assets/worlds/ground-earth.png';
+import groundgrass from '../../assets/worlds/ground-grass.png';
+import groundwater from '../../assets/worlds/ground-water.png';
+import lamp from '../../assets/worlds/coastal-lamp.png';
+import crates from '../../assets/worlds/coastal-crates.png';
+import wall from '../../assets/worlds/coastal-wall.png';
+import fence from '../../assets/worlds/coastal-fence.png';
+import { registerArt } from '../../ui/pixel-art.ts';
+import shellsBase from '../../assets/worlds/shells-base.png';
+import shellsHouse from '../../assets/worlds/shells-house.png';
+import coastalTree from '../../assets/worlds/coastal-tree.png';
+import coastalPalm from '../../assets/worlds/coastal-palm.png';
+import stoneQuay from '../../assets/worlds/stone-quay.png';
+import woodenDock from '../../assets/worlds/wooden-dock.png';
+import food from '../../assets/worlds/food.png';
+import pistolArt from '../../assets/abilities/elastic-punch.png';
+import gatlingArt from '../../assets/abilities/gatling.png';
+import bazookaArt from '../../assets/abilities/bazooka.png';
+import whipArt from '../../assets/abilities/whip.png';
+import balloonArt from '../../assets/abilities/balloon.png';
+import axeArt from '../../assets/abilities/axe.png';
 import buggy from '../../assets/bosses/buggy.png';
 import knives from '../../assets/bosses/buggy-knives.png';
 import type Phaser from 'phaser';
@@ -7,7 +30,7 @@ import pirate from '../../assets/actors/buggy-pirate-atlas.png';
 import gunner from '../../assets/actors/buggy-gunner-atlas.png';
 import bruiser from '../../assets/actors/buggy-bruiser-atlas.png';
 import house from '../../assets/worlds/orange-house-0.png';
-import occupied from '../../assets/worlds/orange-house-1.png';
+
 import tent from '../../assets/worlds/orange-tent.png';
 import stall from '../../assets/worlds/orange-stall.png';
 import tree from '../../assets/worlds/orange-tree.png';
@@ -17,7 +40,8 @@ import compass from '../../assets/worlds/navigation-chart.png';
 import { createPackedDirectionalArt } from './directional-art.ts';
 
 const actors = { 'buggy-pirate': pirate, 'buggy-gunner': gunner, 'buggy-bruiser': bruiser };
-const props = { buggy, 'buggy-knives': knives, morgan, 'morgan-axe': axe, 'orange-house-0': house, 'orange-house-1': occupied,
+const props = { 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
+  'ability-elastic-punch': pistolArt, 'ability-gatling': gatlingArt, 'ability-bazooka': bazookaArt, 'ability-whip': whipArt, 'ability-balloon': balloonArt, 'ability-axe': axeArt, buggy, 'buggy-knives': knives, morgan, 'morgan-axe': axe, 'orange-house-0': house, 'orange-house-1': shellsHouse,
   'orange-tent': tent, 'orange-stall': stall, 'orange-tree': tree, 'orange-ruin': ruin,
   'orange-flags': flags, 'navigation-chart': compass };
 export function preloadIslandArt(scene: Phaser.Scene): void {
@@ -31,7 +55,7 @@ export function createIslandArt(scene: Phaser.Scene): void {
     const canvas = document.createElement('canvas'); canvas.width = source.width; canvas.height = source.height;
     canvas.getContext('2d')!.drawImage(source, 0, 0);
     if (scene.textures.exists(key)) scene.textures.remove(key);
-    scene.textures.addCanvas(key, canvas); scene.textures.remove(`island-source-${key}`);
+    scene.textures.addCanvas(key, canvas); if (key.startsWith('ability-')) registerArt(key, canvas); scene.textures.remove(`island-source-${key}`);
   }
   for (const key of Object.keys(actors)) {
     for (const direction of ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']) for (let phase = 0; phase < 2; phase++) {

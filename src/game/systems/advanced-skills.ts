@@ -37,7 +37,7 @@ export function castAdvanced(player: Player, state: EquippedAttack, effects: Ski
   }
   if (ability.behavior !== 'dash' && ability.behavior !== 'evade') return;
   const dashRange = Math.min(player.stats.range * params.range, (params.dash ?? 50) + 28);
-  const target = nearestTarget(player, grid, world, ability.behavior === 'dash' ? dashRange : player.stats.range * params.range, ability.behavior === 'dash' ? 14 : 2);
+  const target = nearestTarget(player, grid, world, ability.behavior === 'dash' ? dashRange : player.stats.range * params.range, ability.behavior === 'dash' ? 14 : 2, ability.behavior === 'dash' ? 'movement' : 'attack');
   const hazard = effects.projectiles.items.find(p => p.active && p.hostile && Math.hypot(p.x - player.x, p.y - player.y) < 90);
   if (ability.behavior === 'dash' && !target) return false;
   if (!target && !hazard || ability.behavior === 'evade' && !hazard && target && Math.hypot(target.x - player.x, target.y - player.y) > 70) return false;

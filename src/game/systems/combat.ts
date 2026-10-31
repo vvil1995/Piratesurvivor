@@ -17,7 +17,7 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
   grid.visit(player.x, player.y, range, enemy => {
     if (options?.targetId !== undefined && enemy.id !== options.targetId) return;
     const d = (player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2;
-    if (d <= closest && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) { closest = d; target = enemy; }
+    if (d <= closest && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2, 'attack')) { closest = d; target = enemy; }
   });
   if (!target) return;
   const angle = Math.atan2(target.y - player.y, target.x - player.x) + (options?.angleOffset ?? 0), ax = Math.cos(angle), ay = Math.sin(angle);
@@ -27,7 +27,7 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
   grid.visit(player.x, player.y, range + 15, enemy => {
     if (ability.behavior === 'focus' && enemy.id !== target!.id) return;
     const dx = enemy.x - player.x, dy = enemy.y - player.y, distance = Math.hypot(dx, dy);
-    if (distance > range + enemy.radius || !world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) return;
+    if (distance > range + enemy.radius || !world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2, 'attack')) return;
     const projection = dx * ax + dy * ay;
     const line = ability.behavior === 'line' || ability.behavior === 'focus' || ability.behavior === 'burst' && params.shape !== 'cone';
     if (line ? projection < 0 || Math.abs(dx * ay - dy * ax) > params.width + enemy.radius :
@@ -44,7 +44,7 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
   for (const enemy of victims.slice(0, params.hits)) damage(enemy);
   if (params.splash) grid.visit(impactX, impactY, params.splash + 15, enemy => {
     if (Math.hypot(enemy.x - impactX, enemy.y - impactY) <= params.splash + enemy.radius &&
-      world.segmentClear(impactX, impactY, enemy.x, enemy.y, 2) && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) damage(enemy, 0.75);
+      world.segmentClear(impactX, impactY, enemy.x, enemy.y, 2, 'attack') && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2, 'attack')) damage(enemy, 0.75);
   });
   let reach = ability.behavior === 'sweep' || params.hits > 1 ? range : Math.sqrt(closest);
   if (ability.behavior === 'line' || ability.behavior === 'burst') {
@@ -71,7 +71,7 @@ export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionW
         const radius = player.stats.range * params.range;
         grid.visit(player.x, player.y, radius + 15, enemy => {
           const dx = enemy.x - player.x, dy = enemy.y - player.y, d = Math.max(1, Math.hypot(dx, dy));
-          if (d > radius + enemy.radius || !world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) return;
+          if (d > radius + enemy.radius || !world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2, 'attack')) return;
           if (params.damage > 0) damageEnemy(player, enemy, player.stats.damage * params.damage, 0, player, world, onKill, random);
           if (!enemy.active || enemy.kind) return;
           if (params.launch) {

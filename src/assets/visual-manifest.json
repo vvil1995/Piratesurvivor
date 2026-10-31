@@ -27,36 +27,120 @@
     "sha256": "85d9b24b90882e34d2113a4fa5ac1883e2029cc99439eb91e13878acd02c72df",
     "bytes": 1624
   },
+  "worlds/ground-earth.png": {
+    "sha256": "05587c132809686a649a517e921a220e478d20b8df3e9c355465f971bd7b55a4",
+    "bytes": 3403
+  },
+  "worlds/shells-house.png": {
+    "sha256": "70ee0ef44993d71fc499a3cc6e54eb247a33dcef64c6656ea518f81017c2a471",
+    "bytes": 12268
+  },
+  "worlds/wooden-dock.png": {
+    "sha256": "c3a1103ff30aba06423f32ad1f711bcd4bc8a3f8c29e1e2c11f73a4789f77848",
+    "bytes": 5037
+  },
+  "worlds/coastal-lamp.png": {
+    "sha256": "7e7f51c9036da559c855c9c0e5cd1bf649adbd49f5253e145b50176827bed687",
+    "bytes": 1975
+  },
   "worlds/orange-tent.png": {
-    "sha256": "7549e84fe1f958debb27ead29c41edf0d727cd5eaca69fc874bcc69902fdfb9c",
-    "bytes": 11847
+    "sha256": "d4e9caca622a9221379b9c1e6e811273ddf501d2f4bef82ea5d37612df677603",
+    "bytes": 14554
   },
   "worlds/orange-tree.png": {
     "sha256": "ab55ad117405dee7deb7e550b8c6cd20241fe9de399b5d494af1b8c3acc7fd11",
     "bytes": 7010
   },
+  "worlds/food.png": {
+    "sha256": "3596149e8ea0a5f6d79ce3d1d6444ed526ff32cc4e3b98d89102e354e8377adb",
+    "bytes": 1399
+  },
   "worlds/orange-flags.png": {
     "sha256": "b027d70355847bc59e5af98480b91fb7f73bd16a4d1b2f7e1c388e045e6328a9",
     "bytes": 3058
   },
-  "worlds/orange-house-0.png": {
-    "sha256": "fb545e3732503e37414681fe47144384708068400fc00146d3890d94c0f72578",
-    "bytes": 12878
+  "worlds/shells-base.png": {
+    "sha256": "fb55f0bc7c7824127ff5e5a1179447ceae36cfd811a3a561f7e29f7c368d36fb",
+    "bytes": 14006
   },
-  "worlds/orange-house-1.png": {
-    "sha256": "f047b33ae2f8b5448a95b91723dfa4e6137a0e3958d7261a361c03bd1dc85402",
-    "bytes": 12423
+  "worlds/coastal-crates.png": {
+    "sha256": "f742915693b8cf9815fabc688dc6075e71c12829d836736e943c612cd6504701",
+    "bytes": 2885
+  },
+  "worlds/orange-house-0.png": {
+    "sha256": "06e23a73ee39452c1c28c8bf58a9968938df5fb4e097ec8e8719901276ec6db2",
+    "bytes": 12322
+  },
+  "worlds/coastal-palm.png": {
+    "sha256": "fd618de71825d967760acfddade3582d5e8f57c955f0271f771910ea000ccc5e",
+    "bytes": 5156
   },
   "worlds/orange-stall.png": {
-    "sha256": "e6acee7cb9c76dad3939a0c57d3a5622e4cec14dc753578821949b5c62d6c06b",
-    "bytes": 7228
+    "sha256": "573ea44cd32210b1638659e21407602fa1b272a65f886fb3c3d633bc66cb354d",
+    "bytes": 7948
+  },
+  "worlds/ground-grass.png": {
+    "sha256": "a73924e5e4e765faadea48f5b420c96dda71f9f11cf60f47f066a730f38a55ee",
+    "bytes": 3872
   },
   "worlds/navigation-chart.png": {
     "sha256": "e1d80bebb394c04dd7b964df85aabaa22c4272e59ea92a8f3995c6d0804d33bf",
     "bytes": 1997
   },
+  "worlds/coastal-tree.png": {
+    "sha256": "1b211fff3f5c513b67a4b6855ecc74db25f86dc18eed9cdb589cd66152348acc",
+    "bytes": 6246
+  },
   "worlds/orange-ruin.png": {
-    "sha256": "114185dffb1c9ee2a403364b4e8830f2a6ff4436a90bee4b6a31ef68c6b1e386",
-    "bytes": 11994
+    "sha256": "d112664c62269652c2e976b2afd19ad1c76607012fc625e7982c7cbbed997805",
+    "bytes": 11940
+  },
+  "worlds/ground-water.png": {
+    "sha256": "cdc5b5a66744cdf06e8de72fbc6996a5d3a9776448a66cf5ba5f94b6ce43b7c1",
+    "bytes": 3282
+  },
+  "worlds/coastal-fence.png": {
+    "sha256": "7040e88935456a405a7562f05337df9b627fc02f8fc3b61fb2594f4fcaee21af",
+    "bytes": 3826
+  },
+  "worlds/stone-quay.png": {
+    "sha256": "bbd03c28d998a9bb9efddffc6869af9eac1dc4b0f632e691f626083ac92fe982",
+    "bytes": 6436
+  },
+  "worlds/ground-stone.png": {
+    "sha256": "4a90a4e5e09c74bb4fce6975da67c21440ee74c3b0219bbcd10c3cbfa2a52d5a",
+    "bytes": 3732
+  },
+  "worlds/naval-ship.png": {
+    "sha256": "1e0acca315db9eb91255342a39d480e7dd0a750d4825167e777e2384a486a4a9",
+    "bytes": 9414
+  },
+  "worlds/coastal-wall.png": {
+    "sha256": "aa3f366fe7f7caca4eec7ba335d8066a35b4d9685c93003625b95ed71a2ff9ba",
+    "bytes": 3914
+  },
+  "abilities/whip.png": {
+    "sha256": "a072b1d47d6986da5b16b8e65e7b61bce159b1b27972c051324dabfaa7079412",
+    "bytes": 5859
+  },
+  "abilities/bazooka.png": {
+    "sha256": "1ec714c8b6f986ec4f674da6d71e9ee5134809da73cc4e5eb900d0e18dfae564",
+    "bytes": 6464
+  },
+  "abilities/axe.png": {
+    "sha256": "325ed17e527b45bab1c70eca17b3cbd019d2b31c57b57de1ba719552a57d744a",
+    "bytes": 6287
+  },
+  "abilities/balloon.png": {
+    "sha256": "9d8877542311cee3a6e99d25f1f48b3195038de635568b22187dadcfa166add1",
+    "bytes": 6225
+  },
+  "abilities/elastic-punch.png": {
+    "sha256": "93c9017aad9692c400f93b85cccb9d403b769e8003f0fee380a19a0720aac5aa",
+    "bytes": 5966
+  },
+  "abilities/gatling.png": {
+    "sha256": "c7a72a3d65c525d48d4bb73ecce93c139e647c1422423d457466599a9892d6a7",
+    "bytes": 5859
   }
 }

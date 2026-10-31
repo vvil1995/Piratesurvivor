@@ -22,29 +22,34 @@ export class WorldRenderer {
   private paint(slot: Slot, chunk: Chunk): void {
     const ctx = slot.texture.context;
     ctx.imageSmoothingEnabled = false;
-    const orange = this.world?.theme === 'orange';
-    const orchard = chunk.district === 'orchard', circus = chunk.district === 'circus';
+    const ground = Object.fromEntries(['stone','earth','grass','water'].map(name => [name, ctx.createPattern(this.scene.textures.get(`ground-${name}`).getSourceImage() as HTMLCanvasElement, 'repeat')!]));
+    const orange = this.world?.theme === 'orange', coastal = this.world?.theme !== 'syrup';
+    const orchard = chunk.district === 'orchard' || chunk.district === 'garden', circus = chunk.district === 'circus';
     const grass = chunk.district === 'garden' ? ['#719063', '#759568', '#6e8c60'] : ['#b9b39a', '#b5b096', '#bdb79d'];
     for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
       const h = hash(chunk.variation, x, y), road = roadTile(x, y) || chunk.district === 'plaza';
       ctx.fillStyle = road ? (this.world?.theme === 'orange' ? ['#d5bb9c', '#d9c3a5', '#cfb596'] : ['#c6c2ad', '#cbc7b4', '#c2bfac'])[h % 3] : grass[h % 3];
       ctx.fillRect(x * 16, y * 16, 16, 16);
-      if (orange) {
+      if (coastal) {
         // Calles adoquinadas estrechas, tierra de feria y huertos: otra trama,
         // no la cuadrícula naval recoloreada. Se rasteriza solo al cargar el chunk.
-        ctx.fillStyle = road ? ['#b59c80', '#bba58a', '#b19a81'][h % 3]
+        ctx.fillStyle = road ? ['#cdb78e', '#d6c39d', '#cbb58c'][h % 3]
           : orchard ? ['#688952', '#718e57', '#78925c'][h % 3]
-          : circus ? ['#b8a178', '#baa57f', '#b19a74'][h % 3] : ['#a99070', '#b49b79', '#b9a17f'][h % 3];
+          : !orange ? ['#83a452', '#89a959', '#7e9e50'][h % 3] : circus ? ['#cbb17b', '#d2ba85', '#c8ad76'][h % 3] : ['#c9ae7b', '#d1b785', '#cdb17e'][h % 3];
         ctx.fillRect(x * 16, y * 16, 16, 16);
         if (road) for (let row = 0; row < 2; row++) {
           for (let col = 0; col < 3; col++) {
             const px = x * 16 + col * 6 - (row % 2 ? 3 : 0), py = y * 16 + row * 8;
-            ctx.fillStyle = '#887b69'; ctx.fillRect(Math.max(x * 16, px), py, Math.min(5, x * 16 + 16 - px), 7);
-            ctx.fillStyle = ['#c9b89a', '#c1ae91', '#bfab8e'][(h + col + row) % 3];
+            ctx.fillStyle = '#ab9776'; ctx.fillRect(Math.max(x * 16, px), py, Math.min(5, x * 16 + 16 - px), 7);
+            ctx.fillStyle = ['#e1cda2', '#d8c39a', '#dcc69c'][(h + col + row) % 3];
             ctx.fillRect(Math.max(x * 16, px), py, Math.min(5, x * 16 + 16 - px), 5);
           }
         }
-        else if (h % 3 === 0) { ctx.fillStyle = orchard ? '#526e43' : '#8b795c'; ctx.fillRect(x * 16 + 5, y * 16 + 9, 3, 1); }
+        if (chunk.district === 'harbor' && road) {
+          ctx.fillStyle = ['#aa7945', '#b9844e', '#bc8b54'][h % 3]; ctx.fillRect(x * 16, y * 16, 16, 16);
+          for (let row = 0; row < 4; row++) { ctx.fillStyle = '#765438'; ctx.fillRect(x * 16, y * 16 + row * 4, 16, 1); ctx.fillStyle = '#d6ab6e'; ctx.fillRect(x * 16 + 2, y * 16 + row * 4 + 1, 11, 1); }
+        }
+        else if (!road && h % 3 === 0) { ctx.fillStyle = orchard ? '#526e43' : '#8b795c'; ctx.fillRect(x * 16 + 5, y * 16 + 9, 3, 1); }
       } else if (road) {
         ctx.fillStyle = '#a5a58f'; ctx.fillRect(x * 16, y * 16, 16, 1); ctx.fillRect(x * 16, y * 16, 1, 16);
         ctx.fillStyle = '#dedbc6'; ctx.fillRect(x * 16 + 2, y * 16 + 2, 11, 1);
@@ -52,10 +57,31 @@ export class WorldRenderer {
         ctx.fillStyle = chunk.district === 'garden' ? '#567e52' : '#969f7a';
         ctx.fillRect(x * 16 + 5, y * 16 + 8, 1, 3); ctx.fillRect(x * 16 + 7, y * 16 + 6, 1, 4);
       }
+      if (coastal && !(chunk.district === 'harbor' && road)) {
+        ctx.fillStyle = road ? ground.stone : !orange || orchard ? ground.grass : ground.earth;
+        ctx.fillRect(x * 16, y * 16, 16, 16);
+      }
       // Bordillos alineados con la trama de calles.
       ctx.fillStyle = orange ? '#8b775d' : '#9d9e86';
       if ((x === 5 || x === 10) && !roadTile(0, y)) ctx.fillRect(x * 16 + (x === 5 ? 14 : 0), y * 16, 2, 16);
       if ((y === 5 || y === 10) && !roadTile(x, 0)) ctx.fillRect(x * 16, y * 16 + (y === 5 ? 14 : 0), 16, 2);
+    }
+    for (const obstacle of chunk.obstacles) if (obstacle.kind === 'water') {
+      const x = (obstacle.x - chunk.cx * CHUNK_SIZE) / 2, y = (obstacle.y - chunk.cy * CHUNK_SIZE) / 2;
+      const w = obstacle.width / 2, h = obstacle.height / 2;
+      ctx.fillStyle = ground.water; ctx.fillRect(x, y, w, h);
+      // Espuma solo donde hay tierra/pasarela, nunca dibujar líneas sobre las
+      // uniones de dos chunks de mar contiguos.
+      const tx = Math.floor(obstacle.x / 32), ty = Math.floor(obstacle.y / 32), tw = obstacle.width / 32, th = obstacle.height / 32;
+      ctx.fillStyle = '#c0e8de';
+      for (let i = 0; i < tw; i++) {
+        if (!this.world!.solidTile(tx + i, ty - 1)) ctx.fillRect(x + i * 16, y, 16, 1);
+        if (!this.world!.solidTile(tx + i, ty + th)) ctx.fillRect(x + i * 16, y + h - 1, 16, 1);
+      }
+      for (let i = 0; i < th; i++) {
+        if (!this.world!.solidTile(tx - 1, ty + i)) ctx.fillRect(x, y + i * 16, 1, 16);
+        if (!this.world!.solidTile(tx + tw, ty + i)) ctx.fillRect(x + w - 1, y + i * 16, 1, 16);
+      }
     }
     if (orange && (circus || chunk.district === 'plaza')) {
       // Pista de feria y banderines; los avisos de combate se dibujan por encima.
@@ -88,15 +114,25 @@ export class WorldRenderer {
       const obstacle = chunk.obstacles[i];
       if (!slot.decorations[i]) slot.decorations.push(this.scene.add.image(0, 0, 'tree').setOrigin(0.5, 1));
       const sprite = slot.decorations[i];
+      if (obstacle.kind === 'water') { sprite.setVisible(false); continue; }
       const own = orange && ['house', 'tree', 'tent', 'stall', 'ruin'].includes(obstacle.kind);
-      sprite.setTexture(obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
-      if (obstacle.kind === 'house' || obstacle.kind === 'ruin') sprite.setDisplaySize(obstacle.width, obstacle.height + 32);
+      sprite.setTexture(obstacle.kind === 'ship' ? 'naval-ship' : obstacle.kind === 'lamp' ? 'coastal-lamp' : obstacle.kind === 'fence' ? 'coastal-fence' : obstacle.kind === 'crate' && coastal ? 'coastal-crates' : obstacle.kind === 'wall' && coastal ? 'coastal-wall' : obstacle.kind === 'dock' ? 'wooden-dock' : obstacle.kind === 'quay' ? 'stone-quay' : !orange && coastal && obstacle.kind === 'house' ? obstacle.variant === 3 ? 'shells-base' : 'shells-house' : obstacle.kind === 'tree' && coastal && (obstacle.variant === 1 || !orange) ? obstacle.variant === 1 && orange ? 'coastal-palm' : 'coastal-tree' : obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
+      if (obstacle.kind === 'ship') sprite.setDisplaySize(obstacle.width, obstacle.width * sprite.height / sprite.width);
+      else if (obstacle.kind === 'lamp') sprite.setDisplaySize(28, 84);
+      else if (obstacle.kind === 'fence') sprite.setDisplaySize(obstacle.width, 48);
+      else if (obstacle.kind === 'dock') sprite.setDisplaySize(obstacle.width + 12, obstacle.height);
+      else if (obstacle.kind === 'quay') sprite.setDisplaySize(obstacle.width, obstacle.height + 16);
+      else if (obstacle.kind === 'house' || obstacle.kind === 'ruin') sprite.setDisplaySize(obstacle.width, obstacle.height + 32);
       else if (obstacle.kind === 'tent') sprite.setDisplaySize(obstacle.width, obstacle.height + 48);
       else if (obstacle.kind === 'stall') sprite.setDisplaySize(obstacle.width, obstacle.height + 24);
       else if (obstacle.kind === 'pennant') sprite.setDisplaySize(30, 80);
       else if (obstacle.kind === 'tree') sprite.setDisplaySize(76, 98);
       else if (obstacle.kind === 'rock') sprite.setDisplaySize(obstacle.width + 12, obstacle.height + 16);
       else sprite.setDisplaySize(obstacle.width, obstacle.height + 10);
+      if (coastal && ['house', 'tent', 'stall', 'ruin', 'tree', 'crate', 'fence', 'lamp'].includes(obstacle.kind)) {
+        const width = obstacle.kind === 'tent' ? obstacle.width + 32 : sprite.displayWidth;
+        sprite.setDisplaySize(width, width * sprite.height / sprite.width);
+      }
       sprite.setVisible(true);
     }
     for (let i = chunk.obstacles.length; i < slot.decorations.length; i++) slot.decorations[i].setVisible(false);
