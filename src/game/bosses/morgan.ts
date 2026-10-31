@@ -1,3 +1,4 @@
+import { isInvulnerable } from '../systems/guards.ts';
 import { MORGAN, MORGAN_ATTACKS } from '../../content/bosses/morgan.ts';
 import type { Enemy, Player, Vector } from '../core/types.ts';
 import type { CollisionWorld } from '../world/world.ts';
@@ -38,7 +39,7 @@ export class MorganEncounter {
   private hurt(player: Player, zone: DangerZone): void {
     if (this.hit.has(player.id) || !inDanger(zone, player)) return;
     this.hit.add(player.id);
-    if (player.hurtTimer > 0) return;
+    if (player.hurtTimer > 0 || isInvulnerable(player)) return;
     player.hp = Math.max(0, player.hp - receivedDamage(this.attack!.damage, player.stats.armor)); player.hurtTimer = 0.65;
   }
   tick(dt: number, player: Player, world: CollisionWorld, direction: (from: Vector) => Vector, reinforce: () => void): void {

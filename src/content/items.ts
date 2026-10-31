@@ -1,5 +1,5 @@
 import type { StatModifiers } from './types.ts';
-export const ITEM_SLOTS = 6, ITEM_MAX_LEVEL = 3;
+export const ITEM_SLOTS = 1, ITEM_MAX_LEVEL = 3;
 export const ITEMS: Record<string, { name: string; description: string; modifiers: StatModifiers }> = {
   boots: { name: 'Botes de navegant', description: '+8% velocidad por nivel', modifiers: { speed: 0.08 } },
   whetstone: { name: 'Pedra d’esmolar', description: '+8% daño por nivel', modifiers: { damage: 0.08 } },

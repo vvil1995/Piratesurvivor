@@ -17,7 +17,7 @@ export interface AttackLevel {
   hits: number; shots: number; interval: number; knockback: number; splash: number;
   projectiles?: number; projectileSpeed?: number; fan?: number; bounces?: number; chain?: number;
   status?: StatusKind; statusDuration?: number; steal?: number; dash?: number; counterDamage?: number; counterArc?: number; reflect?: boolean; deflect?: boolean; finisher?: number; heal?: number; regeneration?: number;
-  duration?: number; delay?: number; area?: number; guard?: number; inflate?: number; shape?: 'line' | 'cone';
+  invulnerable?: boolean; launch?: boolean; duration?: number; delay?: number; area?: number; guard?: number; inflate?: number; shape?: 'line' | 'cone';
 }
 export interface AbilityDefinition {
   id: string; name: string; shortName: string; behavior: AttackBehavior;

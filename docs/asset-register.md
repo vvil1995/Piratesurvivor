@@ -100,3 +100,7 @@ Morgan provisional (64×80), brazo-destral (40×58), caja de cobertura y barco: 
 ### 0.11.0 — botín y buffs
 
 Carne con hueso y fruta de espirales: primitivas pixeladas originales18×18 en `textures.ts`; sustituyen el plato provisional y añaden la primera fruta funcional. Flechas de buff: líneas originales y caracteres del sistema; sin imágenes, fuentes ni paquetes externos. Orígenes de hombros calculados sobre el atlas normalizado existente; no se modifica la caminata ni se importan sprites nuevos.
+
+### 0.12.0 — objetos y pose Balloon
+
+Ocho iconos de objetos24×24 dibujados originalmente en `item-art.ts`, usados tanto en HUD como en pickups. Ninguna descarga ni dependencia nueva. Pose Balloon: composición de cabeza/pies recortados del atlas ya registrado y torso de geometría original en `balloon-rig.ts`; no se modifica el PNG fuente ni la caminata normal. Se mantienen los avisos de derechos de One Piece del registro anterior.

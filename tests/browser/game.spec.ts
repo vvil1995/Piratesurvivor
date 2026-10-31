@@ -309,28 +309,26 @@ test('quinta habilidad, combinación táctil, buffs constantes y ocho movimiento
   await offerChoice(page, 'ability:fury', true);
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Furia/ }) }).click();
   await expect(page.locator('#combinations')).toBeVisible();
-  await expect(page.locator('#combination-done')).toBeDisabled();
+  await expect(page.locator('.combination-card')).toHaveCount(5);
   const time = await page.evaluate(() => window.__OPS_QA__!.getRun()!.time);
   await page.waitForTimeout(150); expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.time)).toBe(time);
-  await page.locator('#merge-from').selectOption('1'); await page.locator('#merge-to').selectOption('0'); await page.locator('#merge-apply').click();
-  await expect(page.locator('#combination-done')).toBeEnabled(); await page.locator('#combination-done').click();
+  await page.locator('[data-join="1"]').click(); await expect(page.locator('.combination-card')).toHaveCount(4); await page.locator('[data-join="0"]').click();
+  await expect(page.locator('#combinations')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.attacks.length)).toBe(5);
   await page.locator('#manage-abilities').click();
-  await expect(page.locator('#merge-apply')).toBeDisabled();
+  await expect(page.locator('.combination-card').first()).toBeDisabled();
   await page.locator('#combination-done').click();
   await offerChoice(page, 'ability:impulse', true);
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Impulso/ }) }).click();
-  const fury = page.locator('.component-detail').filter({ has: page.getByRole('heading', { name: /Furia/ }) });
-  await fury.locator('select').selectOption('0'); await fury.getByRole('button', { name: 'Mover', exact: true }).click();
-  await expect(page.locator('#combination-slots')).toContainText('CONSTANTE');
-  await page.locator('#combination-done').click();
+  await page.locator('[data-join="1"]').click(); await page.locator('[data-join="0"]').click();
+  await expect(page.locator('#combinations')).toBeHidden();
   await expect(page.locator('[data-ability="fury"]')).toHaveClass(/buff-constant/);
   for (const [id, name, from, to] of [['balloon', 'Balloon', '2', '3'], ['axe', 'Axe', '1', '0']]) {
     await offerChoice(page, `ability:${id}`, true);
     await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
     await expect(page.locator('#combinations')).toBeVisible();
-    await page.locator('#merge-from').selectOption(from); await page.locator('#merge-to').selectOption(to); await page.locator('#merge-apply').click();
-    await page.locator('#combination-done').click();
+    await page.locator(`[data-join="${from}"]`).click(); await page.locator(`[data-join="${to}"]`).click();
+    await expect(page.locator('#combinations')).toBeHidden();
   }
   const data = await page.evaluate(async () => {
     const p = window.__OPS_QA__!.getRun()!.player, path = '/src/game/systems/progression.ts'; const { chooseUpgrades } = await import(/* @vite-ignore */ path);
@@ -410,14 +408,14 @@ test('el quinto elegido se junta solo al confirmarlo, y cancelar conserva las cu
     await offerChoice(page, `ability:${id}`, true);
     await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: new RegExp(name) }) }).click();
   }
-  await page.locator('#manage-abilities').click(); await expect(page.locator('#merge-apply')).toBeDisabled();
+  await page.locator('#manage-abilities').click(); await expect(page.locator('.combination-card').first()).toBeDisabled();
   await page.locator('#combination-done').click();
   await offerChoice(page, 'ability:fury', true);
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Furia/ }) }).click();
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.attacks.length)).toBe(4);
   await page.locator('#combination-cancel').click(); await expect(page.locator('#levelup')).toBeVisible();
   await page.locator('.upgrade-card').filter({ has: page.getByRole('heading', { name: /Furia/ }) }).click();
-  await page.locator('#pending-join-target').selectOption('0'); await page.locator('#pending-join-apply').click();
+  await page.locator('[data-join="pending"]').click(); await page.locator('[data-join="0"]').click();
   await expect(page.locator('#combinations')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.abilitySlots)).toEqual([['elastic-punch', 'fury'], ['gatling'], ['bazooka'], ['whip']]);
   await expect(page.locator('[data-ability="fury"]')).toHaveClass(/buff-constant/);
@@ -535,7 +533,7 @@ test('tocar las ranuras alterna Pistol/Bazooka sin agruparlos ni disparar el que
   if (isMobile) await pistol.tap(); else await pistol.click();
   expect((await sample()).behaviors).toEqual(['line']);
   await page.keyboard.press('2'); await expect(bazooka).toHaveAttribute('aria-pressed', 'true');
-  await page.locator('#manage-abilities').click(); await expect(page.locator('#merge-apply')).toBeDisabled();
+  await page.locator('#manage-abilities').click(); await expect(page.locator('.combination-card').first()).toBeDisabled();
   await page.screenshot({ path: test.info().outputPath('selected-slot.png') });
 });
 
@@ -619,7 +617,7 @@ test('Morgan: cinco patrones legibles y fases sin avisos ocultos por el HUD', as
   }
 });
 
-test('buffs legibles, Balloon sin deformación y fruta temporal con decisión táctil', async ({ page }, info) => {
+test('buffs legibles, Balloon hinchado y fruta temporal con decisión táctil', async ({ page }, info) => {
   await page.locator('#start').click(); await isolateWalk(page);
   await page.evaluate(async () => {
     const path = '/src/game/systems/loadout.ts', { improveAttack } = await import(/* @vite-ignore */ path);
@@ -629,13 +627,15 @@ test('buffs legibles, Balloon sin deformación y fruta temporal con decisión t�
   await expect(page.locator('#buff-strip')).toContainText('×1.12');
   await page.evaluate(async () => {
     const path = '/src/game/systems/loadout.ts', { improveAttack } = await import(/* @vite-ignore */ path);
-    const qa = window.__OPS_QA__!, r = qa.getRun()!; improveAttack(r.player, 'balloon'); r.selectSlot(2); r.player.attacks.find(a => a.id === 'balloon')!.activeFor = 60; qa.draw(); qa.tick();
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; improveAttack(r.player, 'balloon'); r.selectSlot(2); r.player.attacks.find(a => a.id === 'balloon')!.activeFor = 0.45; r.update = () => {}; qa.draw(); qa.tick();
   });
-  await expect(page.locator('#buff-strip')).toContainText('DEF');
+  await expect(page.locator('#buff-strip')).toContainText('IMMUNE');
+  expect(await page.evaluate(() => window.__OPS_QA__!.metrics().inflating)).toBe(true);
   expect(await page.evaluate(() => window.__OPS_QA__!.metrics().actorScaleY)).toBeCloseTo(0.65, 2);
   await page.screenshot({ path: info.outputPath('balloon-defense.png') });
   await page.evaluate(() => {
     const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.pickups.acquire()!;
+    r.update = Object.getPrototypeOf(r).update;
     Object.assign(p, { x: r.player.x, y: r.player.y, kind: 'fruit', fruitId: 'bomu', value: 0 });
     r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
   });
@@ -643,4 +643,35 @@ test('buffs legibles, Balloon sin deformación y fruta temporal con decisión t�
   await expect(page.locator('#fruit-description')).toContainText('Bomu');
   await page.locator('#fruit-take').click(); await expect(page.locator('#fruit-found')).toBeHidden();
   await expect(page.locator('#fruit-active')).toContainText('Bomu');
+});
+
+test('pareja en dos toques con recompensa de jefe y objeto único visible junto a ataques', async ({ page, isMobile }, info) => {
+  await page.locator('#start').click(); await isolateWalk(page);
+  await page.evaluate(async () => {
+    const loadout = '/src/game/systems/loadout.ts', items = '/src/game/systems/items.ts';
+    const { improveAttack } = await import(/* @vite-ignore */ loadout), { equipItem } = await import(/* @vite-ignore */ items);
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; improveAttack(r.player, 'gatling'); r.grantCombinationReward(); equipItem(r.player, 'boots'); qa.tick();
+  });
+  await expect(page.locator('#equipped-item')).toContainText('Botes');
+  await expect.poll(() => page.locator('#equipped-item img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 24)).toBe(true);
+  const attacks = await page.locator('#attack-slots').boundingBox(), item = await page.locator('#equipped-item').boundingBox();
+  expect(item!.x).toBeGreaterThanOrEqual(attacks!.x + attacks!.width); expect(item!.x + item!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await page.locator('#manage-abilities').click(); await expect(page.locator('.combination-card')).toHaveCount(2);
+  if (isMobile) await page.locator('[data-join="0"]').tap(); else await page.locator('[data-join="0"]').click();
+  await expect(page.locator('.combination-card')).toHaveCount(1); await expect(page.locator('#combination-chosen')).toContainText('Pistol');
+  await page.screenshot({ path: info.outputPath('two-tap-combination.png') });
+  if (isMobile) await page.locator('[data-join="1"]').tap(); else await page.locator('[data-join="1"]').click();
+  await expect(page.locator('#combinations')).toBeHidden();
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.abilitySlots[1])).toEqual(['gatling', 'elastic-punch']);
+  await page.locator('#equipped-item').click(); await expect(page.locator('#item-info')).toBeVisible(); await page.locator('#item-info-close').click();
+  const offer = () => page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, item = r.pickups.acquire()!;
+    Object.assign(item, { x: r.player.x, y: r.player.y, kind: 'item', itemId: 'whetstone', value: 0, ownerId: r.player.id });
+    r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
+  });
+  await offer(); await expect(page.locator('#item-found')).toBeVisible(); await page.locator('#item-keep').click();
+  await expect(page.locator('#equipped-item')).toContainText('Botes');
+  await offer(); await page.locator('#item-take').click(); await expect(page.locator('#equipped-item')).toContainText('Pedra');
+  expect(await page.evaluate(() => Object.keys(window.__OPS_QA__!.getRun()!.player.items))).toEqual(['whetstone']);
+  await page.screenshot({ path: info.outputPath('equipped-item.png') });
 });

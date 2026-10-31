@@ -71,7 +71,13 @@ export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionW
         const radius = player.stats.range * params.range;
         grid.visit(player.x, player.y, radius + 15, enemy => {
           const dx = enemy.x - player.x, dy = enemy.y - player.y, d = Math.max(1, Math.hypot(dx, dy));
-          if (!enemy.kind && d <= radius + enemy.radius && world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) world.moveCircle(enemy, dx / d * params.knockback, dy / d * params.knockback, enemy.radius);
+          if (d > radius + enemy.radius || !world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2)) return;
+          if (params.damage > 0) damageEnemy(player, enemy, player.stats.damage * params.damage, 0, player, world, onKill, random);
+          if (!enemy.active || enemy.kind) return;
+          if (params.launch) {
+            const ux = d > 1 ? dx / d : Math.cos(player.facing), uy = d > 1 ? dy / d : Math.sin(player.facing);
+            enemy.launchTime = 0.3; enemy.launchX = ux * params.knockback / 0.3; enemy.launchY = uy * params.knockback / 0.3;
+          } else world.moveCircle(enemy, dx / d * params.knockback, dy / d * params.knockback, enemy.radius);
         });
         emit({ x: player.x, y: player.y, angle: 0, reach: radius, life: 0.25, ownerId: player.id, behavior: 'guard', evolved: state.level === 6, arc: Math.PI, splash: 0, impact: { x: player.x, y: player.y } });
       }

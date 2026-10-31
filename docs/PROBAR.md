@@ -91,3 +91,11 @@ Probar cadencia de los seis movimientos de Luffy, en particular Pistol y Gatling
 Buscar cofres más separados. Pequeños: moneda, poca XP y posible carne; grandes: círculo/candado de3s y botín directo, sin selección de mejoras. Recoger moneda/XP. Una subida de nivel por esa XP sigue abriendo cartas normales. Objeto ocasional entra directamente en un hueco libre; no aumenta un objeto equipado. Fruta rara Bomu Bomu: recogerla, aceptar o conservar build, probar explosiones al derrotar enemigos. Se pierde al reiniciar. Comprobar que comer cura sin superar HP máximo y que enemigos dejan carne ocasionalmente.
 
 La carne también aporta1XP. Comprobar la subida normal si esa pequeña cantidad completa la barra.
+
+## Beta0.12.0
+
+Balloon: ver torso hinchado, cabeza/pies sin deformar, rivales dañados y despedidos. Probar contacto, rifle y Morgan durante la ventana de inmunidad; después vuelve a poder recibir daño. El lanzamiento debe frenarse ante sólidos.
+
+Quinta habilidad: aparecen cuatro grupos y la nueva pendiente. Tocar primera carta y luego otra; se combina y continúa automáticamente. También puede elegirse la pendiente. Volver desde el segundo paso no debe gastar nada. Con recompensa de Morgan se hace igual aunque haya menos habilidades. Grupos llenos no se combinan por encima de cuatro.
+
+Solo un objeto junto a los ataques. Tocar su icono para consultar efecto. Si aparece otro, recogerlo y conservar/sustituir; la estadística anterior debe desaparecer al sustituir. Los grandes son mucho más raros (1/96 chunks). No cambia la entrada voluntaria a Morgan mediante BASE DE MORGAN.

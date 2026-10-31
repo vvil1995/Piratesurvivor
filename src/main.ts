@@ -1,3 +1,5 @@
+import { ITEMS } from './content/items.ts';
+import { itemImage } from './ui/item-art.ts';
 import { FRUITS } from './content/fruits.ts';
 import Phaser from 'phaser';
 import './ui/style.css';
@@ -35,7 +37,13 @@ function sync(): void {
   if (run.status === previousStatus) return;
   previousStatus = run.status;
   if (run.status !== 'playing') controller.reset();
-  if (run.status === 'fruit') {
+  if (run.status === 'item') {
+    view.showModal('item-found'); const item = ITEMS[run.pendingItem!];
+    el('item-new-art').replaceChildren(itemImage(run.pendingItem!));
+    el('item-new-description').textContent = `${item.name}: ${item.description}`;
+    const previous = Object.keys(run.player.items)[0]; el('item-old-description').textContent = previous ? `Actual: ${ITEMS[previous].name}. Sustituirlo elimina su efecto.` : 'Espacio de objeto libre.';
+  }
+  else if (run.status === 'fruit') {
     view.showModal('fruit-found');
     const fruit = FRUITS[run.pendingFruit!];
     el('fruit-description').textContent = `${fruit.name}: ${fruit.description}`;
@@ -50,9 +58,8 @@ function sync(): void {
     const refresh = () => { previousStatus = ''; sync(); };
     renderCombinations(run, {
       move: (id, to) => { const ok = run!.moveComponent(id, to); if (ok) refresh(); return ok; },
-      merge: (from, to) => { const ok = run!.combine(from, to); if (ok) refresh(); return ok; },
+      pair: (first, second) => { if (orientation.blocked) return false; const ok = run!.joinPair(first, second); if (ok) { refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); } return ok; },
       done: () => { if (!orientation.blocked && run!.finishCombinations()) { refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); } },
-      learnWith: to => { if (!orientation.blocked && run!.finishCombinations(to)) { refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); } },
       cancel: () => { run!.cancelCombinations(); refresh(); if (run?.status === 'playing') (document.activeElement as HTMLElement)?.blur(); },
     });
   }
@@ -85,6 +92,12 @@ for (const id of ['manage-abilities', 'pause-build']) el(id).addEventListener('c
   if (orientation.blocked || !run?.openCombinations()) return; previousStatus = ''; sync();
 });
 el('pause').addEventListener('click', pause);
+for (const [id, replace] of [['item-take', true], ['item-keep', false]] as const) el(id).addEventListener('click', () => { if (orientation.blocked || !run?.selectItem(replace)) return; previousStatus = ''; view.showModal(); sync(); });
+el('equipped-item').addEventListener('click', () => {
+  const id = run && Object.keys(run.player.items)[0]; if (!run || !id || run.status !== 'playing' || orientation.blocked) return;
+  run.pause(); controller.reset(); sync(); el('item-info-art').replaceChildren(itemImage(id)); el('item-info-description').textContent = `${ITEMS[id].name} · Nv.${run.player.items[id]}/3 · ${ITEMS[id].description}`; view.showModal('item-info');
+});
+el('item-info-close').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); previousStatus = ''; view.showModal(); sync(); });
 for (const [id, replace] of [['fruit-take', true], ['fruit-keep', false]] as const) el(id).addEventListener('click', () => { if (orientation.blocked || !run?.selectFruit(replace)) return; previousStatus = ''; view.showModal(); sync(); });
 el('challenge-morgan').addEventListener('click', () => {
   if (!run || run.status !== 'playing' || orientation.blocked) return;
@@ -169,5 +182,5 @@ window.addEventListener('orientationchange', () => requestAnimationFrame(resizeC
 window.visualViewport?.addEventListener('resize', () => requestAnimationFrame(resizeCanvas));
 
 // Solo en desarrollo o en compilación de QA explícita. No se incluye en producción.
-declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; draw: (deltaMs?: number) => void; start: (characterId?: string) => Promise<void>; metrics: () => { legSwing: number; footsteps: number; actorScaleY: number; actorAngle: number; actorTexture: string; actorDirection: string; actorFrame: number; renderedChunks: number; textureSlots: number } } } }
+declare global { interface Window { __OPS_QA__?: { getRun: () => Run | undefined; store: SaveStore; tick: () => void; draw: (deltaMs?: number) => void; start: (characterId?: string) => Promise<void>; metrics: () => { legSwing: number; footsteps: number; actorScaleY: number; actorAngle: number; actorTexture: string; actorDirection: string; actorFrame: number; inflating: boolean; renderedChunks: number; textureSlots: number } } } }
 if (import.meta.env.DEV || import.meta.env.VITE_QA === 'true') window.__OPS_QA__ = { getRun: () => run, store, tick: sync, draw: (delta = 0) => scene.update(performance.now(), delta), start, metrics: () => scene.diagnostics };

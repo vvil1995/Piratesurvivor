@@ -40,3 +40,6 @@ export function counterGuard(player: Player, origin: Vector, grid: SpatialGrid, 
   }
   return false;
 }
+export function isInvulnerable(player: Player): boolean {
+  return player.attacks.some(state => state.activeFor > 0 && activeMovements(player).includes(state.id) && ABILITIES[state.id].levels[state.level - 1].invulnerable === true);
+}

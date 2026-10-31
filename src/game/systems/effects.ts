@@ -5,7 +5,7 @@ import type { Pool } from '../core/pool.ts';
 import type { SpatialGrid } from '../spatial/grid.ts';
 import type { CollisionWorld } from '../world/world.ts';
 import { damageEnemy } from './hits.ts';
-import { counterGuard } from './guards.ts';
+import { counterGuard, isInvulnerable } from './guards.ts';
 import { applySkillHit, applyStatus } from './status.ts';
 import { receivedDamage } from './stats.ts';
 export const PROJECTILE_CAP = 96, AREA_CAP = 24;
@@ -92,7 +92,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
         bullet.hostile = false; bullet.ownerId = actor.id; bullet.reflected = true; bullet.vx *= -1; bullet.vy *= -1; bullet.hit.clear(); reflected = true; break;
       }
       if (segmentDistance(actor.x, actor.y, ax, ay, bx, by) < 14 + bullet.radius) {
-        if (actor.hurtTimer <= 0) { if (!counterGuard(actor, bullet, grid, world, e => onKill(e, actor.id), random)) actor.hp = Math.max(0, actor.hp - receivedDamage(bullet.damage, actor.stats.armor)); actor.hurtTimer = 0.65; }
+        if (actor.hurtTimer <= 0 && !isInvulnerable(actor)) { if (!counterGuard(actor, bullet, grid, world, e => onKill(e, actor.id), random)) actor.hp = Math.max(0, actor.hp - receivedDamage(bullet.damage, actor.stats.armor)); actor.hurtTimer = 0.65; }
         bullet.active = false; break;
       }
     }

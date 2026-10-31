@@ -1,5 +1,5 @@
 import type { Stats, StatModifiers, LevelChoice, AttackBehavior, StatusKind } from '../../content/types.ts';
-export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'fruit';
+export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'fruit' | 'item';
 export interface Vector { x: number; y: number }
 export interface Player extends Vector {
   id: string; characterId: string;
@@ -12,11 +12,12 @@ export interface EquippedAttack { id: string; level: number; cooldown: number; p
 export interface Enemy extends Vector {
   active: boolean; id: number; kind?: 'chest' | 'boss'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
   speed: number; damage: number; xp: number; radius: number; flash: number;
+  launchTime?: number; launchX?: number; launchY?: number;
   statuses?: Partial<Record<StatusKind, number>>; stolen?: boolean; lureIndex?: number; decoyHitTimer?: number;
   ranged?: { interval: number; speed: number; range: number }; shotTimer?: number;
   targetId?: string; steeringTime?: number; steerX?: number; steerY?: number;
 }
-export interface Pickup extends Vector { active: boolean; value: number; ownerId?: string; kind?: 'xp' | 'food' | 'berry' | 'fruit'; fruitId?: string; life?: number; abilityId?: string; level?: number }
+export interface Pickup extends Vector { active: boolean; value: number; ownerId?: string; kind?: 'xp' | 'food' | 'berry' | 'fruit' | 'item'; fruitId?: string; itemId?: string; life?: number; abilityId?: string; level?: number }
 export interface Strike extends Vector { angle: number; reach: number; life: number; ownerId: string; behavior: AttackBehavior; evolved: boolean; arc: number; splash: number; impact: Vector; targetId?: number; visual?: string }
 export interface RunResult {
   id: string; outcome: 'defeat' | 'victory'; seconds: number; kills: number; level: number; coins: number;

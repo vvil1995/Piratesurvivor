@@ -13,7 +13,9 @@ test('Balloon repele y mitiga contacto; su evolución refleja proyectiles reales
   p.attacks[0].cooldown = 100;
   const e = enemy(run, 900, p.x + 20, p.y); e.damage = 10;
   run.update(1 / 60, axis);
-  assert.ok(p.stats.armor > 0); assert.ok(p.hp > 90); assert.ok(e.x > p.x + 40);
+  assert.ok(p.stats.armor > 0); assert.ok(p.hp > 90); assert.ok((e.launchTime ?? 0) > 0); assert.ok(e.hp < 1000);
+  for (let i = 0; i < 10; i++) run.update(1 / 60, axis);
+  assert.ok(e.x > p.x + 40);
   while (p.attacks.find(a => a.id === 'balloon')!.level < 6) improveAttack(p, 'balloon');
   const shield = p.attacks.find(a => a.id === 'balloon')!; shield.activeFor = 2;
   assert.equal(spawnProjectile(run, p.x - 35, p.y, p.x, p.y, 10, 200, '', true), true);

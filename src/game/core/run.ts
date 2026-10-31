@@ -1,3 +1,5 @@
+import { ITEMS } from '../../content/items.ts';
+import { replaceItem } from '../systems/items.ts';
 import { MorganEncounter } from '../bosses/morgan.ts';
 import { ArenaWorld, MORGAN_ARENA } from '../world/arena.ts';
 import { MORGAN } from '../../content/bosses/morgan.ts';
@@ -11,7 +13,7 @@ import type { AbilityChoice, CharacterDefinition } from '../../content/types.ts'
 import { receivedDamage, regenerationRate, resolveStats } from '../systems/stats.ts';
 import { difficultyAt } from '../systems/difficulty.ts';
 import { tickStatus } from '../systems/status.ts';
-import { counterGuard, tickGuards } from '../systems/guards.ts';
+import { counterGuard, tickGuards, isInvulnerable } from '../systems/guards.ts';
 import { AREA_CAP, PROJECTILE_CAP, queueImpact, spawnProjectile, tickEffects } from '../systems/effects.ts';
 import { tickBuffs, updateBuffModifiers } from '../systems/buffs.ts';
 import { tickAttacks } from '../systems/combat.ts';
@@ -57,6 +59,7 @@ export class Run {
   // Punto de integración futuro: solo una recompensa real de jefe debe llamar aquí.
   grantCombinationReward(): void { this.combinationRewards++; }
   private combinationOrigin: 'playing' | 'paused' | 'levelup' = 'playing';
+  pendingItem?: string;
   pendingFruit?: string;
   lootNotice = ''; lootNoticeFor = 0;
   private fruitCooldown = 0;
@@ -131,13 +134,18 @@ export class Run {
       const enemy = this.enemies.acquire(); if (!enemy) break;
       const def = ENEMIES.marine;
       Object.assign(enemy, { ...def, active: true, id: ++this.enemyId, ...gate, hp: def.hp * 1.5, maxHp: def.hp * 1.5, kind: undefined, flash: 0,
-        statuses: undefined, stolen: false, lureIndex: undefined, decoyHitTimer: 0, ranged: undefined, shotTimer: 0, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
+        statuses: undefined, launchTime: 0, launchX: 0, launchY: 0, stolen: false, lureIndex: undefined, decoyHitTimer: 0, ranged: undefined, shotTimer: 0, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
       remaining--;
     }
   }
   setView(view: View): void { this.view = view; }
   pause(): void { if (this.status === 'playing') this.status = 'paused'; }
   resume(): void { if (this.status === 'paused') this.status = 'playing'; }
+  selectItem(replace: boolean): boolean {
+    if (this.status !== 'item' || !this.pendingItem || !ITEMS[this.pendingItem]) return false;
+    if (replace && !replaceItem(this.player, this.pendingItem)) return false;
+    this.pendingItem = undefined; this.status = 'playing'; this.checkLevel(); return true;
+  }
   selectFruit(replace: boolean): boolean {
     if (this.status !== 'fruit' || !this.pendingFruit || !FRUITS[this.pendingFruit]) return false;
     if (replace) { if (this.player.fruit !== this.pendingFruit) this.fruitCooldown = 0; this.player.fruit = this.pendingFruit; }
@@ -163,6 +171,18 @@ export class Run {
   openCombinations(): boolean {
     if (this.status !== 'playing' && this.status !== 'paused') return false;
     this.combinationOrigin = this.status; this.pendingAbility = undefined; this.status = 'combining'; return true;
+  }
+  joinPair(first: number | 'pending', second: number | 'pending'): boolean {
+    if (this.status !== 'combining' || !this.canJoinMovements || first === second) return false;
+    const p = this.player;
+    if (first === 'pending' || second === 'pending') {
+      const target = first === 'pending' ? second : first;
+      if (target === 'pending' || !Number.isInteger(target) || !this.pendingAbility || !p.abilitySlots[target]?.length || p.abilitySlots[target].length >= 4) return false;
+      return this.finishCombinations(target);
+    }
+    if (!Number.isInteger(first) || !Number.isInteger(second) || !p.abilitySlots[first]?.length || !p.abilitySlots[second]?.length || p.abilitySlots[first].length + p.abilitySlots[second].length > 4) return false;
+    if (!this.combine(first, second)) return false;
+    return this.finishCombinations();
   }
   combine(from: number, to: number): boolean {
     if (this.status !== 'combining' || !this.canJoinMovements) return false;
@@ -218,7 +238,7 @@ export class Run {
     if (this.random() < LOOT.enemyFoodChance) dropLoot(this.pickups, { x: enemy.x, y: enemy.y + 16 }, ownerId, 'food', LOOT.enemyFoodHeal);
     if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, enemy, ownerId, 'berry', LOOT.enemyBerries);
     const pickup = this.pickups.acquire();
-    if (pickup) { Object.assign(pickup, { x: enemy.x, y: enemy.y, value: enemy.xp, ownerId, kind: 'xp', abilityId: undefined, life: undefined, level: undefined, fruitId: undefined }); return; }
+    if (pickup) { Object.assign(pickup, { x: enemy.x, y: enemy.y, value: enemy.xp, ownerId, kind: 'xp', abilityId: undefined, life: undefined, level: undefined, fruitId: undefined, itemId: undefined }); return; }
     let nearest: Pickup | undefined, best = Infinity;
     for (const item of this.pickups.items) {
       if (item.ownerId !== ownerId || item.kind && item.kind !== 'xp') continue;
@@ -292,14 +312,16 @@ export class Run {
       let steerX = enemy.steerX ?? 0, steerY = enemy.steerY ?? 0;
       if ((enemy.statuses?.confuse ?? 0) > 0) { const turn = Math.sin(this.time * 3 + enemy.id) * 1.5, c = Math.cos(turn), s = Math.sin(turn); [steerX, steerY] = [steerX * c - steerY * s, steerX * s + steerY * c]; }
       const speed = enemy.speed * ((enemy.statuses?.slow ?? 0) > 0 ? 0.6 : 1);
-      this.world.moveCircle(enemy, frozen ? 0 : steerX * speed * dt * chase + sx * dt * 5, frozen ? 0 : steerY * speed * dt * chase + sy * dt * 5, enemy.radius);
+      const launched = (enemy.launchTime ?? 0) > 0;
+      if (launched) { this.world.moveCircle(enemy, (enemy.launchX ?? 0) * dt, (enemy.launchY ?? 0) * dt, enemy.radius); enemy.launchTime = Math.max(0, enemy.launchTime! - dt); }
+      else this.world.moveCircle(enemy, frozen ? 0 : steerX * speed * dt * chase + sx * dt * 5, frozen ? 0 : steerY * speed * dt * chase + sy * dt * 5, enemy.radius);
       enemy.decoyHitTimer = Math.max(0, (enemy.decoyHitTimer ?? 0) - dt);
       if (aim !== target && aimDistance < enemy.radius + (lure?.radius ?? 0) && enemy.decoyHitTimer <= 0) { lure!.hp = (lure!.hp ?? 0) - enemy.damage; enemy.decoyHitTimer = 0.8; }
       if (enemy.ranged) {
         enemy.shotTimer = Math.max(0, (enemy.shotTimer ?? 0) - dt);
-        if (firing && enemy.shotTimer <= 0 && spawnProjectile(this, enemy.x, enemy.y, aim.x, aim.y, enemy.damage, enemy.ranged.speed, '', true)) enemy.shotTimer = enemy.ranged.interval;
+        if (!launched && firing && enemy.shotTimer <= 0 && spawnProjectile(this, enemy.x, enemy.y, aim.x, aim.y, enemy.damage, enemy.ranged.speed, '', true)) enemy.shotTimer = enemy.ranged.interval;
       }
-      if ((enemy.statuses?.stun ?? 0) <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
+      if (!launched && !isInvulnerable(target) && (enemy.statuses?.stun ?? 0) <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
         if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor)); target.hurtTimer = 0.65;
       }
     }
@@ -322,12 +344,13 @@ export class Run {
       if (!actor || actor.hp <= 0 || Math.hypot(actor.x - pickup.x, actor.y - pickup.y) > 1700) { pickup.active = false; continue; }
       const dx = actor.x - pickup.x, dy = actor.y - pickup.y, d = Math.hypot(dx, dy);
       if (d < 20) {
-        if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { this.pendingFruit = pickup.fruitId; this.status = 'fruit'; }
+        if (pickup.kind === 'item' && pickup.itemId && ITEMS[pickup.itemId]) { this.pendingItem = pickup.itemId; this.status = 'item'; }
+        else if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { this.pendingFruit = pickup.fruitId; this.status = 'fruit'; }
         else if (pickup.kind === 'food') { actor.xp += LOOT.foodXp; actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
         else if (pickup.kind === 'berry') actor.collectedBerries += pickup.value;
         else actor.xp += pickup.value;
         pickup.active = false;
-        if (this.status === 'fruit') break;
+        if (this.status === 'fruit' || this.status === 'item') break;
       }
       else if (pickup.kind !== 'food' && d < actor.stats.magnet && this.world.segmentClear(pickup.x, pickup.y, actor.x, actor.y, 2)) {
         const step = Math.min(d, dt * 350); pickup.x += dx / d * step; pickup.y += dy / d * step;

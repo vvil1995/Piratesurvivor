@@ -36,8 +36,8 @@ export const ABILITIES: Record<string, AbilityDefinition> = {
   },
   balloon: {
     id: 'balloon', name: 'Gomu Gomu no Balloon', shortName: 'Balloon', behavior: 'guard',
-    description: 'Guardia elástica: reduce daño por un tiempo y repele enemigos cercanos.', evolution: 'La defensa también refleja proyectiles hostiles.',
-    levels: levels({ damage: 0, range: 0.8, cooldown: 6, width: 0, arc: Math.PI, hits: 0, shots: 1, interval: 0, knockback: 45, splash: 0, duration: 2, guard: 0.22, inflate: 1.0 }, { duration: 3, guard: 0.28, knockback: 60, reflect: true }),
+    description: 'Se infla brevemente: inmunidad, daño ligero y rivales despedidos.', evolution: 'La defensa también refleja proyectiles hostiles.',
+    levels: levels({ damage: 0.5, range: 0.8, cooldown: 6, width: 0, arc: Math.PI, hits: 0, shots: 1, interval: 0, knockback: 125, splash: 0, duration: 0.9, guard: 0.22, inflate: 1.6, invulnerable: true, launch: true }, { duration: 1.2, guard: 0.28, knockback: 155, reflect: true }),
   },
   axe: {
     id: 'axe', name: 'Gomu Gomu no Axe', shortName: 'Axe', behavior: 'slam', visual: 'rubber-axe',

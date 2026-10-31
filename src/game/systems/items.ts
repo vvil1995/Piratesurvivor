@@ -17,3 +17,10 @@ export function equipItem(player: Player, id: string): boolean {
   }
   player.modifiers.items = modifiers; refreshStats(player); return true;
 }
+
+export function replaceItem(player: Player, id: string): boolean {
+  if (!ITEMS[id]) return false;
+  const previous = player.items; player.items = {};
+  if (!equipItem(player, id)) { player.items = previous; return false; }
+  return true;
+}

@@ -104,3 +104,5 @@ Beta0.9.0: retrato frontal uniforme, drops de berries, cofres pequeños destruct
 Beta0.10.0: Morgan como primer jefe opcional de Shells Town, arena con cobertura y colisiones, cinco patrones/avisos y tres fases. Sistema de telegraphs separado del controlador. Recompensa de agrupación, victoria local y salida voluntaria a una llegada provisional de Orange Town, conservando HP/build. Ver `docs/MORGAN.md`. No incluye todavía Buggy ni el contenido completo de la segunda isla.
 
 Beta0.11.0: Luffy más rápido, puños conectados al actor en movimiento, Balloon sin deformación, buffs con flechas/valores y cofres mucho más escasos. Botín directo de los grandes, carne curativa de pequeños/enemigos y primera fruta temporal Bomu Bomu (rara, con elección de consumo). No añade nuevos poderes permanentes ni modifica el movimiento aceptado.
+
+Beta0.12.0: Balloon hincha el torso, da inmunidad breve y lanza/daña enemigos; combinación en dos selecciones; un único objeto con icono junto a ataques y sustitución opcional. Grandes aún más raros. Estas decisiones sustituyen el inventario de seis espacios y la presentación de Balloon de versiones anteriores. Ver docs/PROBAR.md.

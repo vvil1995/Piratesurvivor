@@ -1,3 +1,4 @@
+import { BalloonRig } from './balloon-rig.ts';
 import { BUFF_LOOK } from '../../ui/buff-info.ts';
 import { BossRenderer } from './boss-renderer.ts';
 import { MORGAN_ARENA } from '../world/arena.ts';
@@ -31,6 +32,7 @@ export class BattleScene extends Phaser.Scene {
   private bossRenderer!: BossRenderer;
   private bridge: BattleBridge;
   private captain!: Phaser.GameObjects.Image;
+  private balloonRig!: BalloonRig;
   private captainRig!: WalkRig;
   private enemyRigs: WalkRig[] = [];
   private captainShadow!: Phaser.GameObjects.Image;
@@ -50,7 +52,7 @@ export class BattleScene extends Phaser.Scene {
   private actorLoads = new Map<string, Promise<void>>();
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
-  get diagnostics() { return { legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  get diagnostics() { return { legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
   async ensureActorArt(visual: string): Promise<void> {
     if (this.textures.exists(`${visual}-s-0`)) return;
     const known = this.actorLoads.get(visual); if (known) return known;
@@ -82,7 +84,7 @@ export class BattleScene extends Phaser.Scene {
     }
     this.captainShadow = this.add.image(256, 256, 'shadow').setDepth(-1000).setScale(1.2);
     this.captain = this.add.image(256, 256, 'straw-hat').setOrigin(0.5, 0.96).setScale(0.65).setDepth(1000);
-    this.captainRig = new WalkRig(this, 'straw-hat');
+    this.captainRig = new WalkRig(this, 'straw-hat'); this.balloonRig = new BalloonRig(this);
     this.bossRenderer = new BossRenderer(this);
     this.departureBoat = this.add.image(0, 0, 'departure-boat').setVisible(false).setScale(1.5);
     this.effects = this.add.graphics().setDepth(4000);
@@ -128,7 +130,7 @@ export class BattleScene extends Phaser.Scene {
     const aimedStrike = run?.strikes.find(s => s.ownerId === player?.id && s.targetId !== undefined);
     if (!pose.frame && aimedStrike) pose.direction = movementDirection(Math.cos(aimedStrike.angle), Math.sin(aimedStrike.angle));
     const phase = pose.frame ? (pose.frame - 1) % 2 : 0;
-    this.captain.setTexture(`${run?.character.visual ?? 'straw-hat'}-${pose.direction}-${phase}`).setFlipX(false)
+    this.captain.setVisible(true).setTexture(`${run?.character.visual ?? 'straw-hat'}-${pose.direction}-${phase}`).setFlipX(false)
       .setScale(0.65 * (1 + pose.weight / 2) , 0.65 * (1 - pose.weight)).setAngle(pose.lean);
     this.captain.setPosition(worldX - origin.x, worldY - origin.y).setDepth(worldY - origin.y + 1000);
     this.captainShadow.setPosition(worldX - origin.x, worldY - origin.y + 2).setScale(1.2 + pose.weight);
@@ -143,15 +145,19 @@ export class BattleScene extends Phaser.Scene {
     }
     this.captain.setAlpha(player && player.hurtTimer > 0 && Math.floor(player.hurtTimer * 18) % 2 === 0 ? 0.5 : 1);
     this.captainRig.update(this.captain, pose, 0.65);
+    const balloon = player?.attacks.find(a => a.activeFor > 0 && ABILITIES[a.id].levels[a.level - 1].invulnerable);
+    this.balloonRig.update(this.captain, `${run?.character.visual ?? 'straw-hat'}-s-0`, balloon?.activeFor ?? 0, balloon ? ABILITIES[balloon.id].levels[balloon.level - 1].duration ?? 1 : 1, balloon ? ABILITIES[balloon.id].levels[balloon.level - 1].inflate ?? 1.6 : 1);
+    if (balloon) this.captainRig.hide();
     for (let i = 0; i < this.enemies.length; i++) {
       const e = run?.enemies.items[i], sprite = this.enemies[i], shadow = this.shadows[i];
       const visible = !!e?.active && Math.abs(e.x - worldX) < camera.width / camera.zoom / 2 + 160 && Math.abs(e.y - worldY) < camera.height / camera.zoom / 2 + 160;
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
-      animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate, delta / 1000);
+      animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000);
       sprite.setTexture(`marine-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
-      sprite.setPosition(e.x - origin.x, e.y - origin.y).setDepth(e.y - origin.y + 1000);
+      const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
+      sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
       this.enemyRigs[i].update(sprite, animation, 0.6);
     }
@@ -165,7 +171,7 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(!!pickup?.active);
       if (pickup?.active) {
         const kind = pickup.kind ?? 'xp', factor = kind === 'xp' && pickup.value >= 20 ? 1.3 : 1;
-        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : 18) * factor, 18 * factor);
+        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : 18) * factor, 18 * factor);
       }
     }
     this.effects.clear();
@@ -213,7 +219,7 @@ export class BattleScene extends Phaser.Scene {
       }
       if (player) for (const state of player.attacks) {
         const ability = ABILITIES[state.id], x = player.x - origin.x, y = player.y - origin.y - 22;
-        if (ability.behavior === 'guard' && state.activeFor > 0) {
+        if (ability.behavior === 'guard' && state.activeFor > 0 && !ability.levels[state.level - 1].invulnerable) {
           this.effects.fillStyle(0x92dce1, 0.08);
           this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); if (ability.visual === 'slash') { for (const offset of [-9, 0, 9]) this.effects.lineBetween(x - 24, y - 18 + offset, x + 24, y + 18 + offset); } else { for (const side of [-1, 1]) { this.effects.beginPath(); this.effects.arc(x, y + 3, 28, side < 0 ? Math.PI * 0.65 : -Math.PI * 0.35, side < 0 ? Math.PI * 1.35 : Math.PI * 0.35); this.effects.strokePath(); } }
         }

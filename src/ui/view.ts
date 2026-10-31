@@ -1,3 +1,5 @@
+import { itemImage } from './item-art.ts';
+import { isInvulnerable } from '../game/systems/guards.ts';
 import { FRUITS } from '../content/fruits.ts';
 import { BUFF_LOOK, buffEffect } from './buff-info.ts';
 import { ITEMS } from '../content/items.ts';
@@ -18,6 +20,7 @@ export const timeLabel = (seconds: number): string => `${Math.floor(seconds / 60
 export class View {
   private modal?: string;
   private attackSignature = '';
+  private itemSignature = '';
   private xpLevel = 0;
   private xpRunId = '';
   private lastFocus?: HTMLElement;
@@ -34,7 +37,7 @@ export class View {
   showModal(id?: string): void {
     if (id === this.modal) return;
     if (!this.modal && id) this.lastFocus = document.activeElement as HTMLElement;
-    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'fruit-found', 'boss-entry', 'boss-victory']) el(name).hidden = name !== id;
+    for (const name of ['help', 'credits', 'paused', 'levelup', 'result', 'combinations', 'fruit-found', 'item-found', 'item-info', 'boss-entry', 'boss-victory']) el(name).hidden = name !== id;
     this.modal = id;
     el('home').inert = !!id;
     el('topbar').inert = !!id;
@@ -89,7 +92,7 @@ export class View {
     });
     for (const a of p.attacks) if (ABILITIES[a.id].behavior === 'guard' && a.activeFor > 0) {
       const badge = document.createElement('span'); badge.style.color = BUFF_LOOK.armor.color;
-      badge.textContent = `↑DEF ${Math.round(p.stats.armor * 100)}%`; badge.title = `${ABILITIES[a.id].shortName}: reducción de daño activa, sujeta al límite global60%.`; badges.push(badge);
+      badge.textContent = isInvulnerable(p) ? 'BALLOON · IMMUNE' : `↑DEF ${Math.round(p.stats.armor * 100)}%`; badge.title = isInvulnerable(p) ? 'Inmunidad solo durante la inflada; termina al desinflarse.' : `${ABILITIES[a.id].shortName}: reducción de daño activa, sujeta al límite global60%.`; badges.push(badge);
     }
     el('buff-strip').replaceChildren(...badges);
     el('fruit-active').textContent = p.fruit ? `FRUTA: ${FRUITS[p.fruit].name}` : '';
@@ -110,9 +113,15 @@ export class View {
     el('board-orange').hidden = !run.morganDefeated || run.zone === 'orange-town' || boss?.state === 'dead' && boss.elapsed < 1.3;
     el('area-label').textContent = run.zone === 'morgan-arena' ? 'BASE NAVAL · ARENA DE MORGAN' : run.zone === 'orange-town' ? 'ORANGE TOWN · LLEGADA PROVISIONAL' : 'SHELLS TOWN · BASE NAVAL';
     el('character-name').textContent = (run.character.shortName ?? run.character.name).toUpperCase();
-    el('run-items').textContent = `OBJETOS ${Object.keys(p.items).length}/6`;
-    el('run-items').title = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objetos';
-    el('inventory-list').textContent = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objetos';
+    el('run-items').textContent = `OBJETO ${Object.keys(p.items).length}/1`;
+    el('run-items').title = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objeto';
+    const equipped = Object.keys(p.items)[0], itemSignature = run.id + ':' + equipped + ':' + p.items[equipped];
+    if (this.itemSignature !== itemSignature) {
+      this.itemSignature = itemSignature; const slot = el<HTMLButtonElement>('equipped-item'); slot.disabled = !equipped; slot.replaceChildren();
+      if (equipped) { slot.append(itemImage(equipped)); const label = document.createElement('span'); label.textContent = ITEMS[equipped].name; const level = document.createElement('small'); level.textContent = `NV. ${p.items[equipped]}/3`; slot.append(label, level); slot.setAttribute('aria-label', `Objeto: ${ITEMS[equipped].name}. Ver efecto`); }
+      else { slot.textContent = '+ OBJETO'; slot.setAttribute('aria-label', 'Espacio de objeto vacío'); }
+    }
+    el('inventory-list').textContent = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objeto';
     el('run-berries').textContent = p.collectedBerries.toString();
     const signature = run.id + ':' + p.selectedSlot + ':' + p.abilitySlots.map(slot => slot.join(',')).join('|') + p.attacks.map(a => `${a.id}:${a.level}:${a.activeFor > 0}`).join('|');
     if (signature !== this.attackSignature) {

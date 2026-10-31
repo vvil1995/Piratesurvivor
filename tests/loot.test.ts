@@ -54,16 +54,17 @@ test('cofre grande requiere tres segundos, pausa al alejarse y entrega botín si
   const count = r.pickups.count; tick(1); assert.ok(r.pickups.count <= count); // No vuelve a entregar.
 
 });
-test('objetos limitados a seis espacios y tres niveles, respetando topes globales', async () => {
-  const { equipItem, itemChoices } = await import('../src/game/systems/items.ts');
+test('un único objeto, hasta tres niveles y sustitución sin acumular efectos', async () => {
+  const { equipItem, itemChoices, replaceItem } = await import('../src/game/systems/items.ts');
   const r = new Run(), p = r.player;
-  for (const id of ['boots', 'whetstone', 'vest', 'medicine', 'watch', 'telescope']) {
-    for (let i = 0; i < 3; i++) assert.equal(equipItem(p, id), true);
-    assert.equal(equipItem(p, id), false);
-  }
-  assert.equal(equipItem(p, 'compass'), false); assert.deepEqual(itemChoices(p, () => 0), ['supplies-berries', 'supplies-heal', 'supplies-xp']);
-  assert.ok(p.stats.armor <= 0.6); assert.ok(p.stats.speed <= p.baseStats.speed * 2);
+  for (let i = 0; i < 3; i++) assert.equal(equipItem(p, 'boots'), true);
+  assert.equal(equipItem(p, 'boots'), false); assert.equal(equipItem(p, 'whetstone'), false);
+  assert.deepEqual(itemChoices(p, () => 0), ['supplies-berries', 'supplies-heal', 'supplies-xp']);
+  assert.equal(replaceItem(p, 'vest'), true); assert.deepEqual(p.items, { vest: 1 });
+  assert.equal(p.stats.speed, p.baseStats.speed); assert.equal(p.stats.armor, 0.06);
+  assert.equal(replaceItem(p, 'invalid'), false); assert.deepEqual(p.items, { vest: 1 });
 });
+
 test('solo algunos enemigos dejan berries y hay que recogerlas', () => {
   for (const [roll, expected] of [[0, true], [0.9, false]] as const) {
     const r = new Run('luffy', 0, () => roll);

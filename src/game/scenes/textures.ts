@@ -1,11 +1,14 @@
 import Phaser from 'phaser';
 import { createPackedDirectionalArt } from './directional-art.ts';
+import { itemCanvases } from '../../ui/item-art.ts';
+import { registerArt } from '../../ui/pixel-art.ts';
 import { rasterizeArt } from '../../ui/pixel-art.ts';
 
 // Recursos propios: atlas existente para actores y geometría pixelada para Shells Town.
 export function createTextures(scene: Phaser.Scene): void {
   const art = rasterizeArt(scene.textures.get('source-atlas').getSourceImage() as HTMLImageElement);
   for (const [name, canvas] of art) scene.textures.addCanvas(name, canvas);
+  for (const [name, canvas] of itemCanvases()) { scene.textures.addCanvas(name, canvas); registerArt(name, canvas); }
   createPackedDirectionalArt(scene, 'luffy-directions-source', 'straw-hat');
   createPackedDirectionalArt(scene, 'marine-directions-source', 'marine');
   // Las texturas normalizadas ya son independientes: liberar hojas grandes de GPU.
