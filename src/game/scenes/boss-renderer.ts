@@ -1,3 +1,5 @@
+import { BuggyRenderer } from './buggy-renderer.ts';
+import type { BuggyEncounter } from '../bosses/buggy.ts';
 import { ActorAnimation } from './actor-animation.ts';
 import Phaser from 'phaser';
 import type { PatternEncounter } from '../bosses/pattern-encounter.ts';
@@ -22,6 +24,8 @@ export function drawDanger(g: Phaser.GameObjects.Graphics, zone: DangerZone, ori
   g.fillPoints(points, true); g.strokePoints(points, true);
 }
 export class BossRenderer {
+  private buggy: BuggyRenderer;
+  private showingBuggy = false;
   private motion = new ActorAnimation();
   private idleTime=0;
   private body: Phaser.GameObjects.Image;
@@ -29,8 +33,9 @@ export class BossRenderer {
   private arm: Phaser.GameObjects.Image;
   private warnings: Phaser.GameObjects.Graphics;
   private details: Phaser.GameObjects.Graphics;
-  get texture(): string { return this.body.texture.key; }
+  get texture(): string { return this.showingBuggy ? this.buggy.texture : this.body.texture.key; }
   constructor(scene: Phaser.Scene) {
+    this.buggy = new BuggyRenderer(scene);
     this.body = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
     this.head = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
     this.arm = scene.add.image(0, 0, 'morgan-axe').setOrigin(0.22, 0.88).setScale(1.1).setVisible(false);
@@ -40,6 +45,9 @@ export class BossRenderer {
   }
   update(boss: PatternEncounter | undefined, origin: Vector, arena: ArenaDefinition = MORGAN_ARENA, dt=1/60, animate=true): void {
     this.warnings.clear(); this.details.clear();
+    this.showingBuggy = boss?.profile.id === 'buggy';
+    if(this.showingBuggy){this.body.setVisible(false);this.head.setVisible(false);this.arm.setVisible(false);this.buggy.update(boss as BuggyEncounter,origin,dt,animate,drawDanger);return;}
+    this.buggy.hide();
     this.body.setVisible(!!boss); this.arm.setVisible(!!boss); this.head.setVisible(false);
     if (!boss) return;
     for (const gate of arena.gates) {

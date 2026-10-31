@@ -168,3 +168,9 @@ Uso solicitado expresamente por el usuario para este proyecto. No se ha proporci
 ## HUD compacto · tarea5
 
 Se reutilizan sin cambios retratos, ilustraciones de habilidades e iconos de objetos existentes. Las estrellas de nivel son un SVG original de contorno escalonado definido en `src/ui/view.ts`, coloreado en plata/oro mediante CSS; no son emojis, fuentes ni sprites descargados. No se añaden imágenes ni dependencias.
+
+## Buggy animado y plaza pirata · tarea6
+
+Arte original generado para este proyecto usando la referencia del usuario solo como dirección artística, sin recortar personajes ni fondos de dicha referencia. Fuente de poses/partes: `/workspace/generated_images/exec-9a4358c3-df0a-4708-b4bc-ed09416228d6.png`; suelo: `exec-36221517-7531-4883-a27f-337931358182.png`; bandera: `exec-4e177941-bdf3-4c4d-aee7-e65b1db64a36.png`.
+
+`src/assets/bosses/buggy-motion.png`: atlas512×512, doce poses128×128. Partes independientes `buggy-head`, `buggy-hand-left/right` (64×64), cuchillo/bomba32×32; suelo128×128 y bandera96×160. Recorte por celda, pies alineados, limpieza de halo/fragmentos alfa, vecino más cercano y PNG indexado hasta256 colores con transparencia. No son sprites oficiales ni material MIT. Se conservan los derechos de la franquicia de sus titulares; generar arte no los concede. SHA-256 originales/finales y dimensiones en `buggy-manifest.json`. No se descargó código, música ni sprites de terceros. Reutilizados los props ya registrados de Orange Town; la referencia no se usa como fondo completo.

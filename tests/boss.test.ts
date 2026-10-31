@@ -103,7 +103,7 @@ test('Morgan encuentra una ruta alrededor de cajas usando su radio real', () => 
   assert.ok(boss.body.x < 350, `No rodeó la cobertura: ${boss.body.x},${boss.body.y}`);
   assert.ok(r.world.canOccupy(boss.body.x, boss.body.y, boss.body.radius));
 });
-test('sesión de patrones completa: tres fases, cinco movimientos y máximo cinco refuerzos', () => {
+test('sesión de patrones completa: tres fases, cinco movimientos y máximo doce refuerzos', () => {
   const r = new Run(); r.beginMorgan(); const b = r.encounter!, seen = new Set<string>();
   r.player.hurtTimer = 1000000;
   for (const a of r.player.attacks) a.cooldown = 1e6;
@@ -112,8 +112,16 @@ test('sesión de patrones completa: tres fases, cinco movimientos y máximo cinc
     for (let i = 0; i < 3600; i++) {
       r.update(1 / 60, axis);
       if (b.telegraph) seen.add(b.telegraph.attack.id);
-      assert.ok(r.enemies.count <= 5); assert.ok(r.world.canOccupy(b.body.x, b.body.y, b.body.radius));
+      assert.ok(r.enemies.count <= MORGAN.reinforcementCap); assert.ok(r.world.canOccupy(b.body.x, b.body.y, b.body.radius));
     }
   }
   assert.deepEqual([...seen].sort(), MORGAN_ATTACKS.map(a => a.id).sort());
+});
+
+test('Morgan: campo ampliado y refuerzos desde primera fase, con límite configurable',()=>{
+ const r=new Run();r.beginMorgan();r.player.hurtTimer=1e6;for(const a of r.player.attacks)a.cooldown=1e6;
+ assert.ok(MORGAN_ARENA.width>2560&&MORGAN_ARENA.height>1792);
+ for(let i=0;i<60*7;i++)r.update(1/60,axis);assert.equal(r.enemies.count,6);
+ for(let i=0;i<60*15;i++)r.update(1/60,axis);assert.equal(r.enemies.count,12);assert.equal(r.enemies.count,MORGAN.reinforcementCap);
+ for(let i=0;i<60*28;i++)r.update(1/60,axis);assert.ok(r.enemies.items.filter(e=>e.active).every(e=>Math.hypot(e.x-r.player.x,e.y-r.player.y)<100));
 });

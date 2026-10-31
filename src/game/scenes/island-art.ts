@@ -1,3 +1,11 @@
+import buggyFlag from '../../assets/bosses/buggy-flag.png';
+import buggyGround from '../../assets/bosses/buggy-ground.png';
+import buggyMotion from '../../assets/bosses/buggy-motion.png';
+import buggyHead from '../../assets/bosses/buggy-head.png';
+import buggyLeft from '../../assets/bosses/buggy-hand-left.png';
+import buggyRight from '../../assets/bosses/buggy-hand-right.png';
+import buggyKnife from '../../assets/bosses/buggy-knife.png';
+import buggyBomb from '../../assets/bosses/buggy-bomb.png';
 import morganMotion from '../../assets/motion/morgan.png';
 import navalground from '../../assets/arena/ground.png';
 import navalgate from '../../assets/arena/gate.png';
@@ -48,7 +56,7 @@ import compass from '../../assets/worlds/navigation-chart.png';
 import { createPackedDirectionalArt } from './directional-art.ts';
 
 const actors = { 'buggy-pirate': pirate, 'buggy-gunner': gunner, 'buggy-bruiser': bruiser };
-const props = { 'morgan-motion-sheet': morganMotion, 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
+const props = { 'buggy-flag':buggyFlag, 'buggy-ground': buggyGround, 'buggy-motion-sheet': buggyMotion, 'buggy-head':buggyHead, 'buggy-hand-left':buggyLeft, 'buggy-hand-right':buggyRight, 'buggy-knife':buggyKnife, 'buggy-bomb':buggyBomb, 'morgan-motion-sheet': morganMotion, 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
   'ability-elastic-punch': pistolArt, 'ability-gatling': gatlingArt, 'ability-bazooka': bazookaArt, 'ability-whip': whipArt, 'ability-balloon': balloonArt, 'ability-axe': axeArt, buggy, 'buggy-knives': knives, morgan, 'morgan-axe': axe, 'orange-house-0': house, 'orange-house-1': shellsHouse,
   'orange-tent': tent, 'orange-stall': stall, 'orange-tree': tree, 'orange-ruin': ruin,
   'orange-flags': flags, 'navigation-chart': compass };
@@ -63,8 +71,11 @@ export function createIslandArt(scene: Phaser.Scene): void {
     const canvas = document.createElement('canvas'); canvas.width = source.width; canvas.height = source.height;
     canvas.getContext('2d')!.drawImage(source, 0, 0);
     if (scene.textures.exists(key)) scene.textures.remove(key);
-    scene.textures.addCanvas(key, canvas); if (key.startsWith('ability-')) registerArt(key, canvas); scene.textures.remove(`island-source-${key}`);
+    scene.textures.addCanvas(key, canvas); if (key.startsWith('ability-') || key==='buggy-head') registerArt(key, canvas); scene.textures.remove(`island-source-${key}`);
   }
+  const buggySheet = scene.textures.get('buggy-motion-sheet').getSourceImage() as HTMLCanvasElement;
+  for(let i=0;i<12;i++){const c=document.createElement('canvas');c.width=c.height=128;c.getContext('2d')!.drawImage(buggySheet,i%4*128,Math.floor(i/4)*128,128,128,0,0,128,128);scene.textures.addCanvas(`buggy-pose-${i}`,c);}
+  scene.textures.remove('buggy-motion-sheet');
   const sheet = scene.textures.get('morgan-motion-sheet').getSourceImage() as HTMLCanvasElement;
   for (let i=0;i<16;i++) {const c=document.createElement('canvas');c.width=c.height=128;c.getContext('2d')!.drawImage(sheet,i%4*128,Math.floor(i/4)*128,128,128,0,0,128,128);scene.textures.addCanvas(`morgan-pose-${i}`,c);}
   scene.textures.remove('morgan-motion-sheet');

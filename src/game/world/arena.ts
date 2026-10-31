@@ -1,7 +1,7 @@
 import { ProceduralWorld } from './world.ts';
 import { CHUNK_SIZE, TILE, cellKey, type Chunk, type Obstacle } from './generator.ts';
-export const MORGAN_ARENA: ArenaDefinition = { width: 2560, height: 1792, playerSpawn: { x: 1280, y: 1056 }, bossSpawn: { x: 1280, y: 864 },
-  gates: [{ x: 320, y: 160 }, { x: 2240, y: 160 }, { x: 160, y: 1568 }, { x: 2400, y: 1568 }],
+export const MORGAN_ARENA: ArenaDefinition = { width: 3072, height: 2176, playerSpawn: { x: 1536, y: 1216 }, bossSpawn: { x: 1536, y: 1024 },
+  gates: [{ x: 320, y: 160 }, { x: 2752, y: 160 }, { x: 160, y: 1856 }, { x: 2912, y: 1856 }, { x: 160, y: 960 }, { x: 2912, y: 960 }, { x: 1120, y: 1984 }, { x: 1952, y: 1984 }],
   covers: [{ x: 224, y: 224, width: 64, height: 64 }, { x: 480, y: 224, width: 64, height: 64 },
     { x: 960, y: 864, width: 64, height: 64 }, { x: 1536, y: 864, width: 64, height: 64 },
     { x: 448, y: 1280, width: 96, height: 64, art: 'naval-cannon' }, { x: 2016, y: 1280, width: 96, height: 64, art: 'naval-cannon' },
@@ -9,7 +9,23 @@ export const MORGAN_ARENA: ArenaDefinition = { width: 2560, height: 1792, player
     { x: 1152, y: 128, width: 256, height: 96, art: 'naval-gate' }],
   decorations: [{ x: 832, y: 160, width: 48, height: 112, art: 'naval-flag' }, { x: 1680, y: 160, width: 48, height: 112, art: 'naval-flag' }] };
 export interface ArenaDefinition { width: number; height: number; playerSpawn: { x: number; y: number }; bossSpawn: { x: number; y: number }; gates: readonly { x: number; y: number }[]; covers: readonly { x: number; y: number; width: number; height: number; art?: string }[]; decorations?: readonly { x: number; y: number; width: number; height: number; art: string }[] }
-export const BUGGY_ARENA: ArenaDefinition = { width: 768, height: 512, playerSpawn: { x: 384, y: 416 }, bossSpawn: { x: 384, y: 112 }, gates: [{x:96,y:80},{x:672,y:80},{x:96,y:432},{x:672,y:432}], covers: [{ x: 160, y: 224, width: 64, height: 64 }, { x: 544, y: 224, width: 64, height: 64 }] };
+export const BUGGY_ARENA: ArenaDefinition = {
+  width: 2816, height: 2048, playerSpawn: { x: 1408, y: 1152 }, bossSpawn: { x: 1648, y: 1152 },
+  gates: [{x:256,y:256},{x:2560,y:256},{x:256,y:1792},{x:2560,y:1792}],
+  covers: [
+    {x:320,y:224,width:192,height:128,art:'orange-house-0'}, {x:2304,y:224,width:192,height:128,art:'orange-house-0'},
+    {x:1184,y:704,width:448,height:224,art:'orange-tent'},
+    {x:1056,y:1056,width:160,height:128,art:'orange-stall'}, {x:1888,y:1248,width:128,height:96,art:'orange-ruin'},
+    {x:192,y:768,width:160,height:128,art:'orange-stall'}, {x:2464,y:768,width:160,height:128,art:'orange-stall'},
+    {x:416,y:1568,width:192,height:160,art:'orange-ruin'}, {x:2208,y:1568,width:192,height:160,art:'orange-ruin'},
+    {x:992,y:960,width:64,height:64,art:'coastal-crates'}, {x:1760,y:960,width:64,height:64,art:'coastal-crates'},
+    {x:832,y:1344,width:64,height:64,art:'coastal-crates'}, {x:1920,y:1344,width:64,height:64,art:'coastal-crates'},
+    {x:1024,y:1760,width:128,height:64,art:'orange-ruin'}, {x:1664,y:1760,width:128,height:64,art:'orange-ruin'},
+  ],
+  decorations: [{x:1280,y:960,width:64,height:96,art:'buggy-flag'}, {x:1728,y:1344,width:64,height:96,art:'buggy-flag'}, {x:864,y:192,width:64,height:96,art:'buggy-flag'},{x:1888,y:192,width:64,height:96,art:'buggy-flag'},
+    {x:640,y:640,width:64,height:96,art:'buggy-flag'},{x:2112,y:640,width:64,height:96,art:'buggy-flag'},
+    {x:896,y:1120,width:64,height:96,art:'buggy-flag'}, {x:1856,y:1120,width:64,height:96,art:'buggy-flag'}, {x:640,y:1536,width:64,height:96,art:'buggy-flag'},{x:2112,y:1536,width:64,height:96,art:'buggy-flag'}],
+};
 export class ArenaWorld extends ProceduralWorld {
   readonly arena: ArenaDefinition;
   constructor(seed: number, arena: ArenaDefinition = MORGAN_ARENA, theme: 'shells' | 'orange' = 'shells') { super(seed, theme); this.arena = arena; }

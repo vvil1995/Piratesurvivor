@@ -33,3 +33,9 @@
 @media(max-width:700px){.hud.boss-active .status-notices{top:max(158px,calc(env(safe-area-inset-top) + 148px))}}
 .hud .attack-slot.empty{opacity:.5;border-style:dashed;background:#1023339c}
 @media(max-width:700px){.hud .boss-panel{top:max(76px,calc(env(safe-area-inset-top) + 66px))}.hud.boss-active .status-notices{top:max(132px,calc(env(safe-area-inset-top) + 122px))}}
+/* Buggy's compact portrait uses the existing boss panel; Morgan is unchanged. */
+.hud .boss-panel.with-portrait{padding-left:39px}
+.hud #boss-portrait{position:absolute;left:4px;top:4px;width:30px;height:30px;object-fit:contain;image-rendering:pixelated}
+.hud #boss-hp{display:block;font:8px monospace;letter-spacing:0;color:#d3deeb;margin-top:2px}
+.hud .boss-panel.with-portrait #boss-pattern{display:block;text-align:left;margin-right:62px}
+.hud #boss-hp{position:absolute;right:8px;bottom:5px;margin:0;font-size:7px}

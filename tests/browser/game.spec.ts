@@ -722,7 +722,7 @@ async function enterBuggy(page: Page) {
   await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; Object.assign(r.player, r.buggyRoute.signal!); r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
   await expect(page.locator('#voyage-title')).toContainText('RUMBO A BUGGY');
   await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
-  await expect(page.locator('#boss-name')).toHaveText('BUGGY EL PAYASO');
+  await expect(page.locator('#boss-name')).toHaveText('BUGGY');
 }
 
 test('Buggy: carta de Orange, cuatro avisos legibles, victoria y llegada a Syrup sin curar', async ({ page }, info) => {
@@ -732,7 +732,7 @@ test('Buggy: carta de Orange, cuatro avisos legibles, victoria y llegada a Syrup
       const path = '/src/content/bosses/buggy.ts', { BUGGY_ATTACKS } = await import(/* @vite-ignore */ path);
       const qa = window.__OPS_QA__!, r = qa.getRun()!, b = r.encounter!;
       for (const a of r.player.attacks) a.cooldown = 1e6;
-      b.body.x = 384; b.body.y = 145; r.player.x = 384; r.player.y = 380; b.body.hp = b.body.maxHp * 0.2;
+      b.body.x = 1648; b.body.y = 1152; r.player.x = 1408; r.player.y = 1152; b.body.hp = b.body.maxHp * 0.2;
       b.tick(0, r.player, r.world, () => ({ x: 0, y: 0 }), () => {});
       b.prepare(BUGGY_ATTACKS.find((a: { id: string }) => a.id === id)!, r.player, r.world);
       b.elapsed = b.telegraph!.attack.preparation - 0.15; b.telegraph!.elapsed = b.elapsed; b.tick = () => {};
@@ -1018,4 +1018,35 @@ test('HUD compacto: estrellas, combinaciones, objeto y Morgan sin superposición
     await page.screenshot({path:info.outputPath(`hud-morgan-${width}.png`)});
   }
   await page.locator('#pause').click();await expect(page.locator('#paused')).toBeVisible();
+});
+
+test('Buggy completo: cámara de exploración, seis patrones, partes y sprites animados', async ({page},info)=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#start').click();const normalZoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
+ await page.evaluate(()=>{const qa=window.__OPS_QA__!,r=qa.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.lootNoticeFor=0;r.player.hurtTimer=1e6;for(const a of r.player.attacks)a.cooldown=1e6;r.update=()=>{};qa.draw();qa.tick();});
+ await expect(page.locator('#boss-name')).toHaveText('BUGGY');await expect(page.locator('#boss-portrait')).toBeVisible();await expect(page.locator('#boss-hp')).toContainText('6800');
+ expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(normalZoom);
+ const frames=[];
+ for(let i=0;i<4;i++)frames.push(await page.evaluate(()=>{const qa=window.__OPS_QA__!,b=qa.getRun()!.encounter!;b.body.x+=24;qa.draw(100);return qa.metrics().bossTexture;}));
+ expect(new Set(frames).size).toBeGreaterThanOrEqual(3);
+ for(const id of ['knives','ring','bomb','split','charge','barrage']){
+  await page.evaluate(async id=>{
+   const path='/src/content/bosses/buggy.ts',{BUGGY_ATTACKS}=await import(/* @vite-ignore */ path);
+   const qa=window.__OPS_QA__!,r=qa.getRun()!,b=r.encounter!;b.cancel();b.body.x=1648;b.body.y=1152;b.body.hp=b.body.maxHp*.2;r.player.x=1408;r.player.y=1152;
+   b.prepare(BUGGY_ATTACKS.find((a:{id:string})=>a.id===id)!,r.player,r.world);b.elapsed=b.telegraph!.attack.preparation-.16;b.telegraph!.elapsed=b.elapsed;qa.draw();qa.tick();
+  },id);
+  await expect(page.locator('#boss-phase')).toHaveText('FASE 3/3');await page.screenshot({path:info.outputPath(`buggy-full-${id}-warning.png`)});
+  const outcome=await page.evaluate(()=>{
+   const qa=window.__OPS_QA__!,r=qa.getRun()!,b=r.encounter! as typeof r.encounter & {knives:unknown[];parts:unknown[];hazards:unknown[]};
+   for(let i=0;i<25;i++)b!.tick(1/60,r.player,r.world,()=>({x:0,y:0}),()=>{});qa.draw();qa.tick();return {knives:b!.knives.length,parts:b!.parts.length,hazards:b!.hazards.length};
+  });
+  if(id==='knives')expect(outcome.knives).toBe(9);if(id==='ring')expect(outcome.knives).toBe(16);if(id==='split')expect(outcome.parts).toBe(3);if(id==='charge')expect(outcome.parts).toBe(1);if(id==='bomb'||id==='barrage')expect(outcome.hazards).toBeGreaterThan(0);
+  await page.screenshot({path:info.outputPath(`buggy-full-${id}-impact.png`)});
+ }
+ await page.setViewportSize({width:568,height:320});
+ await page.evaluate(()=>{window.__OPS_QA__!.draw();window.__OPS_QA__!.tick();});
+ const panel=await page.locator('#boss-panel').boundingBox();expect(panel!.x).toBeGreaterThanOrEqual(0);expect(panel!.x+panel!.width).toBeLessThanOrEqual(568);
+ await page.screenshot({path:info.outputPath('buggy-small-landscape.png')});
+ await page.evaluate(()=>{const qa=window.__OPS_QA__!,r=qa.getRun()!;r.encounter!.cancel();r.encounter!.body.hp=0;r.encounter!.defeated();qa.draw();qa.tick();});
+ await page.screenshot({path:info.outputPath('buggy-defeated.png')});expect(errors).toEqual([]);
 });

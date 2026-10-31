@@ -1,0 +1,67 @@
+{
+  "source": "exec-9a4358c3-df0a-4708-b4bc-ed09416228d6.png",
+  "sourceSha256": "f892ff784c5f692b6eb20a75a013515bc4b425f82ec817216578c33252b7705c",
+  "assets": {
+    "buggy-motion.png": {
+      "sha256": "41b09316adbc4551f09a4d9cfd0bd7d1c7febcde51c115332f96172bc11400a7",
+      "size": [
+        512,
+        512
+      ]
+    },
+    "buggy-head.png": {
+      "sha256": "ae336ae435357e90c9a528ca9ee0579faf4dbb1a7869931d4c43468c85a9f8bf",
+      "size": [
+        64,
+        64
+      ]
+    },
+    "buggy-hand-left.png": {
+      "sha256": "e4f001b632dc80cd10cf49f376dd95c8835d1e9c9f70d28d0e62e51e0a5a5eee",
+      "size": [
+        64,
+        64
+      ]
+    },
+    "buggy-hand-right.png": {
+      "sha256": "1e7bfae0ae792c5fffc9ba945a5ba4273dd1921232b2ea302fcd362d3170527e",
+      "size": [
+        64,
+        64
+      ]
+    },
+    "buggy-knife.png": {
+      "sha256": "99e134b72a553e368f255ee0df1b72ed5682e11465dc5c4f0eee4607f6e2ace7",
+      "size": [
+        32,
+        32
+      ]
+    },
+    "buggy-bomb.png": {
+      "sha256": "6b087b8ab2fbdf805feeef34fcdd6ca19610fec75728fd77cbfeff29db6246a6",
+      "size": [
+        32,
+        32
+      ]
+    }
+  },
+  "ground": {
+    "source": "exec-36221517-7531-4883-a27f-337931358182.png",
+    "sourceSha256": "a7899f483908f9b8bc62c58c96a603b447c9c0646a98d2eb96cac3db468a6517",
+    "sha256": "8653f4d8d9dbb36b242a484bbdc0467cca50224cb199a9aaa9d235502eb48dbe",
+    "size": [
+      128,
+      128
+    ]
+  },
+  "flag": {
+    "source": "exec-4e177941-bdf3-4c4d-aee7-e65b1db64a36.png",
+    "sourceSha256": "344d22a3b88360349f2b30407809285ddaa5629902f5663ebdc392042f508426",
+    "sha256": "0c463032a161ad1748a35466efb0ca9bac87e869c83a3d88eec1a9b9952f6493",
+    "size": [
+      96,
+      160
+    ]
+  },
+  "palette": "PNG indexado, hasta256 colores; transparencia conservada y sin interpolaci\u00f3n"
+}

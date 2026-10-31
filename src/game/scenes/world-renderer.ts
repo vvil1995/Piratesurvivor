@@ -105,7 +105,7 @@ export class WorldRenderer {
         ctx.fillStyle = ['#e1bd70', '#d9d8bd', '#b68892'][h % 3]; ctx.fillRect(x, y, 2, 2);
       }
     }
-    if (chunk.district === 'plaza') {
+    if (chunk.district === 'plaza' && !(this.world instanceof ArenaWorld && orange)) {
       ctx.strokeStyle = '#9eaa9d'; ctx.lineWidth = 2;
       ctx.strokeRect(96, 96, 64, 64); ctx.strokeRect(103, 103, 50, 50);
       ctx.fillStyle = '#8a9f9b';
@@ -123,6 +123,13 @@ export class WorldRenderer {
         for(let x=56;x<75;x+=4){ctx.fillStyle='#78838b';ctx.fillRect(x,54,1,20);}
       }
     }
+    if (this.world instanceof ArenaWorld && orange) {
+      ctx.fillStyle = ctx.createPattern(this.scene.textures.get('buggy-ground').getSourceImage() as HTMLCanvasElement, 'repeat')!; ctx.fillRect(0,0,256,256);
+      for (let y=0;y<256;y+=16) for (let x=0;x<256;x+=16) {
+        const wx=chunk.cx*512+x*2,wy=chunk.cy*512+y*2;
+        if(wx<64||wy<64||wx>=this.world.arena.width-64||wy>=this.world.arena.height-64){ctx.fillStyle=(Math.floor((wx+wy)/64)%2)?'#a94c47':'#d6bd87';ctx.fillRect(x,y,16,16);}
+      }
+    }
     slot.texture.refresh(); slot.chunk = chunk;
     for (let i = 0; i < chunk.obstacles.length; i++) {
       const obstacle = chunk.obstacles[i];
@@ -130,7 +137,7 @@ export class WorldRenderer {
       const sprite = slot.decorations[i];
       if (obstacle.kind === 'water') { sprite.setVisible(false); continue; }
       const own = orange && ['house', 'tree', 'tent', 'stall', 'ruin'].includes(obstacle.kind);
-      sprite.setTexture(naval ? obstacle.art ?? (obstacle.kind === 'wall' ? 'naval-wall' : 'naval-crates') : obstacle.kind === 'ship' ? 'naval-ship' : obstacle.kind === 'lamp' ? 'coastal-lamp' : obstacle.kind === 'fence' ? 'coastal-fence' : obstacle.kind === 'crate' && coastal ? 'coastal-crates' : obstacle.kind === 'wall' && coastal ? 'coastal-wall' : obstacle.kind === 'dock' ? 'wooden-dock' : obstacle.kind === 'quay' ? 'stone-quay' : !orange && coastal && obstacle.kind === 'house' ? obstacle.variant === 3 ? 'shells-base' : 'shells-house' : obstacle.kind === 'tree' && coastal && (obstacle.variant === 1 || !orange) ? obstacle.variant === 1 && orange ? 'coastal-palm' : 'coastal-tree' : obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
+      sprite.setTexture(this.world instanceof ArenaWorld && orange && obstacle.art ? obstacle.art : naval ? obstacle.art ?? (obstacle.kind === 'wall' ? 'naval-wall' : 'naval-crates') : obstacle.kind === 'ship' ? 'naval-ship' : obstacle.kind === 'lamp' ? 'coastal-lamp' : obstacle.kind === 'fence' ? 'coastal-fence' : obstacle.kind === 'crate' && coastal ? 'coastal-crates' : obstacle.kind === 'wall' && coastal ? 'coastal-wall' : obstacle.kind === 'dock' ? 'wooden-dock' : obstacle.kind === 'quay' ? 'stone-quay' : !orange && coastal && obstacle.kind === 'house' ? obstacle.variant === 3 ? 'shells-base' : 'shells-house' : obstacle.kind === 'tree' && coastal && (obstacle.variant === 1 || !orange) ? obstacle.variant === 1 && orange ? 'coastal-palm' : 'coastal-tree' : obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
       if (obstacle.kind === 'ship') sprite.setDisplaySize(obstacle.width, obstacle.width * sprite.height / sprite.width);
       else if (obstacle.kind === 'lamp') sprite.setDisplaySize(28, 84);
       else if (obstacle.kind === 'fence') sprite.setDisplaySize(obstacle.width, 48);
@@ -148,6 +155,7 @@ export class WorldRenderer {
         sprite.setDisplaySize(width, width * sprite.height / sprite.width);
       }
       if (naval) { const w = obstacle.width; sprite.setDisplaySize(w, obstacle.art ? w * sprite.height / sprite.width : obstacle.kind === 'wall' ? obstacle.height + 24 : obstacle.height); }
+      if (this.world instanceof ArenaWorld && orange && obstacle.art) sprite.setDisplaySize(obstacle.width, obstacle.width * sprite.height / sprite.width);
       sprite.setVisible(true);
     }
     for (let i = chunk.obstacles.length; i < slot.decorations.length; i++) slot.decorations[i].setVisible(false);

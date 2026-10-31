@@ -5,7 +5,6 @@ import { preloadIslandArt } from './island-art.ts';
 import { BalloonRig } from './balloon-rig.ts';
 import { BUFF_LOOK } from '../../ui/buff-info.ts';
 import { BossRenderer } from './boss-renderer.ts';
-import { MORGAN_ARENA } from '../world/arena.ts';
 import { LOOT } from '../../content/loot.ts';
 import Phaser from 'phaser';
 import { WalkRig } from './walk-rig.ts';
@@ -112,13 +111,12 @@ export class BattleScene extends Phaser.Scene {
     const run = this.bridge.run();
     if (run !== this.previousRun) { this.accumulator = 0; this.previousRun = run; for (const p of this.dust) p.life = 0; }
     const camera = this.cameras.main;
-    if (run?.inArena && run.zone !== 'morgan-arena') camera.setZoom(Math.max(0.3, Math.min(1.4, camera.width / ((run?.arena.width ?? MORGAN_ARENA.width) + 48), (camera.height - 120) / ((run?.arena.height ?? MORGAN_ARENA.height) + 32))));
-    else this.resize();
+    this.resize();
     const player = run?.player;
     let worldX = player?.x ?? 256, worldY = player?.y ?? 256;
     const worldView = { width: camera.width / camera.zoom, height: camera.height / camera.zoom, centerX: worldX, centerY: worldY };
     if (run) {
-      if (run.zone === 'morgan-arena' && this.cameraWorld === run.world && this.arenaCameraPosition) { worldView.centerX = this.arenaCameraPosition.x; worldView.centerY = this.arenaCameraPosition.y; }
+      if (run.inArena && this.cameraWorld === run.world && this.arenaCameraPosition) { worldView.centerX = this.arenaCameraPosition.x; worldView.centerY = this.arenaCameraPosition.y; }
       run.setView(worldView);
       if (run.status === 'playing' || run.status === 'voyage') {
         this.accumulator = Math.min(this.accumulator + delta / 1000, 0.1);
@@ -131,13 +129,10 @@ export class BattleScene extends Phaser.Scene {
     worldView.centerX = worldX; worldView.centerY = worldY;
     // Posiciones lógicas globales; solo el dibujo usa origen local por chunk.
     const origin = { x: Math.floor(worldX / CHUNK_SIZE) * CHUNK_SIZE, y: Math.floor(worldY / CHUNK_SIZE) * CHUNK_SIZE };
-    if (run?.zone === 'morgan-arena') {
+    if (run?.inArena) {
       if (this.cameraWorld !== run.world) this.arenaCameraPosition = { x: worldX, y: worldY };
       this.arenaCameraPosition = arenaCamera(this.arenaCameraPosition!, {x:worldX,y:worldY}, worldView.width, worldView.height, run.arena, delta / 1000);
       worldView.centerX = this.arenaCameraPosition.x; worldView.centerY = this.arenaCameraPosition.y;
-      camera.centerOn(worldView.centerX - origin.x, worldView.centerY - origin.y);
-    } else if (run?.inArena) {
-      worldView.centerX = run.arena.width / 2; worldView.centerY = run.arena.height / 2;
       camera.centerOn(worldView.centerX - origin.x, worldView.centerY - origin.y);
     } else camera.centerOn(worldX - origin.x, worldY - origin.y);
     this.cameraWorld = run?.world;

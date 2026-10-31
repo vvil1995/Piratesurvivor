@@ -135,9 +135,10 @@ export class Run {
     this.fields.clear(); this.bossField = undefined;
     for (const state of this.player.attacks) { state.pending = 0; state.targetId = undefined; }
   }
+  private arenaReinforcementTimer = 6;
   beginMorgan(): boolean {
     if (!['playing', 'paused', 'voyage'].includes(this.status) || this.zone !== 'shells-town' || this.morganDefeated) return false;
-    this.route.consume(); this.clearBattlefield();
+    this.route.consume(); this.clearBattlefield(); this.arenaReinforcementTimer = 6;
     this.world = new ArenaWorld(this.world.seed); this.zone = 'morgan-arena'; this.bossField = new FlowField(this.world, MORGAN.radius);
     Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter(); Object.assign(this.encounter.body, MORGAN_ARENA.bossSpawn);
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
@@ -145,7 +146,12 @@ export class Run {
   beginBuggy(): boolean {
     if (!['playing', 'paused', 'voyage'].includes(this.status) || this.zone !== 'orange-town' || !this.morganDefeated || this.buggyDefeated) return false;
     this.buggyRoute.consume(); this.clearBattlefield(); this.orangeWorld = this.world;
-    this.encounter = new BuggyEncounter(); this.world = new ArenaWorld(this.world.seed, BUGGY_ARENA, 'orange'); this.zone = 'buggy-arena';
+    const encounter: BuggyEncounter = new BuggyEncounter({
+      reflectHit: damage => damageEnemy(this.player, encounter.body, damage, 0, this.player, this.world, e => this.dropXp(e, this.player.id), this.random),
+      counter: origin => counterGuard(this.player, origin, this.grid, this.world, e => this.dropXp(e, this.player.id), this.random),
+      absorb: (position, damage) => { const lure = this.areas.items.find(a => a.active && a.kind === 'decoy' && Math.hypot(a.x-position.x,a.y-position.y) < a.radius+6); if(!lure)return false; lure.hp=(lure.hp??0)-damage;return true; },
+    });
+    this.encounter = encounter; Object.assign(this.encounter.body, BUGGY_ARENA.bossSpawn); this.world = new ArenaWorld(this.world.seed, BUGGY_ARENA, 'orange'); this.zone = 'buggy-arena';
     this.bossField = new FlowField(this.world, this.encounter.body.radius); Object.assign(this.player, BUGGY_ARENA.playerSpawn);
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
@@ -352,6 +358,10 @@ export class Run {
     }
     if (this.encounter && this.encounter.state !== 'dead') {
       this.bossField!.update(this.player, dt);
+      if (this.encounter.profile.id === 'morgan') {
+        this.arenaReinforcementTimer -= dt;
+        if (this.arenaReinforcementTimer <= 0) { this.arenaReinforcementTimer = MORGAN.ambientReinforcementSeconds; this.callReinforcements(); }
+      }
       this.encounter.body.statuses??={};this.encounter.body.statuses.stun=Math.max(0,(this.encounter.body.statuses.stun??0)-dt);
       this.encounter.tick(dt, this.player, this.world, from => (this.encounter!.body.statuses?.stun??0)>0?{x:0,y:0}:this.bossField!.direction(from, this.player, this.encounter!.body.radius), () => this.callReinforcements());
       if (this.player.hp <= 0) { this.defeat(); return; }
@@ -366,7 +376,7 @@ export class Run {
       if (!enemy.active) continue;
       let target = living[0], nearest = Infinity;
       for (const actor of living) { const d = Math.hypot(actor.x - enemy.x, actor.y - enemy.y); if (d < nearest) { nearest = d; target = actor; } }
-      if (nearest > 1400) { enemy.active = false; continue; }
+      if (!this.inArena && nearest > 1400) { enemy.active = false; continue; }
       tickStatus(enemy, dt);
       enemy.flash = Math.max(0, enemy.flash - dt);
       enemy.steeringTime = (enemy.steeringTime ?? 0) - dt;
