@@ -1,7 +1,7 @@
 import { TRAINING, trainingCost, trainingLevel } from '../content/training.ts';
 import { CHARACTERS } from '../content/catalog.ts';
 import { ABILITIES } from '../content/attacks.ts';
-import { pixelIcon, type IconName } from './pixel-art.ts';
+import { trainingIcon } from './training-art.ts';
 import type { SaveStore } from '../platform/persistence/save.ts';
 const node = (id: string) => document.getElementById(id)!;
 export function renderTraining(store: SaveStore, characterId: string, refresh: () => void): void {
@@ -11,7 +11,7 @@ export function renderTraining(store: SaveStore, characterId: string, refresh: (
   const grid = node('training-grid'); grid.replaceChildren();
   for (const [id, rule] of Object.entries(TRAINING)) {
     const level = p.levels[id] ?? 0, card = document.createElement('article'); card.className = 'training-card'; card.dataset.training = id;
-    const icon = pixelIcon(rule.icon as IconName), content = document.createElement('div'), title = document.createElement('b'), text = document.createElement('p'), progress = document.createElement('div'), buy = document.createElement('button');
+    const icon = trainingIcon(id, rule.name), content = document.createElement('div'), title = document.createElement('b'), text = document.createElement('p'), progress = document.createElement('div'), buy = document.createElement('button');
     title.textContent = `${rule.name} · ${level}/${rule.max}`; text.textContent = `${rule.effect} por nivel`;
     progress.className = 'training-segments'; progress.setAttribute('aria-label', `${level} de ${rule.max}`);
     for (let i = 0; i < rule.max; i++) { const segment = document.createElement('i'); segment.classList.toggle('bought', i < level); progress.append(segment); }

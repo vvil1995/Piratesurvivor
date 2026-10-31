@@ -15,8 +15,15 @@ try{
   await page.goto(`http://127.0.0.1:${server.address().port}${base}`);await page.locator('#loading').waitFor({state:'hidden'});
   assert.equal(await page.evaluate(()=>!!window.__OPS_QA__),false);
   for(const id of ['luffy','zoro','nami','usopp','sanji']){await page.selectOption('#beta-character',id);await page.waitForFunction(()=>!document.querySelector('#start').disabled);await page.locator('#captain-portrait').evaluate(image=>image.decode());}
+  await page.locator('#train').click();
+  await page.locator('.training-card').last().waitFor({state:'visible'});
+  assert.equal(await page.locator('.training-card').count(),14);
+  await page.waitForFunction(()=>[...document.querySelectorAll('.training-icon')].length===14&&[...document.querySelectorAll('.training-icon')].every(i=>i.complete&&i.naturalWidth===512));
+  assert.equal(await page.locator('.training-icon').evaluateAll(images=>new Set(images.map(i=>i.src)).size),13);
+  await page.screenshot({path:`/tmp/training-production-${viewport.width}.png`});
+  await page.locator('#training-close').click();
   await page.locator('#start').click();await page.locator('#hud').waitFor({state:'visible'});await page.waitForTimeout(500);await page.locator('#pause').click();await page.locator('#paused').waitFor({state:'visible'});
   assert.deepEqual(errors,[]);await page.close();
  }
- console.log(`Pages smoke OK: ${base}, desktop/mobile, five character atlas imports, start/pause, no404/JS errors or QA hook`);
+ console.log(`Pages smoke OK: ${base}, desktop/mobile, five character atlas imports,13 training sprites/14 cards, start/pause, no404/JS errors or QA hook`);
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

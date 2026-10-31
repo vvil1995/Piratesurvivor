@@ -1,0 +1,93 @@
+{
+  "01_vitalitat.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "c866be986598773630d1cacf3119c93c2ab5ae8cfeb744aaa29cb0203e53c072"
+  },
+  "02_forca.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "6ae8a93ed385c2f3650eceb07527aa575165a4f0ff4d2929394ab8108caa3563"
+  },
+  "03_zancada.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "1bd41b371213b478530b56c01c3290ec168703daa032ec388b9a2858a5fa7841"
+  },
+  "04_reflexos.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "8c6a76676511b21423a8dc8ae59715e44ea010c6536af64c9c859d02c075f082"
+  },
+  "05_corassa.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "bf4e1b1fdbcd44e2b734b1be99fa9e515bd79ef0456cf9a816b430c52e7529c0"
+  },
+  "06_recuperacio.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "f14262e4de28651b0720a6a63b8be6a354efc9c9166ac5c796fb6681eb2ecfc1"
+  },
+  "07_imant.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "763747dcd47cac49093b34451fb93a2cefa14d7f3b9d963884322cb2eb058d8c"
+  },
+  "08_aprenentatge.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "9f0067b0bfa3a812c80f3ffe5d9ed06dee5c5ae72e5f94ad10bf768b45518d85"
+  },
+  "09_fortuna.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "2f7b46f7e33fe45d580ea0863a04fcb37c8bbc3d4dfdb3388ec01accb3f8ef77"
+  },
+  "10_cop_critic.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "642e5ddd3698c7687eec5dc6c4f59e15af220eab54a0e323354943a98e04c8b8"
+  },
+  "11_canvi_de_cartes.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "5fedfc3f521e18c15183774fec3140e9b54de30a1d9090348f729abe0548387b"
+  },
+  "12_veto.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "16a9d3de7c2f7c28ed21eea10b1907976184ca4393a3fef27363aacb57d432d5"
+  },
+  "13_atac_inicial_i_14_repertori.png": {
+    "size": [
+      512,
+      512
+    ],
+    "sha256": "e9c2cec461fd69b5600032d48377a074fd5bd4f91d6624310ed52b815c2c7a14"
+  }
+}

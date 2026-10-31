@@ -372,3 +372,16 @@ Se sustituye el Buggy provisional de corredores/barrido/teletransporte por seis 
 Pendiente: equilibrio mediante partidas humanas (HP/daño/cadencia configurables), Android/iOS y Safari físicos, notch real y medición de FPS. Las pruebas emuladas no certifican rendimiento en teléfonos reales. No se ha cambiado ninguna habilidad, objeto, entrenamiento ni economía permanente.
 
 Cierre de tarea6:142/142 pruebas de lógica; repetición final2/2 de los seis patrones en navegador tras optimizar PNG y ajustar persecución. Regresiones anteriores10/10 y6/6 (PC/móvil). El boss cierra distancia antes de disparar en vez de permanecer atacando fuera de alcance. Comprobados viewport568×320, transparencia/paleta, cuerpo/cabeza/manos y banderas. `npm run build`, licencias19 paquetes y smoke `/Piratesurvivor/`: correctos. Nuevos PNG aproximadamente96KiB en disco. El bundle conserva el aviso previo de tamaño; sin medición de FPS en teléfonos físicos.
+
+## Rediseño del entrenamiento permanente (2026-10-31)
+
+Cambios de representación en `src/ui/training.ts`, nuevo catálogo visual `training-art.ts` y hoja aislada `training.css`, importada desde main. Trece PNG originales del ZIP, sin alterar bytes/alfa, y catorce tarjetas; Starter/Repertorio comparten imagen. Ranuras vacías gris oscuro/contorno metálico y compradas doradas, con igual altura/separación y sin reglas por estadística. Tarjetas azul marino, contorno dorado, iconos proporcionados y compra44px. No se cambian catálogo de precios/bonificaciones, límites, métodos de compra, almacenamiento ni configuración de ataques/veto.
+
+Validación realizada:
+- `npm run check`, `npm test`:142/142 y compilación correctos.
+- Chromium PC/móvil:4/4 pruebas de entrenamiento. Verificados14 iconos,13 fuentes únicas512px, recurso compartido,10 segmentos dorados al máximo, colores uniformes y geometría sin solapamiento en1440/844/390/320px. Capturas inspeccionadas.
+- Compra real de Vitalidad3→4 por95 berries, saldo1000→905 y conservación tras recargar. Regresión de configuración inicial/Gatling+Whip, veto y mejoras independientes por personaje correcta.
+- Smoke de producción bajo `/Piratesurvivor/`:las14 tarjetas cargan los13 PNG y los cinco personajes; sin404 ni errores JS. Capturas de producción1440/844px guardadas durante la validación. QA ausente de producción.
+- Registro de procedencia/licencias actualizado; sin dependencias nuevas.
+
+Pendiente: validación en Safari/Android físicos. Esta tarea no modifica el renderizador ni resuelve por sí sola la incidencia visual del mapa reportada previamente, aún pendiente de reproducir con el navegador/URL afectados.

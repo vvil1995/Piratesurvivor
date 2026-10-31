@@ -1,0 +1,19 @@
+/* Permanent training presentation only; prices, rules and persistence live elsewhere. */
+.training-dialog{background:#102333;border:1px solid #bba06780;border-radius:4px}
+.training-dialog>header{background:#102333;gap:12px;flex-wrap:wrap}
+#training-grid{grid-auto-rows:1fr;gap:12px;align-items:stretch}
+#training-grid .training-card{display:grid;grid-template-columns:64px minmax(0,1fr)76px;gap:12px;align-items:center;min-height:132px;height:100%;padding:14px;background:#132b3d;border:1px solid #bba06760;border-radius:4px;box-shadow:inset 0 1px #e5c77a0c}
+#training-grid .training-icon{display:block;width:64px;height:64px;object-fit:contain;image-rendering:pixelated}
+#training-grid .training-card>div{min-width:0;display:flex;flex-direction:column;justify-content:center;align-self:stretch}
+#training-grid .training-card b{display:block;font:600 12px/1.4 monospace;letter-spacing:0;color:#f0dfb6;overflow-wrap:anywhere}
+#training-grid .training-card p{font:10px/1.5 monospace;letter-spacing:0;color:#b6c9d5;margin:7px 0 10px}
+#training-grid .training-segments{display:flex;gap:3px;margin-top:auto;width:100%;align-items:stretch}
+#training-grid .training-segments>i{display:block;flex:1 1 0;min-width:0;max-width:22px;height:8px;background:#283640;border:1px solid #667580;border-radius:2px;box-shadow:inset 0 1px 2px #0005}
+#training-grid .training-segments>i.bought{background:#d9ad4c;border-color:#f0cc78;box-shadow:inset 0 1px #ffebad88,0 0 3px #d9ad4c35}
+#training-grid .training-buy{width:76px;min-width:0;min-height:44px;margin:0;padding:8px 4px;background:#223b4b;border:1px solid #bba06799;border-radius:3px;color:#f1d18b;font:600 12px monospace;white-space:nowrap;touch-action:manipulation}
+#training-grid .training-buy:disabled{opacity:.6;background:#1a303e}
+#training-grid .training-buy:not(:disabled):hover{background:#304c5c;border-color:#f0cc78}
+#training-config label{min-width:0;max-width:100%}#training-config select{width:100%;max-width:100%;min-height:44px}
+@media(max-width:1000px){#training-grid .training-card{grid-template-columns:52px minmax(0,1fr)64px;gap:9px;padding:11px}#training-grid .training-icon{width:52px;height:52px}#training-grid .training-buy{width:64px}}
+@media(max-width:650px){#training-grid{grid-template-columns:minmax(0,1fr)}.training-dialog>header{position:relative;top:0}.training-dialog header>b{margin-left:0}#training-grid .training-card{min-height:126px}}
+@media(max-width:360px){#training-grid .training-card{grid-template-columns:44px minmax(0,1fr)58px;gap:7px;padding:9px}#training-grid .training-icon{width:44px;height:44px}#training-grid .training-buy{width:58px;font-size:11px}#training-grid .training-card b{font-size:11px}#training-grid .training-segments{gap:2px}}

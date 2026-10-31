@@ -174,3 +174,9 @@ Se reutilizan sin cambios retratos, ilustraciones de habilidades e iconos de obj
 Arte original generado para este proyecto usando la referencia del usuario solo como dirección artística, sin recortar personajes ni fondos de dicha referencia. Fuente de poses/partes: `/workspace/generated_images/exec-9a4358c3-df0a-4708-b4bc-ed09416228d6.png`; suelo: `exec-36221517-7531-4883-a27f-337931358182.png`; bandera: `exec-4e177941-bdf3-4c4d-aee7-e65b1db64a36.png`.
 
 `src/assets/bosses/buggy-motion.png`: atlas512×512, doce poses128×128. Partes independientes `buggy-head`, `buggy-hand-left/right` (64×64), cuchillo/bomba32×32; suelo128×128 y bandera96×160. Recorte por celda, pies alineados, limpieza de halo/fragmentos alfa, vecino más cercano y PNG indexado hasta256 colores con transparencia. No son sprites oficiales ni material MIT. Se conservan los derechos de la franquicia de sus titulares; generar arte no los concede. SHA-256 originales/finales y dimensiones en `buggy-manifest.json`. No se descargó código, música ni sprites de terceros. Reutilizados los props ya registrados de Orange Town; la referencia no se usa como fondo completo.
+
+## Entrenamiento permanente ·13 PNG suministrados
+
+Fuente del usuario: `13_sprites_entrenament_ben_retallats.zip`. Copiados sin modificar bytes, dimensiones512×512 ni transparencia RGBA a `src/assets/training/`. Se conserva `README.source.txt`; SHA-256 y dimensiones en `manifest.json`. Correspondencia por nombre/número del ZIP para las catorce mejoras; Ataque inicial y Repertorio comparten el13, sin duplicar el recurso. No hay redibujo, recorte, emojis ni sustituciones geométricas.
+
+`src/ui/training-art.ts` carga los PNG originales al abrir el menú; la versión web usa chunks diferidos y la versión portátil los integra. Autorización de uso proporcionada explícitamente por el usuario; no se ha aportado una licencia redistribuible independiente ni se consideran MIT. Aviso en `licenses/user-training-art.md`.

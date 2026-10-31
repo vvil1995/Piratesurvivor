@@ -1050,3 +1050,23 @@ test('Buggy completo: cámara de exploración, seis patrones, partes y sprites a
  await page.evaluate(()=>{const qa=window.__OPS_QA__!,r=qa.getRun()!;r.encounter!.cancel();r.encounter!.body.hp=0;r.encounter!.defeated();qa.draw();qa.tick();});
  await page.screenshot({path:info.outputPath('buggy-defeated.png')});expect(errors).toEqual([]);
 });
+
+test('entrenamiento uniforme:13 PNG originales,14 tarjetas y progreso conservado',async({page},info)=>{
+ await page.evaluate(()=>{const s=window.__OPS_QA__!.store;s.progress.coins=1000;const p=s.getTraining('luffy');p.levels={vitality:3,force:10,critical:1,starter:1};s.flush();});
+ await page.reload();await expect(page.locator('#loading')).toBeHidden();await page.locator('#train').click();
+ await expect(page.locator('.training-card')).toHaveCount(14);
+ await expect.poll(()=>page.locator('.training-icon').evaluateAll(images=>images.every(i=>(i as HTMLImageElement).complete&&(i as HTMLImageElement).naturalWidth===512))).toBe(true);
+ expect(await page.locator('.training-icon').evaluateAll(images=>new Set(images.map(i=>(i as HTMLImageElement).src)).size)).toBe(13);
+ expect(await page.locator('[data-training="starter"] img').getAttribute('src')).toBe(await page.locator('[data-training="repertoire"] img').getAttribute('src'));
+ await expect(page.locator('[data-training="force"] .bought')).toHaveCount(10);await expect(page.locator('[data-buy-training="force"]')).toBeDisabled();
+ const colors=await page.locator('.training-segments i').evaluateAll(nodes=>({empty:[...new Set(nodes.filter(n=>!n.classList.contains('bought')).map(n=>getComputedStyle(n).backgroundColor))],gold:[...new Set(nodes.filter(n=>n.classList.contains('bought')).map(n=>getComputedStyle(n).backgroundColor))]}));
+ expect(colors.empty).toEqual(['rgb(40, 54, 64)']);expect(colors.gold).toEqual(['rgb(217, 173, 76)']);
+ for(const [width,height]of [[1440,900],[844,390],[390,844],[320,640]]){
+  await page.setViewportSize({width,height});
+  const layout=await page.locator('.training-card').evaluateAll(cards=>cards.map(card=>{const r=card.getBoundingClientRect(),g=card.parentElement!.getBoundingClientRect(),buy=card.querySelector('button')!.getBoundingClientRect(),text=card.querySelector('article>div')!.getBoundingClientRect();return {height:r.height,inside:r.x>=g.x&&r.right<=g.right,noOverlap:text.right<buy.left};}));
+  expect(layout.every(r=>r.inside&&r.noOverlap)).toBe(true);expect(Math.max(...layout.map(r=>r.height))-Math.min(...layout.map(r=>r.height))).toBeLessThan(1);
+  await page.locator('.training-dialog').evaluate(e=>e.scrollTop=0);await page.screenshot({path:info.outputPath(`training-${width}.png`)});
+ }
+ await page.setViewportSize({width:844,height:390});await page.locator('[data-buy-training="vitality"]').click();await expect(page.locator('[data-training="vitality"] .bought')).toHaveCount(4);await expect(page.locator('#training-wallet')).toHaveText('905 berries');
+ await page.reload();await expect(page.locator('#loading')).toBeHidden();await page.locator('#train').click();await expect(page.locator('[data-training="vitality"] .bought')).toHaveCount(4);await expect(page.locator('#training-wallet')).toHaveText('905 berries');
+});
