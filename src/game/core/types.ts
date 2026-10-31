@@ -1,5 +1,5 @@
 import type { Stats, StatModifiers, LevelChoice, AttackBehavior, StatusKind } from '../../content/types.ts';
-export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'fruit' | 'item';
+export type RunStatus = 'playing' | 'paused' | 'levelup' | 'defeat' | 'victory' | 'combining' | 'fruit' | 'item' | 'voyage';
 export interface Vector { x: number; y: number }
 export interface Player extends Vector {
   id: string; characterId: string;
@@ -10,7 +10,7 @@ export interface Player extends Vector {
 }
 export interface EquippedAttack { id: string; level: number; cooldown: number; pending: number; burstTimer: number; activeFor: number; activationPending?: boolean; targetId?: number; counterUsed?: boolean }
 export interface Enemy extends Vector {
-  active: boolean; id: number; kind?: 'chest' | 'boss'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
+  active: boolean; id: number; visual?: string; kind?: 'chest' | 'boss'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
   speed: number; damage: number; xp: number; radius: number; flash: number;
   launchTime?: number; launchX?: number; launchY?: number;
   statuses?: Partial<Record<StatusKind, number>>; stolen?: boolean; lureIndex?: number; decoyHitTimer?: number;

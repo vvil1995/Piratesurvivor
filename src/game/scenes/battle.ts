@@ -28,7 +28,7 @@ export interface BattleBridge {
   ready: () => void; reducedMotion: () => boolean;
 }
 export class BattleScene extends Phaser.Scene {
-  private departureBoat!: Phaser.GameObjects.Image;
+  private navigationSignal!: Phaser.GameObjects.Image;
   private bossRenderer!: BossRenderer;
   private bridge: BattleBridge;
   private captain!: Phaser.GameObjects.Image;
@@ -86,7 +86,7 @@ export class BattleScene extends Phaser.Scene {
     this.captain = this.add.image(256, 256, 'straw-hat').setOrigin(0.5, 0.96).setScale(0.65).setDepth(1000);
     this.captainRig = new WalkRig(this, 'straw-hat'); this.balloonRig = new BalloonRig(this);
     this.bossRenderer = new BossRenderer(this);
-    this.departureBoat = this.add.image(0, 0, 'departure-boat').setVisible(false).setScale(1.5);
+    this.navigationSignal = this.add.image(0, 0, 'navigation-chart').setVisible(false).setScale(1.3).setDepth(5000);
     this.effects = this.add.graphics().setDepth(4000);
     for (let i = 0; i < 12; i++) this.fists.push(this.add.image(0, 0, 'fist').setDisplaySize(27, 27).setDepth(4001).setVisible(false));
     this.resize();
@@ -108,10 +108,10 @@ export class BattleScene extends Phaser.Scene {
     const worldView = { width: camera.width / camera.zoom, height: camera.height / camera.zoom, centerX: worldX, centerY: worldY };
     if (run) {
       run.setView(worldView);
-      if (run.status === 'playing') {
+      if (run.status === 'playing' || run.status === 'voyage') {
         this.accumulator = Math.min(this.accumulator + delta / 1000, 0.1);
         const axis = this.bridge.axis();
-        while (this.accumulator >= 1 / 60 && run.status === 'playing') { run.update(1 / 60, axis); this.accumulator -= 1 / 60; }
+        while (this.accumulator >= 1 / 60 && (run.status === 'playing' || run.status === 'voyage')) { run.update(1 / 60, axis); this.accumulator -= 1 / 60; }
       } else this.accumulator = 0;
     }
     // Dibujar todas las entidades y la cámara tras el mismo paso de simulación.
@@ -155,7 +155,7 @@ export class BattleScene extends Phaser.Scene {
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000);
-      sprite.setTexture(`marine-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
+      sprite.setTexture(`${e.visual ?? 'marine'}-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
@@ -176,8 +176,13 @@ export class BattleScene extends Phaser.Scene {
     }
     this.effects.clear();
     this.bossRenderer.update(run?.encounter, origin);
-    this.departureBoat.setVisible(!!run?.morganDefeated && run.zone !== 'orange-town');
-    if (run?.morganDefeated) this.departureBoat.setPosition(run.navigationPoint.x - origin.x, run.navigationPoint.y - origin.y).setDepth(run.navigationPoint.y - origin.y + 1000);
+    const signal = run?.zone === 'shells-town' ? run.route.signal : undefined;
+    this.navigationSignal.setVisible(!!signal);
+    if (signal) {
+      const bob = this.bridge.reducedMotion() ? 0 : Math.sin((run?.time ?? 0) * 4) * 3;
+      this.navigationSignal.setPosition(signal.x - origin.x, signal.y - origin.y - 12 + bob);
+      this.effects.lineStyle(2, 0xf5d784, 0.85); this.effects.strokeCircle(signal.x - origin.x, signal.y - origin.y, 24);
+    }
     if (run) {
       for (const chest of run.zone === 'shells-town' ? run.chests.active : []) if (chest.active && chest.large && ((chest.openProgress ?? 0) > 0 || Math.hypot(chest.x - worldX, chest.y - worldY) < 110)) {
         const x = chest.x - origin.x, y = chest.y - origin.y - 48;

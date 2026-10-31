@@ -45,9 +45,9 @@ El guardado no conserva una batalla en curso. Borrar datos del navegador elimina
 
 Dispositivo, versión de Android/iOS, navegador y versión, orientación, minuto de partida, número de enemigos aproximado y pasos para reproducirlo. Para una pantalla negra, adjunta el error de consola si puedes acceder a él. No incluyas datos de cuentas ni credenciales.
 
-## Alcance actual: beta0.12
+## Alcance actual: beta0.13
 
-Shells Town procedural, cinco personajes de prueba, habilidades, berries, cofres, un objeto, fruta Bomu y Morgan están disponibles. Orange Town es una llegada provisional; no están disponibles Buggy, el resto de la campaña, Roger ni la taverna. Cada partida nueva reinicia la build; se conservan berries, récords y entrenamiento existente. No se ha implementado todavía el nuevo entrenamiento individual. Volver a un fragmento de la misma partida reconstruye el mismo terreno y no regenera cofres consumidos.
+Shells Town procedural, cinco personajes de prueba, habilidades, berries, cofres, un objeto, fruta Bomu y Morgan están disponibles. Orange Town tiene tres variantes provisionales de piratas de Buggy; no están disponibles Buggy, el resto de la campaña, Roger ni la taverna. Cada partida nueva reinicia la build; se conservan berries, récords y entrenamiento existente. No se ha implementado todavía el nuevo entrenamiento individual. Volver a un fragmento de la misma partida reconstruye el mismo terreno y no regenera cofres consumidos.
 
 ## Ataques de Luffy
 
@@ -80,9 +80,9 @@ Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el 
 
 ## Beta0.10.0: Morgan
 
-Pulsa BASE DE MORGAN durante la exploración y confirma. Nivel20 recomendado, sin requisito. Aprende rectángulo de destral y arco; en fases2/3 aparecen carga, refuerzos y onda. Rojo tenue: preparación; contorno intenso: último aviso; naranja: impacto efectivo. Sal de la zona antes del golpe y usa cajas contra cargas/ondas. Comprueba que Morgan no las atraviesa y puede rodearlas. Mira tu vida y las tres fases de la barra del jefe.
+Desde05:00 puede aparecer una carta náutica cerca del personaje. Camina sobre ella para viajar en barco3s a Morgan; no existe botón de acceso directo. Nivel20 recomendado, sin requisito. Aprende rectángulo de destral y arco; en fases2/3 aparecen carga, refuerzos y onda. Rojo tenue: preparación; contorno intenso: último aviso; naranja: impacto efectivo. Sal de la zona antes del golpe y usa cajas contra cargas/ondas. Comprueba que Morgan no las atraviesa y puede rodearlas. Mira tu vida y las tres fases de la barra del jefe.
 
-Al vencer, espera la caída. Se guarda la victoria y se concede una agrupación en Gestionar habilidades. Escoge explorar o embarcar; no hay cambio automático ni curación. Orange Town es llegada provisional, sin Buggy. Prueba la entrada, esquiva y navegación en móvil horizontal y PC. Si el teléfono interrumpe la aplicación, verifica pausa y reanudación; no se permite escapar del jefe mediante los botones de navegación antes de vencer.
+Al vencer, espera la caída: se guarda la victoria, se concede una agrupación y el barco te lleva automáticamente a Orange Town sin curación ni reiniciar la build. Allí aparecen piratas básicos, tiradores y resistentes; Buggy aún no está implementado. Si pierdes contra Morgan, el barco te devuelve al mismo Shells Town con25HP, nivel/build/berries conservados y una nueva oportunidad aleatoria tras45–90s de juego. Morir fuera de la arena sigue terminando la partida. Prueba entrada, esquiva y travesía en móvil horizontal y PC; al interrumpir/girar debe pausarse también el barco.
 
 ## Beta0.11.0
 
@@ -98,4 +98,15 @@ Balloon: ver torso hinchado, cabeza/pies sin deformar, rivales dañados y desped
 
 Quinta habilidad: aparecen cuatro grupos y la nueva pendiente. Tocar primera carta y luego otra; se combina y continúa automáticamente. También puede elegirse la pendiente. Volver desde el segundo paso no debe gastar nada. Con recompensa de Morgan se hace igual aunque haya menos habilidades. Grupos llenos no se combinan por encima de cuatro.
 
-Solo un objeto junto a los ataques. Tocar su icono para consultar efecto. Si aparece otro, recogerlo y conservar/sustituir; la estadística anterior debe desaparecer al sustituir. Los grandes son mucho más raros (1/96 chunks). No cambia la entrada voluntaria a Morgan mediante BASE DE MORGAN.
+Solo un objeto junto a los ataques. Tocar su icono para consultar efecto. Si aparece otro, recogerlo y conservar/sustituir; la estadística anterior debe desaparecer al sustituir. Los grandes son mucho más raros (1/96 chunks). La entrada a Morgan cambia en0.13 según el recorrido siguiente.
+
+
+## Beta0.13.0 — cartas y reintentos de Morgan
+
+1. Sobrevive hasta05:00. Entre05:00 y05:45 puede aparecer la primera carta náutica, sobre suelo transitable cerca del actor; el HUD indica su distancia. Antes no hay acceso al jefe.
+2. Camina sobre la carta: animación de barco3s y entrada a la arena. El combate/reloj se congelan durante la travesía. Prueba Pausar travesía y reanudar, además de cambiar de pestaña o girar el móvil.
+3. Pierde contra Morgan: desaparecen sus avisos/refuerzos y regresas con25HP a Shells Town. Comprueba nivel, ataques, combinaciones, buffs, objeto, fruta y berries. El terreno/cofres consumidos no se reinician. Hay2,5s de protección al volver.
+4. Sigue jugando: otra carta puede aparecer45–90s después. Si ignoras una carta90s o te alejas demasiado, desaparece y se programa otra oportunidad. El nuevo Morgan empieza con toda su vida.
+5. Vence: viaje automático a Orange Town conservando la vida actual/build y una recompensa de combinación. Comprueba que hay piratas con bandana y rayas, incluidos tiradores y resistentes. Su apariencia es provisional y Buggy está pendiente.
+
+Las cartas son la representación de navegación de East Blue; no un Log Pose canónico de Grand Line. El momento de aparición no obliga a entrar: puedes rodear/ignorar la carta.

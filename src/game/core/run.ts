@@ -1,3 +1,6 @@
+import { MORGAN_ROUTE } from '../../content/navigation.ts';
+import { MorganRoute } from '../systems/navigation-signal.ts';
+import { ORANGE_TOWN } from '../../content/worlds/orange-town.ts';
 import { ITEMS } from '../../content/items.ts';
 import { replaceItem } from '../systems/items.ts';
 import { MorganEncounter } from '../bosses/morgan.ts';
@@ -32,10 +35,13 @@ export class Run {
   readonly localPlayerId = 'player-1';
   readonly players = new Map<string, Player>();
   readonly character: CharacterDefinition;
-  readonly definition: WorldDefinition;
+  definition: WorldDefinition;
+  private readonly shellsDefinition: WorldDefinition;
+  readonly route = new MorganRoute();
+  voyage?: { destination: 'morgan' | 'shells' | 'orange'; elapsed: number };
+  private zoneTime = 0;
   world: ProceduralWorld;
   private shellsWorld: ProceduralWorld;
-  private returnPosition: Vector = { x: 256, y: 256 };
   zone: 'shells-town' | 'morgan-arena' | 'orange-town' = 'shells-town';
   encounter?: MorganEncounter;
   morganDefeated = false;
@@ -78,7 +84,7 @@ export class Run {
     this.random = random; this.character = CHARACTERS[characterId];
     if (!this.character) throw new Error('Personaje desconocido');
     this.id = globalThis.crypto?.randomUUID?.() || `run-${Date.now()}-${random()}`;
-    this.definition = options.world ?? SHELLS_TOWN;
+    this.definition = options.world ?? SHELLS_TOWN; this.shellsDefinition = this.definition;
     this.world = new ProceduralWorld((options.seed ?? Math.floor(random() * 2147483647)) ^ this.definition.seedSalt);
     this.shellsWorld = this.world;
     this.enemies = new Pool<Enemy>(this.definition.enemyCap, () => ({ active: false, id: 0, x: 0, y: 0, hp: 0, maxHp: 0, speed: 0, damage: 0, xp: 0, radius: 13, flash: 0 }));
@@ -96,29 +102,40 @@ export class Run {
     if (!field) { field = new FlowField(this.world); this.fields.set(actor.id, field); }
     return field;
   }
-  get navigationPoint(): Vector { return this.zone === 'morgan-arena' ? MORGAN_ARENA.gates[3] : this.returnPosition; }
   private clearBattlefield(): void {
     this.enemies.clear(); this.pickups.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
     this.fields.clear(); this.bossField = undefined;
     for (const state of this.player.attacks) { state.pending = 0; state.targetId = undefined; }
   }
   beginMorgan(): boolean {
-    if (!['playing', 'paused'].includes(this.status) || this.zone !== 'shells-town' || this.morganDefeated) return false;
-    this.returnPosition = { x: this.player.x, y: this.player.y }; this.clearBattlefield();
+    if (!['playing', 'paused', 'voyage'].includes(this.status) || this.zone !== 'shells-town' || this.morganDefeated) return false;
+    this.route.consume(); this.clearBattlefield();
     this.world = new ArenaWorld(this.world.seed); this.zone = 'morgan-arena'; this.bossField = new FlowField(this.world, MORGAN.radius);
     Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter();
-    this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
-  }
-  returnToShells(): boolean {
-    if (!this.morganDefeated || this.zone !== 'morgan-arena' || !['playing', 'paused'].includes(this.status)) return false;
-    this.clearBattlefield(); this.encounter = undefined; this.world = this.shellsWorld; this.zone = 'shells-town';
-    Object.assign(this.player, this.returnPosition); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
+    this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
   boardToOrangeTown(): boolean {
-    if (!this.morganDefeated || this.zone === 'orange-town' || !['playing', 'paused'].includes(this.status)) return false;
+    if (!this.morganDefeated || this.zone === 'orange-town' || !['playing', 'paused', 'voyage'].includes(this.status)) return false;
     this.clearBattlefield(); this.encounter = undefined; this.zone = 'orange-town';
+    this.lootNotice = 'Morgan derrotado. Recompensa: una combinación en Gestionar habilidades.'; this.lootNoticeFor = 8;
+    this.definition = ORANGE_TOWN; this.zoneTime = 0; this.spawnTimer = 0; this.voyage = undefined;
     this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x42756767, 'orange');
     Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
+  }
+  private startVoyage(destination: 'morgan' | 'shells' | 'orange'): void {
+    this.encounter?.cancel(); this.clearBattlefield();
+    this.voyage = { destination, elapsed: 0 }; this.status = 'voyage';
+  }
+  private finishVoyage(): void {
+    const destination = this.voyage!.destination;
+    if (destination === 'morgan') { this.beginMorgan(); return; }
+    if (destination === 'orange') { this.boardToOrangeTown(); return; }
+    this.clearBattlefield(); this.encounter = undefined; this.world = this.shellsWorld;
+    this.definition = this.shellsDefinition; this.zone = 'shells-town';
+    Object.assign(this.player, { x: 256, y: 256, hp: MORGAN_ROUTE.recoveryHp, hurtTimer: MORGAN_ROUTE.recoveryGrace });
+    this.spawnTimer = 1; this.route.retry(this.time, this.random); this.voyage = undefined;
+    this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1);
+    this.lootNotice = 'De vuelta con25HP. Conservas tu build. Busca otra carta náutica para reintentar Morgan.'; this.lootNoticeFor = 8;
   }
   private defeatMorgan(): void {
     if (this.morganDefeated) return;
@@ -139,8 +156,8 @@ export class Run {
     }
   }
   setView(view: View): void { this.view = view; }
-  pause(): void { if (this.status === 'playing') this.status = 'paused'; }
-  resume(): void { if (this.status === 'paused') this.status = 'playing'; }
+  pause(): void { if (this.status === 'playing' || this.status === 'voyage') this.status = 'paused'; }
+  resume(): void { if (this.status === 'paused') this.status = this.voyage ? 'voyage' : 'playing'; }
   selectItem(replace: boolean): boolean {
     if (this.status !== 'item' || !this.pendingItem || !ITEMS[this.pendingItem]) return false;
     if (replace && !replaceItem(this.player, this.pendingItem)) return false;
@@ -248,8 +265,14 @@ export class Run {
     if (nearest) nearest.value += enemy.xp;
   }
   update(dt: number, movement: Vector | ReadonlyMap<string, Vector>): void {
+    dt = Math.min(1 / 30, Math.max(0, dt));
+    if (this.status === 'voyage' && this.voyage) {
+      this.voyage.elapsed += dt;
+      if (this.voyage.elapsed + 1e-8 >= MORGAN_ROUTE.voyageSeconds) this.finishVoyage();
+      return;
+    }
     if (this.status !== 'playing') return;
-    dt = Math.min(1 / 30, Math.max(0, dt)); this.time += dt;
+    this.time += dt; this.zoneTime += dt;
     this.fruitCooldown = Math.max(0, this.fruitCooldown - dt); this.lootNoticeFor = Math.max(0, this.lootNoticeFor - dt);
     const living = [...this.players.values()].filter(actor => actor.hp > 0);
     for (const actor of living) {
@@ -262,17 +285,24 @@ export class Run {
       this.fieldFor(actor).update(actor, dt);
     }
     if (!living.length) { this.defeat(); return; }
+    if (this.zone === 'shells-town' && !this.morganDefeated && this.route.tick(this.time, this.player, this.world, this.random, p => this.fieldFor(this.player).reachable(p))) {
+      this.startVoyage('morgan'); return;
+    }
+    const threatTime = this.zone === 'orange-town' ? this.zoneTime : this.time;
     this.spawnTimer -= dt;
-    if (this.zone === 'shells-town' && this.spawnTimer <= 0) {
-      const threat = difficultyAt(this.time, this.definition.spawnInterval, this.definition.difficulty);
-      for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player), this.definition, this.random, ++this.enemyId, this.time);
+    if (this.zone !== 'morgan-arena' && this.spawnTimer <= 0) {
+      const threat = difficultyAt(threatTime, this.definition.spawnInterval, this.definition.difficulty);
+      for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player), this.definition, this.random, ++this.enemyId, threatTime);
       this.spawnTimer = threat.interval;
     }
     if (this.encounter && !this.morganDefeated) {
       this.bossField!.update(this.player, dt);
       this.encounter.tick(dt, this.player, this.world, from => this.bossField!.direction(from, this.player, MORGAN.radius), () => this.callReinforcements());
       if (this.player.hp <= 0) { this.defeat(); return; }
-    } else if (this.encounter) this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
+    } else if (this.encounter) {
+      this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
+      if (this.encounter.elapsed >= 1.3) { this.startVoyage('orange'); return; }
+    }
     this.grid.rebuild(this.enemies.items);
     for (const enemy of this.enemies.items) {
       if (!enemy.active) continue;
@@ -366,6 +396,7 @@ export class Run {
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }
   }
   private defeat(): void {
+    if (this.zone === 'morgan-arena' && !this.morganDefeated) { this.startVoyage('shells'); return; }
     this.status = 'defeat'; this.encounter?.cancel(); this.strikes.length = 0;
     for (const p of this.projectiles.items) { p.active = false; p.hit.clear(); }
     for (const a of this.areas.items) a.active = false;

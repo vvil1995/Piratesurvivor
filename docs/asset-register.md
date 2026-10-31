@@ -104,3 +104,7 @@ Carne con hueso y fruta de espirales: primitivas pixeladas originales18×18 en `
 ### 0.12.0 — objetos y pose Balloon
 
 Ocho iconos de objetos24×24 dibujados originalmente en `item-art.ts`, usados tanto en HUD como en pickups. Ninguna descarga ni dependencia nueva. Pose Balloon: composición de cabeza/pies recortados del atlas ya registrado y torso de geometría original en `balloon-rig.ts`; no se modifica el PNG fuente ni la caminata normal. Se mantienen los avisos de derechos de One Piece del registro anterior.
+
+### Beta0.13 — navegación y primera facción de Orange Town
+
+Carta náutica32×30 dibujada en `textures.ts` y barco/olas/isla CSS en `style.css`: gráficos provisionales originales del proyecto, sin descargas ni fuentes nuevas. Piratas provisionales: variante en memoria del atlas propio de marines aprobado, conservando alpha/contorno y piernas, con bandana roja y camiseta de rayas. Se generan16 poses una sola vez en `pirate-art.ts`; no se altera el archivo ni las poses existentes. No son sprites oficiales ni arte final de Buggy. Sin dependencias nuevas. Siguen vigentes los avisos de propiedad de One Piece.

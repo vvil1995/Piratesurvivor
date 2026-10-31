@@ -92,7 +92,7 @@ test('victoria cancela peligros, recompensa una combinación y transición conse
 });
 test('muerte del jugador cancela avisos y reinicio no hereda el encuentro', () => {
   const r = new Run(); r.beginMorgan(); r.encounter!.prepare(MORGAN_ATTACKS[4], r.player, r.world);
-  r.player.hp = 0; r.update(1 / 60, axis); assert.equal(r.status, 'defeat'); assert.equal(r.encounter!.telegraph, undefined);
+  r.player.hp = 0; r.update(1 / 60, axis); assert.equal(r.status, 'voyage'); assert.equal(r.voyage?.destination, 'shells'); assert.equal(r.encounter!.telegraph, undefined);
   const fresh = new Run(); assert.equal(fresh.encounter, undefined); assert.equal(fresh.zone, 'shells-town');
 });
 test('Morgan encuentra una ruta alrededor de cajas usando su radio real', () => {

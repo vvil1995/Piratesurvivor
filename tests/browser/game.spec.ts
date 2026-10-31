@@ -28,6 +28,28 @@ async function isolateWalk(page: Page) {
   });
 }
 
+// Acortar únicamente el reloj de la fixture; generación y recogida usan el flujo real.
+async function revealMorganChart(page: Page) {
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!;
+    r.player.hurtTimer = 1e6; r.enemies.clear();
+    r.time = 300; r.update(1 / 60, { x: 0, y: 0 });
+    r.time = 346; r.update(1 / 60, { x: 0, y: 0 });
+    if (!r.route.signal) throw new Error('No se generó carta náutica transitable');
+    qa.draw(); qa.tick();
+  });
+}
+async function takeMorganChart(page: Page) {
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!;
+    Object.assign(r.player, r.route.signal!); r.update(1 / 60, { x: 0, y: 0 }); qa.draw(); qa.tick();
+  });
+  await expect(page.locator('#voyage')).toBeVisible();
+  await expect(page.locator('#voyage-title')).toContainText('RUMBO A MORGAN');
+  await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
+  await expect(page.locator('#boss-panel')).toBeVisible();
+}
+
 test.beforeEach(async ({ page, isMobile }) => {
   if (isMobile) await page.setViewportSize({ width: 844, height: 390 });
   await page.goto('/');
@@ -565,11 +587,9 @@ test('retrato frontal y cofres pequeños/grandes con botín directo y guardado d
   expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.coins)).toBe(coins);
 });
 
-test('Morgan: entrada voluntaria, aviso visible, victoria y navegación sin curación', async ({ page }, testInfo) => {
+test('Morgan: carta, aviso visible, victoria y viaje automático sin curación', async ({ page }, testInfo) => {
   await page.locator('#start').click();
-  await page.locator('#challenge-morgan').click(); await expect(page.locator('#boss-entry')).toBeVisible();
-  await page.locator('#cancel-morgan').click(); await expect(page.locator('#boss-entry')).toBeHidden();
-  await page.locator('#challenge-morgan').click(); await page.locator('#confirm-morgan').click();
+  await revealMorganChart(page); await takeMorganChart(page);
   await expect(page.locator('#boss-panel')).toBeVisible();
   await expect(page.locator('#boss-phase')).toHaveText('FASE 1/3');
   await page.evaluate(async () => {
@@ -589,19 +609,23 @@ test('Morgan: entrada voluntaria, aviso visible, victoria y navegación sin cura
     b.tick = Object.getPrototypeOf(b).tick; p.hp = 43; b.body.x = p.x; b.body.y = p.y - 40; b.body.hp = 1;
     p.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); qa.draw();
   });
-  await expect(page.locator('#boss-victory')).toBeVisible();
+  await expect(page.locator('#voyage')).toBeVisible();
+  await expect(page.locator('#voyage-title')).toContainText('ORANGE TOWN');
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.zone)).toBe('morgan-arena');
   expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.morganVictories)).toBe(1);
-  await page.locator('#victory-ship').click(); await expect(page.locator('#boss-victory')).toBeHidden();
+  await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
   await expect(page.locator('#area-label')).toContainText('ORANGE TOWN');
   expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.hp)).toBeLessThan(45);
-  await expect(page.locator('#challenge-morgan')).toBeHidden();
+  await expect(page.locator('#challenge-morgan')).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => window.__OPS_QA__!.getRun()!.enemies.count)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.enemies.items.filter(e => e.active).every(e => e.visual === 'buggy-pirate'))).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('orange-pirates.png') });
   await page.reload(); await expect(page.locator('#loading')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.morganVictories)).toBe(1);
 });
 
 test('Morgan: cinco patrones legibles y fases sin avisos ocultos por el HUD', async ({ page }, testInfo) => {
-  await page.locator('#start').click(); await page.locator('#challenge-morgan').click(); await page.locator('#confirm-morgan').click();
+  await page.locator('#start').click(); await revealMorganChart(page); await takeMorganChart(page);
   for (const id of ['axe', 'sweep', 'charge', 'order', 'devastating']) {
     await page.evaluate(async id => {
       const path = '/src/content/bosses/morgan.ts', { MORGAN_ATTACKS } = await import(/* @vite-ignore */ path);
@@ -674,4 +698,38 @@ test('pareja en dos toques con recompensa de jefe y objeto único visible junto 
   await offer(); await page.locator('#item-take').click(); await expect(page.locator('#equipped-item')).toContainText('Pedra');
   expect(await page.evaluate(() => Object.keys(window.__OPS_QA__!.getRun()!.player.items))).toEqual(['whetstone']);
   await page.screenshot({ path: info.outputPath('equipped-item.png') });
+});
+
+
+test('carta desde05:00, barco pausable y derrota con25HP permite reintentar sin perder build', async ({ page }, info) => {
+  await page.locator('#start').click(); await isolateWalk(page);
+  await expect(page.locator('#navigation-hint')).toContainText('05:00');
+  await expect(page.locator('#challenge-morgan')).toHaveCount(0);
+  await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; r.time = 299; r.update(1 / 60, { x: 0, y: 0 }); });
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.route.signal)).toBeUndefined();
+  await revealMorganChart(page); await expect(page.locator('#navigation-hint')).toContainText('CARTA NÁUTICA');
+  await page.screenshot({ path: info.outputPath('navigation-chart.png') });
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!;
+    Object.assign(r.player, r.route.signal!); r.player.level = 8; r.player.collectedBerries = 23;
+    r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
+  });
+  await expect(page.locator('#voyage')).toBeVisible();
+  await page.locator('#voyage-pause').click(); await expect(page.locator('#paused')).toBeVisible();
+  const elapsed = await page.evaluate(() => window.__OPS_QA__!.getRun()!.voyage!.elapsed);
+  await page.waitForTimeout(200); expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.voyage!.elapsed)).toBe(elapsed);
+  await page.locator('#resume').click(); await expect(page.locator('#voyage')).toBeVisible();
+  await page.screenshot({ path: info.outputPath('boat-voyage.png') });
+  await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 }); await expect(page.locator('#boss-panel')).toBeVisible();
+  await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; r.player.hp = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
+  await expect(page.locator('#voyage-title')).toContainText('REGRESO');
+  await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
+  const state = await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; return { hp: r.player.hp, zone: r.zone, level: r.player.level, berries: r.player.collectedBerries, next: r.route.nextAt, time: r.time }; });
+  expect(state.zone).toBe('shells-town'); expect(state.hp).toBeGreaterThanOrEqual(25); expect(state.hp).toBeLessThan(26);
+  expect(state.level).toBe(8); expect(state.berries).toBe(23); expect(state.next).toBeGreaterThan(state.time);
+  await expect(page.locator('#result')).toBeHidden();
+  await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; r.time = r.route.nextAt; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
+  await expect(page.locator('#navigation-hint')).toContainText('CARTA NÁUTICA');
+  await takeMorganChart(page);
+  expect(await page.evaluate(() => { const b = window.__OPS_QA__!.getRun()!.encounter!; return b.body.hp === b.body.maxHp; })).toBe(true);
 });

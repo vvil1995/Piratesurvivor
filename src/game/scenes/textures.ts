@@ -1,3 +1,4 @@
+import { createPirateArt } from './pirate-art.ts';
 import Phaser from 'phaser';
 import { createPackedDirectionalArt } from './directional-art.ts';
 import { itemCanvases } from '../../ui/item-art.ts';
@@ -11,6 +12,7 @@ export function createTextures(scene: Phaser.Scene): void {
   for (const [name, canvas] of itemCanvases()) { scene.textures.addCanvas(name, canvas); registerArt(name, canvas); }
   createPackedDirectionalArt(scene, 'luffy-directions-source', 'straw-hat');
   createPackedDirectionalArt(scene, 'marine-directions-source', 'marine');
+  createPirateArt(scene);
   // Las texturas normalizadas ya son independientes: liberar hojas grandes de GPU.
   for (const key of ['source-atlas', 'luffy-directions-source', 'marine-directions-source']) scene.textures.remove(key);
   const g = scene.make.graphics({ x: 0, y: 0 });
@@ -26,6 +28,11 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0xb8834b); g.fillRect(7, 23, 37, 3); g.fillStyle(0x724a32); g.fillRect(13, 29, 26, 4);
   g.fillStyle(0x493c32); g.fillRect(24, 1, 3, 24); g.fillStyle(0xece1bf); g.fillTriangle(28, 2, 28, 21, 44, 21);
   g.fillStyle(0xc2a364); g.fillRect(26, 2, 2, 20); g.generateTexture('departure-boat', 52, 40); g.clear();
+  // Carta náutica original: pergamino, ruta punteada y destino naval.
+  g.fillStyle(0x5c4534); g.fillRect(1, 2, 30, 25); g.fillStyle(0xe5cb8d); g.fillRect(3, 3, 26, 22);
+  g.fillStyle(0xf8e1a5); g.fillRect(3, 3, 26, 3); g.fillStyle(0x77a7a1); g.fillRect(6, 9, 8, 5); g.fillRect(18, 17, 8, 5);
+  g.fillStyle(0xb45d49); for (let i = 0; i < 4; i++) g.fillRect(10 + i * 3, 19 - i * 3, 2, 2);
+  g.fillStyle(0x42545c); g.fillRect(21, 6, 3, 7); g.fillRect(18, 9, 9, 2); g.generateTexture('navigation-chart', 32, 30); g.clear();
   // Pixel art provisional original de Morgan: abrigo, mandíbula metálica y brazo-destral.
   g.fillStyle(0x18222f); g.fillRect(16, 53, 13, 17); g.fillRect(33, 53, 13, 17);
   g.fillStyle(0x38455e); g.fillRect(18, 54, 7, 13); g.fillRect(35, 54, 7, 13);
