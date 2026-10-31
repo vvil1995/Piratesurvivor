@@ -733,3 +733,62 @@ test('carta desde05:00, barco pausable y derrota con25HP permite reintentar sin 
   await takeMorganChart(page);
   expect(await page.evaluate(() => { const b = window.__OPS_QA__!.getRun()!.encounter!; return b.body.hp === b.body.maxHp; })).toBe(true);
 });
+
+async function enterBuggy(page: Page) {
+  await page.locator('#start').click();
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; r.morganDefeated = true; r.boardToOrangeTown(); r.player.hurtTimer = 1e6;
+    Object.assign(r, { zoneTime: 300 }); r.update(1 / 60, { x: 0, y: 0 });
+    Object.assign(r, { zoneTime: 346 }); r.update(1 / 60, { x: 0, y: 0 });
+    if (!r.buggyRoute.signal) throw new Error('No hay carta válida de Buggy'); qa.draw(); qa.tick();
+  });
+  await expect(page.locator('#navigation-hint')).toContainText('Buggy');
+  await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; Object.assign(r.player, r.buggyRoute.signal!); r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
+  await expect(page.locator('#voyage-title')).toContainText('RUMBO A BUGGY');
+  await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
+  await expect(page.locator('#boss-name')).toHaveText('BUGGY EL PAYASO');
+}
+
+test('Buggy: carta de Orange, cuatro avisos legibles, victoria y llegada a Syrup sin curar', async ({ page }, info) => {
+  await enterBuggy(page);
+  for (const id of ['knives', 'bomb', 'split', 'barrage']) {
+    await page.evaluate(async id => {
+      const path = '/src/content/bosses/buggy.ts', { BUGGY_ATTACKS } = await import(/* @vite-ignore */ path);
+      const qa = window.__OPS_QA__!, r = qa.getRun()!, b = r.encounter!;
+      for (const a of r.player.attacks) a.cooldown = 1e6;
+      b.body.x = 384; b.body.y = 145; r.player.x = 384; r.player.y = 380; b.body.hp = b.body.maxHp * 0.2;
+      b.tick(0, r.player, r.world, () => ({ x: 0, y: 0 }), () => {});
+      b.prepare(BUGGY_ATTACKS.find((a: { id: string }) => a.id === id)!, r.player, r.world);
+      b.elapsed = b.telegraph!.attack.preparation - 0.15; b.telegraph!.elapsed = b.elapsed; b.tick = () => {};
+      qa.draw(); qa.tick();
+    }, id);
+    await expect(page.locator('#boss-phase')).toHaveText('FASE 3/3');
+    expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.encounter!.stage)).toBe('final');
+    await page.screenshot({ path: info.outputPath(`buggy-${id}.png`) });
+  }
+  await page.evaluate(() => {
+    const qa = window.__OPS_QA__!, r = qa.getRun()!, b = r.encounter!;
+    b.tick = Object.getPrototypeOf(b).tick; r.player.hp = 53; b.body.x = r.player.x; b.body.y = r.player.y - 40; b.body.hp = 1;
+    r.player.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
+  });
+  await expect(page.locator('#voyage-title')).toContainText('SYRUP VILLAGE');
+  await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
+  await expect(page.locator('#area-label')).toContainText('SYRUP VILLAGE');
+  expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.player.hp)).toBeLessThan(55);
+  expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.buggyVictories)).toBe(1);
+  await page.reload(); await expect(page.locator('#loading')).toBeHidden();
+  expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.buggyVictories)).toBe(1);
+});
+
+test('Buggy: derrota vuelve a Orange con25HP y conserva nivel/berries para otra carta', async ({ page }) => {
+  await enterBuggy(page);
+  await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; r.player.level = 24; r.player.collectedBerries = 41; r.player.hp = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
+  await expect(page.locator('#voyage-title')).toContainText('REGRESO A ORANGE');
+  await expect(page.locator('#voyage')).toBeHidden({ timeout: 15000 });
+  await expect(page.locator('#area-label')).toContainText('ORANGE TOWN');
+  const p = await page.evaluate(() => { const r = window.__OPS_QA__!.getRun()!; return { hp: r.player.hp, level: r.player.level, berries: r.player.collectedBerries, morgan: r.morganDefeated, buggy: r.buggyDefeated }; });
+  expect(p.hp).toBeGreaterThanOrEqual(25); expect(p.hp).toBeLessThan(26); expect(p.level).toBe(24); expect(p.berries).toBe(41); expect(p.morgan).toBe(true); expect(p.buggy).toBe(false);
+  await expect(page.locator('#result')).toBeHidden();
+  await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; Object.assign(r, { zoneTime: r.buggyRoute.nextAt }); r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
+  await expect(page.locator('#navigation-hint')).toContainText('CARTA NÁUTICA');
+});

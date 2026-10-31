@@ -101,7 +101,7 @@ export class BattleScene extends Phaser.Scene {
     const run = this.bridge.run();
     if (run !== this.previousRun) { this.accumulator = 0; this.previousRun = run; for (const p of this.dust) p.life = 0; }
     const camera = this.cameras.main;
-    if (run?.zone === 'morgan-arena') camera.setZoom(Math.max(0.3, Math.min(1.4, camera.width / (MORGAN_ARENA.width + 48), (camera.height - 120) / (MORGAN_ARENA.height + 32))));
+    if (run?.inArena) camera.setZoom(Math.max(0.3, Math.min(1.4, camera.width / ((run?.arena.width ?? MORGAN_ARENA.width) + 48), (camera.height - 120) / ((run?.arena.height ?? MORGAN_ARENA.height) + 32))));
     else this.resize();
     const player = run?.player;
     let worldX = player?.x ?? 256, worldY = player?.y ?? 256;
@@ -119,9 +119,9 @@ export class BattleScene extends Phaser.Scene {
     worldView.centerX = worldX; worldView.centerY = worldY;
     // Posiciones lógicas globales; solo el dibujo usa origen local por chunk.
     const origin = { x: Math.floor(worldX / CHUNK_SIZE) * CHUNK_SIZE, y: Math.floor(worldY / CHUNK_SIZE) * CHUNK_SIZE };
-    if (run?.zone === 'morgan-arena') camera.centerOn(MORGAN_ARENA.width / 2 - origin.x, MORGAN_ARENA.height / 2 - origin.y);
+    if (run?.inArena) camera.centerOn((run?.arena.width ?? MORGAN_ARENA.width) / 2 - origin.x, (run?.arena.height ?? MORGAN_ARENA.height) / 2 - origin.y);
     else camera.centerOn(worldX - origin.x, worldY - origin.y);
-    if (run?.zone === 'morgan-arena') { worldView.centerX = MORGAN_ARENA.width / 2; worldView.centerY = MORGAN_ARENA.height / 2; }
+    if (run?.inArena) { worldView.centerX = (run?.arena.width ?? MORGAN_ARENA.width) / 2; worldView.centerY = (run?.arena.height ?? MORGAN_ARENA.height) / 2; }
     this.worldRenderer.update(run?.world ?? this.previewWorld, worldView, origin);
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
     this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate, delta / 1000);
@@ -162,7 +162,7 @@ export class BattleScene extends Phaser.Scene {
       this.enemyRigs[i].update(sprite, animation, 0.6);
     }
     for (let i = 0; i < this.chestSprites.length; i++) {
-      const chest = run?.zone === 'shells-town' ? run.chests.active[i] : undefined, sprite = this.chestSprites[i];
+      const chest = run?.visibleChests[i], sprite = this.chestSprites[i];
       sprite.setVisible(!!chest?.active);
       if (chest?.active) sprite.setPosition(chest.x - origin.x, chest.y - origin.y).setScale(chest.large ? 1.35 : 1).setTint(chest.large ? 0xffdc8a : 0xffffff).setDepth(chest.y - origin.y + 1000);
     }
@@ -175,8 +175,8 @@ export class BattleScene extends Phaser.Scene {
       }
     }
     this.effects.clear();
-    this.bossRenderer.update(run?.encounter, origin);
-    const signal = run?.zone === 'shells-town' ? run.route.signal : undefined;
+    this.bossRenderer.update(run?.encounter, origin, run?.arena);
+    const signal = run && ['shells-town', 'orange-town'].includes(run.zone) ? run.navigationRoute.signal : undefined;
     this.navigationSignal.setVisible(!!signal);
     if (signal) {
       const bob = this.bridge.reducedMotion() ? 0 : Math.sin((run?.time ?? 0) * 4) * 3;
@@ -184,7 +184,7 @@ export class BattleScene extends Phaser.Scene {
       this.effects.lineStyle(2, 0xf5d784, 0.85); this.effects.strokeCircle(signal.x - origin.x, signal.y - origin.y, 24);
     }
     if (run) {
-      for (const chest of run.zone === 'shells-town' ? run.chests.active : []) if (chest.active && chest.large && ((chest.openProgress ?? 0) > 0 || Math.hypot(chest.x - worldX, chest.y - worldY) < 110)) {
+      for (const chest of run.visibleChests) if (chest.active && chest.large && ((chest.openProgress ?? 0) > 0 || Math.hypot(chest.x - worldX, chest.y - worldY) < 110)) {
         const x = chest.x - origin.x, y = chest.y - origin.y - 48;
         this.effects.fillStyle(0x14252e, 0.9); this.effects.fillCircle(x, y, 16);
         this.effects.lineStyle(3, 0x64757a); this.effects.strokeCircle(x, y, 14);

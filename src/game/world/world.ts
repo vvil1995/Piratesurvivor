@@ -10,8 +10,8 @@ export class ProceduralWorld implements CollisionWorld {
   private chunks = new Map<string, Chunk>();
   readonly maxChunks = 128;
   readonly seed: number;
-  readonly theme: 'shells' | 'orange';
-  constructor(seed: number, theme: 'shells' | 'orange' = 'shells') { this.seed = seed; this.theme = theme; }
+  readonly theme: 'shells' | 'orange' | 'syrup';
+  constructor(seed: number, theme: 'shells' | 'orange' | 'syrup' = 'shells') { this.seed = seed; this.theme = theme; }
   get chunkCount(): number { return this.chunks.size; }
   getChunk(cx: number, cy: number): Chunk {
     const key = cellKey(cx, cy);

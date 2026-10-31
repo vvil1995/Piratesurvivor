@@ -45,9 +45,9 @@ El guardado no conserva una batalla en curso. Borrar datos del navegador elimina
 
 Dispositivo, versión de Android/iOS, navegador y versión, orientación, minuto de partida, número de enemigos aproximado y pasos para reproducirlo. Para una pantalla negra, adjunta el error de consola si puedes acceder a él. No incluyas datos de cuentas ni credenciales.
 
-## Alcance actual: beta0.13
+## Alcance actual: beta0.14
 
-Shells Town procedural, cinco personajes de prueba, habilidades, berries, cofres, un objeto, fruta Bomu y Morgan están disponibles. Orange Town tiene tres variantes provisionales de piratas de Buggy; no están disponibles Buggy, el resto de la campaña, Roger ni la taverna. Cada partida nueva reinicia la build; se conservan berries, récords y entrenamiento existente. No se ha implementado todavía el nuevo entrenamiento individual. Volver a un fragmento de la misma partida reconstruye el mismo terreno y no regenera cofres consumidos.
+Shells Town procedural, cinco personajes de prueba, habilidades, berries, cofres, un objeto, fruta Bomu y Morgan están disponibles. Orange Town tiene tres variantes de piratas y el jefe Buggy. Syrup Village es una llegada provisional con dos variantes de enemigos; Kuro, el resto de la campaña, Roger y la taverna siguen pendientes. Cada partida nueva reinicia la build; se conservan berries, récords y entrenamiento existente. No se ha implementado todavía el nuevo entrenamiento individual. Volver a un fragmento de la misma partida reconstruye el mismo terreno y no regenera cofres consumidos.
 
 ## Ataques de Luffy
 
@@ -82,7 +82,7 @@ Luffy debe mirar de frente en el selector. Busca pequeños cofres de madera: el 
 
 Desde05:00 puede aparecer una carta náutica cerca del personaje. Camina sobre ella para viajar en barco3s a Morgan; no existe botón de acceso directo. Nivel20 recomendado, sin requisito. Aprende rectángulo de destral y arco; en fases2/3 aparecen carga, refuerzos y onda. Rojo tenue: preparación; contorno intenso: último aviso; naranja: impacto efectivo. Sal de la zona antes del golpe y usa cajas contra cargas/ondas. Comprueba que Morgan no las atraviesa y puede rodearlas. Mira tu vida y las tres fases de la barra del jefe.
 
-Al vencer, espera la caída: se guarda la victoria, se concede una agrupación y el barco te lleva automáticamente a Orange Town sin curación ni reiniciar la build. Allí aparecen piratas básicos, tiradores y resistentes; Buggy aún no está implementado. Si pierdes contra Morgan, el barco te devuelve al mismo Shells Town con25HP, nivel/build/berries conservados y una nueva oportunidad aleatoria tras45–90s de juego. Morir fuera de la arena sigue terminando la partida. Prueba entrada, esquiva y travesía en móvil horizontal y PC; al interrumpir/girar debe pausarse también el barco.
+Al vencer, espera la caída: se guarda la victoria, se concede una agrupación y el barco te lleva automáticamente a Orange Town sin curación ni reiniciar la build. Allí aparecen piratas básicos, tiradores y resistentes; Buggy ya está disponible mediante otra carta desde cinco minutos en Orange. Si pierdes contra Morgan, el barco te devuelve al mismo Shells Town con25HP, nivel/build/berries conservados y una nueva oportunidad aleatoria tras45–90s de juego. Morir fuera de la arena sigue terminando la partida. Prueba entrada, esquiva y travesía en móvil horizontal y PC; al interrumpir/girar debe pausarse también el barco.
 
 ## Beta0.11.0
 
@@ -107,6 +107,20 @@ Solo un objeto junto a los ataques. Tocar su icono para consultar efecto. Si apa
 2. Camina sobre la carta: animación de barco3s y entrada a la arena. El combate/reloj se congelan durante la travesía. Prueba Pausar travesía y reanudar, además de cambiar de pestaña o girar el móvil.
 3. Pierde contra Morgan: desaparecen sus avisos/refuerzos y regresas con25HP a Shells Town. Comprueba nivel, ataques, combinaciones, buffs, objeto, fruta y berries. El terreno/cofres consumidos no se reinician. Hay2,5s de protección al volver.
 4. Sigue jugando: otra carta puede aparecer45–90s después. Si ignoras una carta90s o te alejas demasiado, desaparece y se programa otra oportunidad. El nuevo Morgan empieza con toda su vida.
-5. Vence: viaje automático a Orange Town conservando la vida actual/build y una recompensa de combinación. Comprueba que hay piratas con bandana y rayas, incluidos tiradores y resistentes. Su apariencia es provisional y Buggy está pendiente.
+5. Vence: viaje automático a Orange Town conservando la vida actual/build y una recompensa de combinación. Comprueba que hay piratas con bandana y rayas, incluidos tiradores y resistentes. Su apariencia es provisional; Buggy se añade en0.14.
 
 Las cartas son la representación de navegación de East Blue; no un Log Pose canónico de Grand Line. El momento de aparición no obliga a entrar: puedes rodear/ignorar la carta.
+
+
+## Beta0.14.0 — Buggy
+
+Tras Morgan, sigue jugando en Orange Town. Desde cinco minutos en esa isla puede aparecer otra carta, con el mismo sistema aleatorio y sin requisito de nivel. Recógela para viajar a la arena del circo.
+
+- Mano de cuchillas: corredor rojo y mano separada que lo recorre. Sal lateralmente.
+- Bomba del payaso: círculo fijado sobre tu posición. Muévete antes de explotar; una caja puede protegerte.
+- Abanico: barrido frontal amplio; busca su espalda o aléjate.
+- Asalto desmontable: se separa durante el aviso y se recompone en el círculo anunciado, solo si hay trayecto libre.
+- Orden: refuerzos piratas limitados, por las puertas.
+- Bombardeo: tres círculos simultáneos, aviso de2s y recuperación larga.
+
+Comprueba las fases65%/30%, el nombre/barra de Buggy, visibilidad de todos los círculos y la pausa en móvil horizontal. Perder devuelve a Orange con25HP y build conservada; otra carta permite reintentar. Vencer otorga una combinación, registra la victoria local y viaja automáticamente a Syrup sin curar. Syrup tiene enemigos provisionales, pero Kuro aún no existe. Los cofres de cada isla tienen historial independiente y no se regeneran por reintentar el jefe.

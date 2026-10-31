@@ -33,6 +33,20 @@ export function createTextures(scene: Phaser.Scene): void {
   g.fillStyle(0xf8e1a5); g.fillRect(3, 3, 26, 3); g.fillStyle(0x77a7a1); g.fillRect(6, 9, 8, 5); g.fillRect(18, 17, 8, 5);
   g.fillStyle(0xb45d49); for (let i = 0; i < 4; i++) g.fillRect(10 + i * 3, 19 - i * 3, 2, 2);
   g.fillStyle(0x42545c); g.fillRect(21, 6, 3, 7); g.fillRect(18, 9, 9, 2); g.generateTexture('navigation-chart', 32, 30); g.clear();
+  // Buggy provisional original: sombrero naranja, pelo azul, nariz roja y camiseta a rayas.
+  g.fillStyle(0x242637); g.fillRect(17, 55, 12, 19); g.fillRect(35, 55, 12, 19); g.fillRect(13, 71, 18, 6); g.fillRect(34, 71, 18, 6);
+  g.fillStyle(0x426f8c); g.fillRect(18, 56, 9, 14); g.fillRect(37, 56, 9, 14);
+  g.fillStyle(0xab3e43); g.fillRoundedRect(10, 24, 44, 34, 7); g.fillStyle(0xf1d6a5); g.fillRect(19, 28, 26, 28);
+  g.fillStyle(0x97699a); for (let y = 29; y < 53; y += 8) g.fillRect(19, y, 26, 4);
+  g.fillStyle(0xe4af73); g.fillCircle(11, 43, 5); g.fillCircle(54, 43, 5);
+  g.fillStyle(0x276084); g.fillCircle(20, 16, 10); g.fillCircle(44, 16, 10); g.fillStyle(0xf0cc9c); g.fillEllipse(32, 15, 24, 25);
+  g.fillStyle(0xece9d0); g.fillRect(23, 11, 18, 11); g.fillStyle(0x273749); g.fillRect(25, 11, 3, 3); g.fillRect(36, 11, 3, 3);
+  g.fillStyle(0xb43d48); g.fillCircle(32, 16, 4); g.fillRect(27, 22, 11, 2);
+  g.fillStyle(0x8a4a36); g.fillRoundedRect(8, 1, 48, 8, 4); g.fillStyle(0xe79d4a); g.fillRect(15, 0, 34, 6); g.fillStyle(0xf2d791); g.fillRect(17, 4, 30, 2);
+  g.generateTexture('buggy', 64, 80); g.clear();
+  g.fillStyle(0xd7ae7c); g.fillCircle(17, 26, 8); g.fillStyle(0x784a35); g.fillRect(12, 29, 11, 7);
+  for (const x of [5, 16, 27]) { g.fillStyle(0x314956); g.fillRect(x - 1, 7, 6, 18); g.fillStyle(0xd6e9dd); g.fillTriangle(x, 22, x + 4, 22, x + 2, 0); }
+  g.generateTexture('buggy-knives', 36, 42); g.clear();
   // Pixel art provisional original de Morgan: abrigo, mandíbula metálica y brazo-destral.
   g.fillStyle(0x18222f); g.fillRect(16, 53, 13, 17); g.fillRect(33, 53, 13, 17);
   g.fillStyle(0x38455e); g.fillRect(18, 54, 7, 13); g.fillRect(35, 54, 7, 13);

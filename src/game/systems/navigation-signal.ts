@@ -3,7 +3,7 @@ import type { Vector } from '../core/types.ts';
 import type { CollisionWorld } from '../world/world.ts';
 
 // Una sola oportunidad, sin pickups ni temporizadores del navegador.
-export class MorganRoute {
+export class NavigationRoute {
   signal?: Vector;
   nextAt: number = MORGAN_ROUTE.availableAt;
   private first = true;
@@ -32,3 +32,6 @@ export class MorganRoute {
     this.nextAt = now + 5; return false; // Reintentar posición sin bucles ni aparición sobre el actor.
   }
 }
+
+// Compatibilidad con las pruebas e integraciones anteriores de Shells Town.
+export { NavigationRoute as MorganRoute };

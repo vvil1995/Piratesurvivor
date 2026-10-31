@@ -16,5 +16,13 @@ export function createPirateArt(scene: Phaser.Scene): void {
       else if (y < 62 && Math.floor(y / 5) % 2) { data[at] = Math.round(r * 0.55); data[at + 1] = Math.round(g * 0.38); data[at + 2] = Math.round(b * 0.62); }
     }
     context.putImageData(image, 0, 0); scene.textures.addCanvas(`buggy-pirate-${direction}-${phase}`, canvas);
+    const cat = document.createElement('canvas'); cat.width = cat.height = 96;
+    for (let i = 0; i < data.length; i += 4) {
+      if (!data[i + 3]) continue;
+      const y = Math.floor(i / 4 / 96);
+      if (y < 30 && data[i] > data[i + 1] * 1.4) { data[i] *= 0.25; data[i + 1] *= 0.4; data[i + 2] *= 0.4; }
+      else if (y >= 30 && y < 62 && Math.floor(y / 5) % 2 && data[i + 2] > data[i + 1]) { const green = data[i + 2]; data[i + 2] = data[i + 1]; data[i + 1] = green; }
+    }
+    cat.getContext('2d')!.putImageData(image, 0, 0); scene.textures.addCanvas(`blackcat-pirate-${direction}-${phase}`, cat);
   }
 }

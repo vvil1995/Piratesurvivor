@@ -20,6 +20,8 @@ export const CHARACTERS: Record<string, CharacterDefinition> = {
     stats: { maxHp: 105, speed: 210, damage: 25, cooldown: 0.72, range: 140, magnet: 75, armor: 0, regeneration: 0.3, critChance: 0.04 } },
 };
 export const ENEMIES: Record<string, EnemyDefinition> = {
+  'blackcat-pirate': { id: 'blackcat-pirate', hp: 105, damage: 25, speed: 90, xp: 18, radius: 13, visual: 'blackcat-pirate' },
+  'blackcat-raider': { id: 'blackcat-raider', hp: 80, damage: 21, speed: 115, xp: 20, radius: 13, visual: 'blackcat-pirate' },
   'buggy-pirate': { id: 'buggy-pirate', hp: 65, damage: 17, speed: 78, xp: 10, radius: 13, visual: 'buggy-pirate' },
   'buggy-gunner': { id: 'buggy-gunner', hp: 52, damage: 16, speed: 70, xp: 12, radius: 13, visual: 'buggy-pirate', ranged: { interval: 2.6, speed: 220, range: 270 } },
   'buggy-bruiser': { id: 'buggy-bruiser', hp: 110, damage: 24, speed: 59, xp: 16, radius: 13, visual: 'buggy-pirate' },

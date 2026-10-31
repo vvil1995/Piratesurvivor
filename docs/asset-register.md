@@ -108,3 +108,7 @@ Ocho iconos de objetos24×24 dibujados originalmente en `item-art.ts`, usados ta
 ### Beta0.13 — navegación y primera facción de Orange Town
 
 Carta náutica32×30 dibujada en `textures.ts` y barco/olas/isla CSS en `style.css`: gráficos provisionales originales del proyecto, sin descargas ni fuentes nuevas. Piratas provisionales: variante en memoria del atlas propio de marines aprobado, conservando alpha/contorno y piernas, con bandana roja y camiseta de rayas. Se generan16 poses una sola vez en `pirate-art.ts`; no se altera el archivo ni las poses existentes. No son sprites oficiales ni arte final de Buggy. Sin dependencias nuevas. Siguen vigentes los avisos de propiedad de One Piece.
+
+### Beta0.14 — Buggy y llegada a Syrup
+
+Buggy64×80 y mano/cuchillas36×42 dibujados con gráficos propios en `textures.ts`: sombrero naranja, pelo azul, nariz roja y rayas. Bomba/fusible en `boss-renderer.ts`; separación visual de cabeza/mano usando esos mismos recortes. Arte provisional sin material descargado ni sprites oficiales. Gato Negro:16 variantes de color en memoria del mismo atlas propio, alpha y piernas intactos; no aumenta los archivos fuente. Sin dependencias, música ni fuentes nuevas. Derechos sobre One Piece siguen perteneciendo a sus titulares.

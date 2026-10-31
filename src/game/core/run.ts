@@ -1,10 +1,13 @@
+import { BuggyEncounter } from '../bosses/buggy.ts';
+import type { PatternEncounter } from '../bosses/pattern-encounter.ts';
+import { SYRUP_VILLAGE } from '../../content/worlds/syrup-village.ts';
 import { MORGAN_ROUTE } from '../../content/navigation.ts';
-import { MorganRoute } from '../systems/navigation-signal.ts';
+import { NavigationRoute } from '../systems/navigation-signal.ts';
 import { ORANGE_TOWN } from '../../content/worlds/orange-town.ts';
 import { ITEMS } from '../../content/items.ts';
 import { replaceItem } from '../systems/items.ts';
 import { MorganEncounter } from '../bosses/morgan.ts';
-import { ArenaWorld, MORGAN_ARENA } from '../world/arena.ts';
+import { ArenaWorld, MORGAN_ARENA, BUGGY_ARENA } from '../world/arena.ts';
 import { MORGAN } from '../../content/bosses/morgan.ts';
 import { ENEMIES } from '../../content/catalog.ts';
 import { FRUITS } from '../../content/fruits.ts';
@@ -37,19 +40,33 @@ export class Run {
   readonly character: CharacterDefinition;
   definition: WorldDefinition;
   private readonly shellsDefinition: WorldDefinition;
-  readonly route = new MorganRoute();
-  voyage?: { destination: 'morgan' | 'shells' | 'orange'; elapsed: number };
+  readonly route = new NavigationRoute();
+  readonly buggyRoute = new NavigationRoute();
+  get navigationRoute(): NavigationRoute { return this.zone === 'orange-town' ? this.buggyRoute : this.route; }
+  get navigationSeconds(): number { return this.zone === 'orange-town' ? this.zoneTime : this.time; }
+  get inArena(): boolean { return this.zone === 'morgan-arena' || this.zone === 'buggy-arena'; }
+  get arena() { return this.world instanceof ArenaWorld ? this.world.arena : MORGAN_ARENA; }
+  voyage?: { destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup'; elapsed: number };
   private zoneTime = 0;
   world: ProceduralWorld;
   private shellsWorld: ProceduralWorld;
-  zone: 'shells-town' | 'morgan-arena' | 'orange-town' = 'shells-town';
-  encounter?: MorganEncounter;
-  morganDefeated = false;
+  private orangeWorld?: ProceduralWorld;
+  zone: 'shells-town' | 'morgan-arena' | 'orange-town' | 'buggy-arena' | 'syrup-village' = 'shells-town';
+  encounter?: PatternEncounter;
+  morganDefeated = false; buggyDefeated = false;
   readonly enemies: Pool<Enemy>;
   readonly pickups: Pool<Pickup>;
   readonly projectiles = new Pool<Projectile>(PROJECTILE_CAP, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, radius: 3, life: 0, damage: 0, hostile: false, ownerId: '', reflected: false, remainingHits: 1, hit: new Set<number>() }));
   readonly areas = new Pool<AreaEffect>(AREA_CAP, () => ({ active: false, x: 0, y: 0, ownerId: '', radius: 0, shockRadius: 0, damage: 0, knockback: 0, delay: 0, life: 0, triggered: false, evolved: false }));
   readonly chests = new ChestField();
+  private chestFields = new Map<string, ChestField>([['shells-town', this.chests]]);
+  get explorationChests(): ChestField | undefined {
+    if (this.inArena) return;
+    let field = this.chestFields.get(this.zone);
+    if (!field) { field = new ChestField(); this.chestFields.set(this.zone, field); }
+    return field;
+  }
+  get visibleChests(): readonly Enemy[] { return this.explorationChests?.active ?? []; }
   readonly grid = new SpatialGrid();
   readonly strikes: Strike[] = [];
   private bossField?: FlowField;
@@ -114,21 +131,41 @@ export class Run {
     Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter();
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
+  beginBuggy(): boolean {
+    if (!['playing', 'paused', 'voyage'].includes(this.status) || this.zone !== 'orange-town' || !this.morganDefeated || this.buggyDefeated) return false;
+    this.buggyRoute.consume(); this.clearBattlefield(); this.orangeWorld = this.world;
+    this.encounter = new BuggyEncounter(); this.world = new ArenaWorld(this.world.seed, BUGGY_ARENA, 'orange'); this.zone = 'buggy-arena';
+    this.bossField = new FlowField(this.world, this.encounter.body.radius); Object.assign(this.player, BUGGY_ARENA.playerSpawn);
+    this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
+  }
   boardToOrangeTown(): boolean {
     if (!this.morganDefeated || this.zone === 'orange-town' || !['playing', 'paused', 'voyage'].includes(this.status)) return false;
     this.clearBattlefield(); this.encounter = undefined; this.zone = 'orange-town';
     this.lootNotice = 'Morgan derrotado. Recompensa: una combinación en Gestionar habilidades.'; this.lootNoticeFor = 8;
     this.definition = ORANGE_TOWN; this.zoneTime = 0; this.spawnTimer = 0; this.voyage = undefined;
-    this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x42756767, 'orange');
+    this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x42756767, 'orange'); this.orangeWorld = this.world;
     Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
   }
-  private startVoyage(destination: 'morgan' | 'shells' | 'orange'): void {
+  private startVoyage(destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup'): void {
     this.encounter?.cancel(); this.clearBattlefield();
     this.voyage = { destination, elapsed: 0 }; this.status = 'voyage';
   }
   private finishVoyage(): void {
     const destination = this.voyage!.destination;
     if (destination === 'morgan') { this.beginMorgan(); return; }
+    if (destination === 'buggy') { this.beginBuggy(); return; }
+    if (destination === 'syrup') {
+      this.clearBattlefield(); this.encounter = undefined; this.zone = 'syrup-village'; this.definition = SYRUP_VILLAGE;
+      this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x4b75726f, 'syrup'); this.zoneTime = 0; this.spawnTimer = 0; this.voyage = undefined;
+      Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1);
+      this.lootNotice = 'Buggy derrotado. Una combinación ganada. Syrup: llegada provisional; Kuro pendiente.'; this.lootNoticeFor = 8; return;
+    }
+    if (destination === 'orange-return') {
+      this.clearBattlefield(); this.encounter = undefined; this.world = this.orangeWorld!; this.definition = ORANGE_TOWN; this.zone = 'orange-town';
+      Object.assign(this.player, { x: 256, y: 256, hp: MORGAN_ROUTE.recoveryHp, hurtTimer: MORGAN_ROUTE.recoveryGrace });
+      this.spawnTimer = 1; this.buggyRoute.retry(this.zoneTime, this.random); this.voyage = undefined; this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1);
+      this.lootNotice = 'Regresas a Orange Town con25HP y tu build. Otra carta permitirá reintentar Buggy.'; this.lootNoticeFor = 8; return;
+    }
     if (destination === 'orange') { this.boardToOrangeTown(); return; }
     this.clearBattlefield(); this.encounter = undefined; this.world = this.shellsWorld;
     this.definition = this.shellsDefinition; this.zone = 'shells-town';
@@ -137,19 +174,20 @@ export class Run {
     this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1);
     this.lootNotice = 'De vuelta con25HP. Conservas tu build. Busca otra carta náutica para reintentar Morgan.'; this.lootNoticeFor = 8;
   }
-  private defeatMorgan(): void {
-    if (this.morganDefeated) return;
-    this.morganDefeated = true; this.encounter!.defeated(); this.enemies.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
+  private defeatBoss(): void {
+    if (this.encounter?.state === 'dead') return;
+    if (this.zone === 'buggy-arena') this.buggyDefeated = true; else this.morganDefeated = true; this.encounter!.defeated(); this.enemies.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
     this.grantCombinationReward();
   }
   private callReinforcements(): void {
-    let remaining = Math.min(MORGAN.reinforcementCount, MORGAN.reinforcementCap - this.enemies.count);
-    const gates = [...MORGAN_ARENA.gates].sort((a, b) => Math.hypot(b.x - this.player.x, b.y - this.player.y) - Math.hypot(a.x - this.player.x, a.y - this.player.y));
+    const profile = this.encounter!.profile;
+    let remaining = Math.min(profile.reinforcementCount, profile.reinforcementCap - this.enemies.count);
+    const gates = [...this.arena.gates].sort((a, b) => Math.hypot(b.x - this.player.x, b.y - this.player.y) - Math.hypot(a.x - this.player.x, a.y - this.player.y));
     for (const gate of gates) {
       if (remaining <= 0) break;
       if (Math.hypot(gate.x - this.player.x, gate.y - this.player.y) < 110 || !this.world.canOccupy(gate.x, gate.y, 13)) continue;
       const enemy = this.enemies.acquire(); if (!enemy) break;
-      const def = ENEMIES.marine;
+      const def = ENEMIES[profile.reinforcementEnemy];
       Object.assign(enemy, { ...def, active: true, id: ++this.enemyId, ...gate, hp: def.hp * 1.5, maxHp: def.hp * 1.5, kind: undefined, flash: 0,
         statuses: undefined, launchTime: 0, launchX: 0, launchY: 0, stolen: false, lureIndex: undefined, decoyHitTimer: 0, ranged: undefined, shotTimer: 0, targetId: undefined, steeringTime: 0, steerX: 0, steerY: 0 });
       remaining--;
@@ -248,7 +286,7 @@ export class Run {
     }
   }
   private dropXp(enemy: Enemy, ownerId: string): void {
-    if (enemy.kind === 'boss') { this.defeatMorgan(); return; }
+    if (enemy.kind === 'boss') { this.defeatBoss(); return; }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
     const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;
     if (owner && fruit && this.fruitCooldown <= 0) { this.fruitCooldown = fruit.cooldown; queueImpact(this, owner, enemy.x, enemy.y, fruit.radius, owner.stats.damage * fruit.damage, 0.12, 'bomu-explosion'); }
@@ -288,20 +326,21 @@ export class Run {
     if (this.zone === 'shells-town' && !this.morganDefeated && this.route.tick(this.time, this.player, this.world, this.random, p => this.fieldFor(this.player).reachable(p))) {
       this.startVoyage('morgan'); return;
     }
-    const threatTime = this.zone === 'orange-town' ? this.zoneTime : this.time;
+    if (this.zone === 'orange-town' && !this.buggyDefeated && this.buggyRoute.tick(this.zoneTime, this.player, this.world, this.random, p => this.fieldFor(this.player).reachable(p))) { this.startVoyage('buggy'); return; }
+    const threatTime = this.zone === 'shells-town' ? this.time : this.zoneTime;
     this.spawnTimer -= dt;
-    if (this.zone !== 'morgan-arena' && this.spawnTimer <= 0) {
+    if (!this.inArena && this.spawnTimer <= 0) {
       const threat = difficultyAt(threatTime, this.definition.spawnInterval, this.definition.difficulty);
       for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player), this.definition, this.random, ++this.enemyId, threatTime);
       this.spawnTimer = threat.interval;
     }
-    if (this.encounter && !this.morganDefeated) {
+    if (this.encounter && this.encounter.state !== 'dead') {
       this.bossField!.update(this.player, dt);
-      this.encounter.tick(dt, this.player, this.world, from => this.bossField!.direction(from, this.player, MORGAN.radius), () => this.callReinforcements());
+      this.encounter.tick(dt, this.player, this.world, from => this.bossField!.direction(from, this.player, this.encounter!.body.radius), () => this.callReinforcements());
       if (this.player.hp <= 0) { this.defeat(); return; }
     } else if (this.encounter) {
       this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
-      if (this.encounter.elapsed >= 1.3) { this.startVoyage('orange'); return; }
+      if (this.encounter.elapsed >= 1.3) { this.startVoyage(this.zone === 'buggy-arena' ? 'syrup' : 'orange'); return; }
     }
     this.grid.rebuild(this.enemies.items);
     for (const enemy of this.enemies.items) {
@@ -356,8 +395,8 @@ export class Run {
       }
     }
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
-    if (this.zone === 'shells-town') this.chests.sync(this.world, this.player);
-    this.grid.rebuild([...this.enemies.items, ...(this.zone === 'shells-town' ? this.chests.active.filter(c => !c.large) : []), ...(this.encounter?.body.active ? [this.encounter.body] : [])]);
+    this.explorationChests?.sync(this.world, this.player);
+    this.grid.rebuild([...this.enemies.items, ...this.visibleChests.filter(c => !c.large), ...(this.encounter?.body.active ? [this.encounter.body] : [])]);
     for (const actor of living) {
       if (actor.hp <= 0) continue;
       tickAttacks(actor, this.grid, this.world, dt, enemy => this.dropXp(enemy, actor.id), strike => {
@@ -387,7 +426,7 @@ export class Run {
       }
     }
     // Solo un cofre grande progresa a la vez; alejarse conserva su progreso.
-    const large = this.status === 'playing' && this.zone === 'shells-town' && this.chests.active.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
+    const large = this.status === 'playing' && this.visibleChests.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
     if (large) {
       large.openProgress = Math.min(LOOT.largeOpenSeconds, (large.openProgress ?? 0) + dt);
       if (large.openProgress >= LOOT.largeOpenSeconds) { large.active = false; this.lootNotice = largeChestReward(this.pickups, large, this.player, this.random); this.lootNoticeFor = 4; }
@@ -396,7 +435,7 @@ export class Run {
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }
   }
   private defeat(): void {
-    if (this.zone === 'morgan-arena' && !this.morganDefeated) { this.startVoyage('shells'); return; }
+    if (this.inArena && this.encounter?.state !== 'dead') { this.startVoyage(this.zone === 'buggy-arena' ? 'orange-return' : 'shells'); return; }
     this.status = 'defeat'; this.encounter?.cancel(); this.strikes.length = 0;
     for (const p of this.projectiles.items) { p.active = false; p.hit.clear(); }
     for (const a of this.areas.items) a.active = false;

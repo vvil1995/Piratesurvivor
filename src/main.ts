@@ -28,6 +28,7 @@ function sync(): void {
   if (!run) return;
   store.bank(run.id, run.player.collectedBerries);
   if (run.morganDefeated) store.recordMorganVictory(run.id);
+  if (run.buggyDefeated) store.recordBuggyVictory(run.id);
   const now = performance.now();
   if (now - hudAt > 100 || run.status !== previousStatus) { view.hud(run); hudAt = now; }
   if (run.status === previousStatus) return;

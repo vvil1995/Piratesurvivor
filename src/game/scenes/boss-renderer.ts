@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import type { MorganEncounter } from '../bosses/morgan.ts';
+import type { PatternEncounter } from '../bosses/pattern-encounter.ts';
 import type { DangerZone } from '../bosses/telegraphs.ts';
 import type { Vector } from '../core/types.ts';
-import { MORGAN_ARENA } from '../world/arena.ts';
+import { MORGAN_ARENA, type ArenaDefinition } from '../world/arena.ts';
 
 // Un único renderizador de formas: el motor usa exactamente esos parámetros.
 export function drawDanger(g: Phaser.GameObjects.Graphics, zone: DangerZone, origin: Vector, color: number, alpha: number): void {
@@ -22,25 +22,28 @@ export function drawDanger(g: Phaser.GameObjects.Graphics, zone: DangerZone, ori
 }
 export class BossRenderer {
   private body: Phaser.GameObjects.Image;
+  private head: Phaser.GameObjects.Image;
   private arm: Phaser.GameObjects.Image;
   private warnings: Phaser.GameObjects.Graphics;
   private details: Phaser.GameObjects.Graphics;
   constructor(scene: Phaser.Scene) {
     this.body = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
+    this.head = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
     this.arm = scene.add.image(0, 0, 'morgan-axe').setOrigin(0.22, 0.88).setScale(1.1).setVisible(false);
     // Por encima de decoración, actores y todos los efectos de combate.
     this.warnings = scene.add.graphics().setDepth(9000);
     this.details = scene.add.graphics().setDepth(-950);
   }
-  update(boss: MorganEncounter | undefined, origin: Vector): void {
+  update(boss: PatternEncounter | undefined, origin: Vector, arena: ArenaDefinition = MORGAN_ARENA): void {
     this.warnings.clear(); this.details.clear();
-    this.body.setVisible(!!boss); this.arm.setVisible(!!boss);
+    this.body.setVisible(!!boss); this.arm.setVisible(!!boss); this.head.setVisible(false);
     if (!boss) return;
-    for (const gate of MORGAN_ARENA.gates) {
+    for (const gate of arena.gates) {
       const x = gate.x - origin.x, y = gate.y - origin.y;
       this.details.lineStyle(3, 0x7ca6b4, 0.7); this.details.strokeRect(x - 22, y - 14, 44, 28);
       this.details.fillStyle(0x284b64, 0.55); this.details.fillTriangle(x - 10, y - 8, x + 10, y - 8, x, y + 9);
     }
+    this.body.setTexture(boss.profile.visual).setCrop(); this.arm.setTexture(boss.profile.weapon);
     const dead = boss.state === 'dead', alpha = dead ? Math.max(0, 1 - boss.elapsed / 1.5) : 1;
     const x = boss.body.x - origin.x, y = boss.body.y - origin.y;
     this.body.setPosition(x, y).setDepth(y + 1000).setAlpha(alpha).setRotation(dead ? Math.min(Math.PI / 2, boss.elapsed * 2) : 0)
@@ -49,15 +52,31 @@ export class BossRenderer {
     const lift = preparing ? Math.min(1, boss.elapsed / 0.45) : 0;
     this.arm.setPosition(x + 21, y - 42 - lift * 12).setDepth(y + 1001).setAlpha(alpha)
       .setRotation(dead ? Math.PI / 2 : preparing ? -0.85 - lift * 0.7 : boss.state === 'impact' ? 1.1 : 0.1);
+    if (preparing && kind === 'split') {
+      this.body.setCrop(0, 25, 64, 55);
+      this.head.setTexture(boss.profile.visual).setCrop(0, 0, 64, 25).setVisible(true).setPosition(x + Math.sin(boss.elapsed * 7) * 18, y - 13).setDepth(y + 1002).setAlpha(alpha);
+      this.arm.setPosition(x + 40 + Math.sin(boss.elapsed * 9) * 12, y - 48).setRotation(-boss.elapsed * 5);
+    }
+    if (boss.profile.visual === 'buggy' && boss.impactZone?.shape === 'line') {
+      const z = boss.impactZone;
+      this.arm.setPosition(z.x - origin.x + Math.cos(z.angle) * z.length, z.y - origin.y + Math.sin(z.angle) * z.length - 18).setRotation(z.angle + Math.PI / 2).setDepth(9001);
+    }
     if (boss.telegraph) {
       const warning = boss.telegraph, final = boss.stage === 'final';
       const intensity = final ? 0.34 + (Math.floor(boss.elapsed * 12) % 2) * 0.16 : 0.19;
-      if (kind !== 'order') drawDanger(this.warnings, warning.zone, origin, 0xf23f46, intensity);
-      else for (const gate of MORGAN_ARENA.gates) { this.warnings.lineStyle(final ? 4 : 2, 0xffb26a, 0.85); this.warnings.strokeCircle(gate.x - origin.x, gate.y - origin.y, 28); }
+      if (kind !== 'order') for (const zone of [warning.zone, ...boss.extraWarnings]) drawDanger(this.warnings, zone, origin, 0xf23f46, intensity);
+      else for (const gate of arena.gates) { this.warnings.lineStyle(final ? 4 : 2, 0xffb26a, 0.85); this.warnings.strokeCircle(gate.x - origin.x, gate.y - origin.y, 28); }
+      if (kind === 'bomb') for (const zone of [warning.zone, ...boss.extraWarnings]) {
+        const bx = zone.x - origin.x, by = zone.y - origin.y;
+        this.warnings.fillStyle(0x252a36); this.warnings.fillCircle(bx, by - 9, 9);
+        this.warnings.fillStyle(0x576477); this.warnings.fillRect(bx - 5, by - 14, 5, 4);
+        this.warnings.lineStyle(2, 0xcda360); this.warnings.lineBetween(bx + 2, by - 17, bx + 7, by - 22);
+        this.warnings.fillStyle(final ? 0xffd98a : 0xe49053); this.warnings.fillRect(bx + 5, by - 24, 4, 4);
+      }
       this.warnings.lineStyle(final ? 4 : 2, 0xffdad0, final ? 0.95 : 0.5);
       this.warnings.strokeCircle(x, y - 105, final ? 9 : 6);
     }
-    if (boss.impactZone) drawDanger(this.warnings, boss.impactZone, origin, 0xffa66a, 0.55);
+    if (boss.impactZone) for (const zone of [boss.impactZone, ...boss.extraImpacts]) drawDanger(this.warnings, zone, origin, 0xffa66a, 0.55);
     if (boss.state === 'stunned') {
       this.warnings.lineStyle(2, 0xffe4a3, 0.9); this.warnings.strokeEllipse(x, y - 83, 40, 12);
       for (let i = 0; i < 3; i++) { const a = boss.elapsed * 4 + i * Math.PI * 2 / 3; this.warnings.fillStyle(0xffde7d); this.warnings.fillRect(x + Math.cos(a) * 18 - 2, y - 84 + Math.sin(a) * 5, 4, 4); }
