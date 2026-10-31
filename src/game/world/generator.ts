@@ -2,7 +2,7 @@ export const TILE = 32;
 export const CHUNK_TILES = 16;
 export const CHUNK_SIZE = TILE * CHUNK_TILES;
 export type ObstacleKind = 'house' | 'tree' | 'rock' | 'wall' | 'crate' | 'tent' | 'stall' | 'ruin' | 'pennant' | 'water' | 'dock' | 'quay' | 'lamp' | 'fence' | 'ship';
-export interface Obstacle { id: string; kind: ObstacleKind; x: number; y: number; width: number; height: number; variant: number }
+export interface Obstacle { id: string; kind: ObstacleKind; x: number; y: number; width: number; height: number; variant: number; art?: string }
 export interface Chunk {
   key: string; cx: number; cy: number; district: 'residential' | 'garden' | 'barracks' | 'plaza' | 'market' | 'circus' | 'orchard' | 'occupied' | 'harbor';
   solids: Uint8Array; obstacles: Obstacle[]; variation: number;

@@ -150,3 +150,19 @@ test('el mar impide caminar pero permite disparar; edificios y barcos siguen dan
   const house = world.getChunk(0, 0).obstacles.find(o => o.kind === 'house')!;
   assert.equal(world.segmentClear(house.x - 20, house.y + 16, house.x + house.width + 20, house.y + 16, 3, 'attack'), false);
 });
+
+test('cámara naval sigue suavemente y se limita sin cambiar escala', async () => {
+  const { arenaCamera } = await import('../src/game/scenes/arena-camera.ts');
+  const arena = {width:2560,height:1792};
+  const p = arenaCamera({x:1280,y:900},{x:1600,y:1100},1200,700,arena,.016);
+  assert.ok(p.x>1280 && p.x<1600);assert.ok(p.y>900 && p.y<1100);
+  assert.deepEqual(arenaCamera({x:-1000,y:-1000},{x:0,y:0},1200,700,arena,1),{x:600,y:350});
+  assert.deepEqual(arenaCamera({x:9000,y:9000},{x:2560,y:1792},1200,700,arena,1),{x:1960,y:1442});
+});
+
+test('el patio naval completo conserva rutas entre todas las celdas transitables', async () => {
+  const {ArenaWorld,MORGAN_ARENA}=await import('../src/game/world/arena.ts');const world=new ArenaWorld(42), w=MORGAN_ARENA.width/32,h=MORGAN_ARENA.height/32;
+  const start=8+8*w,queue=[start],seen=new Set(queue);
+  for(let i=0;i<queue.length;i++){const x=queue[i]%w,y=Math.floor(queue[i]/w);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,id=nx+ny*w;if(nx<0||ny<0||nx>=w||ny>=h||seen.has(id)||world.solidTile(nx,ny))continue;seen.add(id);queue.push(id);}}
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(!world.solidTile(x,y))assert.ok(seen.has(x+y*w));
+});

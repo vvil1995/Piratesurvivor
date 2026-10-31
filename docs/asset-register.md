@@ -144,3 +144,9 @@ Las capturas aportadas por el usuario se utilizan como referencia estética. Los
 | Barco naval decorativo con emblema de ave original | `exec-14b0e406-5bef-4776-91f8-2a05bfd543ba.png` |
 
 Preparación: recorte, normalización por vecino más cercano y PNG indexado256 colores. Se conserva la relación de aspecto de edificios/vegetación; las ilustraciones sustituyen los iconos procedurales de Luffy en cartas y HUD. Los originales permanecen en `/workspace/generated_images`. El manifiesto `src/assets/visual-manifest.json` recoge SHA-256 y tamaño de cada recorte final. Se elimina la casa morada sin uso; la variante con toldo azul comparte el mismo recurso de ejecución, sin duplicar la imagen.
+
+## Arena naval de Morgan
+
+Piezas originales generadas para el proyecto, fuente `exec-cfe16a78-d27c-422e-bad5-f37e0f77f5b3.png`: puerta, torre, cañón, bandera, cajas/barril y muralla. Preparación: recortes transparentes, vecino más cercano y PNG indexado. Se usan como piezas independientes, no como fondo completo. Referencia del usuario únicamente artística; no se han descargado assets oficiales. Los derechos de One Piece siguen reservados a sus titulares. Solo el escenario de Morgan utiliza estas piezas.
+
+Suelo naval original: `exec-942d9d6c-6518-4bdb-9496-cb84803aeb96.png`, reducido a128×128 y PNG indexado. Hashes y tamaños de las siete piezas en `src/assets/arena/manifest.json`. Material reutilizable con grates/desgaste deterministas, sin cargar un fondo gigante.

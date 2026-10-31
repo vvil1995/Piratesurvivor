@@ -134,7 +134,7 @@ export class Run {
     if (!['playing', 'paused', 'voyage'].includes(this.status) || this.zone !== 'shells-town' || this.morganDefeated) return false;
     this.route.consume(); this.clearBattlefield();
     this.world = new ArenaWorld(this.world.seed); this.zone = 'morgan-arena'; this.bossField = new FlowField(this.world, MORGAN.radius);
-    Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter();
+    Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter(); Object.assign(this.encounter.body, MORGAN_ARENA.bossSpawn);
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
   beginBuggy(): boolean {

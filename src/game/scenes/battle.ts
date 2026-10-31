@@ -1,3 +1,4 @@
+import { arenaCamera } from './arena-camera.ts';
 import { preloadIslandArt } from './island-art.ts';
 import { BalloonRig } from './balloon-rig.ts';
 import { BUFF_LOOK } from '../../ui/buff-info.ts';
@@ -49,11 +50,13 @@ export class BattleScene extends Phaser.Scene {
   private dustIndex = 0;
   private accumulator = 0;
   private previousRun?: Run;
+  private arenaCameraPosition?: Vector;
+  private cameraWorld?: ProceduralWorld;
   private worldRenderer!: WorldRenderer;
   private actorLoads = new Map<string, Promise<void>>();
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
-  get diagnostics() { return { legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  get diagnostics() { return { cameraZoom: this.cameras.main.zoom, cameraX: this.arenaCameraPosition?.x, cameraY: this.arenaCameraPosition?.y, legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
   async ensureActorArt(visual: string): Promise<void> {
     if (this.textures.exists(`${visual}-s-0`)) return;
     const known = this.actorLoads.get(visual); if (known) return known;
@@ -103,12 +106,13 @@ export class BattleScene extends Phaser.Scene {
     const run = this.bridge.run();
     if (run !== this.previousRun) { this.accumulator = 0; this.previousRun = run; for (const p of this.dust) p.life = 0; }
     const camera = this.cameras.main;
-    if (run?.inArena) camera.setZoom(Math.max(0.3, Math.min(1.4, camera.width / ((run?.arena.width ?? MORGAN_ARENA.width) + 48), (camera.height - 120) / ((run?.arena.height ?? MORGAN_ARENA.height) + 32))));
+    if (run?.inArena && run.zone !== 'morgan-arena') camera.setZoom(Math.max(0.3, Math.min(1.4, camera.width / ((run?.arena.width ?? MORGAN_ARENA.width) + 48), (camera.height - 120) / ((run?.arena.height ?? MORGAN_ARENA.height) + 32))));
     else this.resize();
     const player = run?.player;
     let worldX = player?.x ?? 256, worldY = player?.y ?? 256;
     const worldView = { width: camera.width / camera.zoom, height: camera.height / camera.zoom, centerX: worldX, centerY: worldY };
     if (run) {
+      if (run.zone === 'morgan-arena' && this.cameraWorld === run.world && this.arenaCameraPosition) { worldView.centerX = this.arenaCameraPosition.x; worldView.centerY = this.arenaCameraPosition.y; }
       run.setView(worldView);
       if (run.status === 'playing' || run.status === 'voyage') {
         this.accumulator = Math.min(this.accumulator + delta / 1000, 0.1);
@@ -121,9 +125,16 @@ export class BattleScene extends Phaser.Scene {
     worldView.centerX = worldX; worldView.centerY = worldY;
     // Posiciones lógicas globales; solo el dibujo usa origen local por chunk.
     const origin = { x: Math.floor(worldX / CHUNK_SIZE) * CHUNK_SIZE, y: Math.floor(worldY / CHUNK_SIZE) * CHUNK_SIZE };
-    if (run?.inArena) camera.centerOn((run?.arena.width ?? MORGAN_ARENA.width) / 2 - origin.x, (run?.arena.height ?? MORGAN_ARENA.height) / 2 - origin.y);
-    else camera.centerOn(worldX - origin.x, worldY - origin.y);
-    if (run?.inArena) { worldView.centerX = (run?.arena.width ?? MORGAN_ARENA.width) / 2; worldView.centerY = (run?.arena.height ?? MORGAN_ARENA.height) / 2; }
+    if (run?.zone === 'morgan-arena') {
+      if (this.cameraWorld !== run.world) this.arenaCameraPosition = { x: worldX, y: worldY };
+      this.arenaCameraPosition = arenaCamera(this.arenaCameraPosition!, {x:worldX,y:worldY}, worldView.width, worldView.height, run.arena, delta / 1000);
+      worldView.centerX = this.arenaCameraPosition.x; worldView.centerY = this.arenaCameraPosition.y;
+      camera.centerOn(worldView.centerX - origin.x, worldView.centerY - origin.y);
+    } else if (run?.inArena) {
+      worldView.centerX = run.arena.width / 2; worldView.centerY = run.arena.height / 2;
+      camera.centerOn(worldView.centerX - origin.x, worldView.centerY - origin.y);
+    } else camera.centerOn(worldX - origin.x, worldY - origin.y);
+    this.cameraWorld = run?.world;
     this.worldRenderer.update(run?.world ?? this.previewWorld, worldView, origin);
     const animate = run?.status === 'playing' && !this.bridge.reducedMotion();
     this.captainAnimation.update(player ? `${run!.id}/${player.id}` : 'preview', worldX, worldY, !!animate, delta / 1000);
@@ -152,7 +163,7 @@ export class BattleScene extends Phaser.Scene {
     if (balloon) this.captainRig.hide();
     for (let i = 0; i < this.enemies.length; i++) {
       const e = run?.enemies.items[i], sprite = this.enemies[i], shadow = this.shadows[i];
-      const visible = !!e?.active && Math.abs(e.x - worldX) < camera.width / camera.zoom / 2 + 160 && Math.abs(e.y - worldY) < camera.height / camera.zoom / 2 + 160;
+      const visible = !!e?.active && Math.abs(e.x - (run?.zone === 'morgan-arena' ? worldView.centerX : worldX)) < camera.width / camera.zoom / 2 + 160 && Math.abs(e.y - (run?.zone === 'morgan-arena' ? worldView.centerY : worldY)) < camera.height / camera.zoom / 2 + 160;
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];

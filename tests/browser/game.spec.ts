@@ -900,3 +900,21 @@ test('referencia costera: base naval, puerto, seis ilustraciones de Luffy y comi
   await page.screenshot({ path: info.outputPath('luffy-six-illustrations-food.png') });
   expect(errors).toEqual([]);
 });
+
+test('Morgan naval: zoom de exploración, seguimiento y límites de cámara', async ({page},info) => {
+  await page.locator('#start').click();
+  const zoom = await page.evaluate(() => window.__OPS_QA__!.metrics().cameraZoom);
+  await page.evaluate(() => { const qa=window.__OPS_QA__!,r=qa.getRun()!;r.beginMorgan();r.update=()=>{};qa.draw();qa.tick(); });
+  expect(await page.evaluate(() => window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);
+  const before = await page.evaluate(() => window.__OPS_QA__!.metrics().cameraX!);
+  await page.evaluate(() => {const qa=window.__OPS_QA__!;qa.getRun()!.player.x+=250;qa.draw(16);});
+  const after = await page.evaluate(() => window.__OPS_QA__!.metrics().cameraX!);
+  expect(after).toBeGreaterThan(before);expect(after).toBeLessThan(before+250);
+  for (const edge of ['center','gate','corner']) {
+    await page.evaluate(({edge})=>{const qa=window.__OPS_QA__!,r=qa.getRun()!;Object.assign(r.player,edge==='center'?{x:1280,y:900}:edge==='gate'?{x:1280,y:320}:{x:60,y:60});for(let i=0;i<30;i++)qa.draw(100);}, {edge});
+    await page.screenshot({path:info.outputPath(`naval-${edge}.png`)});
+  }
+  const geometry = await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {w:r.arena.width,h:r.arena.height,blocked:r.arena.covers.every(c=>!r.world.canOccupy(c.x+16,c.y+16,14)),bound:!r.world.canOccupy(-10,200,14)};});
+  expect(geometry.blocked).toBe(true);expect(geometry.bound).toBe(true);expect(geometry.w).toBeGreaterThan(page.viewportSize()!.width/zoom);expect(geometry.h).toBeGreaterThan(page.viewportSize()!.height/zoom);
+  expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);
+});

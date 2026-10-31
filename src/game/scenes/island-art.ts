@@ -1,3 +1,10 @@
+import navalground from '../../assets/arena/ground.png';
+import navalgate from '../../assets/arena/gate.png';
+import navaltower from '../../assets/arena/tower.png';
+import navalcannon from '../../assets/arena/cannon.png';
+import navalflag from '../../assets/arena/flag.png';
+import navalcrates from '../../assets/arena/crates.png';
+import navalwall from '../../assets/arena/wall.png';
 import ship from '../../assets/worlds/naval-ship.png';
 import groundstone from '../../assets/worlds/ground-stone.png';
 import groundearth from '../../assets/worlds/ground-earth.png';
@@ -40,7 +47,7 @@ import compass from '../../assets/worlds/navigation-chart.png';
 import { createPackedDirectionalArt } from './directional-art.ts';
 
 const actors = { 'buggy-pirate': pirate, 'buggy-gunner': gunner, 'buggy-bruiser': bruiser };
-const props = { 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
+const props = { 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
   'ability-elastic-punch': pistolArt, 'ability-gatling': gatlingArt, 'ability-bazooka': bazookaArt, 'ability-whip': whipArt, 'ability-balloon': balloonArt, 'ability-axe': axeArt, buggy, 'buggy-knives': knives, morgan, 'morgan-axe': axe, 'orange-house-0': house, 'orange-house-1': shellsHouse,
   'orange-tent': tent, 'orange-stall': stall, 'orange-tree': tree, 'orange-ruin': ruin,
   'orange-flags': flags, 'navigation-chart': compass };

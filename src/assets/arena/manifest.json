@@ -1,0 +1,30 @@
+{
+  "cannon.png": {
+    "sha256": "9428014b14f47939df5b1bf5a5718910739e28f7b7453b23e820140e5f940dd7",
+    "bytes": 3802
+  },
+  "gate.png": {
+    "sha256": "f15d0331175eba78196f4358e15ee1b6d1ecebb859c0b1ed94c2a2fc34407669",
+    "bytes": 23711
+  },
+  "wall.png": {
+    "sha256": "a6d211d262d4360062861fba5260e41ec4bd33d603213e53ee50b03931b5cb70",
+    "bytes": 3731
+  },
+  "flag.png": {
+    "sha256": "584f1ec455449aaf31522bb18f5955f6129c655ab67024345c48e1a0719ce630",
+    "bytes": 2102
+  },
+  "tower.png": {
+    "sha256": "af214183dbf804e7365bf3f03b3ad1bfeba5fcfe20d498635d748c40f22ed686",
+    "bytes": 9597
+  },
+  "crates.png": {
+    "sha256": "94c06222b5055012c861c9e42fd32313933083c599b82f879f6c80bc89415cd9",
+    "bytes": 2753
+  },
+  "ground.png": {
+    "sha256": "451e728d7d80d953af2881878fa732621e679e87f602bca6ec2038cf86d41a37",
+    "bytes": 14875
+  }
+}

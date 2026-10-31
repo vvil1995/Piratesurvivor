@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { ArenaWorld } from '../world/arena.ts';
 import type { Vector } from '../core/types.ts';
 import type { View } from '../systems/spawner.ts';
 import { cellKey, CHUNK_SIZE, hash, roadTile, type Chunk } from '../world/generator.ts';
@@ -20,6 +21,7 @@ export class WorldRenderer {
     return { texture, ground: this.scene.add.image(0, 0, key).setOrigin(0).setScale(2).setDepth(-2000), decorations: [] };
   }
   private paint(slot: Slot, chunk: Chunk): void {
+    const naval = this.world instanceof ArenaWorld && this.world.theme === 'shells';
     const ctx = slot.texture.context;
     ctx.imageSmoothingEnabled = false;
     const ground = Object.fromEntries(['stone','earth','grass','water'].map(name => [name, ctx.createPattern(this.scene.textures.get(`ground-${name}`).getSourceImage() as HTMLCanvasElement, 'repeat')!]));
@@ -109,6 +111,18 @@ export class WorldRenderer {
       ctx.fillStyle = '#8a9f9b';
       for (const [x, y] of [[125, 110], [110, 125], [140, 125], [125, 140]]) ctx.fillRect(x, y, 5, 5);
     }
+    if (naval) {
+      // Losas navales originales: material compartido, desgaste determinista.
+      ctx.fillStyle = ctx.createPattern(this.scene.textures.get('naval-ground').getSourceImage() as HTMLCanvasElement, 'repeat')!; ctx.fillRect(0, 0, 256, 256);
+      for (let y = 0; y < 256; y += 16) for (let x = 0; x < 256; x += 16) {
+        const wx = chunk.cx * 512 + x * 2, wy = chunk.cy * 512 + y * 2;
+        if (wx < 32 || wy < 32 || wx >= (this.world as ArenaWorld).arena.width - 32 || wy >= (this.world as ArenaWorld).arena.height - 32) { ctx.fillStyle=ground.water;ctx.fillRect(x,y,16,16); }
+      }
+      if (hash(71,chunk.cx,chunk.cy)%3 === 0) {
+        ctx.fillStyle='#293742';ctx.fillRect(52,52,24,24);ctx.strokeStyle='#abb0ac';ctx.lineWidth=2;ctx.strokeRect(52,52,24,24);
+        for(let x=56;x<75;x+=4){ctx.fillStyle='#78838b';ctx.fillRect(x,54,1,20);}
+      }
+    }
     slot.texture.refresh(); slot.chunk = chunk;
     for (let i = 0; i < chunk.obstacles.length; i++) {
       const obstacle = chunk.obstacles[i];
@@ -116,7 +130,7 @@ export class WorldRenderer {
       const sprite = slot.decorations[i];
       if (obstacle.kind === 'water') { sprite.setVisible(false); continue; }
       const own = orange && ['house', 'tree', 'tent', 'stall', 'ruin'].includes(obstacle.kind);
-      sprite.setTexture(obstacle.kind === 'ship' ? 'naval-ship' : obstacle.kind === 'lamp' ? 'coastal-lamp' : obstacle.kind === 'fence' ? 'coastal-fence' : obstacle.kind === 'crate' && coastal ? 'coastal-crates' : obstacle.kind === 'wall' && coastal ? 'coastal-wall' : obstacle.kind === 'dock' ? 'wooden-dock' : obstacle.kind === 'quay' ? 'stone-quay' : !orange && coastal && obstacle.kind === 'house' ? obstacle.variant === 3 ? 'shells-base' : 'shells-house' : obstacle.kind === 'tree' && coastal && (obstacle.variant === 1 || !orange) ? obstacle.variant === 1 && orange ? 'coastal-palm' : 'coastal-tree' : obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
+      sprite.setTexture(naval ? obstacle.art ?? (obstacle.kind === 'wall' ? 'naval-wall' : 'naval-crates') : obstacle.kind === 'ship' ? 'naval-ship' : obstacle.kind === 'lamp' ? 'coastal-lamp' : obstacle.kind === 'fence' ? 'coastal-fence' : obstacle.kind === 'crate' && coastal ? 'coastal-crates' : obstacle.kind === 'wall' && coastal ? 'coastal-wall' : obstacle.kind === 'dock' ? 'wooden-dock' : obstacle.kind === 'quay' ? 'stone-quay' : !orange && coastal && obstacle.kind === 'house' ? obstacle.variant === 3 ? 'shells-base' : 'shells-house' : obstacle.kind === 'tree' && coastal && (obstacle.variant === 1 || !orange) ? obstacle.variant === 1 && orange ? 'coastal-palm' : 'coastal-tree' : obstacle.kind === 'pennant' ? 'orange-flags' : own ? obstacle.kind === 'house' ? `orange-house-${obstacle.variant % 2}` : `orange-${obstacle.kind}` : obstacle.kind === 'house' ? `house-${obstacle.variant}` : obstacle.kind);
       if (obstacle.kind === 'ship') sprite.setDisplaySize(obstacle.width, obstacle.width * sprite.height / sprite.width);
       else if (obstacle.kind === 'lamp') sprite.setDisplaySize(28, 84);
       else if (obstacle.kind === 'fence') sprite.setDisplaySize(obstacle.width, 48);
@@ -133,6 +147,7 @@ export class WorldRenderer {
         const width = obstacle.kind === 'tent' ? obstacle.width + 32 : sprite.displayWidth;
         sprite.setDisplaySize(width, width * sprite.height / sprite.width);
       }
+      if (naval) { const w = obstacle.width; sprite.setDisplaySize(w, obstacle.art ? w * sprite.height / sprite.width : obstacle.kind === 'wall' ? obstacle.height + 24 : obstacle.height); }
       sprite.setVisible(true);
     }
     for (let i = chunk.obstacles.length; i < slot.decorations.length; i++) slot.decorations[i].setVisible(false);
