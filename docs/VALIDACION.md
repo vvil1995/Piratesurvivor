@@ -413,3 +413,17 @@ Navegador:8/8 pruebas (PC y móvil emulado) para Morgan5 patrones, Buggy6 patron
 Pendiente de la validación del usuario: sensación de las animaciones y dificultad en teléfono físico. No se han medido FPS en hardware móvil ni probado Safari real. El guardado permanente, HUD, mapas y habilidades no se modifican.
 
 Cierre: comprobación de tipos,147 tests y build de producción correctos. Smoke de producción bajo `/Piratesurvivor/` en escritorio/móvil emulado sin404, errores JS ni hook QA. Repetición final2/2 con marcha continua real a66px/s y registro de las texturas renderizadas durante todo el ciclo (el muestreo puntual entre capturas podía saltarse una pose). Inspeccionadas capturas de esta marcha y de preparación; PNG nuevos con transparencia y márgenes comprobados. Se conserva el aviso preexistente de Vite por tamaño del bundle; no se han añadido dependencias.
+
+## Marcha de marines: rodillas y orientación (2026-10-31)
+
+Causas: los pasos3–4 reflejaban únicamente el segmento inferior de las piernas, rompiendo su continuidad anatómica. Además, todas las direcciones compartían un reposo frontal, y la selección instantánea de rumbo oscilaba cerca de diagonales al corregir la trayectoria.
+
+Corrección: fotogramas completos de marcha sin transformaciones de extremidades; reposo en el mismo perfil del paso de apoyo; eje corporal centrado por casco; escala fija sin estirar/inclinar el cuerpo al caminar. Solo para marines se usa orientación cardinal con margen angular y confirmación de giro durante0,1s/3px, evitando micro inversiones. El desplazamiento real sigue admitiendo ocho direcciones y no se cambia IA, daño, spawn, vida ni recompensas. Jugadores y piratas conservan su selector de animación anterior. Se conservaron los píxeles de las tres filas de acciones/muerte de cada atlas.
+
+Tipos y148 pruebas unitarias correctos, incluida retención de rumbo ante diagonales/micro retrocesos, giro sostenido y reposo. Navegador4/4: nuevos marines y piratas de Orange, en PC y móvil emulado. Se capturan marcha continua, reposo hacia este/oeste/norte/sur, preparación, ataque, daño y caída. Las192 celdas tienen contenido y margen; el reposo coincide con el paso de apoyo de su propia dirección. Atlas y capturas inspeccionados visualmente. No se acredita prueba en teléfono físico.
+
+Se detectó además un fallo de la CI anterior en la prueba visual de cuatro ataques evolucionados: Pistol conservaba un cooldown del bucle real y la fixture avanzaba solo un tick. Se inicializa explícitamente el estado de esos ataques al comienzo de la fixture; no cambia el combate del juego. Se repite esa prueba en ambos formatos antes de cerrar.
+
+La prueba de efectos evolucionados pasa4/4 (dos repeticiones por formato) tras inicializar correctamente la fixture. Las habilidades del juego no se han modificado.
+
+Cierre: build correcto y smoke de producción bajo `/Piratesurvivor/` en ambos formatos sin404 ni errores JS. Se mantiene el aviso preexistente de tamaño del bundle. No hay cambios en dependencias ni persistencia.

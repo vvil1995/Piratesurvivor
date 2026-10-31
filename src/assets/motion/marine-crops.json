@@ -12,17 +12,11 @@
       "attack",
       "death"
     ],
-    "bytes": 61425,
-    "sha256": "5b457cccc4233dbd2ab06449f6ddba3d9e3400d39b1ee1983f484c5f353f6987",
-    "normalization": "walking body height84; actions use idle body height84; full poses bounded116; feet120; nearest sampling",
-    "lowerLegAlternation": {
-      "frames": [
-        3,
-        4
-      ],
-      "startHeightFraction": 0.68,
-      "keepTorsoAndWeapon": true
-    }
+    "bytes": 253414,
+    "sha256": "6a78b1675a56749b0220eb617da20fb42fcd6884d47a98856978e1809c3a7d4c",
+    "normalization": "common84px scale per facing, head-centered X, feet120, nearest; full natural source poses; no limb reflection, shear or rotation",
+    "idleSourceFrame": 2,
+    "actionsPreserved": true
   },
   "marine-rifle": {
     "cell": 128,
@@ -37,17 +31,11 @@
       "attack",
       "death"
     ],
-    "bytes": 57355,
-    "sha256": "f836fb9f6e8a30e38a244931420661109a681209b320c099131b0c21f70c40a7",
-    "normalization": "walking body height84; actions use idle body height84; full poses bounded116; feet120; nearest sampling",
-    "lowerLegAlternation": {
-      "frames": [
-        3,
-        4
-      ],
-      "startHeightFraction": 0.68,
-      "keepTorsoAndWeapon": true
-    }
+    "bytes": 241879,
+    "sha256": "04560b2dce8b9a85182794c2dfee3518fd41cc338b726df6654b3fbf53280284",
+    "normalization": "common84px scale per facing, head-centered X, feet120, nearest; full natural source poses; no limb reflection, shear or rotation",
+    "idleSourceFrame": 2,
+    "actionsPreserved": true
   },
   "marine-veteran": {
     "cell": 128,
@@ -62,233 +50,227 @@
       "attack",
       "death"
     ],
-    "bytes": 63855,
-    "sha256": "7ac8d5719bbf21d23d053bd0055a8c9c236d4ab1bcbb9d0f83db02ee0f40d13c",
-    "normalization": "walking body height84; actions use idle body height84; full poses bounded116; feet120; nearest sampling",
-    "lowerLegAlternation": {
-      "frames": [
-        3,
-        4
-      ],
-      "startHeightFraction": 0.68,
-      "keepTorsoAndWeapon": true
-    }
+    "bytes": 282036,
+    "sha256": "8ed6409db66c92654d1db71fb5305713450c896f96df2cf4a68842c8aef4da04",
+    "normalization": "common84px scale per facing, head-centered X, feet120, nearest; full natural source poses; no limb reflection, shear or rotation",
+    "idleSourceFrame": 2,
+    "actionsPreserved": true
   },
   "sourceWalkBoxes": [
     [
       111,
-      16,
-      267,
-      171
+      14,
+      272,
+      170
     ],
     [
-      340,
-      15,
-      492,
-      171
+      339,
+      14,
+      497,
+      170
     ],
     [
       571,
-      15,
-      727,
-      171
-    ],
-    [
-      796,
-      16,
-      949,
-      171
-    ],
-    [
-      95,
-      187,
-      261,
-      352
-    ],
-    [
-      330,
-      187,
-      490,
-      353
-    ],
-    [
-      572,
-      189,
-      736,
-      353
+      14,
+      733,
+      170
     ],
     [
       795,
-      187,
-      949,
+      14,
+      953,
+      170
+    ],
+    [
+      100,
+      182,
+      265,
+      353
+    ],
+    [
+      331,
+      182,
+      493,
       352
     ],
     [
-      106,
-      365,
-      269,
-      525
+      569,
+      184,
+      735,
+      353
     ],
     [
-      336,
-      365,
-      497,
-      525
+      800,
+      182,
+      954,
+      352
     ],
     [
-      568,
-      365,
-      731,
-      525
-    ],
-    [
-      795,
-      365,
-      955,
-      525
-    ],
-    [
-      108,
-      539,
-      246,
-      703
-    ],
-    [
-      342,
-      540,
-      481,
-      703
-    ],
-    [
-      577,
-      540,
-      715,
-      703
-    ],
-    [
-      799,
-      540,
-      934,
-      703
-    ],
-    [
-      100,
-      715,
-      255,
-      876
-    ],
-    [
-      330,
-      715,
-      491,
-      876
-    ],
-    [
-      566,
-      715,
-      725,
-      876
-    ],
-    [
-      792,
-      716,
-      943,
-      876
-    ],
-    [
-      93,
-      891,
-      227,
-      1055
-    ],
-    [
-      316,
-      891,
-      453,
-      1055
-    ],
-    [
-      554,
-      891,
-      689,
-      1055
-    ],
-    [
-      780,
-      888,
-      915,
-      1055
-    ],
-    [
-      100,
-      1064,
-      243,
-      1224
-    ],
-    [
-      330,
-      1064,
-      476,
-      1224
-    ],
-    [
-      572,
-      1063,
-      712,
-      1224
-    ],
-    [
-      796,
-      1063,
-      937,
-      1224
-    ],
-    [
-      95,
-      1230,
-      251,
-      1382
+      107,
+      363,
+      279,
+      527
     ],
     [
       335,
-      1230,
-      481,
-      1389
+      363,
+      503,
+      527
     ],
     [
-      567,
-      1233,
-      722,
-      1387
+      565,
+      362,
+      736,
+      527
+    ],
+    [
+      792,
+      363,
+      960,
+      527
+    ],
+    [
+      106,
+      539,
+      252,
+      706
+    ],
+    [
+      339,
+      539,
+      484,
+      705
+    ],
+    [
+      574,
+      539,
+      721,
+      705
     ],
     [
       794,
-      1230,
-      948,
-      1387
+      539,
+      942,
+      705
     ],
     [
-      85,
-      1395,
-      227,
-      1535
+      108,
+      712,
+      260,
+      879
+    ],
+    [
+      339,
+      713,
+      493,
+      876
+    ],
+    [
+      575,
+      712,
+      729,
+      878
+    ],
+    [
+      794,
+      713,
+      950,
+      878
+    ],
+    [
+      92,
+      889,
+      233,
+      1056
     ],
     [
       315,
-      1396,
-      458,
-      1535
+      888,
+      460,
+      1051
     ],
     [
-      547,
-      1396,
-      691,
-      1535
+      551,
+      889,
+      693,
+      1056
     ],
     [
       777,
-      1395,
-      920,
+      889,
+      921,
+      1052
+    ],
+    [
+      101,
+      1063,
+      252,
+      1225
+    ],
+    [
+      330,
+      1063,
+      482,
+      1225
+    ],
+    [
+      568,
+      1063,
+      719,
+      1225
+    ],
+    [
+      792,
+      1063,
+      943,
+      1225
+    ],
+    [
+      108,
+      1230,
+      255,
+      1389
+    ],
+    [
+      342,
+      1230,
+      485,
+      1389
+    ],
+    [
+      573,
+      1232,
+      725,
+      1389
+    ],
+    [
+      803,
+      1230,
+      951,
+      1389
+    ],
+    [
+      82,
+      1394,
+      232,
+      1536
+    ],
+    [
+      313,
+      1394,
+      463,
+      1535
+    ],
+    [
+      546,
+      1394,
+      696,
+      1536
+    ],
+    [
+      777,
+      1394,
+      926,
       1535
     ]
   ],
@@ -583,7 +565,8 @@
     ]
   ],
   "sources": {
-    "walk": "exec-3246dad7-dd4a-49c9-8e30-03503c45f12b.png",
+    "walk": "exec-e0273981-02f5-4b31-b9d3-642574d92fb7.png",
     "actions": "exec-a82e10c3-5dfa-4a96-be0c-d1a1edc9db89.png"
-  }
+  },
+  "previousWalkSource": "exec-3246dad7-dd4a-49c9-8e30-03503c45f12b.png"
 }

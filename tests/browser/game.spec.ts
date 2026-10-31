@@ -261,6 +261,9 @@ test('los cuatro efectos evolucionados se dibujan sin errores en combate', async
     for (const id of ['elastic-punch', 'gatling', 'bazooka', 'whip']) while ((p.attacks.find(a => a.id === id)?.level ?? 0) < 6) improveAttack(p, id);
     // Grupo ya desbloqueado de fixture: reglas de obtención probadas aparte.
     p.abilitySlots = [['elastic-punch', 'gatling', 'bazooka', 'whip'], [], [], []]; p.selectedSlot = 0;
+    // Start the visual fixture deterministically: the real loop may have fired Pistol already.
+    for(const a of p.attacks)Object.assign(a,{cooldown:0,pending:0,burstTimer:0,activeFor:0,activationPending:false,targetId:undefined});
+    r.strikes.length=0;r.projectiles.clear();r.areas.clear();
     p.x = 256; p.y = 256;
     for (const e of r.enemies.items) e.active = false;
     for (let i = 0; i < 8; i++) {
@@ -1107,6 +1110,16 @@ test('marines: tres armas, cuatro pasos sin recortes, preparación, disparo y de
  }
  const seen=await page.evaluate(()=>Array.from((window as unknown as {marineFrames:Set<string>}).marineFrames));seen.forEach(k=>poses.add(k));
  for(const visual of ['marine-sword','marine-rifle','marine-veteran'])for(let frame=1;frame<=4;frame++)expect(poses.has(`${visual}-e-${frame}`)).toBe(true);
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=()=>{};q.draw(200);});
+ expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyTextures)).toEqual(expect.arrayContaining(['marine-sword-e-0','marine-rifle-e-0','marine-veteran-e-0']));
+ await page.screenshot({path:info.outputPath('marines-idle-east.png')});
+ // Sustained turns change the facing, but brief diagonal/separation corrections do not.
+ for(const [dx,dy,direction]of [[-1,0,'w'],[0,-1,'n'],[0,1,'s']] as const){
+  const keys=await page.evaluate(({dx,dy})=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let n=0;n<12;n++){for(const e of r.enemies.items)if(e.active){e.x+=dx;e.y+=dy;}q.draw(1000/60);}q.draw(200);return q.metrics().enemyTextures;},{dx,dy});
+  for(const visual of ['marine-sword','marine-rifle','marine-veteran'])expect(keys).toContain(`${visual}-${direction}-0`);
+  await page.screenshot({path:info.outputPath(`marines-idle-${direction}.png`)});
+ }
+
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=()=>{};let i=0;for(const e of r.enemies.items)if(e.active){e.x=r.player.x-80+(i++)*80;e.shotWindup=e.ranged?.preparation??0;e.shotAngle=-Math.PI/2;}q.draw(200);});
  await page.screenshot({path:info.outputPath('marines-aiming.png')});
  expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyTextures)).toEqual(expect.arrayContaining(['marine-rifle-n-5','marine-veteran-n-5']));
@@ -1126,7 +1139,9 @@ test('marines: tres armas, cuatro pasos sin recortes, preparación, disparo y de
     const a=ctx.getImageData(col*128,row*128,128,128).data;let count=0;
     for(let y=0;y<128;y++)for(let x=0;x<128;x++){if(a[(y*128+x)*4+3]>96){count++;if(x<2||x>125||y<2||y>125)bad++;}}
     if(!count)empty++;
-   }results.push({name,bad,empty,width:im.width,height:im.height});
+   }
+   for(let col=0;col<8;col++){const idle=ctx.getImageData(col*128,0,128,128).data,passing=ctx.getImageData(col*128,256,128,128).data; if(!idle.every((v,i)=>v===passing[i]))bad++;}
+   results.push({name,bad,empty,width:im.width,height:im.height});
   }return results;
  });
  for(const a of assets){expect(a.bad).toBe(0);expect(a.empty).toBe(0);expect(a.width).toBe(1024);expect(a.height).toBe(1024);}

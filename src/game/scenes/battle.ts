@@ -169,14 +169,14 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
-      animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000);
       const pirate = e.visual?.startsWith('buggy-');
       const marine = e.visual?.startsWith('marine-');
+      animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000, !!marine);
       const attacking = pirate && (e.ranged ? (e.shotTimer ?? 0) > e.ranged.interval - .18 : Math.hypot(e.x-worldX,e.y-worldY)<e.radius+22);
       let frame = attacking ? 4 : animation.frame ? pirate ? animation.frame - 1 : (animation.frame - 1) % 2 : 0;
       if (marine) frame = (e.shotWindup ?? 0) > 0 ? 5 : (e.shotRecovery ?? 0) > 0 ? e.ranged && e.shotRecovery! < .18 ? 0 : 6 : !e.ranged && Math.hypot(e.x-worldX,e.y-worldY)<e.radius+45 ? 5 : animation.frame;
       const facing = marine && ((e.shotWindup ?? 0)>0 || (e.shotRecovery ?? 0)>0) ? movementDirection(e.ranged ? Math.cos(e.shotAngle ?? 0) : worldX-e.x, e.ranged ? Math.sin(e.shotAngle ?? 0) : worldY-e.y) : attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction;
-      sprite.setOrigin(.5, pirate || marine ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${facing}-${frame}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
+      sprite.setOrigin(.5, pirate || marine ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${facing}-${frame}`).setFlipX(false).setScale(marine ? .6 : 0.6 * (1 + animation.weight / 2), marine ? .6 : 0.6 * (1 - animation.weight)).setAngle(marine ? 0 : animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged && e.visual === 'marine' ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);

@@ -32,3 +32,15 @@ test('el paso lateral y diagonal flexiona rodilla, alterna piernas y vuelve a re
     assert.deepEqual(legPose(direction, Math.PI / 2, -1, false), { thigh: 0, knee: 0 });
   }
 });
+
+test('marines: orientación cardinal estable sin alternar al rozar diagonales ni dar micro pasos atrás',()=>{
+ const a=new ActorAnimation();let x=0,y=0;const move=(dx:number,dy:number)=>{x+=dx;y+=dy;a.update('marine',x,y,true,1/60,true);};
+ a.update('marine',x,y,true,1/60,true);move(2,0);assert.equal(a.direction,'e');
+ for(let i=0;i<40;i++){move(1,i%2?.99:1.01);assert.equal(a.direction,'e');}
+ move(-.3,0);move(.5,0);assert.equal(a.direction,'e');
+ for(let i=0;i<10;i++)move(-1,0);assert.equal(a.direction,'w');
+ for(let i=0;i<10;i++)move(0,-1);assert.equal(a.direction,'n');
+ for(let i=0;i<10;i++)a.update('marine',x,y,true,1/60,true);
+ assert.equal(a.frame,0);assert.equal(a.direction,'n');
+ a.update('new-marine',1000,1000,true,1/60,true);assert.equal(a.frame,0);assert.equal(a.direction,'s');
+});

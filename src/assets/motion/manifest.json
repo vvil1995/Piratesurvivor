@@ -16,15 +16,15 @@
     "bytes": 54131
   },
   "marine-sword.png": {
-    "sha256": "5b457cccc4233dbd2ab06449f6ddba3d9e3400d39b1ee1983f484c5f353f6987",
-    "bytes": 61425
+    "sha256": "6a78b1675a56749b0220eb617da20fb42fcd6884d47a98856978e1809c3a7d4c",
+    "bytes": 253414
   },
   "marine-rifle.png": {
-    "sha256": "f836fb9f6e8a30e38a244931420661109a681209b320c099131b0c21f70c40a7",
-    "bytes": 57355
+    "sha256": "04560b2dce8b9a85182794c2dfee3518fd41cc338b726df6654b3fbf53280284",
+    "bytes": 241879
   },
   "marine-veteran.png": {
-    "sha256": "7ac8d5719bbf21d23d053bd0055a8c9c236d4ab1bcbb9d0f83db02ee0f40d13c",
-    "bytes": 63855
+    "sha256": "8ed6409db66c92654d1db71fb5305713450c896f96df2cf4a68842c8aef4da04",
+    "bytes": 282036
   }
 }
