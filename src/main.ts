@@ -5,6 +5,7 @@ import { itemImage } from './ui/item-art.ts';
 import { FRUITS } from './content/fruits.ts';
 import Phaser from 'phaser';
 import './ui/style.css';
+import './ui/hud.css';
 import { BattleScene } from './game/scenes/battle.ts';
 import { CHARACTERS } from './content/catalog.ts';
 import { Run } from './game/core/run.ts';

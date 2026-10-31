@@ -344,3 +344,19 @@ Pendiente: equilibrio durante partidas largas y validación en Android/iOS físi
 Repetición final conjunta sin modificar fuentes durante la ejecución:8/8 pruebas de navegador seleccionadas, incluidos Morgan y cofres tanto en escritorio como en móvil emulado.
 
 Ajuste final del modal en horizontal: composición compacta con dos columnas para sprite/descripción y botones de44px, reinicio del desplazamiento al abrir. Prueba específica repetida:2/2, comprobando además que la ventana cabe dentro del viewport. Fixture corregida para crear un cofre de prueba cuando la semilla aleatoria de inicio no contiene ninguno; no se aumenta la densidad del juego. Compilación/smoke repetidos después del ajuste.
+
+## Beta0.18 · tarea5, HUD compacto (2026-10-31)
+
+Cambio exclusivamente de presentación: `index.html`, importación en `src/main.ts`, `src/ui/view.ts` y nueva hoja aislada `src/ui/hud.css`. No se modifica ningún archivo de simulación, habilidades, enemigos, colisiones, mapas, recompensas ni persistencia.
+
+Retrato/nombre/nivel/HP/berries/XP agrupados; reloj MM:SS sin caja ni texto permanente; pausa44×44 independiente; ruta previa a Morgan oculta mientras no hay carta (la carta contextual sigue visible). Cuatro ranuras con arte existente, selección original, nombres/niveles accesibles pero sin etiquetas visibles; estrellas SVG plateadas1–5 y una dorada al6. Combinaciones conservan icono y estrellas de cada componente, hasta cuatro por ranura. Indicador de objeto con icono y nivel solo si está equipado. Menús y sus eventos no se cambian.
+
+Pruebas de la tarea:
+- Tipos y133 pruebas de lógica: correctos.
+- Prueba específica del HUD: tamaños1440,1024,844,667 y568px; exploración, Morgan, niveles1/5/6, cuatro componentes en una ranura, objeto, selección y pausa. Verifica límites, objetivo táctil44px, separación entre reloj/barra del boss, controles y joystick; capturas inspeccionadas. También se cubre568×320 en la comprobación final.
+- Regresiones de navegador seleccionadas: joystick, selección de ranura, cartas/evolución, HP/XP, buffs/fruta, objetos y unión de habilidades. Resultados finales registrados al completar la ejecución.
+- Compilación de producción y carga bajo `/Piratesurvivor/`: comprobadas con el smoke existente; no se cambian rutas ni recursos.
+
+Pendiente: Safari/iOS y Android físicos, notch real y preferencias de ampliación del sistema. Se simulan viewport y entrada táctil con Chromium; no equivale a una medición de rendimiento en un teléfono. En pantallas estrechas la barra del boss pasa debajo de la información superior, manteniendo libre el centro; las cuatro habilidades agrupadas usan iconos más pequeños que las ranuras individuales. Las ayudas de nombre/efecto siguen disponibles en gestión de habilidades y accesibilidad.
+
+Resultado final de navegador:17 pruebas superadas y1 omitida (joystick táctil en el proyecto de escritorio, por diseño); cero fallos. Incluye las cinco proporciones del HUD y568×320. `npm run build` y smoke de producción: correctos; se conserva el aviso previo de tamaño del bundle. Capturas de exploración844px y arena de Morgan1440/844/568px revisadas. No se han medido FPS ni probado dispositivos físicos.

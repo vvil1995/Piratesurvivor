@@ -164,3 +164,7 @@ Fuente: `one_piece_survivor_assets.zip`, PNG `one_piece_survivor_10_items.png`,1
 Diez recortes PNG RGBA96×96 en `src/assets/items/`, centrados con márgenes transparentes y silueta máxima88×88 mediante vecino más cercano, sin suavizado ni recoloración. Orden: barret, haramaki, mandarines, tirador, piedra, bolsa, mapa, pólvora, péndulo, daga. `manifest.json` registra celda, rectángulo de origen y SHA-256 de cada archivo. Se usan tanto en ventanas HTML como en texturas de Phaser; no hay emojis ni descargas remotas.
 
 Uso solicitado expresamente por el usuario para este proyecto. No se ha proporcionado una licencia redistribuible ni autoría independiente; estos recursos no se declaran MIT ni assets oficiales. Los derechos de One Piece siguen reservados a sus titulares. Mantenerlos separados del código facilita su sustitución si se necesita acreditar una licencia de distribución.
+
+## HUD compacto · tarea5
+
+Se reutilizan sin cambios retratos, ilustraciones de habilidades e iconos de objetos existentes. Las estrellas de nivel son un SVG original de contorno escalonado definido en `src/ui/view.ts`, coloreado en plata/oro mediante CSS; no son emojis, fuentes ni sprites descargados. No se añaden imágenes ni dependencias.

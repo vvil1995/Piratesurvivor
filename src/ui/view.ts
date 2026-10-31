@@ -20,6 +20,20 @@ export const el = <T extends HTMLElement = HTMLElement>(id: string): T => {
   return node as T;
 };
 export const timeLabel = (seconds: number): string => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
+/** Pixel stepped SVG, independent of platform emoji fonts. */
+function levelStars(level: number): HTMLElement {
+  const row = document.createElement('span'); row.className = 'level-stars';
+  row.dataset.level = String(level); row.classList.toggle('gold', level === 6);
+  row.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < (level === 6 ? 1 : level); i++) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 12 12'); svg.setAttribute('focusable', 'false');
+    const shape = document.createElementNS(svg.namespaceURI, 'path');
+    shape.setAttribute('d', 'M5 0h2v3h2v1h3v2h-2v2h1v3H8V9H7V8H5v1H4v2H1V8h1V6H0V4h3V3h2Z');
+    shape.setAttribute('fill', 'currentColor'); svg.append(shape); row.append(svg);
+  }
+  return row;
+}
 export class View {
   private modal?: string;
   private attackSignature = '';
@@ -114,6 +128,7 @@ export class View {
       el('boss-pattern').textContent = boss.moveName;
     }
     const signal = run.navigationRoute.signal, targetBoss = run.zone === 'orange-town' ? 'Buggy' : 'Morgan';
+    el('navigation-hint').hidden = !signal || !['shells-town', 'orange-town'].includes(run.zone);
     el('navigation-hint').textContent = !['shells-town', 'orange-town'].includes(run.zone) || run.buggyDefeated ? '' : signal ? `CARTA NÁUTICA · ${targetBoss} · ${Math.round(Math.hypot(signal.x - p.x, signal.y - p.y))}m · camina sobre ella` : run.navigationSeconds < MORGAN_ROUTE.availableAt ? `Ruta de ${targetBoss}: cartas a partir de05:00 en esta isla` : `Explora: puede aparecer una carta hacia ${targetBoss}`;
     if (run.voyage) {
       const destination = run.voyage.destination;
@@ -129,8 +144,8 @@ export class View {
     el('run-items').title = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objeto';
     const equipped = Object.keys(p.items)[0], itemSignature = run.id + ':' + equipped + ':' + p.items[equipped];
     if (this.itemSignature !== itemSignature) {
-      this.itemSignature = itemSignature; const slot = el<HTMLButtonElement>('equipped-item'); slot.disabled = !equipped; slot.replaceChildren();
-      if (equipped) { slot.append(itemImage(equipped)); const label = document.createElement('span'); label.textContent = ITEMS[equipped].name; const level = document.createElement('small'); level.textContent = `NV. ${p.items[equipped]}/3`; slot.append(label, level); slot.setAttribute('aria-label', `Objeto: ${ITEMS[equipped].name}. Ver efecto`); }
+      this.itemSignature = itemSignature; const slot = el<HTMLButtonElement>('equipped-item'); slot.hidden = !equipped; slot.disabled = !equipped; slot.replaceChildren();
+      if (equipped) { slot.append(itemImage(equipped)); const label = document.createElement('span'); label.textContent = ITEMS[equipped].name; label.className = 'sr-only'; const level = document.createElement('small'); level.textContent = `${p.items[equipped]}/3`; slot.append(label, level); slot.setAttribute('aria-label', `Objeto: ${ITEMS[equipped].name}. Ver efecto`); }
       else { slot.textContent = '+ OBJETO'; slot.setAttribute('aria-label', 'Espacio de objeto vacío'); }
     }
     el('inventory-list').textContent = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objeto';
@@ -150,12 +165,12 @@ export class View {
           const component = document.createElement('div'); component.className = 'ability-component'; component.dataset.ability = id;
           component.classList.toggle('evolved', plus);
           component.append(pixelIcon(abilityIcon(definition)));
-          const text = document.createElement('span'); text.className = 'component-name'; text.textContent = definition.shortName + (plus ? ' +' : '');
+          const text = document.createElement('span'); text.className = 'component-name sr-only'; text.textContent = definition.shortName + (plus ? ' +' : '');
           const level = document.createElement('small');
           const mode = definition.buff ? combined(p, id) ? i === p.selectedSlot ? 'CONST' : 'RESERVA' : state.activeFor > 0 ? 'ACTIVO' : i === p.selectedSlot ? 'DESCANSO' : 'RESERVA' : '';
           level.textContent = mode ? `NV. ${state.level} · ${mode}` : plus ? 'NV. 6 · EVOLUCIÓN' : `NV. ${state.level} / 6`;
           component.classList.toggle('buff-constant', mode === 'CONST'); component.classList.toggle('buff-active', mode === 'ACTIVO'); component.classList.toggle('buff-rest', mode === 'DESCANSO');
-          const detail = document.createElement('span'); detail.append(text, level); component.append(detail);
+          level.className = 'sr-only'; component.append(text, level, levelStars(state.level));
           component.title = `${definition.name}: ${plus ? definition.evolution : definition.description}`;
           component.setAttribute('aria-label', `${definition.name}, nivel ${state.level}${plus ? ', evolucionado' : ''} ${mode}`);
           card.append(component);
@@ -167,6 +182,7 @@ export class View {
     el('clock').textContent = timeLabel(run.time);
     el('level').textContent = `NV. ${p.level}`;
     el('kills').textContent = p.kills.toString();
+    el('health-text-inline').textContent = `${Math.ceil(p.hp)} / ${Math.round(p.stats.maxHp)}`;
     el('health-text').textContent = `${Math.ceil(p.hp)} / ${Math.round(p.stats.maxHp)}`;
     const ratio = Math.max(0, Math.min(100, p.hp / p.stats.maxHp * 100));
     el('health-fill').style.width = `${ratio}%`;

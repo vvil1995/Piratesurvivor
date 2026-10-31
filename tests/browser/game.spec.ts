@@ -970,3 +970,52 @@ test('diez sprites originales y cofre grande: equipar, mejorar, máximo y reempl
   await page.screenshot({path:info.outputPath('item-comparison.png')});await page.locator('#item-take').click();
   expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.player.items)).toEqual({[next]:1});
 });
+
+test('HUD compacto: estrellas, combinaciones, objeto y Morgan sin superposición', async ({ page }, info) => {
+  await page.locator('#start').click(); await isolateWalk(page);
+  await expect(page.locator('#equipped-item')).toBeHidden();
+  await expect(page.locator('#attack-selection-label')).toBeHidden();
+  await expect(page.locator('#run-items')).toBeHidden();
+  await expect(page.locator('#navigation-hint')).toBeHidden();
+  await expect(page.locator('.run-clock')).not.toContainText('EXPLORA');
+  await page.evaluate(async()=>{
+    const path='/src/game/systems/loadout.ts',itemsPath='/src/game/systems/items.ts';
+    const {improveAttack}=await import(/* @vite-ignore */ path),{equipItem}=await import(/* @vite-ignore */ itemsPath);
+    const qa=window.__OPS_QA__!,r=qa.getRun()!,p=r.player;
+    for(const id of ['gatling','bazooka','frenzy'])improveAttack(p,id);
+    p.attacks.find(a=>a.id==='gatling')!.level=5;p.attacks.find(a=>a.id==='bazooka')!.level=6;
+    equipItem(p,'haramaki');qa.tick();
+  });
+  await expect(page.locator('[data-ability="elastic-punch"] .level-stars svg')).toHaveCount(1);
+  await expect(page.locator('[data-ability="gatling"] .level-stars svg')).toHaveCount(5);
+  await expect(page.locator('[data-ability="bazooka"] .level-stars.gold svg')).toHaveCount(1);
+  await expect(page.locator('#equipped-item')).toBeVisible();
+  await page.locator('[data-slot="1"]').click();await expect(page.locator('[data-slot="1"]')).toHaveAttribute('aria-pressed','true');
+  for(const width of [1440,1024,844,667,568]){
+    await page.setViewportSize({width,height:width>1000?800:width===568?320:390});
+    const rects=await page.evaluate(()=>{
+      const box=(selector:string)=>{const r=document.querySelector(selector)!.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+      return {player:box('.player-status'),clock:box('.run-clock'),pause:box('#pause'),row:box('.attack-row'),tools:box('#manage-abilities'),joy:box('#joystick'),touch:document.body.classList.contains('touch-device')};
+    });
+    expect(rects.player.right).toBeLessThan(rects.clock.x);expect(rects.pause.width).toBeGreaterThanOrEqual(44);expect(rects.row.right).toBeLessThan(rects.tools.x);
+    expect(rects.row.x).toBeGreaterThanOrEqual(0);expect(rects.row.bottom).toBeLessThanOrEqual(width>1000?800:width===568?320:390);
+    if(rects.touch)expect(rects.row.x).toBeGreaterThan(rects.joy.right);
+    if(width===844)await page.screenshot({path:info.outputPath('hud-exploration-844.png')});
+  }
+  await page.evaluate(()=>{
+    const qa=window.__OPS_QA__!,r=qa.getRun()!,p=r.player;
+    p.abilitySlots=[p.attacks.map(a=>a.id),[],[],[]];p.selectedSlot=0;r.beginMorgan();r.player.hurtTimer=1e6;
+    for(const a of p.attacks)a.cooldown=1e6;qa.tick();qa.draw();
+  });
+  for(const width of [1440,844,568]){
+    await page.setViewportSize({width,height:width>1000?800:width===568?320:390});
+    await expect(page.locator('#boss-panel')).toBeVisible();await expect(page.locator('.run-clock')).toBeVisible();await expect(page.locator('#captain-avatar')).toBeVisible();
+    await expect(page.locator('[data-slot="0"] .ability-component')).toHaveCount(4);
+    const boxes=await page.evaluate(()=>['.player-status','.run-clock','#boss-panel','#pause','.attack-row'].map(s=>{const r=document.querySelector(s)!.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};}));
+    for(const b of boxes){expect(b.x).toBeGreaterThanOrEqual(0);expect(b.y).toBeGreaterThanOrEqual(0);expect(b.right).toBeLessThanOrEqual(width);expect(b.bottom).toBeLessThanOrEqual(width>1000?800:width===568?320:390);}
+    expect(boxes[2].y).toBeGreaterThanOrEqual(boxes[1].bottom);
+    expect(boxes[2].x>=boxes[0].right||boxes[2].y>=boxes[0].bottom).toBe(true);
+    await page.screenshot({path:info.outputPath(`hud-morgan-${width}.png`)});
+  }
+  await page.locator('#pause').click();await expect(page.locator('#paused')).toBeVisible();
+});
