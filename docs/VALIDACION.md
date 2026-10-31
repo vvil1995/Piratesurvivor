@@ -310,3 +310,19 @@ Causa: la victoria entregaba un token, pero el bloque de derrota iniciaba el via
 125 pruebas de núcleo aprobadas: unión Pistol/Gatling con nivel6/4, cooldowns conservados, viaje sin perder build, mejora posterior, buff Frenesí constante y ausencia de duplicados, reinicio y caso de una habilidad. Se excluye del snapshot el identificador del objetivo muerto, que se limpia correctamente al viajar. Compilación aprobada. Prueba de navegador añadida para la selección en dos pasos y HUD combinado tras viajar; adaptada la regresión antigua que esperaba el viaje sin pantalla de recompensa.
 
 Resultado navegador:4/4 casos aprobados en Chromium escritorio/móvil emulado (60s): flujo de victoria y pantalla de recompensa, unión real en dos pasos, niveles conservados, viaje y dos componentes visibles en el HUD. Tipos y compilación finales aprobados. Sin cambios en arena, mapas o cámara. Pendiente solo la validación en dispositivos físicos/Safari.
+
+## Animación de enemigos · beta0.18
+
+Reutilizado ActorAnimation por entidad: cuatro pasos reales por desplazamiento, no bobbing como sustituto. Piratas con ocho orientaciones y pose de ataque diferenciada por arma; ataque orientado al blanco, respiración en reposo y reacción a daño. Muerte mediante32 efectos visuales reciclados independientes de las entidades físicas, con caída/desvanecimiento; cola limitada a32 y limpiada en transiciones. No retrasa botín ni reutilización de enemigos.
+
+Morgan usa cuatro pasos en dos orientaciones, poses de preparación/impacto/escombrada/carga/daño y dos etapas de derrota antes de la recompensa existente. Selección visual basada en estado y reloj del encuentro, sin modificar IA, avisos, hitboxes, daño, velocidades o duración de fases. Los sprites no se invierten horizontalmente; el brazo se ancla al hombro correspondiente al cambiar de orientación. No se cambian arena/cámara/habilidades/cofres/progresión.
+
+125 pruebas de núcleo y compilación aprobadas. Regresión navegador6/6: cinco patrones de Morgan, Orange Town y unión de recompensa/viaje, en escritorio y móvil emulado. Prueba adicional2/2 verifica cuatro claves de textura distintas durante desplazamiento y poses de daño/rodillas/caída de Morgan. Captura de caída revisada. No se afirman mediciones de FPS ni pruebas en móviles físicos/Safari. Morgan todavía no tiene ciclos completos en ocho orientaciones; son dos ciclos oblicuos, sin reflejar el sprite. Las muertes de piratas usan pose de acción con caída/desvanecimiento visual, sin una hoja de muerte adicional.
+
+## Preparación de GitHub Pages
+
+Vite acepta PAGES_BASE_PATH y conserva la base relativa fuera de Pages. Workflow de main con instalación, tipos, pruebas, licencias, build, comprobación de distribución bajo /Piratesurvivor/ y publicación exclusiva de dist mediante OIDC. Netlify intacto, sin activar Pages ni cambiar visibilidad del repositorio. Pasos manuales y limitaciones de planes en docs/GITHUB_PAGES.md.
+
+Compilación con la base real y prueba de producción bajo subdirectorio aprobadas: escritorio y móvil horizontal, cinco personajes/atlas diferidos, inicio y pausa, sin errores404/JS ni hook QA expuesto. No hay audio en el proyecto. Tipos y125 pruebas de núcleo aprobados. Animaciones pendientes recuperadas y verificadas:6/6 pruebas de navegador para patrones de Morgan, recompensa/unión/viaje y cuatro pasos reales/poses de daño y caída, en ambos perfiles. No se cambian reglas de juego ni diseño en la configuración de Pages; se incluyen los cambios visuales anteriores ya autorizados.
+
+Revisión de credenciales:690 blobs de texto históricos,0 coincidencias de patrones de alta confianza,0 objetos históricos pendientes. No hay .env versionados. Publicación efectiva de Pages pendiente de configuración manual y disponibilidad en el plan GitHub; no se afirma que la URL pública esté activa. Safari/móviles físicos no probados.

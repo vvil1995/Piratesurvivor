@@ -127,6 +127,7 @@ export class Run {
     return field;
   }
   private clearBattlefield(): void {
+    this.visualDeaths.length=0;
     this.enemies.clear(); this.pickups.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
     this.fields.clear(); this.bossField = undefined;
     for (const state of this.player.attacks) { state.pending = 0; state.targetId = undefined; }
@@ -293,7 +294,9 @@ export class Run {
       this.status = 'levelup'; return;
     }
   }
+  readonly visualDeaths: { x:number;y:number;visual:string }[] = [];
   private dropXp(enemy: Enemy, ownerId: string): void {
+    if (enemy.visual?.startsWith('buggy-') && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
     if (enemy.kind === 'boss') { this.defeatBoss(); return; }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
     const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;

@@ -54,10 +54,10 @@ export function createDirectionalArt(scene: Phaser.Scene, sourceKey: string, act
 
 // Atlas listo para ejecución: 768×192, 8 columnas de 96 px y dos pasos.
 // La extracción de fuentes grandes solo se utiliza al preparar/verificar recursos.
-export function createPackedDirectionalArt(scene: Phaser.Scene, sourceKey: string, actor: string): void {
+export function createPackedDirectionalArt(scene: Phaser.Scene, sourceKey: string, actor: string, poses = 2): void {
   const source = scene.textures.get(sourceKey).getSourceImage() as HTMLImageElement;
-  if (source.width !== 768 || source.height !== 192) throw new Error(`Dimensiones de atlas incorrectas: ${actor}`);
-  for (let phase = 0; phase < 2; phase++) for (let i = 0; i < 8; i++) {
+  if (source.width !== 768 || source.height !== poses * 96) throw new Error(`Dimensiones de atlas incorrectas: ${actor}`);
+  for (let phase = 0; phase < poses; phase++) for (let i = 0; i < 8; i++) {
     const canvas = document.createElement('canvas'); canvas.width = 96; canvas.height = 96;
     const ctx = canvas.getContext('2d')!; ctx.imageSmoothingEnabled = false;
     ctx.drawImage(source, i * 96, phase * 96, 96, 96, 0, 0, 96, 96);

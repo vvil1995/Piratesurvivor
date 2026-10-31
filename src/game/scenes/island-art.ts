@@ -1,3 +1,4 @@
+import morganMotion from '../../assets/motion/morgan.png';
 import navalground from '../../assets/arena/ground.png';
 import navalgate from '../../assets/arena/gate.png';
 import navaltower from '../../assets/arena/tower.png';
@@ -33,9 +34,9 @@ import knives from '../../assets/bosses/buggy-knives.png';
 import type Phaser from 'phaser';
 import morgan from '../../assets/bosses/morgan.png';
 import axe from '../../assets/bosses/morgan-axe.png';
-import pirate from '../../assets/actors/buggy-pirate-atlas.png';
-import gunner from '../../assets/actors/buggy-gunner-atlas.png';
-import bruiser from '../../assets/actors/buggy-bruiser-atlas.png';
+import pirate from '../../assets/motion/buggy-pirate.png';
+import gunner from '../../assets/motion/buggy-gunner.png';
+import bruiser from '../../assets/motion/buggy-bruiser.png';
 import house from '../../assets/worlds/orange-house-0.png';
 
 import tent from '../../assets/worlds/orange-tent.png';
@@ -47,7 +48,7 @@ import compass from '../../assets/worlds/navigation-chart.png';
 import { createPackedDirectionalArt } from './directional-art.ts';
 
 const actors = { 'buggy-pirate': pirate, 'buggy-gunner': gunner, 'buggy-bruiser': bruiser };
-const props = { 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
+const props = { 'morgan-motion-sheet': morganMotion, 'naval-ground': navalground, 'naval-gate': navalgate, 'naval-tower': navaltower, 'naval-cannon': navalcannon, 'naval-flag': navalflag, 'naval-crates': navalcrates, 'naval-wall': navalwall, 'naval-ship': ship, 'ground-stone': groundstone, 'ground-earth': groundearth, 'ground-grass': groundgrass, 'ground-water': groundwater, 'coastal-lamp': lamp, 'coastal-crates': crates, 'coastal-wall': wall, 'coastal-fence': fence, 'shells-base': shellsBase, 'shells-house': shellsHouse, 'coastal-tree': coastalTree, 'coastal-palm': coastalPalm, 'stone-quay': stoneQuay, 'wooden-dock': woodenDock, food,
   'ability-elastic-punch': pistolArt, 'ability-gatling': gatlingArt, 'ability-bazooka': bazookaArt, 'ability-whip': whipArt, 'ability-balloon': balloonArt, 'ability-axe': axeArt, buggy, 'buggy-knives': knives, morgan, 'morgan-axe': axe, 'orange-house-0': house, 'orange-house-1': shellsHouse,
   'orange-tent': tent, 'orange-stall': stall, 'orange-tree': tree, 'orange-ruin': ruin,
   'orange-flags': flags, 'navigation-chart': compass };
@@ -64,10 +65,13 @@ export function createIslandArt(scene: Phaser.Scene): void {
     if (scene.textures.exists(key)) scene.textures.remove(key);
     scene.textures.addCanvas(key, canvas); if (key.startsWith('ability-')) registerArt(key, canvas); scene.textures.remove(`island-source-${key}`);
   }
+  const sheet = scene.textures.get('morgan-motion-sheet').getSourceImage() as HTMLCanvasElement;
+  for (let i=0;i<16;i++) {const c=document.createElement('canvas');c.width=c.height=128;c.getContext('2d')!.drawImage(sheet,i%4*128,Math.floor(i/4)*128,128,128,0,0,128,128);scene.textures.addCanvas(`morgan-pose-${i}`,c);}
+  scene.textures.remove('morgan-motion-sheet');
   for (const key of Object.keys(actors)) {
-    for (const direction of ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']) for (let phase = 0; phase < 2; phase++) {
+    for (const direction of ['s', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw']) for (let phase = 0; phase < 5; phase++) {
       if (scene.textures.exists(`${key}-${direction}-${phase}`)) scene.textures.remove(`${key}-${direction}-${phase}`);
     }
-    createPackedDirectionalArt(scene, `island-source-${key}`, key); scene.textures.remove(`island-source-${key}`);
+    createPackedDirectionalArt(scene, `island-source-${key}`, key, 5); scene.textures.remove(`island-source-${key}`);
   }
 }

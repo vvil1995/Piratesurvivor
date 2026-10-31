@@ -56,3 +56,7 @@ Los workflows usan permisos mínimos de lectura. GitHub Actions puede tener lím
 El remoto privado está en https://github.com/vvil1995/Piratesurvivor, rama `main`. El código ya se ha subido; los avisos anteriores sobre ausencia de remoto describen el estado inicial. No es necesario hacer público el repositorio para usar la integración autorizada de Netlify.
 
 `netlify.toml` establece Node 22.18.0, `npm run build` y carpeta de publicación `dist`. Netlify despliega después de un push si tiene los despliegues automáticos activos para `main`. Los cambios locales no aparecen mientras se editan. Si los despliegues están pausados, usar «Trigger deploy» y revisar el SHA del despliegue publicado.
+
+## GitHub Pages
+
+La configuración de publicación automática y la activación manual están documentadas en [GITHUB_PAGES.md](GITHUB_PAGES.md). El repositorio sigue privado; no cambiar su visibilidad sin autorización expresa. Netlify se conserva.

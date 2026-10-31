@@ -150,3 +150,9 @@ Preparación: recorte, normalización por vecino más cercano y PNG indexado256 
 Piezas originales generadas para el proyecto, fuente `exec-cfe16a78-d27c-422e-bad5-f37e0f77f5b3.png`: puerta, torre, cañón, bandera, cajas/barril y muralla. Preparación: recortes transparentes, vecino más cercano y PNG indexado. Se usan como piezas independientes, no como fondo completo. Referencia del usuario únicamente artística; no se han descargado assets oficiales. Los derechos de One Piece siguen reservados a sus titulares. Solo el escenario de Morgan utiliza estas piezas.
 
 Suelo naval original: `exec-942d9d6c-6518-4bdb-9496-cb84803aeb96.png`, reducido a128×128 y PNG indexado. Hashes y tamaños de las siete piezas en `src/assets/arena/manifest.json`. Material reutilizable con grates/desgaste deterministas, sin cargar un fondo gigante.
+
+## Animaciones de Morgan y piratas · beta0.18
+
+Recursos originales generados a partir de los sprites propios existentes, sin descargas externas. Fuentes en `/workspace/generated_images`: espadachín `exec-3cb64a56-b603-40d8-83e6-28d12f3771ec.png`, tirador `exec-1129340d-9bf7-4e73-b7e9-3aff2fbddc2a.png`, pesado `exec-189cf55e-3700-4a54-9889-a50e863efc63.png`, Morgan `exec-d45b275f-7d1a-4795-ae89-9615cea28ee7.png`.
+
+Atlas de piratas768×480: ocho direcciones, cuatro pasos y una pose de ataque por dirección. Morgan512×512: dos orientaciones de cuatro pasos y ocho poses de reposo/acción/daño/derrota. Arma independiente conservada. Preparación: recorte por celda, escala común por actor, pies alineados, vecino más cercano y PNG indexado. SHA-256/tamaños en `src/assets/motion/manifest.json`. Sin inversión horizontal en ejecución. Los derechos de One Piece no se conceden por generar estas imágenes; no se presentan como recursos oficiales ni MIT.

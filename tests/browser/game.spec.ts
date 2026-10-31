@@ -930,3 +930,17 @@ test('recompensa de Morgan permite unir Pistol y Gatling antes del viaje',async(
  expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {zone:r.zone,levels:r.player.attacks.map(a=>a.level),group:r.player.abilitySlots.some(s=>s.includes('elastic-punch')&&s.includes('gatling'))};})).toEqual({zone:'orange-town',levels:[6,3],group:true});
  await expect(page.locator('.attack-slot .ability-component')).toHaveCount(2);
 });
+
+test('ciclos reales de cuatro pasos y poses de daño/derrota de Morgan',async({page},info)=>{
+ await page.locator('#start').click();
+ const frames=await page.evaluate(()=>{
+  const qa=window.__OPS_QA__!,r=qa.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.update=()=>{};r.enemies.clear();
+  const enemy=r.enemies.acquire()!;Object.assign(enemy,{id:810,visual:'buggy-pirate',x:r.player.x+40,y:r.player.y+80,hp:100,radius:13,flash:0,ranged:undefined});qa.draw(100);
+  const result:string[]=[];for(let i=0;i<8;i++){enemy.x+=13;qa.draw(100);result.push(qa.metrics().enemyTextures[0]);}return result;
+ });expect(new Set(frames).size).toBe(4);
+ const boss=await page.evaluate(()=>{
+  const qa=window.__OPS_QA__!,r=qa.getRun()!;r.zone='shells-town';r.morganDefeated=false;r.beginMorgan();r.update=()=>{};const b=r.encounter!;b.body.x=r.player.x+50;b.body.y=r.player.y+70;qa.draw(100);
+  const result:string[]=[];for(let i=0;i<12;i++){b.body.x+=10;qa.draw(100);result.push(qa.metrics().bossTexture!);}b.body.flash=.15;qa.draw(100);const hurt=qa.metrics().bossTexture;b.body.flash=0;b.defeated();qa.draw(100);const kneel=qa.metrics().bossTexture;b.elapsed=.6;qa.draw(100);return{frames:result,hurt,kneel,fall:qa.metrics().bossTexture};
+ });expect(new Set(boss.frames).size).toBe(4);expect(boss.hurt).toBe('morgan-pose-13');expect(boss.kneel).toBe('morgan-pose-14');expect(boss.fall).toBe('morgan-pose-15');
+ await page.screenshot({path:info.outputPath('morgan-fall.png')});
+});

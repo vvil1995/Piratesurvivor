@@ -1,3 +1,4 @@
+import { EnemyDeaths } from './enemy-motion.ts';
 import { arenaCamera } from './arena-camera.ts';
 import { preloadIslandArt } from './island-art.ts';
 import { BalloonRig } from './balloon-rig.ts';
@@ -36,6 +37,8 @@ export class BattleScene extends Phaser.Scene {
   private captain!: Phaser.GameObjects.Image;
   private balloonRig!: BalloonRig;
   private captainRig!: WalkRig;
+  private enemyIdle=0;
+  private enemyDeaths!: EnemyDeaths;
   private enemyRigs: WalkRig[] = [];
   private captainShadow!: Phaser.GameObjects.Image;
   private enemies: Phaser.GameObjects.Image[] = [];
@@ -56,7 +59,7 @@ export class BattleScene extends Phaser.Scene {
   private actorLoads = new Map<string, Promise<void>>();
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
-  get diagnostics() { return { cameraZoom: this.cameras.main.zoom, cameraX: this.arenaCameraPosition?.x, cameraY: this.arenaCameraPosition?.y, legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  get diagnostics() { return { enemyTextures: this.enemies.filter(e=>e.visible).map(e=>e.texture.key), bossTexture: this.bossRenderer?.texture, cameraZoom: this.cameras.main.zoom, cameraX: this.arenaCameraPosition?.x, cameraY: this.arenaCameraPosition?.y, legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
   async ensureActorArt(visual: string): Promise<void> {
     if (this.textures.exists(`${visual}-s-0`)) return;
     const known = this.actorLoads.get(visual); if (known) return known;
@@ -89,6 +92,7 @@ export class BattleScene extends Phaser.Scene {
     }
     this.captainShadow = this.add.image(256, 256, 'shadow').setDepth(-1000).setScale(1.2);
     this.captain = this.add.image(256, 256, 'straw-hat').setOrigin(0.5, 0.96).setScale(0.65).setDepth(1000);
+    this.enemyDeaths = new EnemyDeaths(this);
     this.captainRig = new WalkRig(this, 'straw-hat'); this.balloonRig = new BalloonRig(this);
     this.bossRenderer = new BossRenderer(this);
     this.navigationSignal = this.add.image(0, 0, 'navigation-chart').setVisible(false).setScale(1.3).setDepth(5000);
@@ -161,6 +165,7 @@ export class BattleScene extends Phaser.Scene {
     const balloon = player?.attacks.find(a => a.activeFor > 0 && ABILITIES[a.id].levels[a.level - 1].invulnerable);
     this.balloonRig.update(this.captain, `${run?.character.visual ?? 'straw-hat'}-s-0`, balloon?.activeFor ?? 0, balloon ? ABILITIES[balloon.id].levels[balloon.level - 1].duration ?? 1 : 1, balloon ? ABILITIES[balloon.id].levels[balloon.level - 1].inflate ?? 1.6 : 1);
     if (balloon) this.captainRig.hide();
+    if (animate) this.enemyIdle += Math.min(delta/1000,.1);
     for (let i = 0; i < this.enemies.length; i++) {
       const e = run?.enemies.items[i], sprite = this.enemies[i], shadow = this.shadows[i];
       const visible = !!e?.active && Math.abs(e.x - (run?.zone === 'morgan-arena' ? worldView.centerX : worldX)) < camera.width / camera.zoom / 2 + 160 && Math.abs(e.y - (run?.zone === 'morgan-arena' ? worldView.centerY : worldY)) < camera.height / camera.zoom / 2 + 160;
@@ -168,10 +173,15 @@ export class BattleScene extends Phaser.Scene {
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000);
-      sprite.setTexture(`${e.visual ?? 'marine'}-${animation.direction}-${animation.frame ? (animation.frame - 1) % 2 : 0}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
+      const pirate = e.visual?.startsWith('buggy-');
+      const attacking = pirate && (e.ranged ? (e.shotTimer ?? 0) > e.ranged.interval - .18 : Math.hypot(e.x-worldX,e.y-worldY)<e.radius+22);
+      const frame = attacking ? 4 : animation.frame ? pirate ? animation.frame - 1 : (animation.frame - 1) % 2 : 0;
+      sprite.setTexture(`${e.visual ?? 'marine'}-${attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction}-${frame}`).setFlipX(false).setScale(0.6 * (1 + animation.weight / 2), 0.6 * (1 - animation.weight)).setAngle(animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged && e.visual === 'marine' ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
+      if (pirate && !animation.frame && !attacking) sprite.setScale(.6,.6*(1+Math.sin(this.enemyIdle*2+e.id)*.01));
+      if (pirate && e.flash > 0) sprite.setAngle(-9 * e.flash/.15);
       if (e.visual?.startsWith('buggy-')) { sprite.setCrop(); this.enemyRigs[i].hide(); }
       else this.enemyRigs[i].update(sprite, animation, 0.6);
     }
@@ -189,7 +199,8 @@ export class BattleScene extends Phaser.Scene {
       }
     }
     this.effects.clear();
-    this.bossRenderer.update(run?.encounter, origin, run?.arena);
+    this.enemyDeaths.update(run, origin, delta/1000);
+    this.bossRenderer.update(run?.encounter, origin, run?.arena, delta/1000, !!animate);
     const signal = run && ['shells-town', 'orange-town'].includes(run.zone) ? run.navigationRoute.signal : undefined;
     this.navigationSignal.setVisible(!!signal);
     if (signal) {
