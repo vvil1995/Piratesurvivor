@@ -69,9 +69,17 @@ export class BossRenderer {
       .setRotation(dead ? Math.PI / 2 : preparing ? -0.85 - lift * 0.7 : boss.state === 'impact' ? 1.1 : 0.1);
     if(boss.profile.id==='kuro'){
       this.motion.update(boss.body.id,boss.body.x,boss.body.y,animate,dt,true);
+      const kuro=boss as KuroEncounter;
+      if(animate)this.idleTime+=Math.min(dt,.1);
       const d=this.motion.direction,frame=preparing||boss.state==='impact'?4:this.motion.frame?this.motion.frame-1:0;
       this.body.setOrigin(.5,120/128).setTexture(`kuro-${d}-${frame}`).setScale(.9).setRotation(dead?Math.min(1.5,boss.elapsed*2):0);this.arm.setVisible(false);
-      for(const [i,t]of (boss as KuroEncounter).trails.entries())if(this.echoes[i])this.echoes[i].setTexture(`kuro-${d}-${frame}`).setPosition(t.x-origin.x,t.y-origin.y).setScale(.9).setAlpha(Math.min(.28,t.life)).setTint(0xb5d9eb).setDepth(t.y-origin.y+999).setVisible(true);
+      if(kuro.exhausted)this.body.setScale(.9,.82).setRotation(.15);
+      else if(boss.state==='impact')this.body.setRotation(boss.impactZone?.shape==='line'?(Math.cos(boss.angle)>=0?.18:-.18):Math.sin(boss.elapsed*25)*.09);
+      else if(preparing)this.body.setRotation(-.06);
+      else if(!this.motion.frame&&!dead)this.body.setScale(.9,.9+Math.sin(this.idleTime*2)*.006);
+      if(kuro.attackId==='shakushi'&&boss.state==='impact')this.body.setTint(0x69717c).setAlpha(.9);
+      if(boss.body.flash>0&&!dead)this.body.setRotation(-.1).setTint(0xffc9c9);
+      for(const [i,t]of (boss as KuroEncounter).trails.entries())if(this.echoes[i])this.echoes[i].setTexture(`kuro-${d}-${frame}`).setPosition(t.x-origin.x,t.y-origin.y).setScale(.9).setAlpha(Math.min(.28,t.life)).setTint(0x535967).setDepth(t.y-origin.y+999).setVisible(true);
     }
     if (boss.profile.id === 'morgan') {
       this.motion.update(boss.body.id, boss.body.x, boss.body.y, animate, dt);

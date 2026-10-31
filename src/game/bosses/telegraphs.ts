@@ -6,6 +6,7 @@ export interface DangerZone extends Vector {
 export interface BossAttack {
   id: string; name: string; phase: number; shape: WarningShape; length: number; width: number; radius: number; innerRadius: number; arc: number;
   preparation: number; finalWarning: number; impact: number; damage: number; cooldown: number; recovery: number;
+  minimumWarning?: number; fixedRecovery?: boolean;
   animation: string; speed?: number; targeted?: boolean; cover?: boolean; offsets?: readonly Vector[];
 }
 export interface Telegraph { zone: DangerZone; elapsed: number; attack: BossAttack }

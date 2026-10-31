@@ -28,7 +28,7 @@ test('abanico 5/7/9 y círculo con huecos: proyectiles reales, aviso fijado y si
  for(const [ratio,count]of [[1,5],[.5,7],[.2,9]]){
   const b=new BuggyEncounter(),p=new Run().player;b.body.x=1000;b.body.y=1000;p.x=1300;p.y=1000;b.body.hp=b.body.maxHp*ratio;
   b.prepare(attack('knives'),p,clear);const zones=[b.telegraph!.zone,...b.extraWarnings];assert.equal(zones.length,count);const angle=zones[Math.floor(count/2)].angle;
-  tick(b,p,1);assert.equal(p.hp,100);tick(b,p,.06);assert.equal(p.hp,100);assert.equal(b.knives.length,count);assert.equal(b.knives[Math.floor(count/2)].angle,angle);
+  tick(b,p,b.telegraph!.attack.preparation-.05);assert.equal(p.hp,100);tick(b,p,.06);assert.equal(p.hp,100);assert.equal(b.knives.length,count);assert.equal(b.knives[Math.floor(count/2)].angle,angle);
   p.y+=100;tick(b,p,.8);assert.equal(p.hp,100);b.cancel();assert.equal(b.knives.length,0);
  }
  const b=new BuggyEncounter(),p=new Run().player;p.x=b.body.x+200;p.y=b.body.y;b.prepare(attack('ring'),p,clear);assert.equal(b.extraWarnings.length+1,12);
@@ -51,7 +51,7 @@ test('carga solo mueve la cabeza en dirección fijada, colisión con pared aturd
 test('pluja de ganivets deja huecos, no daña antes del aviso y cada zona explota una sola vez',()=>{
  const b=new BuggyEncounter(),p=new Run().player;p.x=1408;p.y=1152;b.body.hp=b.body.maxHp*.2;
  b.prepare(attack('barrage'),p,clear);const zones=[b.telegraph!.zone,...b.extraWarnings];assert.equal(zones.length,7);assert.ok(zones.every(z=>z.radius===32));
- tick(b,p,1.7);assert.equal(p.hp,100);tick(b,p,.2);assert.equal(p.hp,58);tick(b,p,.5);assert.equal(p.hp,58);
+ tick(b,p,1.15);assert.equal(p.hp,100);tick(b,p,.2);assert.equal(p.hp,58);tick(b,p,.5);assert.equal(p.hp,58);
  b.cancel();assert.equal(b.hazards.length,0);assert.equal(b.parts.length,0);
 });
 test('Orange exige Morgan; carta propia, derrota con25HP y mismo mundo/cofres; victoria ofrece Log Pose voluntario a Syrup sin curar', () => {

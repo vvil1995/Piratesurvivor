@@ -204,3 +204,8 @@ No se incorporan ni modifican PNGs: se reutilizan casas, árboles, palmeras, mer
 Se incorporan4 atlas de actores (`blackcat-pirate`, `blackcat-claw`, `blackcat-hypnotist`, `kuro`) y4 props (`syrup-house`, `syrup-mansion`, `syrup-cart`, `syrup-cliff`). Generados con ImageGen para esta tarea, no extraídos de otros juegos. Fuentes conservadas en generated_images: `exec-bf05da5f-46b8-4f13-84a7-209723183022.png` y `exec-963cf782-1556-449c-bde7-d71c5e2e0bee.png`. Mismos derechos de franquicia que el resto del fan game.
 
 Extracción por componentes alpha para no mezclar figuras; escala común por actor, pies120, celdas128 y muestreo nearest. Atlas1024×640, cinco poses de ejecución (reposo/pasos/ataque) con perfil compartido y reflejo completo para el lado opuesto. Son sprites de beta, sin ocho orientaciones dibujadas independientemente ni animaciones finales. Props pequeños128/256/96/128px y transparencia real. Cajas fuente, tamaños y hashes en `src/assets/motion/syrup-manifest.json`. Se reutilizan vegetación, cercas, cajas y texturas existentes. Sin nuevas dependencias ni fondos completos.
+
+## Jardines de Kaya: complementos provisionales
+- `src/assets/worlds/blackcat-banner.svg` y `kaya-cat-statue.svg`: dibujos vectoriales originales creados para este proyecto, sin recursos externos. Formas alineadas a píxeles y transparencia.
+- PNG homónimos (48×96 y64×96): exportación a escala1 mediante Chromium, sin interpolar ni modificar los sprites existentes. Solo se usan en la arena de Kuro.
+- Se reutiliza íntegro `motion/kuro.png`; las poses de preparación, golpe, desplazamiento, daño, agotamiento y caída se distinguen mediante el renderizador existente. No son nueve secuencias dibujadas nuevas.

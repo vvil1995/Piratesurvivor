@@ -570,7 +570,7 @@ test('Morgan: carta, aviso visible, victoria y viaje automático sin curación',
   await page.locator('#start').click();
   await revealMorganChart(page); await takeMorganChart(page);
   await expect(page.locator('#boss-panel')).toBeVisible();
-  await expect(page.locator('#boss-phase')).toHaveText('FASE 1/3');
+  await expect(page.locator('#boss-phase')).toHaveCount(0);
   await page.evaluate(async () => {
     const path = '/src/content/bosses/morgan.ts', { MORGAN_ATTACKS } = await import(/* @vite-ignore */ path);
     const qa = window.__OPS_QA__!, r = qa.getRun()!, p = r.player, b = r.encounter!;
@@ -578,7 +578,7 @@ test('Morgan: carta, aviso visible, victoria y viaje automático sin curación',
     b.body.x = 384; b.body.y = 220; p.x = 384; p.y = 370;
     b.prepare(MORGAN_ATTACKS[0], p, r.world); b.tick = () => {}; qa.draw(); qa.tick();
   });
-  await expect(page.locator('#boss-pattern')).toContainText('Cop de destral');
+  await expect(page.locator('#boss-pattern')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('morgan-warning.png') });
   const viewport = page.viewportSize()!;
   const bar = await page.locator('#boss-panel').boundingBox();
@@ -743,7 +743,7 @@ test('Buggy: carta de Orange, cuatro avisos legibles, victoria y llegada a Syrup
       b.elapsed = b.telegraph!.attack.preparation - 0.15; b.telegraph!.elapsed = b.elapsed; b.tick = () => {};
       qa.draw(); qa.tick();
     }, id);
-    await expect(page.locator('#boss-phase')).toHaveText('FASE 3/3');
+    await expect(page.locator('#boss-phase')).toHaveCount(0);
     expect(await page.evaluate(() => window.__OPS_QA__!.getRun()!.encounter!.stage)).toBe('final');
     await page.screenshot({ path: info.outputPath(`buggy-${id}.png`) });
   }
@@ -1032,7 +1032,7 @@ test('Buggy completo: cámara de exploración, seis patrones, partes y sprites a
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.locator('#start').click();const normalZoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
  await page.evaluate(()=>{const qa=window.__OPS_QA__!,r=qa.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.lootNoticeFor=0;r.player.hurtTimer=1e6;for(const a of r.player.attacks)a.cooldown=1e6;r.update=()=>{};qa.draw();qa.tick();});
- await expect(page.locator('#boss-name')).toHaveText('BUGGY');await expect(page.locator('#boss-portrait')).toBeVisible();await expect(page.locator('#boss-hp')).toContainText('6800');
+ await expect(page.locator('#boss-name')).toHaveText('BUGGY');await expect(page.locator('#boss-portrait,#boss-hp')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(normalZoom);
  const frames=[];
  for(let i=0;i<4;i++)frames.push(await page.evaluate(()=>{const qa=window.__OPS_QA__!,b=qa.getRun()!.encounter!;b.body.x+=24;qa.draw(100);return qa.metrics().bossTexture;}));
@@ -1043,7 +1043,7 @@ test('Buggy completo: cámara de exploración, seis patrones, partes y sprites a
    const qa=window.__OPS_QA__!,r=qa.getRun()!,b=r.encounter!;b.cancel();b.body.x=1648;b.body.y=1152;b.body.hp=b.body.maxHp*.2;r.player.x=1408;r.player.y=1152;
    b.prepare(BUGGY_ATTACKS.find((a:{id:string})=>a.id===id)!,r.player,r.world);b.elapsed=b.telegraph!.attack.preparation-.16;b.telegraph!.elapsed=b.elapsed;qa.draw();qa.tick();
   },id);
-  await expect(page.locator('#boss-phase')).toHaveText('FASE 3/3');await page.screenshot({path:info.outputPath(`buggy-full-${id}-warning.png`)});
+  await expect(page.locator('#boss-phase')).toHaveCount(0);await page.screenshot({path:info.outputPath(`buggy-full-${id}-warning.png`)});
   const outcome=await page.evaluate(()=>{
    const qa=window.__OPS_QA__!,r=qa.getRun()!,b=r.encounter! as typeof r.encounter & {knives:unknown[];parts:unknown[];hazards:unknown[]};
    for(let i=0;i<25;i++)b!.tick(1/60,r.player,r.world,()=>({x:0,y:0}),()=>{});qa.draw();qa.tick();return {knives:b!.knives.length,parts:b!.parts.length,hazards:b!.hazards.length};
@@ -1175,7 +1175,7 @@ test('pueblos orgánicos: distintas semillas, continuidad visual y arenas conser
  await expect(page.locator('#boss-name')).toHaveText('BUGGY');await page.screenshot({path:info.outputPath('town-buggy-unchanged.png')});expect(errors).toEqual([]);
 });
 
-test('Syrup completo: viaje voluntario, tres piratas, cinco patrones de Kuro y Baratie pendiente',async({page},info)=>{
+test('Syrup completo: viaje voluntario, tres piratas, seis patrones de Kuro y Baratie pendiente',async({page},info)=>{
  test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.locator('#start').click();const zoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
  await page.evaluate(async()=>{
@@ -1200,19 +1200,57 @@ test('Syrup completo: viaje voluntario, tres piratas, cinco patrones de Kuro y B
  const textures=await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyTextures);for(const id of ['blackcat-pirate','blackcat-claw','blackcat-hypnotist'])expect(textures.some(t=>t.startsWith(id+'-'))).toBe(true);
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.beginKuro();q.draw();q.tick();});
  await expect(page.locator('#boss-name')).toHaveText('CAPITÀ KURO');expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);await page.screenshot({path:info.outputPath('kuro-arena.png')});
- for(const id of ['cross','pounce','ghost','shakushi','flurry']){
+ for(const id of ['cross','pounce','ghost','shakushi','flurry','surprise']){
   await page.evaluate(async id=>{const path='/src/content/bosses/kuro.ts',{KURO_ATTACKS}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;
    b.cancel();b.body.x=1408;b.body.y=1090;b.body.hp=b.body.maxHp*.2;r.player.x=1558;r.player.y=1090;r.player.hurtTimer=1;
    b.prepare(KURO_ATTACKS.find((a:{id:string})=>a.id===id)!,r.player,r.world);b.elapsed=b.telegraph!.attack.preparation-.15;b.telegraph!.elapsed=b.elapsed;b.phase=3;q.draw();q.tick();
   },id);
-  await expect(page.locator('#boss-phase')).toHaveText('FASE 3/3');await page.screenshot({path:info.outputPath(`kuro-${id}-warning.png`)});
+  await expect(page.locator('#boss-phase')).toHaveCount(0);await page.screenshot({path:info.outputPath(`kuro-${id}-warning.png`)});
   await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<14;i++)r.encounter!.tick(1/60,r.player,r.world,()=>({x:0,y:0}),()=>{});q.draw();q.tick();});
   await page.screenshot({path:info.outputPath(`kuro-${id}-impact.png`)});
  }
+ await page.evaluate(async()=>{
+  const path='/src/content/bosses/kuro.ts',{KURO_ATTACKS}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;
+  b.cancel();b.body.x=1408;b.body.y=1090;r.player.x=1558;r.player.y=1090;r.player.hurtTimer=1e6;
+  b.prepare(KURO_ATTACKS.find((a:{id:string})=>a.id==='shakushi')!,r.player,r.world);
+  for(let i=0;i<2000&&!b.moveName.startsWith('ESGOTAT');i++)b.tick(.01,r.player,r.world,()=>({x:0,y:0}),()=>{});
+  if(!b.moveName.startsWith('ESGOTAT'))throw Error('Shakushi no acaba con agotamiento');q.draw();q.tick();
+ });
+ await page.screenshot({path:info.outputPath('kuro-exhaustion.png')});
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.cancel();b.state='approach';b.body.x=r.player.x+40;b.body.y=r.player.y;b.body.hp=1;r.player.attacks[0].cooldown=0;r.player.hurtTimer=1;
   for(let i=0;i<100&&r.status==='playing';i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
  await expect(page.locator('#combinations')).toBeVisible();await expect(page.locator('#combination-message')).toContainText('Kuro');await page.locator('#combination-done').click();
  await expect(page.locator('#navigation-hint')).toContainText('BARATIE');
  expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.kuroDefeated,unlocked:r.baratieUnlocked,travel:r.sailToBaratie(),zone:r.zone};})).toEqual({won:true,unlocked:true,travel:false,zone:'kuro-arena'});
  await page.screenshot({path:info.outputPath('kuro-victory-baratie-locked.png')});expect(errors).toEqual([]);
+});
+
+test('HUD minimalista compartido: tres bosses sin panel ni textos secundarios, móvil y escritorio',async({page},info)=>{
+ test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#start').click();
+ for(const boss of ['morgan','buggy','kuro']){
+  await page.evaluate(id=>{
+   const q=window.__OPS_QA__!,r=q.getRun()!;r.update=Object.getPrototypeOf(r).update;
+   if(id==='morgan')r.beginMorgan();
+   else if(id==='buggy'){r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();}
+   else {r.buggyDefeated=true;r.encounter!.defeated();for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.sailToSyrup();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.beginKuro();}
+   r.player.hurtTimer=1e6;r.update=()=>{};q.draw();q.tick();
+  },boss);
+  await expect(page.locator('#boss-name')).toHaveText(boss==='morgan'?'AXE-HAND MORGAN':boss==='buggy'?'BUGGY':'CAPITÀ KURO');
+  await expect(page.locator('#boss-phase,#boss-pattern,#boss-hp,#boss-portrait')).toHaveCount(0);
+  await expect(page.locator('.run-clock')).toBeVisible();
+  const layout=await page.evaluate(()=>{
+   const boss=document.querySelector('#boss-panel')!,style=getComputedStyle(boss),bar=boss.getBoundingClientRect(),player=document.querySelector('.player-status')!.getBoundingClientRect(),clock=document.querySelector('.run-clock')!.getBoundingClientRect();
+   const overlap=bar.x<player.right&&bar.right>player.x&&bar.y<player.bottom&&bar.bottom>player.y;
+   return {background:style.backgroundColor,border:style.borderTopWidth,shadow:style.boxShadow,overlap,belowClock:bar.y>=clock.bottom,x:bar.x,right:bar.right,height:bar.height,width:innerWidth};
+  });
+  expect(layout.background).toBe('rgba(0, 0, 0, 0)');expect(layout.border).toBe('0px');expect(layout.shadow).toBe('none');expect(layout.overlap).toBe(false);expect(layout.belowClock).toBe(true);expect(layout.height).toBeLessThan(40);expect(layout.x).toBeGreaterThanOrEqual(0);expect(layout.right).toBeLessThanOrEqual(layout.width);
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await page.screenshot({path:info.outputPath(`${boss}-minimal-hud.png`)});
+ }
+ for(const width of [568,667,740,844,1024,1440]){
+  await page.setViewportSize({width,height:width>1000?900:390});
+  const overlap=await page.evaluate(()=>{const a=document.querySelector('#boss-panel')!.getBoundingClientRect(),b=document.querySelector('.player-status')!.getBoundingClientRect();const c=document.querySelector('.run-clock')!.getBoundingClientRect();return {overlap:a.x<b.right&&a.right>b.x&&a.y<b.bottom&&a.bottom>b.y,belowClock:a.y>=c.bottom};});expect(overlap.overlap).toBe(false);expect(overlap.belowClock).toBe(true);
+ }
+ expect(errors).toEqual([]);
 });

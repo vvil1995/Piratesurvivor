@@ -1,3 +1,4 @@
+import { bossPhase, pressuredAttack, movementScale, cadenceScale } from './pressure.ts';
 import { isInvulnerable } from '../systems/guards.ts';
 import type { Enemy, Player, Vector } from '../core/types.ts';
 import type { CollisionWorld } from '../world/world.ts';
@@ -33,6 +34,8 @@ export class PatternEncounter {
   defeated(): void { this.body.active = false; this.state = 'dead'; this.elapsed = 0; this.cancel(); }
   // Gancho determinista para secuenciación del controlador; también permite probar cada patrón.
   prepare(attack: BossAttack, target: Vector, world: CollisionWorld): void {
+    this.phase = bossPhase(this.body.hp,this.body.maxHp,this.profile.phaseThresholds[0]);
+    attack = pressuredAttack(attack,this.phase);
     this.attack = attack; this.elapsed = 0; this.state = 'preparing'; this.impactZone = undefined; this.hit.clear();
     const zone = zoneFor(attack, attack.targeted ? target : this.body, target);
     if (attack.animation === 'split' && (!world.canOccupy(zone.x, zone.y, this.body.radius) || !world.segmentClear(this.body.x, this.body.y, zone.x, zone.y, this.body.radius))) { zone.x = this.body.x; zone.y = this.body.y; }
@@ -58,7 +61,7 @@ export class PatternEncounter {
   tick(dt: number, player: Player, world: CollisionWorld, direction: (from: Vector) => Vector, reinforce: () => void): void {
     if (player.hp <= 0) { this.cancel(); return; }
     if (!this.body.active || this.body.hp <= 0) { if (this.state !== 'dead') this.defeated(); this.elapsed += dt; return; }
-    this.phase = this.body.hp / this.body.maxHp > this.profile.phaseThresholds[0] ? 1 : this.body.hp / this.body.maxHp > this.profile.phaseThresholds[1] ? 2 : 3;
+    this.phase = bossPhase(this.body.hp,this.body.maxHp,this.profile.phaseThresholds[0]);
     this.body.flash = Math.max(0, this.body.flash - dt);
     for (const [id, seconds] of this.ready) this.ready.set(id, Math.max(0, seconds - dt));
     this.elapsed += dt;
@@ -68,7 +71,7 @@ export class PatternEncounter {
       if (distance > this.profile.engageRange && (this.phase === 1 || this.pursuit < this.profile.rangedWait)) {
         const d = direction(this.body); this.angle = Math.atan2(d.y, d.x);
         const speed = this.pursuit > this.profile.sprintAfter ? this.profile.pursuitSprint : this.profile.speed;
-        world.moveCircle(this.body, d.x * speed * dt, d.y * speed * dt, this.body.radius); return;
+        world.moveCircle(this.body, d.x * speed * movementScale(this.phase) * dt, d.y * speed * movementScale(this.phase) * dt, this.body.radius); return;
       }
       if (this.lastPhase !== this.phase) { this.next = 0; this.lastPhase = this.phase; }
       const patterns = this.profile.patterns[this.phase - 1];
@@ -78,7 +81,7 @@ export class PatternEncounter {
       this.prepare(attack, player, world); return;
     }
     if (this.state === 'recovering' || this.state === 'stunned') {
-      const recovery = this.state === 'stunned' ? this.profile.stunSeconds : this.attack!.recovery * this.profile.phaseCadence[this.phase - 1];
+      const recovery = this.state === 'stunned' ? this.profile.stunSeconds : this.attack!.recovery * (this.attack!.fixedRecovery ? 1 : this.profile.phaseCadence[this.phase - 1] * cadenceScale(this.phase));
       if (this.elapsed >= recovery) { this.state = 'approach'; this.elapsed = 0; this.pursuit = 0; this.body.statuses = undefined; this.attack = undefined; }
       return;
     }

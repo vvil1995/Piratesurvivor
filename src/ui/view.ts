@@ -118,19 +118,12 @@ export class View {
     el('hud').classList.toggle('boss-active', !!boss);
     el('boss-panel').hidden = !boss;
     if (boss) {
-      const pirateBoss = boss.profile.id === 'buggy';
-      const portrait = el<HTMLImageElement>('boss-portrait'); portrait.hidden = !pirateBoss;
-      el('boss-panel').classList.toggle('with-portrait', pirateBoss);
-      if (pirateBoss) { const url = artUrl('buggy-head'); if (portrait.getAttribute('src') !== url) portrait.src = url; }
-      el('boss-hp').hidden = !pirateBoss; el('boss-hp').textContent = `${Math.max(0, Math.ceil(boss.body.hp))} / ${boss.body.maxHp}`;
       el('boss-name').textContent = boss.profile.name;
       el('boss-panel').querySelector('[role="progressbar"]')!.setAttribute('aria-label', `Vida de ${boss.profile.name}`);
       const percentage = Math.max(0, boss.body.hp / boss.body.maxHp * 100);
-      el('boss-phase').textContent = boss.state === 'dead' ? 'VICTORIA' : `FASE ${boss.phase}/3`;
       el('boss-panel').dataset.phase = String(boss.phase);
       el('boss-health-fill').style.width = `${percentage}%`;
       el('boss-panel').querySelector('[role="progressbar"]')!.setAttribute('aria-valuenow', String(Math.round(percentage)));
-      el('boss-pattern').textContent = boss.state==='dead'&&boss.profile.id==='buggy'?'VICTORIA · LOG POSE A SYRUP':boss.moveName;
     }
     const signal=run.navigationSignal;
     el('navigation-hint').hidden=!signal;

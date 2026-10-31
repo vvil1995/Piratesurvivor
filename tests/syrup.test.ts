@@ -40,25 +40,25 @@ test('cinco personajes conservan HP/build al viajar y no hay acceso anticipado a
   assert.ok(r.beginKuro());assert.equal(p.hp,57);assert.equal(JSON.stringify([p.level,p.xp,p.attacks,p.items,p.fruit,p.collectedBerries]),state);assert.equal(r.world.theme,'syrup');assert.equal(r.inArena,true);assert.equal(r.visibleChests.length,0);
  }
 });
-test('Kuro: X con dos avisos, ningún daño temprano y zona fijada antes de esquivar',()=>{
+test('Kuro: X con dos cortes avisados, ningún daño temprano y zona fijada antes de esquivar',()=>{
  const b=new KuroEncounter(),p=new Run().player;b.body.x=500;b.body.y=500;p.x=560;p.y=500;b.prepare(attack('cross'),p,clear);
- const zones=JSON.stringify([b.telegraph!.zone,...b.extraWarnings]);assert.equal(b.extraWarnings.length,1);tick(b,p,.9);assert.equal(p.hp,100);assert.equal(JSON.stringify([b.telegraph!.zone,...b.extraWarnings]),zones);
+ const zones=JSON.stringify([b.telegraph!.zone,...b.extraWarnings]);assert.equal(b.extraWarnings.length,0);tick(b,p,.4);assert.equal(p.hp,100);assert.equal(JSON.stringify([b.telegraph!.zone,...b.extraWarnings]),zones);
  p.x=1000;p.y=1000;tick(b,p,.12);assert.equal(p.hp,100);assert.ok(b.impactZone);
 });
 test('Kuro: carga advierte, fija rumbo y no atraviesa obstáculos',()=>{
  const b=new KuroEncounter(),p=new Run().player,w=new ArenaWorld(42,KURO_ARENA,'syrup');b.body.x=700;b.body.y=600;p.x=100;p.y=600;b.prepare(attack('pounce'),p,w);const angle=b.telegraph!.zone.angle;p.y+=200;
- tick(b,p,1);assert.equal(b.body.x,700);tick(b,p,1.2,w);assert.ok(w.canOccupy(b.body.x,b.body.y,b.body.radius));assert.ok(b.body.x<700);assert.equal(angle,Math.PI);
+ tick(b,p,.7);assert.equal(b.body.x,700);tick(b,p,1.2,w);assert.ok(w.canOccupy(b.body.x,b.body.y,b.body.radius));assert.ok(b.body.x<700);assert.equal(angle,Math.PI);
 });
 test('Kuro: pasos fantasma no dañan y generan estela acotada',()=>{
- const b=new KuroEncounter(),p=new Run().player;p.x=b.body.x+130;p.y=b.body.y;b.body.hp=b.body.maxHp*.5;b.prepare(attack('ghost'),p,clear);tick(b,p,.7);assert.equal(p.hp,100);assert.ok(b.trails.length>0&&b.trails.length<=12);assert.equal(b.body.x,p.x);
+ const b=new KuroEncounter(),p=new Run().player;p.x=b.body.x+130;p.y=b.body.y;b.body.hp=b.body.maxHp*.5;b.prepare(attack('ghost'),p,clear);tick(b,p,.7);assert.equal(p.hp,100);assert.ok(b.trails.length>0&&b.trails.length<=12);assert.ok(Math.hypot(b.body.x-p.x,b.body.y-p.y)>=120);
 });
-test('Kuro: Shakushi tiene tres pasadas avisadas y ráfaga cuatro golpes separados',()=>{
- for(const [id,expected]of [['shakushi',3],['flurry',4]] as const){const b=new KuroEncounter(),p=new Run().player;p.x=1000;p.y=500;p.hurtTimer=100;b.body.x=500;b.body.y=500;b.body.hp=b.body.maxHp*.2;b.prepare(attack(id),p,clear);let impacts=0,old=b.state;
+test('Kuro: Shakushi tiene cinco pasadas avisadas y ráfaga cuatro golpes separados',()=>{
+ for(const [id,expected]of [['shakushi',5],['flurry',4],['cross',2]] as const){const b=new KuroEncounter(),p=new Run().player;p.x=1000;p.y=500;p.hurtTimer=100;b.body.x=500;b.body.y=500;b.body.hp=b.body.maxHp*.2;b.prepare(attack(id),p,clear);let impacts=0,old=b.state;
   for(let i=0;i<900;i++){b.tick(1/60,p,clear,()=>axis,noop);if(old==='preparing'&&b.state==='impact')impacts++;old=b.state;if(b.state==='approach')break;}
   assert.equal(impacts,expected);assert.ok(b.body.active);b.defeated();assert.equal(b.trails.length,0);assert.equal(b.telegraph,undefined);assert.equal(b.extraWarnings.length,0);
  }
 });
-test('Kuro: las tres fases ejecutan sus cinco patrones con colisión segura',()=>{
+test('Kuro: las tres fases ejecutan sus seis patrones con colisión segura',()=>{
  const r=syrup();r.beginKuro();const b=r.encounter!,seen=new Set<string>();r.player.attacks.forEach(a=>a.cooldown=1e6);
  for(const ratio of [1,.5,.2]){b.body.hp=b.body.maxHp*ratio;for(let i=0;i<60*55;i++){r.update(1/60,axis);if(b.telegraph)seen.add(b.telegraph.attack.id);assert.ok(r.world.canOccupy(b.body.x,b.body.y,b.body.radius));}}
  assert.deepEqual([...seen].sort(),KURO_ATTACKS.map(a=>a.id).sort());

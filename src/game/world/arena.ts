@@ -27,7 +27,7 @@ export const BUGGY_ARENA: ArenaDefinition = {
     {x:896,y:1120,width:64,height:96,art:'buggy-flag'}, {x:1856,y:1120,width:64,height:96,art:'buggy-flag'}, {x:640,y:1536,width:64,height:96,art:'buggy-flag'},{x:2112,y:1536,width:64,height:96,art:'buggy-flag'}],
 };
 export const KURO_ARENA:ArenaDefinition={width:2816,height:2048,playerSpawn:{x:1408,y:1200},bossSpawn:{x:1408,y:1090},gates:[],
- covers:[{x:1184,y:640,width:448,height:320,art:'syrup-mansion'},{x:416,y:512,width:64,height:64,art:'coastal-tree'},{x:2304,y:512,width:64,height:64,art:'coastal-tree'},{x:576,y:1376,width:64,height:64,art:'coastal-crates'},{x:2176,y:1376,width:64,height:64,art:'syrup-cart'},{x:864,y:1632,width:128,height:32,art:'coastal-fence'},{x:1824,y:1632,width:128,height:32,art:'coastal-fence'}]};
+ covers:[{x:1184,y:640,width:448,height:320,art:'syrup-mansion'},{x:416,y:512,width:64,height:64,art:'coastal-tree'},{x:2304,y:512,width:64,height:64,art:'coastal-tree'},{x:576,y:1376,width:64,height:64,art:'coastal-crates'},{x:2176,y:1376,width:64,height:64,art:'syrup-cart'},{x:864,y:1632,width:128,height:32,art:'coastal-fence'},{x:1824,y:1632,width:128,height:32,art:'coastal-fence'}],decorations:[{x:1056,y:864,width:48,height:96,art:'blackcat-banner'},{x:1712,y:864,width:48,height:96,art:'blackcat-banner'},{x:1120,y:912,width:64,height:96,art:'kaya-cat-statue'},{x:1696,y:912,width:64,height:96,art:'kaya-cat-statue'}]};
 export class ArenaWorld extends ProceduralWorld {
   readonly arena: ArenaDefinition;
   constructor(seed: number, arena: ArenaDefinition = MORGAN_ARENA, theme: 'shells' | 'orange' | 'syrup' = 'shells') { super(seed, theme); this.arena = arena; }

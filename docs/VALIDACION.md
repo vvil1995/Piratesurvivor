@@ -459,3 +459,20 @@ Navegador: recorrido controlado Buggy→Syrup→Kuro, tres sprites en mapa, avis
 No se ha completado una campaña manual de30–45 minutos ni medido FPS en un teléfono físico. Gráficos, animaciones y balance de Syrup son provisionales; no se afirma validación final de equilibrio para las cinco builds. No hay acceso a Baratie todavía ni nuevos sistemas permanentes.
 
 Cierre de regresiones:8/8 pruebas finales de navegador (PC y móvil emulado) de cofres, ruta/victoria de Morgan, ambos pueblos y recorrido completo de Syrup. Además4/4 del pase Buggy→Syrup/Kuro y2/2 de revisión específica de sprites/telegráficos tras corregir el traslado. Total de lógica166/166. Se ha inspeccionado renderizado real, no solo compilación.
+
+## 2026-10-31 · HUD de bosses, presión final y Kuro completo
+
+Auditoría: Kuro ya estaba integrado con cinco patrones, tres pasadas de Shakushi y HP8200. Se amplía el controlador existente: seis patrones, cinco pasadas, dos cortes sucesivos para la X, dirección fijada en la ráfaga, reposicionamiento seguro, HP8500 y agotamiento vulnerable de2s sin escalado. No se cambian mapas de Shells/Orange, sus arenas, habilidades, cofres, entrenamiento ni transiciones/recompensas. El único ajuste de datos de Morgan es el umbral final30→33%; sus cinco ataques se mantienen. Buggy conserva sus seis ataques y partes independientes.
+
+Archivos de implementación: `index.html`, `src/ui/view.ts`, `src/ui/hud.css`; `src/game/bosses/{pressure,pattern-encounter,telegraphs,buggy,kuro}.ts`; `src/content/bosses/{morgan,kuro}.ts`; `src/game/scenes/{boss-renderer,island-art}.ts`; `src/game/world/arena.ts`. Cuatro archivos originales de arte: `src/assets/worlds/{blackcat-banner,kaya-cat-statue}.{svg,png}`. Pruebas: `tests/boss-pressure.test.ts`, `tests/buggy.test.ts`, `tests/syrup.test.ts`, `tests/browser/game.spec.ts`. Documentación: este registro, `SYRUP-VILLAGE.md` y `asset-register.md`.
+
+Comprobaciones realizadas:
+- `npm run check` correcto; `npm test`:172/172.
+- Casos de avisos al70% en todos los ataques de los tres bosses, mínimo0,35s configurable, daño y geometría no escalados, fases1/2 intactas y aviso ya iniciado conservado al cambiar de fase. Bombas escalonadas y bomba secundaria de Buggy incluidas.
+- Kuro ejecuta seis ataques/tres fases; cinco pasadas separadas; X con dos impactos no simultáneos; ráfaga no gira persiguiendo al jugador; reposicionamiento no solapa al actor; colisiones de carga; limpieza al morir/cancelar; agotamiento2s; victoria con unión y Baratie bloqueado sin mapa vacío. Persistencia de la build y regreso tras derrota cubiertos por pruebas existentes.
+- Chromium real con vista1440×1000 y móvil emulado844×390:10/10 pruebas de rutas, victorias, seis patrones de Kuro, agotamiento y HUD. Además4/4 de animaciones de Morgan y combate completo de Buggy. Se inspeccionaron capturas reales de la barra sin panel, avisos y agotamiento. Revisión de tamaños568,667,740,844,1024,1440: sin solapamiento con jugador/cronómetro. Se corrigió un solapamiento inicial de1px detectado por la prueba móvil.
+- `PAGES_BASE_PATH=/Piratesurvivor/ npm run build` correcto, incluido HTML autónomo. Sigue el aviso previo de tamaño del bundle, sin dependencias nuevas.
+- `scripts/check-pages.mjs`: producción bajo `/Piratesurvivor/` correcta en PC/móvil emulado, cinco personajes,13sprites/14tarjetas, inicio/pausa, sin404 ni errores JS ni hookQA.
+- PNG decorativos verificados con transparencia real(alpha0–255); fuentes SVG originales conservadas.
+
+Límites: no se han medido FPS en teléfono físico, Safari ni realizado una campaña manual completa de los cinco personajes. Las animaciones de Kuro reutilizan sus poses y transformaciones funcionales; no se entregan nueve secuencias artísticas nuevas. Se requiere equilibrado mediante partidas reales. Baratie sigue pendiente intencionadamente.

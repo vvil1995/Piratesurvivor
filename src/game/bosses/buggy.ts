@@ -1,3 +1,4 @@
+import { FINAL_PHASE, bossPhase, pressuredAttack, warningSeconds, movementScale, cadenceScale } from './pressure.ts';
 import { ABILITIES } from '../../content/attacks.ts';
 import { PatternEncounter } from './pattern-encounter.ts';
 import { BUGGY, BUGGY_ATTACKS, BUGGY_RULES as R } from '../../content/bosses/buggy.ts';
@@ -68,6 +69,8 @@ export class BuggyEncounter extends PatternEncounter {
     override defeated(): void { super.defeated(); }
     private partOrigin(kind: BuggyPart['kind']): Vector { return { x: this.body.x + (kind === 'left' ? -30 : kind === 'right' ? 30 : 0), y: this.body.y + (kind === 'head' ? -60 : -4) }; }
     override prepare(attack: BossAttack, target: Vector, world: CollisionWorld): void {
+        this.phase = bossPhase(this.body.hp,this.body.maxHp,BUGGY.phaseThresholds[0]);
+        attack = pressuredAttack(attack,this.phase);
         this.current = attack;
         this.state = 'preparing';
         this.elapsed = 0;
@@ -77,7 +80,6 @@ export class BuggyEncounter extends PatternEncounter {
         this.returning = false;
         this.parts.length = 0;
         this.body.statuses = undefined;
-        this.phase = this.body.hp / this.body.maxHp > BUGGY.phaseThresholds[0] ? 1 : this.body.hp / this.body.maxHp > BUGGY.phaseThresholds[1] ? 2 : 3;
         let zone = zoneFor(attack, attack.targeted ? target : this.body, target);
         this.angle = Math.atan2(target.y - this.body.y, target.x - this.body.x);
         if (attack.id === 'knives' || attack.id === 'ring') {
@@ -142,7 +144,7 @@ export class BuggyEncounter extends PatternEncounter {
     private queueHazards(zones: readonly DangerZone[], kind: 'bomb' | 'rain', damage: number, delay = 0): void {
         for (const [i, zone] of zones.entries())
             if (this.hazards.length < R.hazardCap)
-                this.hazards.push({ zone: { ...zone }, kind, damage, remaining: delay + i * R.bombStagger, exploded: false, life: .3 });
+                this.hazards.push({ zone: { ...zone }, kind, damage, remaining: delay + i * R.bombStagger * (this.phase===3?FINAL_PHASE.warningScale:1), exploded: false, life: .3 });
     }
     private tickHazards(dt: number, player: Player, world: CollisionWorld): void {
         const reflect = player.attacks.some(a => a.activeFor > 0 && ABILITIES[a.id].levels[a.level - 1].reflect);
@@ -208,11 +210,11 @@ export class BuggyEncounter extends PatternEncounter {
             for (const z of zones)
                 if (this.knives.length < R.knifeCap)
                     this.knives.push({ x: z.x, y: z.y, angle: z.angle, speed: R.knifeSpeed * R.knifeSpeedScale[this.phase - 1], life: z.length / (R.knifeSpeed * R.knifeSpeedScale[this.phase - 1]), damage: attack.damage, active: true, reflected: false });
-            // Only one compatible, off-centre bomb in phase3; its own full warning lasts1.6s.
+            // Una bomba compatible fuera del centro, con su propio aviso y la regla común de fase final.
             if (this.phase === 3 && attack.id === 'ring') {
                 const z = { ...zoneFor(this.attacks.find(a => a.id === 'bomb')!, player, player), x: player.x + 150 };
                 if (world.canOccupy(z.x, z.y, z.radius))
-                    this.queueHazards([z], 'bomb', 40, 1.6);
+                    this.queueHazards([z], 'bomb', 40, warningSeconds(1.6,this.phase));
             }
         }
         else if (attack.id === 'bomb' || attack.id === 'barrage')
@@ -239,7 +241,7 @@ export class BuggyEncounter extends PatternEncounter {
             this.elapsed += dt;
             return;
         }
-        this.phase = this.body.hp / this.body.maxHp > BUGGY.phaseThresholds[0] ? 1 : this.body.hp / this.body.maxHp > BUGGY.phaseThresholds[1] ? 2 : 3;
+        this.phase = bossPhase(this.body.hp,this.body.maxHp,BUGGY.phaseThresholds[0]);
         this.elapsed += dt;
         this.body.flash = Math.max(0, this.body.flash - dt);
         for (const [id, t] of this.cooldowns)
@@ -268,11 +270,11 @@ export class BuggyEncounter extends PatternEncounter {
             const move = d < R.retreatDistance ? { x: -dx / d, y: -dy / d } : d > BUGGY.engageRange ? base : { x: -dy / d * sign * .5 + dx / d * drift, y: dx / d * sign * .5 + dy / d * drift };
             for (const [x, y] of [[move.x, move.y], [-move.y, move.x], [move.y, -move.x]]) {
                 if (world.segmentClear(this.body.x, this.body.y, this.body.x + x * 32, this.body.y + y * 32, this.body.radius)) {
-                    world.moveCircle(this.body, x * speed * dt, y * speed * dt, this.body.radius);
+                    world.moveCircle(this.body, x * speed * movementScale(this.phase) * dt, y * speed * movementScale(this.phase) * dt, this.body.radius);
                     break;
                 }
             }
-            if (d > BUGGY.engageRange || this.elapsed < R.repositionSeconds)
+            if (d > BUGGY.engageRange || this.elapsed < R.repositionSeconds * cadenceScale(this.phase))
                 return;
             const ids = BUGGY.patterns[this.phase - 1];
             let chosen: BossAttack | undefined;
@@ -296,7 +298,7 @@ export class BuggyEncounter extends PatternEncounter {
             return;
         }
         if (this.state === 'stunned' || this.state === 'recovering') {
-            if (this.elapsed >= (this.state === 'stunned' ? BUGGY.stunSeconds : this.current!.recovery * BUGGY.phaseCadence[this.phase - 1])) {
+            if (this.elapsed >= (this.state === 'stunned' ? BUGGY.stunSeconds : this.current!.recovery * BUGGY.phaseCadence[this.phase - 1] * cadenceScale(this.phase))) {
                 this.state = 'approach';
                 this.elapsed = 0;
                 this.current = undefined;
