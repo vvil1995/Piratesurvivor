@@ -1,3 +1,6 @@
+import { tickItem } from '../systems/item-effects.ts';
+import { itemValue, ITEM_RULES } from '../../content/items.ts';
+import { damageEnemy } from '../systems/hits.ts';
 import { trainingModifiers, type CharacterTraining } from '../../content/training.ts';
 import { BuggyEncounter } from '../bosses/buggy.ts';
 import type { PatternEncounter } from '../bosses/pattern-encounter.ts';
@@ -295,12 +298,12 @@ export class Run {
     }
   }
   readonly visualDeaths: { x:number;y:number;visual:string }[] = [];
-  private dropXp(enemy: Enemy, ownerId: string): void {
+  private dropXp(enemy: Enemy, ownerId: string, allowFruit = true): void {
     if (enemy.visual?.startsWith('buggy-') && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
     if (enemy.kind === 'boss') { this.defeatBoss(); return; }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
     const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;
-    if (owner && fruit && this.fruitCooldown <= 0) { this.fruitCooldown = fruit.cooldown; queueImpact(this, owner, enemy.x, enemy.y, fruit.radius, owner.stats.damage * fruit.damage, 0.12, 'bomu-explosion'); }
+    if (allowFruit && owner && fruit && this.fruitCooldown <= 0) { this.fruitCooldown = fruit.cooldown; queueImpact(this, owner, enemy.x, enemy.y, fruit.radius, owner.stats.damage * fruit.damage, 0.12, 'bomu-explosion'); }
     if (this.random() < LOOT.enemyFoodChance) dropLoot(this.pickups, { x: enemy.x, y: enemy.y + 16 }, ownerId, 'food', LOOT.enemyFoodHeal);
     if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, enemy, ownerId, 'berry', LOOT.enemyBerries);
     const pickup = this.pickups.acquire();
@@ -330,6 +333,7 @@ export class Run {
       const axis = 'x' in movement ? actor.id === this.localPlayerId ? movement : { x: 0, y: 0 } : movement.get(actor.id) ?? { x: 0, y: 0 };
       const length = Math.max(1, Math.hypot(axis.x, axis.y));
       this.world.moveCircle(actor, axis.x / length * actor.stats.speed * dt, axis.y / length * actor.stats.speed * dt, 14);
+      tickItem(actor,dt);
       actor.hurtTimer = Math.max(0, actor.hurtTimer - dt);
       actor.hp = Math.min(actor.stats.maxHp, actor.hp + regenerationRate(actor.stats) * dt);
       this.fieldFor(actor).update(actor, dt);
@@ -348,7 +352,8 @@ export class Run {
     }
     if (this.encounter && this.encounter.state !== 'dead') {
       this.bossField!.update(this.player, dt);
-      this.encounter.tick(dt, this.player, this.world, from => this.bossField!.direction(from, this.player, this.encounter!.body.radius), () => this.callReinforcements());
+      this.encounter.body.statuses??={};this.encounter.body.statuses.stun=Math.max(0,(this.encounter.body.statuses.stun??0)-dt);
+      this.encounter.tick(dt, this.player, this.world, from => (this.encounter!.body.statuses?.stun??0)>0?{x:0,y:0}:this.bossField!.direction(from, this.player, this.encounter!.body.radius), () => this.callReinforcements());
       if (this.player.hp <= 0) { this.defeat(); return; }
     } else if (this.encounter) {
       this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
@@ -417,6 +422,19 @@ export class Run {
         if (this.strikes.length >= 12) this.strikes.shift(); this.strikes.push(strike);
       }, this.random, this);
     }
+    for (const actor of this.players.values()) for (const blast of actor.itemState?.queue.splice(0) ?? []) {
+      this.grid.visit(blast.x, blast.y, ITEM_RULES.explosionRadius + 64, enemy => {
+        if (enemy.active && Math.hypot(enemy.x - blast.x, enemy.y - blast.y) <= ITEM_RULES.explosionRadius + enemy.radius && this.world.segmentClear(blast.x, blast.y, enemy.x, enemy.y, 2, 'attack')) {
+          damageEnemy(actor, enemy, blast.damage, 0, blast, this.world, e => this.dropXp(e, actor.id, false), this.random, true, true);
+        }
+      });
+      const effect = this.areas.acquire();
+      if (effect) Object.assign(effect, {
+        x: blast.x, y: blast.y, ownerId: actor.id, radius: ITEM_RULES.explosionRadius,
+        shockRadius: 0, status: undefined, statusDuration: undefined, tickTimer: 0, hp: undefined,
+        damage: 0, knockback: 0, delay: 0, life: .2, triggered: true, evolved: false, kind: 'impact', visual: 'item-explosion',
+      });
+    }
     tickEffects(this, this.players, this.grid, this.world, dt, (enemy, owner) => this.dropXp(enemy, owner), this.random);
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
     for (let i = this.strikes.length - 1; i >= 0; i--) { this.strikes[i].life -= dt; if (this.strikes[i].life <= 0) this.strikes.splice(i, 1); }
@@ -429,9 +447,9 @@ export class Run {
       if (d < 20) {
         if (pickup.kind === 'item' && pickup.itemId && ITEMS[pickup.itemId]) { this.pendingItem = pickup.itemId; this.status = 'item'; }
         else if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { this.pendingFruit = pickup.fruitId; this.status = 'fruit'; }
-        else if (pickup.kind === 'food') { actor.xp += LOOT.foodXp * (actor.xpMultiplier ?? 1); actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
-        else if (pickup.kind === 'berry') { actor.collectedBerries += pickup.value * (actor.berryMultiplier ?? 1); actor.collectedBerries = Math.round(actor.collectedBerries * 1000) / 1000; }
-        else actor.xp += pickup.value * (actor.xpMultiplier ?? 1);
+        else if (pickup.kind === 'food') { actor.xp += LOOT.foodXp * (actor.xpMultiplier ?? 1)*(1+itemValue(actor.items,'treasure')); actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
+        else if (pickup.kind === 'berry') { actor.collectedBerries += pickup.value * (actor.berryMultiplier ?? 1)*(1+itemValue(actor.items,'berries')); actor.collectedBerries = Math.round(actor.collectedBerries * 1000) / 1000; }
+        else actor.xp += pickup.value * (actor.xpMultiplier ?? 1)*(1+itemValue(actor.items,'treasure'));
         pickup.active = false;
         if (this.status === 'fruit' || this.status === 'item') break;
       }
@@ -443,7 +461,7 @@ export class Run {
     const large = this.status === 'playing' && this.visibleChests.find(c => c.active && c.large && Math.hypot(c.x - this.player.x, c.y - this.player.y) <= LOOT.largeOpenRadius && this.world.segmentClear(c.x, c.y, this.player.x, this.player.y, 2));
     if (large) {
       large.openProgress = Math.min(LOOT.largeOpenSeconds, (large.openProgress ?? 0) + dt);
-      if (large.openProgress >= LOOT.largeOpenSeconds) { large.active = false; this.lootNotice = largeChestReward(this.pickups, large, this.player, this.random); this.lootNoticeFor = 4; }
+      if (large.openProgress >= LOOT.largeOpenSeconds) { large.active = false; this.pendingItem = largeChestReward(this.pickups, large, this.player, this.random); this.status='item'; }
     }
     this.checkLevel(); this.maintenance += dt;
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }

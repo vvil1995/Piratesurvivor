@@ -1,3 +1,4 @@
+import { itemValue } from '../../content/items.ts';
 import type { Stats, StatModifiers } from '../../content/types.ts';
 import { STAT_LIMITS } from '../../content/stat-rules.ts';
 import type { Player } from '../core/types.ts';
@@ -20,6 +21,8 @@ export function resolveStats(base: Stats, sources: readonly StatModifiers[]): St
   };
 }
 export function refreshStats(player: Player): void {
+  const otherHp=player.baseStats.maxHp+Object.entries(player.modifiers).filter(([key])=>key!=='items').reduce((n,[,m])=>n+(m.maxHp??0),0);
+  player.modifiers.items.maxHp=otherHp*itemValue(player.items,'haramaki');
   player.stats = resolveStats(player.baseStats, Object.values(player.modifiers));
   player.hp = Math.min(player.hp, player.stats.maxHp);
 }

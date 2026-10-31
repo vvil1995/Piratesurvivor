@@ -50,7 +50,7 @@ test('bombardeo muestra las tres zonas reales y solo aplica un impacto por patrÃ
 test('Orange exige Morgan; carta propia, derrota con25HP y mismo mundo/cofres; victoria lleva a Syrup sin curar', () => {
   assert.equal(new Run().beginBuggy(), false);
   const r = orange(), world = r.world; r.explorationChests!.sync(r.world, r.player); const field = r.explorationChests;
-  improveAttack(r.player, 'bazooka'); equipItem(r.player, 'boots'); r.player.fruit = 'bomu'; r.player.collectedBerries = 37; r.player.level = 22; r.player.xp = 4;
+  improveAttack(r.player, 'bazooka'); equipItem(r.player, 'vest'); r.player.fruit = 'bomu'; r.player.collectedBerries = 37; r.player.level = 22; r.player.xp = 4;
   r.buggyRoute.signal = { ...r.player }; r.update(1 / 60, axis); assert.equal(r.voyage?.destination, 'buggy'); finish(r);
   assert.equal(r.encounter!.profile.id, 'buggy'); assert.equal(r.inArena, true); assert.equal(r.visibleChests.length, 0);
   r.player.hp = 0; const before = build(r); r.update(1 / 60, axis); assert.equal(r.voyage?.destination, 'orange-return'); finish(r);

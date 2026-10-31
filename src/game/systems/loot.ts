@@ -1,5 +1,5 @@
 import { ITEMS } from '../../content/items.ts';
-import { equipItem } from './items.ts';
+
 import type { Player } from '../core/types.ts';
 import { LOOT } from '../../content/loot.ts';
 import type { Enemy, Pickup, Vector } from '../core/types.ts';
@@ -55,21 +55,7 @@ export function chestReward(pool: Pool<Pickup>, chest: Enemy, owner: string, ran
   if (random() < LOOT.chestFoodChance) dropLoot(pool, { x: chest.x, y: chest.y + 16 }, owner, 'food', LOOT.chestHeal);
 }
 export function largeChestReward(pool: Pool<Pickup>, chest: Enemy, player: Player, random: () => number): string {
-  dropLoot(pool, { x: chest.x - 18, y: chest.y }, player.id, 'berry', LOOT.largeBerries + Math.floor(random() * LOOT.largeBerryExtra));
-  dropLoot(pool, { x: chest.x + 18, y: chest.y }, player.id, 'xp', LOOT.largeXp);
-  let notice = 'Cofre: berries y experiencia en el suelo';
-  if (random() < LOOT.largeItemChance) {
-    const available = Object.keys(ITEMS).filter(id => !player.items[id]);
-    const id = available[Math.min(available.length - 1, Math.floor(random() * available.length))];
-    if (id && !Object.keys(player.items).length && equipItem(player, id)) notice += ` · ${ITEMS[id].name}`;
-    else if (id) {
-      const item = pool.acquire();
-      if (item) Object.assign(item, { x: chest.x, y: chest.y + 26, ownerId: player.id, kind: 'item', itemId: id, fruitId: undefined, value: 0, life: undefined, abilityId: undefined, level: undefined });
-    }
-  }
-  if (random() < LOOT.largeFruitChance) {
-    const fruit = pool.acquire();
-    if (fruit) Object.assign(fruit, { x: chest.x, y: chest.y - 24, ownerId: player.id, kind: 'fruit', fruitId: 'bomu', value: 0, life: undefined, abilityId: undefined, level: undefined });
-  }
-  return notice;
+  const ids=Object.keys(ITEMS),id=ids[Math.min(ids.length-1,Math.floor(random()*ids.length))];
+  // La recompensa se decide en Run para mostrar el modal incluso con el pool lleno.
+  void pool;void chest;void player;return id;
 }

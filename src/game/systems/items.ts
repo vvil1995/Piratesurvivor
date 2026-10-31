@@ -1,26 +1,30 @@
-import { ITEMS, ITEM_MAX_LEVEL, ITEM_SLOTS } from '../../content/items.ts';
-import type { StatModifiers } from '../../content/types.ts';
+import { ITEMS, ITEM_MAX_LEVEL, itemValue } from '../../content/items.ts';
 import type { Player } from '../core/types.ts';
 import { refreshStats } from './stats.ts';
-export function itemChoices(player: Player, random: () => number): string[] {
-  const candidates = Object.keys(ITEMS).filter(id => (player.items[id] ?? 0) < ITEM_MAX_LEVEL && (player.items[id] || Object.keys(player.items).length < ITEM_SLOTS));
-  for (let i = candidates.length - 1; i > 0; i--) { const j = Math.min(i, Math.floor(random() * (i + 1))); [candidates[i], candidates[j]] = [candidates[j], candidates[i]]; }
-  // Al agotarse las mejoras, completar tres opciones válidas con suministros.
-  return [...candidates, 'supplies-berries', 'supplies-heal', 'supplies-xp'].slice(0, 3);
+
+export function itemChoices(_player: Player, random: () => number): string[] {
+  const ids = Object.keys(ITEMS);
+  return [ids[Math.min(ids.length - 1, Math.floor(random() * ids.length))]];
+}
+function apply(player: Player): void {
+  const oldMaximum = player.stats.maxHp;
+  player.modifiers.items = {
+    armor: itemValue(player.items, 'vest'), range: itemValue(player.items, 'telescope'), damage: itemValue(player.items, 'whetstone'),
+  };
+  refreshStats(player); // Includes Haramaki relative to HP from all other sources.
+  player.hp = Math.min(player.stats.maxHp, player.hp + Math.max(0, player.stats.maxHp - oldMaximum));
+  player.itemState = undefined;
 }
 export function equipItem(player: Player, id: string): boolean {
-  if (!ITEMS[id] || (player.items[id] ?? 0) >= ITEM_MAX_LEVEL || !player.items[id] && Object.keys(player.items).length >= ITEM_SLOTS) return false;
+  if (!ITEMS[id] || (player.items[id] ?? 0) >= ITEM_MAX_LEVEL || (!player.items[id] && Object.keys(player.items).length > 0)) return false;
   player.items[id] = (player.items[id] ?? 0) + 1;
-  const modifiers: StatModifiers = {};
-  for (const [key, level] of Object.entries(player.items)) for (const [stat, value] of Object.entries(ITEMS[key].modifiers)) {
-    const name = stat as keyof StatModifiers; modifiers[name] = (modifiers[name] ?? 0) + value * level;
-  }
-  player.modifiers.items = modifiers; refreshStats(player); return true;
+  apply(player);
+  return true;
 }
-
 export function replaceItem(player: Player, id: string): boolean {
   if (!ITEMS[id]) return false;
-  const previous = player.items; player.items = {};
-  if (!equipItem(player, id)) { player.items = previous; return false; }
+  if (player.items[id]) return equipItem(player, id);
+  player.items = { [id]: 1 };
+  apply(player);
   return true;
 }

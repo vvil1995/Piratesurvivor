@@ -1,16 +1,29 @@
-# Integración pendiente de los diez objetos
+# Diez objetos especiales · beta 0.18
 
-Estado auditado: ocho objetos antiguos; equipamiento de una plaza y tres niveles, ventana de sustitución, modificadores centralizados y cofres procedurales con historial. El cofre grande todavía concede suministros y puede no conceder objeto; además equipa automáticamente el primer objeto. Hay que sustituir ese flujo por una única elección aleatoria y modal obligatorio.
+Implementados con los diez PNG recortados del original facilitado por el usuario. Una única plaza temporal, independiente de ataques y fruta. Cada objeto tiene tres niveles; tablas en `src/content/items.ts`.
 
-Integraciones necesarias:
-- `content/items.ts`: catálogo de diez y tablas por nivel, sin porcentajes lineales implícitos.
-- `systems/items.ts`: equipar/mejorar/reemplazar, recalcular una única fuente y curar solo el incremento positivo real de HP máximo.
-- `systems/loot.ts` y `core/run.ts`: cofre grande consumido una sola vez, exactamente un objeto y pausa; pequeños conservan XP/berries/comida.
-- `systems/hits.ts`: daño efectivo limitado a HP restante para robo de vida; distinguir impactos directos, áreas y daño periódico. Explosión secundaria sin recursión y con cooldown. Aturdimiento resistente en bosses.
-- Temporizadores y presupuestos de curación en el estado temporal del jugador; reiniciar al sustituir objeto. No guardar estos campos en entrenamiento permanente.
-- Recompensas de XP/berries: aplicar multiplicador del objeto además del permanente una sola vez al recoger.
-- `main.ts` y ventana existente: comparación de nivel/efecto actual y siguiente, mejorar solo hasta3, mantener/cambiar sin inventario. Icono y nivel en indicador existente.
+| Objeto | Efectos de niveles 1 / 2 / 3 |
+| --- | --- |
+| Barret de palla | −8 / 14 / 20% daño recibido |
+| Haramaki | +15 / 30 / 45% HP máximo, cura el incremento al equipar/mejorar |
+| Mandarines | +2 / 4 / 6 HP cada 5 s |
+| Tirador | +15 / 30 / 45% alcance efectivo |
+| Pedra | +8 / 16 / 24% daño |
+| Bossa | +20 / 35 / 50% berries recogidos |
+| Mapa | +10 / 20 / 30% XP recogida |
+| Pólvora | 5 / 10 / 15% de explosión |
+| Pèndol | 4 / 7 / 10% de aturdir |
+| Daga | 2 / 4 / 6% robo de vida del daño efectivo |
 
-Datos solicitados (niveles1/2/3): barret reducción8/14/20%; haramaki vida15/30/45%; mandarines2/4/6HP cada5s; tirador alcance15/30/45%; piedra daño8/16/24%; bolsa berries20/35/50%; mapa XP10/20/30%; pólvora probabilidad5/10/15%; péndulo4/7/10%; daga robo2/4/6%.
+Los barriles/cofres pequeños conservan suministros, sin objetos especiales. Los grandes requieren tres segundos de proximidad, conservan progreso al alejarse y se consumen antes de abrir el modal: exactamente un objeto aleatorio (10% cada uno), sin fruta, cartas ni botín adicional. No depende de que quede espacio en el pool de pickups. El historial existente impide reabrirlo al descargar y volver al chunk.
 
-Las animaciones pendientes de la tarea3 están sin publicar y no deben mezclarse con esta implementación. No se han incorporado sprites generados como sustitutos de los originales suministrados: la extracción exacta requiere el archivo original descargable. La vista previa del chat no permite comprobar sus bytes o transparencia originales.
+El modal pausa el combate y compara el actual con el hallazgo. Equipar, mantener, mejorar el mismo hasta3 o cambiar perdiendo el anterior. A nivel3 solo se puede mantener; el cofre queda consumido. No hay inventario. Icono original y nivel en el indicador existente, junto a los ataques. Se conserva al viajar y no se escribe en el guardado permanente; una nueva partida empieza sin objeto.
+
+Ajustes iniciales configurables en `ITEM_RULES`:
+- Explosión: 35% del daño realmente causado, radio72, descanso0,8s. Colisión circular y cobertura del mundo; máximo4 eventos pendientes, visual en pool existente. Daño secundario sin críticos, otros procs de objeto ni explosión de fruta al matar: sin cadenas.
+- Aturdimiento: 0,4s a enemigos comunes; bosses resisten con0,1s de interrupción del movimiento de aproximación, descanso global4s. No cancela sus avisos, cargas ni golpes ya iniciados, manteniendo sincronización y colisiones.
+- Robo de vida: máximo4HP por ventana de un segundo de simulación; áreas al25%. Solo daño efectivo, sin sobrecuración, sin overkill ni curación por golpear cofres. Los proyectiles directos mantienen eficacia completa. No hay daño periódico ofensivo implementado actualmente; su futuro ejecutor deberá marcar el impacto como área/periódico para aplicar la reducción.
+
+Las fuentes se recalculan, no se multiplican repetidamente. Se mantienen los límites globales existentes de defensa y daño. Los timers se pausan junto al combate y se reinician al cambiar/mejorar objeto. El Haramaki escala también con futuros incrementos de vida temporal, pero solo su equipamiento/mejora concede la curación adicional del objeto.
+
+Pruebas: ver `VALIDACION.md`. Equilibrio y rendimiento en teléfonos físicos siguen pendientes de sesiones reales.

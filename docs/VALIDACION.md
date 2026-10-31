@@ -328,3 +328,19 @@ Compilación con la base real y prueba de producción bajo subdirectorio aprobad
 Revisión de credenciales:690 blobs de texto históricos,0 coincidencias de patrones de alta confianza,0 objetos históricos pendientes. No hay .env versionados. Publicación efectiva de Pages pendiente de configuración manual y disponibilidad en el plan GitHub; no se afirma que la URL pública esté activa. Safari/móviles físicos no probados.
 
 Comprobación remota final: GitHub informa private=false, default_branch=main y has_pages=false. El repositorio ya figuraba público; no se ha cambiado su visibilidad ni activado Pages. La revisión final posterior a preparar los commits examinó707 blobs de texto, sin coincidencias de credenciales de alta confianza.
+
+## Beta0.18 · diez objetos de cofres con PNG original (2026-10-31)
+
+Sustituye los estados históricos de ocho objetos y botín automático. Extraído el PNG RGBA original del ZIP suministrado; transparencia real, diez recortes96×96 con vecino más cercano, sin redibujo. Galería inspeccionada y hashes comprobados automáticamente.
+
+- `npm run check`: correcto.
+- `npm test`:133/133. Añadidos casos para magnitudes, máximo3, reemplazo sin acumulación, HP incremental, curación cada5s, multiplicadores efectivos de recogida, explosión con cooldown/sin cadenas/daño efectivo, resistencia de boss, robo de vida sin overkill y con presupuesto/penalización de área. Viaje real tras Morgan conserva objeto; nueva partida lo elimina. Cofre grande3s pausa y entrega exactamente un objeto; pequeños siguen sin especiales y el historial impide reabrir.
+- Navegador Chromium, escritorio y móvil emulado horizontal: galerías de los diez sprites, cofre real, modal, equipar/mejorar/máximo/conservar/cambiar, indicador junto a ataques y combinación en dos toques. Prueba de regresión de Morgan/viaje ejecutada también. En una ejecución conjunta la entrada móvil al boss no mostró su panel a tiempo; la repetición aislada pasó. No se alteraron arena, cámara ni animaciones para ocultar esa incidencia.
+- Build de producción con `PAGES_BASE_PATH=/Piratesurvivor/` y smoke de Pages: correcto en escritorio/móvil, imports de cinco personajes, inicio/pausa, sin404, errores JS ni hook QA.
+- `npm run licenses`:19 paquetes verificados. Recursos suministrados registrados por separado, sin atribuirles licencia MIT.
+
+Pendiente: equilibrio durante partidas largas y validación en Android/iOS físicos (no se han medido FPS ni probado Safari real). El bundle principal conserva el aviso de tamaño de Vite; esta tarea no cambia la estrategia de carga ni el motor. El aturdimiento resistente del objeto solo interrumpe aproximación del boss, sin cancelar patrones ya anunciados. No hay ejecutor ofensivo de daño periódico todavía; al incorporarlo deberá utilizar el indicador de área/periódico para reducir el robo de vida.
+
+Repetición final conjunta sin modificar fuentes durante la ejecución:8/8 pruebas de navegador seleccionadas, incluidos Morgan y cofres tanto en escritorio como en móvil emulado.
+
+Ajuste final del modal en horizontal: composición compacta con dos columnas para sprite/descripción y botones de44px, reinicio del desplazamiento al abrir. Prueba específica repetida:2/2, comprobando además que la ventana cabe dentro del viewport. Fixture corregida para crear un cofre de prueba cuando la semilla aleatoria de inicio no contiene ninguno; no se aumenta la densidad del juego. Compilación/smoke repetidos después del ajuste.

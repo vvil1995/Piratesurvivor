@@ -47,9 +47,9 @@ test('cofre grande requiere tres segundos, pausa al alejarse y entrega botín si
   const tick = (n: number) => { for (let i = 0; i < n; i++) { r.enemies.clear(); r.update(1 / 60, { x: 0, y: 0 }); } };
   tick(60); assert.ok((large.openProgress ?? 0) > 0.9); assert.equal(r.status, 'playing');
   large.x += 100; const before = large.openProgress; tick(60); assert.equal(large.openProgress, before);
-  large.x -= 100; tick(121); assert.equal(r.status, 'playing'); assert.equal(large.active, false);
-  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'berry'));
-  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'xp'));
+  large.x -= 100; tick(121); assert.equal(r.status, 'item'); assert.equal(large.active, false);
+  assert.ok(r.pendingItem);
+  assert.equal(r.pickups.count, 0);
   assert.equal(Object.keys(r.player.items).length, 0);
   const count = r.pickups.count; tick(1); assert.ok(r.pickups.count <= count); // No vuelve a entregar.
 
@@ -57,11 +57,11 @@ test('cofre grande requiere tres segundos, pausa al alejarse y entrega botín si
 test('un único objeto, hasta tres niveles y sustitución sin acumular efectos', async () => {
   const { equipItem, itemChoices, replaceItem } = await import('../src/game/systems/items.ts');
   const r = new Run(), p = r.player;
-  for (let i = 0; i < 3; i++) assert.equal(equipItem(p, 'boots'), true);
-  assert.equal(equipItem(p, 'boots'), false); assert.equal(equipItem(p, 'whetstone'), false);
-  assert.deepEqual(itemChoices(p, () => 0), ['supplies-berries', 'supplies-heal', 'supplies-xp']);
+  for (let i = 0; i < 3; i++) assert.equal(equipItem(p, 'haramaki'), true);
+  assert.equal(equipItem(p, 'haramaki'), false); assert.equal(equipItem(p, 'whetstone'), false);
+  assert.equal(itemChoices(p, () => 0).length, 1);
   assert.equal(replaceItem(p, 'vest'), true); assert.deepEqual(p.items, { vest: 1 });
-  assert.equal(p.stats.speed, p.baseStats.speed); assert.equal(p.stats.armor, 0.06);
+  assert.equal(p.stats.speed, p.baseStats.speed); assert.equal(p.stats.armor, 0.08);
   assert.equal(replaceItem(p, 'invalid'), false); assert.deepEqual(p.items, { vest: 1 });
 });
 
@@ -85,15 +85,14 @@ test('cofres escasos: densidad determinista baja y sin duplicación al volver', 
   }
   assert.ok(small >= 60 && small <= 120, `${small} pequeños en270 chunks`); assert.ok(big > 0 && big < 25, `${big} grandes en270 chunks`);
 });
-test('botín grande: berries/XP, objeto nuevo ocasional sin mejorar equipado y fruta rara', () => {
-  const r = new Run(), chest = { x: r.player.x + 100, y: r.player.y } as never;
-  largeChestReward(r.pickups, chest, r.player, () => 0);
-  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'berry' && p.value >= 9));
-  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'xp' && p.value >= 28));
-  assert.ok(r.pickups.items.some(p => p.active && p.kind === 'fruit'));
-  const first = Object.keys(r.player.items)[0]; assert.equal(r.player.items[first], 1);
-  largeChestReward(r.pickups, chest, r.player, () => 0); assert.equal(r.player.items[first], 1);
-  assert.equal(r.status, 'playing');
+test('cada cofre grande entrega exactamente un objeto sin equipar ni botín adicional', async () => {
+  const { ITEMS } = await import('../src/content/items.ts');
+  const r = new Run(), chest = { x: 0, y: 0 } as never;
+  const ids = Object.keys(ITEMS);
+  for (let i = 0; i < ids.length; i++) {
+    assert.equal(largeChestReward(r.pickups, chest, r.player, () => (i + .5) / ids.length), ids[i]);
+    assert.deepEqual(r.player.items, {}); assert.equal(r.pickups.count, 0);
+  }
 });
 test('menjar cura sin superar HP y aproximadamente diez por ciento de rivales lo deja', () => {
   let drops = 0;

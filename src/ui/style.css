@@ -46,3 +46,6 @@
 
 /* La textura del mundo ya aporta detalle: no superponer scanlines al combate. */
 .in-run .grain{display:none}.hud-top{background:none!important}.player-status,.run-clock,.hud-actions{background:#102635e8;border:1px solid #526878;border-radius:6px;padding:6px}.hud-actions{align-self:flex-start}#attack-selection-label,#run-items{background:#102635e8;border-radius:3px;padding:3px 5px}
+
+#item-found .pixel-icon{width:80px;height:80px;object-fit:contain;image-rendering:pixelated}#item-found .dialog-card{max-height:90svh;overflow:auto}#item-found button{min-height:44px}
+@media(max-height:500px){#item-found .dialog-card{display:grid;grid-template-columns:64px 1fr;gap:6px;padding:14px;width:min(600px,94vw)}#item-found h2,#item-found button,#item-found small{grid-column:1/-1}#item-found h2{font-size:22px;margin:2px 0}#item-found .pixel-icon{width:64px;height:64px}#item-found p{font-size:12px;line-height:1.35;margin:2px 0;align-self:center}#item-found button{padding:10px;min-height:44px;margin:0}#item-found small{font-size:8px}}

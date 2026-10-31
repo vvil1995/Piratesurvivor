@@ -1,0 +1,106 @@
+{
+  "sourceSha256": "6c5eb23b79b06f87e2e8336fe0aa3084ba6f4106cbb7e8767a2bb611630dc5f6",
+  "realAlpha": true,
+  "items": {
+    "vest": {
+      "sha256": "81f52e3c5113e2c15ac155637cbcbed46e825050407285b4163fda7914f34c0a",
+      "sourceCell": 1,
+      "sourceRect": [
+        0,
+        0,
+        424,
+        370
+      ]
+    },
+    "haramaki": {
+      "sha256": "5cfc23b1a0612b2d778d4a8d367853fac9300ecd00636496809c6f7c77154af2",
+      "sourceCell": 2,
+      "sourceRect": [
+        424,
+        0,
+        824,
+        380
+      ]
+    },
+    "medicine": {
+      "sha256": "62c9f7792f97bba3909f701fc3c3e5a6a1c150c8e1e4958e8bdf55f37f7c401b",
+      "sourceCell": 3,
+      "sourceRect": [
+        824,
+        0,
+        1210,
+        371
+      ]
+    },
+    "telescope": {
+      "sha256": "7d80a77caff41de5df5f80b89511fdffeab9b14ea820d6f9662d97a53aa8d3aa",
+      "sourceCell": 4,
+      "sourceRect": [
+        1210,
+        0,
+        1616,
+        380
+      ]
+    },
+    "whetstone": {
+      "sha256": "90ed23cdd54ba3f0be6ceb031d8d62e8f57f8b6ab736c03e70a39e8c41765ffb",
+      "sourceCell": 5,
+      "sourceRect": [
+        1616,
+        0,
+        1983,
+        380
+      ]
+    },
+    "berries": {
+      "sha256": "ad63b83bde62f03b19a82bc6bba1dc0f6b2ac9bb1f3b3beb3d03c022d9dd6900",
+      "sourceCell": 6,
+      "sourceRect": [
+        0,
+        380,
+        410,
+        793
+      ]
+    },
+    "treasure": {
+      "sha256": "1c733a09cd24c631d8229f3fc8712b8136e719f1c3a662021fc2a155bc827ac3",
+      "sourceCell": 7,
+      "sourceRect": [
+        410,
+        380,
+        824,
+        793
+      ]
+    },
+    "powder": {
+      "sha256": "747292b23630fd093c97f5e9d7525dcfdf6a95ee9e7298d5af3dd765cb4c31a2",
+      "sourceCell": 8,
+      "sourceRect": [
+        824,
+        371,
+        1210,
+        793
+      ]
+    },
+    "pendulum": {
+      "sha256": "55ebd70999663091362da813e519353a65c244e3ca4347a29e67c5a92b6cf16e",
+      "sourceCell": 9,
+      "sourceRect": [
+        1210,
+        380,
+        1610,
+        793
+      ]
+    },
+    "dagger": {
+      "sha256": "c7155eec13c54117a43b5356775fc67b722eb03105baa1d1c2fcec840b81896a",
+      "sourceCell": 10,
+      "sourceRect": [
+        1610,
+        380,
+        1983,
+        793
+      ]
+    }
+  }
+}

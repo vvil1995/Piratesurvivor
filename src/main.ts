@@ -1,3 +1,4 @@
+import { itemDescription } from './content/items.ts';
 import { renderTraining } from './ui/training.ts';
 import { ITEMS } from './content/items.ts';
 import { itemImage } from './ui/item-art.ts';
@@ -36,10 +37,12 @@ function sync(): void {
   previousStatus = run.status;
   if (run.status !== 'playing') controller.reset();
   if (run.status === 'item') {
-    view.showModal('item-found'); const item = ITEMS[run.pendingItem!];
+    view.showModal('item-found'); el('item-found').querySelector('.dialog-card')!.scrollTop = 0; const item = ITEMS[run.pendingItem!];
     el('item-new-art').replaceChildren(itemImage(run.pendingItem!));
-    el('item-new-description').textContent = `${item.name}: ${item.description}`;
-    const previous = Object.keys(run.player.items)[0]; el('item-old-description').textContent = previous ? `Actual: ${ITEMS[previous].name}. Sustituirlo elimina su efecto.` : 'Espacio de objeto libre.';
+    el('item-new-description').textContent = `${item.name} · Nv.${Math.min(3,(run.player.items[run.pendingItem!]??0)+1)}: ${itemDescription(run.pendingItem!,Math.min(3,(run.player.items[run.pendingItem!]??0)+1))}${run.player.items[run.pendingItem!]===3?' · NIVEL MÁXIMO':''}`;
+    const same=run.player.items[run.pendingItem!]??0; el<HTMLButtonElement>('item-take').disabled=same>=3;el('item-take').textContent=same>=3?'Nivel máximo':same?'Mejorar al siguiente nivel':Object.keys(run.player.items).length?'Cambiar objeto':'Equipar objeto';
+    el('item-old-art').replaceChildren();
+    const previous = Object.keys(run.player.items)[0]; if(previous)el('item-old-art').append(itemImage(previous)); el('item-old-description').textContent = previous ? `Actual: ${ITEMS[previous].name} · Nv.${run.player.items[previous]} · ${itemDescription(previous,run.player.items[previous])}. Sustituirlo elimina su efecto.` : 'Espacio de objeto libre.';
   }
   else if (run.status === 'fruit') {
     view.showModal('fruit-found');
@@ -94,7 +97,7 @@ el('pause').addEventListener('click', pause);
 for (const [id, replace] of [['item-take', true], ['item-keep', false]] as const) el(id).addEventListener('click', () => { if (orientation.blocked || !run?.selectItem(replace)) return; previousStatus = ''; view.showModal(); sync(); });
 el('equipped-item').addEventListener('click', () => {
   const id = run && Object.keys(run.player.items)[0]; if (!run || !id || run.status !== 'playing' || orientation.blocked) return;
-  run.pause(); controller.reset(); sync(); el('item-info-art').replaceChildren(itemImage(id)); el('item-info-description').textContent = `${ITEMS[id].name} · Nv.${run.player.items[id]}/3 · ${ITEMS[id].description}`; view.showModal('item-info');
+  run.pause(); controller.reset(); sync(); el('item-info-art').replaceChildren(itemImage(id)); el('item-info-description').textContent = `${ITEMS[id].name} · Nv.${run.player.items[id]}/3 · ${itemDescription(id,run.player.items[id])}`; view.showModal('item-info');
 });
 el('item-info-close').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); previousStatus = ''; view.showModal(); sync(); });
 for (const [id, replace] of [['fruit-take', true], ['fruit-keep', false]] as const) el(id).addEventListener('click', () => { if (orientation.blocked || !run?.selectFruit(replace)) return; previousStatus = ''; view.showModal(); sync(); });

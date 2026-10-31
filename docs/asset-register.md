@@ -156,3 +156,11 @@ Suelo naval original: `exec-942d9d6c-6518-4bdb-9496-cb84803aeb96.png`, reducido 
 Recursos originales generados a partir de los sprites propios existentes, sin descargas externas. Fuentes en `/workspace/generated_images`: espadachín `exec-3cb64a56-b603-40d8-83e6-28d12f3771ec.png`, tirador `exec-1129340d-9bf7-4e73-b7e9-3aff2fbddc2a.png`, pesado `exec-189cf55e-3700-4a54-9889-a50e863efc63.png`, Morgan `exec-d45b275f-7d1a-4795-ae89-9615cea28ee7.png`.
 
 Atlas de piratas768×480: ocho direcciones, cuatro pasos y una pose de ataque por dirección. Morgan512×512: dos orientaciones de cuatro pasos y ocho poses de reposo/acción/daño/derrota. Arma independiente conservada. Preparación: recorte por celda, escala común por actor, pies alineados, vecino más cercano y PNG indexado. SHA-256/tamaños en `src/assets/motion/manifest.json`. Sin inversión horizontal en ejecución. Los derechos de One Piece no se conceden por generar estas imágenes; no se presentan como recursos oficiales ni MIT.
+
+## Objetos especiales proporcionados por el usuario · beta0.18
+
+Fuente: `one_piece_survivor_assets.zip`, PNG `one_piece_survivor_10_items.png`,1983×793 RGBA. SHA-256 original: `6c5eb23b79b06f87e2e8336fe0aa3084ba6f4106cbb7e8767a2bb611630dc5f6`. Transparencia alfa real: no se ha eliminado un fondo negro ni regenerado/redibujado el arte.
+
+Diez recortes PNG RGBA96×96 en `src/assets/items/`, centrados con márgenes transparentes y silueta máxima88×88 mediante vecino más cercano, sin suavizado ni recoloración. Orden: barret, haramaki, mandarines, tirador, piedra, bolsa, mapa, pólvora, péndulo, daga. `manifest.json` registra celda, rectángulo de origen y SHA-256 de cada archivo. Se usan tanto en ventanas HTML como en texturas de Phaser; no hay emojis ni descargas remotas.
+
+Uso solicitado expresamente por el usuario para este proyecto. No se ha proporcionado una licencia redistribuible ni autoría independiente; estos recursos no se declaran MIT ni assets oficiales. Los derechos de One Piece siguen reservados a sus titulares. Mantenerlos separados del código facilita su sustitución si se necesita acreditar una licencia de distribución.

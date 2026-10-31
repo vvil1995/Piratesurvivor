@@ -1,8 +1,8 @@
+import { ITEM_IMAGES } from '../../ui/item-art.ts';
 import { createIslandArt } from './island-art.ts';
 import { createPirateArt } from './pirate-art.ts';
 import Phaser from 'phaser';
 import { createPackedDirectionalArt } from './directional-art.ts';
-import { itemCanvases } from '../../ui/item-art.ts';
 import { registerArt } from '../../ui/pixel-art.ts';
 import { rasterizeArt } from '../../ui/pixel-art.ts';
 
@@ -10,7 +10,6 @@ import { rasterizeArt } from '../../ui/pixel-art.ts';
 export function createTextures(scene: Phaser.Scene): void {
   const art = rasterizeArt(scene.textures.get('source-atlas').getSourceImage() as HTMLImageElement);
   for (const [name, canvas] of art) scene.textures.addCanvas(name, canvas);
-  for (const [name, canvas] of itemCanvases()) { scene.textures.addCanvas(name, canvas); registerArt(name, canvas); }
   createPackedDirectionalArt(scene, 'luffy-directions-source', 'straw-hat');
   createPackedDirectionalArt(scene, 'marine-directions-source', 'marine');
   createPirateArt(scene);
@@ -87,4 +86,5 @@ export function createTextures(scene: Phaser.Scene): void {
   for (let y = 12; y < 64; y += 16) { g.lineBetween(0, y, 64, y); const x = y % 32 ? 16 : 32; g.lineBetween(x, y, x, y + 16); }
   g.generateTexture('wall', 64, 64); g.destroy();
   createIslandArt(scene);
+  for(const id of Object.keys(ITEM_IMAGES)){const source=scene.textures.get('item-source-'+id).getSourceImage() as HTMLImageElement;const c=document.createElement('canvas');c.width=c.height=96;c.getContext('2d')!.drawImage(source,0,0);scene.textures.addCanvas('item-'+id,c);registerArt('item-'+id,c);scene.textures.remove('item-source-'+id);}
 }

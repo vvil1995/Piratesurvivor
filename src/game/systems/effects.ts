@@ -67,7 +67,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
         const factor = d <= area.radius + enemy.radius ? 1 : d <= area.shockRadius + enemy.radius ? 0.55 : 0;
         if (factor && world.segmentClear(area.x, area.y, enemy.x, enemy.y, 2, 'attack')) {
           if (area.status) applyStatus(enemy, area.status, area.statusDuration ?? 0.5);
-          damageEnemy(owner, enemy, area.damage * factor, area.knockback, area, world, e => onKill(e, owner.id), random);
+          damageEnemy(owner, enemy, area.damage * factor, area.knockback, area, world, e => onKill(e, owner.id), random, true);
         }
       });
     }
@@ -113,7 +113,7 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
         if (params?.splash) grid.visit(enemy.x, enemy.y, params.splash + 15, other => {
           if (!other.active || bullet.hit.has(other.id) || Math.hypot(other.x - enemy.x, other.y - enemy.y) > params.splash! + other.radius || !world.segmentClear(enemy.x, enemy.y, other.x, other.y, 2, 'attack')) return;
           bullet.hit.add(other.id); applySkillHit(owner, other, params);
-          damageEnemy(owner, other, bullet.damage * 0.7, params.knockback, enemy, world, e => onKill(e, owner.id), random); chain(other);
+          damageEnemy(owner, other, bullet.damage * 0.7, params.knockback, enemy, world, e => onKill(e, owner.id), random, true); chain(other);
         });
         if ((bullet.bounces ?? 0) > 0) {
           let next: Enemy | undefined, best = 160;

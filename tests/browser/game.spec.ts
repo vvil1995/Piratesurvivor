@@ -550,11 +550,12 @@ test('retrato frontal y cofres pequeños/grandes con botín directo y guardado d
     Object.assign(chest, { active: true, large: true, openProgress: 2.99, x: p.x, y: p.y });
     r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); qa.draw();
   });
-  await expect(page.locator('#loot-notice')).toContainText('Cofre');
+  await expect(page.locator('#item-found')).toBeVisible();
+  await page.locator('#item-keep').click();
   expect(await page.locator('#chest-reward').count()).toBe(0);
   expect(await page.locator('#chest-options').count()).toBe(0);
   await page.evaluate(() => { const qa = window.__OPS_QA__!, r = qa.getRun()!; r.update(1 / 60, { x: 0, y: 0 }); qa.tick(); });
-  const coins = await page.evaluate(() => window.__OPS_QA__!.store.progress.coins); expect(coins).toBeGreaterThanOrEqual(16);
+  const coins = await page.evaluate(() => window.__OPS_QA__!.store.progress.coins); expect(coins).toBeGreaterThanOrEqual(7);
   expect(await page.evaluate(() => Object.keys(window.__OPS_QA__!.getRun()!.player.items).length)).toBe(0);
   await page.reload(); await expect(page.locator('#loading')).toBeHidden();
   expect(await page.evaluate(() => window.__OPS_QA__!.store.progress.coins)).toBe(coins);
@@ -649,10 +650,10 @@ test('pareja en dos toques con recompensa de jefe y objeto único visible junto 
   await page.evaluate(async () => {
     const loadout = '/src/game/systems/loadout.ts', items = '/src/game/systems/items.ts';
     const { improveAttack } = await import(/* @vite-ignore */ loadout), { equipItem } = await import(/* @vite-ignore */ items);
-    const qa = window.__OPS_QA__!, r = qa.getRun()!; improveAttack(r.player, 'gatling'); r.grantCombinationReward(); equipItem(r.player, 'boots'); qa.tick();
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; improveAttack(r.player, 'gatling'); r.grantCombinationReward(); equipItem(r.player, 'vest'); qa.tick();
   });
-  await expect(page.locator('#equipped-item')).toContainText('Botes');
-  await expect.poll(() => page.locator('#equipped-item img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 24)).toBe(true);
+  await expect(page.locator('#equipped-item')).toContainText('Barret');
+  await expect.poll(() => page.locator('#equipped-item img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 96)).toBe(true);
   const attacks = await page.locator('#attack-slots').boundingBox(), item = await page.locator('#equipped-item').boundingBox();
   expect(item!.x).toBeGreaterThanOrEqual(attacks!.x + attacks!.width); expect(item!.x + item!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
   await page.locator('#manage-abilities').click(); await expect(page.locator('.combination-card')).toHaveCount(2);
@@ -669,7 +670,7 @@ test('pareja en dos toques con recompensa de jefe y objeto único visible junto 
     r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
   });
   await offer(); await expect(page.locator('#item-found')).toBeVisible(); await page.locator('#item-keep').click();
-  await expect(page.locator('#equipped-item')).toContainText('Botes');
+  await expect(page.locator('#equipped-item')).toContainText('Barret');
   await offer(); await page.locator('#item-take').click(); await expect(page.locator('#equipped-item')).toContainText('Pedra');
   expect(await page.evaluate(() => Object.keys(window.__OPS_QA__!.getRun()!.player.items))).toEqual(['whetstone']);
   await page.screenshot({ path: info.outputPath('equipped-item.png') });
@@ -943,4 +944,29 @@ test('ciclos reales de cuatro pasos y poses de daño/derrota de Morgan',async({p
   const result:string[]=[];for(let i=0;i<12;i++){b.body.x+=10;qa.draw(100);result.push(qa.metrics().bossTexture!);}b.body.flash=.15;qa.draw(100);const hurt=qa.metrics().bossTexture;b.body.flash=0;b.defeated();qa.draw(100);const kneel=qa.metrics().bossTexture;b.elapsed=.6;qa.draw(100);return{frames:result,hurt,kneel,fall:qa.metrics().bossTexture};
  });expect(new Set(boss.frames).size).toBe(4);expect(boss.hurt).toBe('morgan-pose-13');expect(boss.kneel).toBe('morgan-pose-14');expect(boss.fall).toBe('morgan-pose-15');
  await page.screenshot({path:info.outputPath('morgan-fall.png')});
+});
+
+test('diez sprites originales y cofre grande: equipar, mejorar, máximo y reemplazo', async ({ page }, info) => {
+  await page.locator('#start').click(); await isolateWalk(page);
+  await page.evaluate(async () => {
+    const path='/src/ui/item-art.ts', { ITEM_IMAGES }=await import(/* @vite-ignore */ path);
+    const gallery=document.createElement('div');gallery.id='item-gallery';gallery.style.cssText='position:fixed;inset:0;z-index:99999;background:#24333f;display:grid;grid-template-columns:repeat(5,1fr);align-content:center;gap:12px';
+    for(const [id,src] of Object.entries(ITEM_IMAGES)){const img=document.createElement('img');img.src=src as string;img.alt=id;img.style.cssText='width:100%;max-width:120px;image-rendering:pixelated';gallery.append(img);}
+    document.body.append(gallery);
+  });
+  await expect.poll(()=>page.locator('#item-gallery img').evaluateAll(images=>images.every(img=>(img as HTMLImageElement).complete&&(img as HTMLImageElement).naturalWidth===96))).toBe(true);
+  await expect(page.locator('#item-gallery img')).toHaveCount(10);await page.screenshot({path:info.outputPath('ten-original-items.png')});await page.locator('#item-gallery').evaluate(e=>e.remove());
+  // Abrir el cofre real, sin pasar por la recogida antigua de objetos.
+  await page.evaluate(()=>{const qa=window.__OPS_QA__!,r=qa.getRun()!,c=r.chests.active[0]??{id:-999,kind:'chest',radius:14,hp:24,maxHp:24,speed:0,damage:0,xp:0,flash:0,x:0,y:0,active:false,large:true,openProgress:0};if(!r.chests.active.length)r.chests.active.push(c as typeof r.chests.active[number]);c.active=true;c.large=true;c.x=r.player.x;c.y=r.player.y;c.openProgress=2.99;r.update(1/60,{x:0,y:0});qa.tick();});
+  await expect(page.locator('#item-found')).toBeVisible();
+  expect(await page.evaluate(()=>Object.keys(window.__OPS_QA__!.getRun()!.player.items).length)).toBe(0);
+  await page.locator('#item-take').click();await expect(page.locator('#item-found')).toBeHidden();
+  const equipped=await page.evaluate(()=>Object.keys(window.__OPS_QA__!.getRun()!.player.items)[0]);
+  const offer=async(id:string)=>{await page.evaluate(id=>{const qa=window.__OPS_QA__!,r=qa.getRun()!;r.pendingItem=id;r.status='item';qa.tick();},id);await expect(page.locator('#item-found')).toBeVisible();};
+  for(let level=2;level<=3;level++){await offer(equipped);await expect(page.locator('#item-take')).toContainText('Mejorar');await page.locator('#item-take').click();expect(await page.evaluate(id=>window.__OPS_QA__!.getRun()!.player.items[id],equipped)).toBe(level);}
+  await offer(equipped);await expect(page.locator('#item-take')).toBeDisabled();await page.locator('#item-keep').click();
+  const next=equipped==='vest'?'haramaki':'vest';await offer(next);await expect(page.locator('#item-old-art img')).toHaveCount(1);
+  const card=await page.locator('#item-found .dialog-card').boundingBox();expect(card!.y).toBeGreaterThanOrEqual(0);expect(card!.y+card!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
+  await page.screenshot({path:info.outputPath('item-comparison.png')});await page.locator('#item-take').click();
+  expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.player.items)).toEqual({[next]:1});
 });

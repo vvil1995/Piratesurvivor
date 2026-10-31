@@ -1,3 +1,4 @@
+import { ITEM_IMAGES } from '../../ui/item-art.ts';
 import { EnemyDeaths } from './enemy-motion.ts';
 import { arenaCamera } from './arena-camera.ts';
 import { preloadIslandArt } from './island-art.ts';
@@ -75,6 +76,7 @@ export class BattleScene extends Phaser.Scene {
   }
   preload(): void {
     preloadIslandArt(this);
+    for(const [id,url] of Object.entries(ITEM_IMAGES))this.load.image('item-source-'+id,url);
     this.load.image('source-atlas', atlasUrl);
     this.load.image('luffy-directions-source', luffyDirectionsUrl);
     this.load.image('marine-directions-source', marineDirectionsUrl);
@@ -221,7 +223,7 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const area of run.areas.items) if (area.active) {
         const x = area.x - origin.x, y = area.y - origin.y;
-        if (area.visual === 'bomu-explosion') {
+        if (area.visual === 'bomu-explosion' || area.visual === 'item-explosion') {
           const alpha = Math.max(0, area.life / 0.3), radius = area.radius * (area.triggered ? Math.min(1, 0.4 + (0.3 - area.life) * 5) : 0.2);
           this.effects.fillStyle(0xe28a48, alpha * 0.35); this.effects.fillCircle(x, y, radius);
           this.effects.lineStyle(3, 0xffd89b, alpha);

@@ -39,7 +39,7 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
   const damage = (enemy: Enemy, multiplier = 1) => {
     if (!enemy.active || hit.has(enemy.id)) return;
     hit.add(enemy.id); applySkillHit(player, enemy, params);
-    damageEnemy(player, enemy, player.stats.damage * params.damage * multiplier, params.knockback, player, world, onKill, random);
+    damageEnemy(player, enemy, player.stats.damage * params.damage * multiplier, params.knockback, player, world, onKill, random, !['line','focus','burst'].includes(ability.behavior)||params.shape==='cone'||params.splash>0);
   };
   for (const enemy of victims.slice(0, params.hits)) damage(enemy);
   if (params.splash) grid.visit(impactX, impactY, params.splash + 15, enemy => {
@@ -72,7 +72,7 @@ export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionW
         grid.visit(player.x, player.y, radius + 15, enemy => {
           const dx = enemy.x - player.x, dy = enemy.y - player.y, d = Math.max(1, Math.hypot(dx, dy));
           if (d > radius + enemy.radius || !world.segmentClear(player.x, player.y, enemy.x, enemy.y, 2, 'attack')) return;
-          if (params.damage > 0) damageEnemy(player, enemy, player.stats.damage * params.damage, 0, player, world, onKill, random);
+          if (params.damage > 0) damageEnemy(player, enemy, player.stats.damage * params.damage, 0, player, world, onKill, random, true);
           if (!enemy.active || enemy.kind) return;
           if (params.launch) {
             const ux = d > 1 ? dx / d : Math.cos(player.facing), uy = d > 1 ? dy / d : Math.sin(player.facing);

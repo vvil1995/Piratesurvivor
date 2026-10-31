@@ -45,9 +45,9 @@ test('pareja por recompensa de jefe funciona con menos de cinco y se consume una
   r.openCombinations(); assert.equal(r.joinPair(0, 1), false); r.cancelCombinations();
 });
 test('recoger otro objeto permite conservar o reemplazar, siempre un solo efecto equipado', () => {
-  const r = new Run(), p = r.player; equipItem(p, 'boots'); const speed = p.stats.speed;
+  const r = new Run(), p = r.player; equipItem(p, 'vest'); const armor = p.stats.armor;
   const offer = () => { const item = r.pickups.acquire()!; Object.assign(item, { x: p.x, y: p.y, kind: 'item', itemId: 'whetstone', value: 0 }); r.update(1 / 60, axis); };
-  offer(); assert.equal(r.status, 'item'); assert.deepEqual(p.items, { boots: 1 }); r.selectItem(false); assert.equal(p.stats.speed, speed);
-  offer(); assert.equal(r.selectItem(true), true); assert.deepEqual(p.items, { whetstone: 1 }); assert.equal(p.stats.speed, p.baseStats.speed);
+  offer(); assert.equal(r.status, 'item'); assert.deepEqual(p.items, { vest: 1 }); r.selectItem(false); assert.equal(p.stats.armor, armor);
+  offer(); assert.equal(r.selectItem(true), true); assert.deepEqual(p.items, { whetstone: 1 }); assert.equal(p.stats.armor, p.baseStats.armor);
   assert.ok(p.stats.damage > p.baseStats.damage); assert.equal(r.selectItem(true), false); assert.deepEqual(new Run().player.items, {});
 });

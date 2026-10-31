@@ -75,7 +75,7 @@ test('arena cerrada, fases configurables y refuerzos limitados lejos del jugador
   assert.ok(r.enemies.count >= 3);
 });
 test('victoria cancela peligros, recompensa una combinación y transición conserva la build y HP', () => {
-  const r = new Run(); improveAttack(r.player, 'bazooka'); equipItem(r.player, 'boots'); r.player.hp = 73; r.player.xp = 3;
+  const r = new Run(); improveAttack(r.player, 'bazooka'); equipItem(r.player, 'vest'); r.player.hp = 73; r.player.xp = 3;
   r.player.attacks[0].activeFor = 2; r.player.attacks[0].cooldown = 1e6;
   r.beginMorgan(); assert.equal(r.player.hp, 73); const boss = r.encounter!;
   boss.body.x = r.player.x + 50; boss.body.y = r.player.y; boss.body.hp = 1; boss.prepare(MORGAN_ATTACKS[0], r.player, r.world);

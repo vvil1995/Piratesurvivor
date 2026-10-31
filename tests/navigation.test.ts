@@ -29,7 +29,7 @@ test('carta: no antes de05:00, posición transitable y alcanzable, proximidad y 
 });
 test('travesía por carta conserva build, pausa reloj/combate y permite pausa/reanudación', () => {
   const r = new Run('luffy', 0, () => 0.5); r.time = 301; r.route.signal = { ...r.player };
-  improveAttack(r.player, 'bazooka'); equipItem(r.player, 'boots'); r.player.fruit = 'bomu'; r.player.collectedBerries = 17;
+  improveAttack(r.player, 'bazooka'); equipItem(r.player, 'vest'); r.player.fruit = 'bomu'; r.player.collectedBerries = 17;
   r.update(1 / 60, axis); assert.equal(r.status, 'voyage'); assert.equal(r.voyage?.destination, 'morgan');
   const before = snapshot(r), hp = r.player.hp, time = r.time;
   r.pause(); step(r, 5); assert.equal(r.voyage!.elapsed, 0); r.resume(); assert.equal(r.status, 'voyage');
@@ -39,7 +39,7 @@ test('travesía por carta conserva build, pausa reloj/combate y permite pausa/re
 });
 test('derrota de Morgan vuelve al mismo Shells Town con25HP, conserva build y permite otro intento nuevo', () => {
   const r = new Run('luffy', 0, () => 0.5), world = r.world;
-  improveAttack(r.player, 'bazooka'); equipItem(r.player, 'boots'); r.player.fruit = 'bomu'; r.player.level = 12; r.player.xp = 3; r.player.collectedBerries = 99;
+  improveAttack(r.player, 'bazooka'); equipItem(r.player, 'vest'); r.player.fruit = 'bomu'; r.player.level = 12; r.player.xp = 3; r.player.collectedBerries = 99;
   r.beginMorgan(); r.player.attacks.forEach(a => a.cooldown = 1e6); r.player.hp = 0;
   const before = snapshot(r), oldBoss = r.encounter;
   r.update(1 / 60, axis); assert.equal(r.result(), undefined); assert.equal(r.encounter!.telegraph, undefined);
