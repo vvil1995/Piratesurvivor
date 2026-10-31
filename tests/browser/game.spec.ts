@@ -817,4 +817,11 @@ test('34 iconos propios distintos, buffs legibles y barril/muslo/cofre reconocib
     const bullet = r.projectiles.acquire()!; Object.assign(bullet, { x: p.x + 40, y: p.y - 70, vx: 120, vy: 40, hostile: true, life: 3, radius: 3 }); qa.draw();
   });
   await page.screenshot({ path: info.outputPath('barrel-food-rifle.png') });
+  await page.evaluate(async () => {
+    const path = '/src/game/systems/progression.ts', { chooseUpgrades } = await import(/* @vite-ignore */ path);
+    const qa = window.__OPS_QA__!, r = qa.getRun()!; r.player.choices = chooseUpgrades({}, () => .99, r.player); r.status = 'levelup'; qa.tick();
+  });
+  await expect(page.locator('#levelup')).toBeVisible();
+  expect(await page.locator('.upgrade-card').evaluateAll(cards => cards.every(card => card.querySelector('img')!.getBoundingClientRect().bottom <= card.querySelector('h3')!.getBoundingClientRect().top - 2))).toBe(true);
+  await page.screenshot({ path: info.outputPath('buff-cards.png') });
 });
