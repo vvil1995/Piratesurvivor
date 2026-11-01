@@ -104,7 +104,15 @@ el('equipped-item').addEventListener('click', () => {
 el('item-info-close').addEventListener('click', () => { if (orientation.blocked) return; run?.resume(); previousStatus = ''; view.showModal(); sync(); });
 for (const [id, replace] of [['fruit-take', true], ['fruit-keep', false]] as const) el(id).addEventListener('click', () => { if (orientation.blocked || !run?.selectFruit(replace)) return; previousStatus = ''; view.showModal(); sync(); });
 el('voyage-pause').addEventListener('click', pause);
+el('attack-slots').addEventListener('pointerdown', event => {
+  if (event.pointerType === 'mouse' || event.button !== 0) return;
+  const slot = (event.target as Element).closest<HTMLButtonElement>('button[data-slot]');
+  if (!slot || slot.disabled || orientation.blocked) return;
+  event.preventDefault(); event.stopPropagation();
+  if (run?.selectSlot(Number(slot.dataset.slot))) view.hud(run);
+});
 el('attack-slots').addEventListener('click', event => {
+  if(event instanceof PointerEvent && event.pointerType && event.pointerType !== 'mouse') return;
   const slot = (event.target as Element).closest<HTMLButtonElement>('button[data-slot]');
   if (slot && !orientation.blocked && run?.selectSlot(Number(slot.dataset.slot))) { view.hud(run); slot.blur(); }
 });

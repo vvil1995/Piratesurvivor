@@ -19,7 +19,7 @@ import { inDanger } from '../src/game/bosses/telegraphs.ts';
 const axis={x:0,y:0},noop=()=>{},a=(id:string)=>KRIEG_ATTACKS.find(a=>a.id===id)!;
 const step=(r:Run,seconds:number)=>{for(let i=0;i<Math.ceil(seconds*60);i++)r.update(1/60,axis);};
 function baratie(id='luffy',seed=42,beforeSail?:(r:Run)=>void){
- const r=new Run(id,0,()=>.5,{seed});r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.defeated();step(r,1.4);r.sailToSyrup();step(r,3.1);r.beginKuro();r.kuroDefeated=true;r.encounter!.defeated();step(r,1.4);r.finishCombinations();assert.equal(r.zone,'kuro-arena');beforeSail?.(r);assert.ok(r.sailToBaratie());for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);assert.equal(r.zone,'baratie');r.player.hurtTimer=1e6;return r;
+ const r=new Run(id,0,()=>.5,{seed});r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.defeated();step(r,1.4);r.finishCombinations();r.sailToSyrup();step(r,3.1);r.beginKuro();r.kuroDefeated=true;r.encounter!.defeated();step(r,1.4);r.finishCombinations();assert.equal(r.zone,'kuro-arena');beforeSail?.(r);assert.ok(r.sailToBaratie());for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);assert.equal(r.zone,'baratie');r.player.hurtTimer=1e6;return r;
 }
 function tick(b:KriegEncounter,p:Run['player'],seconds:number,w=new ArenaWorld(42,KRIEG_ARENA,'baratie')){for(let t=0;t<seconds-1e-8;t+=.01){p.hurtTimer=Math.max(0,p.hurtTimer-.01);b.tick(Math.min(.01,seconds-t),p,w,()=>axis,noop);}}
 test('flota: determinismo, puentes compartidos y todos los claros conectados en243chunks',()=>{

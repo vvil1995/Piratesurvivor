@@ -511,7 +511,7 @@ export class Run {
         if(this.zone==='buggy-arena'||this.zone==='kuro-arena'||this.zone==='krieg-arena'||this.zone==='arlong-arena'){
           const first=!this.exitSignal;this.placeExit();
           if(first){this.lootNotice=this.zone==='buggy-arena'?'Buggy derrotado · camina hasta el Log Pose para navegar a Syrup.':this.zone==='arlong-arena'?'Arlong derrotado · East Blue completado. Unión ganada y Log Pose hacia Roger.':this.zone==='krieg-arena'?'Don Krieg derrotado · unión ganada. Camina hasta el Log Pose para navegar a Arlong Park.':'Kuro derrotado · unión ganada. Camina hasta el Log Pose para navegar a Baratie.';this.lootNoticeFor=8;
-            if(this.zone==='kuro-arena'||this.zone==='krieg-arena'||this.zone==='arlong-arena'){this.openCombinations();this.bossCombinationReward=true;return;}}
+            if(this.zone==='buggy-arena'||this.zone==='kuro-arena'||this.zone==='krieg-arena'||this.zone==='arlong-arena'){this.openCombinations();this.bossCombinationReward=true;return;}}
           if(this.exitSignal&&Math.hypot(this.player.x-this.exitSignal.x,this.player.y-this.exitSignal.y)<=MORGAN_ROUTE.radius){if(this.zone==='buggy-arena')this.sailToSyrup();else if(this.zone==='kuro-arena')this.sailToBaratie();else if(this.zone==='krieg-arena')this.sailToArlong();else this.sailToRoger();}
           return;
         }

@@ -753,6 +753,7 @@ test('Buggy: carta de Orange, cuatro avisos legibles, victoria y llegada a Syrup
     r.player.attacks[0].cooldown = 0; r.update(1 / 60, { x: 0, y: 0 }); qa.tick();
   });
   await expect.poll(()=>page.evaluate(()=>!!window.__OPS_QA__!.getRun()!.exitSignal)).toBe(true);
+  await expect(page.locator('#combinations')).toBeVisible();await page.locator('#combination-done').click();
   expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.zone)).toBe('buggy-arena');
   await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;Object.assign(r.player,r.exitSignal);r.update(1/60,{x:0,y:0});q.tick();});
   await expect(page.locator('#voyage-title')).toContainText('SYRUP VILLAGE');
@@ -1184,6 +1185,7 @@ test('Syrup completo: viaje voluntario, tres piratas, seis patrones de Kuro y Ba
   r.beginBuggy();r.encounter!.body.x=r.player.x+40;r.encounter!.body.y=r.player.y;r.encounter!.body.hp=1;r.player.attacks[0].cooldown=0;
   for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.update=()=>{};q.draw();q.tick();
  });
+ await expect(page.locator('#combinations')).toBeVisible();await page.locator('#combination-done').click();
  await expect(page.locator('#navigation-hint')).toContainText('SYRUP VILLAGE');
  expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.zone)).toBe('buggy-arena');await page.screenshot({path:info.outputPath('syrup-voluntary-exit.png')});
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=Object.getPrototypeOf(r).update;Object.assign(r.player,r.exitSignal);r.update(1/60,{x:0,y:0});q.tick();});
@@ -1233,7 +1235,7 @@ test('HUD minimalista compartido: tres bosses sin panel ni textos secundarios, m
    const q=window.__OPS_QA__!,r=q.getRun()!;r.update=Object.getPrototypeOf(r).update;
    if(id==='morgan')r.beginMorgan();
    else if(id==='buggy'){r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();}
-   else {r.buggyDefeated=true;r.encounter!.defeated();for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.sailToSyrup();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.beginKuro();}
+   else {r.buggyDefeated=true;r.encounter!.defeated();for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.finishCombinations();r.sailToSyrup();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.beginKuro();}
    r.player.hurtTimer=1e6;r.update=()=>{};q.draw();q.tick();
   },boss);
   await expect(page.locator('#boss-name')).toHaveText(boss==='morgan'?'AXE-HAND MORGAN':boss==='buggy'?'BUGGY':'CAPITÀ KURO');
@@ -1260,7 +1262,7 @@ test('Baratie completo: Log Pose voluntario, flota conectada, Krieg seis patrone
  await page.locator('#start').click();const zoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
  await page.evaluate(()=>{
   const q=window.__OPS_QA__!,r=q.getRun()!;r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.defeated();
-  for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.sailToSyrup();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.beginKuro();
+  for(let i=0;i<90;i++)r.update(1/60,{x:0,y:0});r.finishCombinations();r.sailToSyrup();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.beginKuro();
   r.player.hp=70;r.player.level=42;r.player.xp=9;r.player.collectedBerries=321;r.player.hurtTimer=10;
   r.encounter!.body.hp=1;r.encounter!.body.x=r.player.x+35;r.encounter!.body.y=r.player.y;r.player.attacks[0].cooldown=0;
   for(let i=0;i<100&&r.status==='playing';i++)r.update(1/60,{x:0,y:0});r.update=()=>{};q.draw();q.tick();
@@ -1311,7 +1313,7 @@ test('Arlong Park completo: canales, hombres-pez, seis ataques, furia y Roger pe
  await page.locator('#start').click();const zoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,axis={x:0,y:0};
   const voyage=()=>{for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);};const wait=()=>{for(let i=0;i<90;i++)r.update(1/60,axis);};
-  r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.defeated();wait();r.sailToSyrup();voyage();r.beginKuro();r.kuroDefeated=true;r.encounter!.defeated();wait();r.finishCombinations();r.sailToBaratie();voyage();r.beginKrieg();
+  r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.defeated();wait();r.finishCombinations();r.sailToSyrup();voyage();r.beginKuro();r.kuroDefeated=true;r.encounter!.defeated();wait();r.finishCombinations();r.sailToBaratie();voyage();r.beginKrieg();
   r.player.hp=70;r.player.level=45;r.player.xp=9;r.player.collectedBerries=456;r.player.hurtTimer=10;r.encounter!.body.hp=1;r.encounter!.body.x=r.player.x+35;r.encounter!.body.y=r.player.y;r.player.attacks[0].cooldown=0;
   for(let i=0;i<100&&r.status==='playing';i++)r.update(1/60,axis);r.update=()=>{};q.draw();q.tick();
  });
@@ -1373,4 +1375,16 @@ test('Roger final: viaje voluntario, seis acciones, cinco invocados, marcador y 
  await expect(page.locator('#result-title')).toContainText('EL REY DE LOS PIRATAS');await expect(page.locator('#roger-results')).toContainText('12.345');await page.screenshot({path:info.outputPath('roger-results-records.png')});
  const titleBox=await page.locator('#result-title').boundingBox();expect(titleBox?.y).toBeGreaterThanOrEqual(0);
  expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.rogerRecords?.global.damage)).toBe(12345);await page.reload();await expect(page.locator('#loading')).toBeHidden();expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.rogerRecords?.characters.luffy.damage)).toBe(12345);expect(errors).toEqual([]);
+});
+
+test('selección de habilidad responde a un solo toque y al inicio del contacto',async({page,isMobile})=>{
+ await page.locator('#start').click();
+ await page.evaluate(async()=>{const path='/src/game/systems/loadout.ts',{improveAttack}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!;improveAttack(r.player,'gatling');r.update=()=>{};q.tick();});
+ for(let i=0;i<12;i++){
+  const target=i%2?0:1,slot=page.locator(`button[data-slot="${target}"]`);
+  if(isMobile)await slot.tap();else await slot.click();
+  expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.player.selectedSlot)).toBe(target);
+ }
+ await page.locator('button[data-slot="1"]').dispatchEvent('pointerdown',{pointerType:'touch',pointerId:17,button:0,bubbles:true});
+ expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.player.selectedSlot)).toBe(1);
 });

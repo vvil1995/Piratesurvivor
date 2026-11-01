@@ -17,7 +17,7 @@ const clear:CollisionWorld={canOccupy:()=>true,segmentClear:()=>true,moveCircle:
 const attack=(id:string)=>KURO_ATTACKS.find(a=>a.id===id)!;
 const step=(r:Run,n:number)=>{for(let i=0;i<Math.ceil(n*60);i++)r.update(1/60,axis);};
 function syrup(id='luffy'){
- const r=new Run(id,0,()=>.5);r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.body.hp=0;r.encounter!.defeated();step(r,1.4);assert.ok(r.exitSignal);assert.ok(r.sailToSyrup());step(r,3.1);assert.equal(r.zone,'syrup-village');r.player.hurtTimer=1e6;return r;
+ const r=new Run(id,0,()=>.5);r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.body.hp=0;r.encounter!.defeated();step(r,1.4);assert.ok(r.exitSignal);r.finishCombinations();assert.ok(r.sailToSyrup());step(r,3.1);assert.equal(r.zone,'syrup-village');r.player.hurtTimer=1e6;return r;
 }
 function tick(b:KuroEncounter,p:Run['player'],seconds:number,w=clear){for(let i=0;i<Math.ceil(seconds*60);i++){p.hurtTimer=Math.max(0,p.hurtTimer-1/60);b.tick(1/60,p,w,()=>axis,noop);}}
 test('Syrup: mezcla por minutos, cap móvil y dificultad moderada respecto a Orange',()=>{
@@ -95,7 +95,7 @@ test('salida voluntaria Buggy: estado completo conservado con los cinco personaj
   p.hp=53;p.level=35;p.xp=8;p.collectedBerries=77;equipItem(p,'vest');p.fruit='bomu';improveAttack(p,r.character.abilities[1]);
   r.buggyDefeated=true;r.encounter!.body.hp=0;r.encounter!.defeated();step(r,1.4);assert.equal(r.zone,'buggy-arena');assert.equal(r.voyage,undefined);
   const state=()=>JSON.stringify([p.hp,p.level,p.xp,p.items,p.fruit,p.collectedBerries,p.abilitySlots,p.modifiers,p.attacks.map(a=>[a.id,a.level,a.cooldown,a.activeFor]),p.learnedBuffs]);
-  assert.ok(r.sailToSyrup());const before=state();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);assert.equal(r.zone,'syrup-village');assert.equal(state(),before);assert.ok(r.world.canOccupy(p.x,p.y,14));
+  r.finishCombinations();assert.ok(r.sailToSyrup());const before=state();for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);assert.equal(r.zone,'syrup-village');assert.equal(state(),before);assert.ok(r.world.canOccupy(p.x,p.y,14));
  }
 });
 

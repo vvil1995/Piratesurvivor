@@ -539,3 +539,13 @@ Comprobaciones finales de integración:
 - Se comprueba el alcance original de las balas de Krieg y agua de Arlong invocados, su limpieza por propietario y el avance de la animación de caída antes de retirar un boss derrotado. No se limpian los proyectiles de otras instancias.
 
 - Caso adicional: si el jugador entra en una silueta antes de los2s, la invocación se recoloca lejos y repite el aviso completo. No se materializa encima del jugador. Check,222/222 pruebas, build y smoke correctos; repetición de Roger en Chromium:2/2.
+
+## Publicación: fusión de Buggy y contacto táctil del HUD
+
+Buggy quedaba excluido de la condición que abre la combinación tras una victoria. Se incluye en el flujo existente, conservando el cierre voluntario antes del viaje y la protección de apertura única mediante exitSignal. El texto de recompensa ahora identifica correctamente a Buggy. Prueba nueva: consumir una unión anterior, derrotar a Buggy, obtener y usar otra unión, no reabrirla y viajar a Syrup.
+
+La selección táctil responde desde pointerdown, antes de que una actualización del HUD pueda sustituir el botón entre pulsación y click. Se mantiene click para ratón/teclado y se ignora el click táctil posterior para no duplicar la selección. No se modifican movimiento ni ataque.
+
+Verificación: check,223/223 pruebas de lógica, compilación bajo /Piratesurvivor/ y smoke de producción correctos. Chromium:6/6 pruebas de Buggy/viaje, Syrup/Kuro y selección inmediata, tanto en escritorio como en móvil horizontal emulado. Doce selecciones consecutivas y selección desde el inicio del contacto. No se ha probado teléfono físico. Las fixtures anteriores se actualizan para cerrar la recompensa antes de viajar.
+
+Esta publicación contiene estas dos correcciones. La densidad, estadísticas, resistencia/patrones y XP solicitados para el balance de los tres primeros mundos siguen pendientes; no se presentan como implementados.

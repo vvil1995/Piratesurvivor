@@ -66,7 +66,7 @@ test('Orange exige Morgan; carta propia, derrota con25HP y mismo mundo/cofres; v
   r.update(1 / 60, axis); assert.ok(r.buggyDefeated); assert.equal(b.state, 'dead'); assert.ok(r.canJoinMovements);
   for (let i = 0; i < 100 && r.status === 'playing'; i++) r.update(1 / 60, axis);
   assert.equal(r.voyage,undefined);assert.ok(r.exitSignal);assert.equal(r.zone,'buggy-arena');
-  Object.assign(r.player,r.exitSignal);r.update(1/60,axis);const won = build(r), hp = r.player.hp; assert.equal(r.voyage?.destination, 'syrup'); finish(r);
+  assert.equal(r.status,'combining');r.finishCombinations();Object.assign(r.player,r.exitSignal);r.update(1/60,axis);const won = build(r), hp = r.player.hp; assert.equal(r.voyage?.destination, 'syrup'); finish(r);
   assert.equal(r.zone, 'syrup-village'); assert.equal(build(r), won); assert.equal(r.player.hp, hp); assert.equal(r.beginBuggy(), false);
 });
 test('sesión de tres fases usa seis patrones y pools limitados sin atravesar obstáculos', () => {
@@ -142,4 +142,13 @@ test('Buggy persigue a distancia y solo prepara disparos tras recuperar distanci
  assert.equal(b.telegraph,undefined);assert.ok(b.body.x>1200);
  for(let i=0;i<72;i++)b.tick(1/60,p,clear,()=>({x:1,y:0}),noop);
  assert.ok(b.body.x>1300);assert.equal(b.state,'preparing');assert.ok(Math.hypot(p.x-b.body.x,p.y-b.body.y)<310);
+});
+
+test('Buggy ofrece su propia fusión aunque la recompensa anterior ya se consumió, una sola vez',()=>{
+ const r=orange();improveAttack(r.player,'gatling');r.grantCombinationReward();r.openCombinations();assert.ok(r.joinPair(0,1));assert.equal(r.unionTokens,0);
+ const next=r.character.abilities.find(id=>!r.player.attacks.some(a=>a.id===id))!;improveAttack(r.player,next);r.beginBuggy();const b=r.encounter!;
+ b.body.x=r.player.x+30;b.body.y=r.player.y;b.body.hp=1;for(const a of r.player.attacks)a.cooldown=0;
+ for(let i=0;i<200&&r.status==='playing';i++)r.update(1/60,axis);
+ assert.equal(r.status,'combining');assert.ok(r.buggyDefeated);assert.equal(r.unionTokens,1);assert.ok(r.joinPair(0,1));assert.equal(r.unionTokens,0);
+ for(let i=0;i<120;i++)r.update(1/60,axis);assert.equal(r.status,'playing');assert.equal(r.unionTokens,0);assert.ok(r.sailToSyrup());
 });
