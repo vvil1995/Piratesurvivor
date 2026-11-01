@@ -1,3 +1,5 @@
+import { arlongGround } from '../world/arlong.ts';
+import { ArlongArenaWorld,ARLONG_ARENA } from '../world/arlong-arena.ts';
 import { deckAt } from '../world/baratie.ts';
 import type { Obstacle } from '../world/generator.ts';
 import Phaser from 'phaser';
@@ -14,6 +16,7 @@ export class WorldRenderer {
   private free: Slot[] = [];
   private world?: ProceduralWorld;
   private serial = 0;
+  private revision=-1;
   private waves:Phaser.GameObjects.Graphics;
   private scene: Phaser.Scene;
   constructor(scene: Phaser.Scene) { this.scene = scene;this.waves=scene.add.graphics().setDepth(-1900); }
@@ -25,7 +28,7 @@ export class WorldRenderer {
     return { texture, ground: this.scene.add.image(0, 0, key).setOrigin(0).setScale(2).setDepth(-2000), decorations: [] };
   }
   private paint(slot: Slot, chunk: Chunk): void {
-    slot.props=undefined;if(this.world?.theme==='baratie'){this.paintFleet(slot,chunk);return;}
+    slot.props=undefined;if(this.world?.theme==='arlong'){this.paintArlong(slot,chunk);return;}if(this.world?.theme==='baratie'){this.paintFleet(slot,chunk);return;}
     const naval = this.world instanceof ArenaWorld && this.world.theme === 'shells';
     const ctx = slot.texture.context;
     ctx.imageSmoothingEnabled = false;
@@ -194,6 +197,22 @@ export class WorldRenderer {
     }
     for(let i=slot.props.length;i<slot.decorations.length;i++)slot.decorations[i].setVisible(false);
   }
+  private paintArlong(slot:Slot,c:Chunk):void{
+    const ctx=slot.texture.context,w=this.world!;ctx.imageSmoothingEnabled=false;
+    const materials=Object.fromEntries(['stone','earth','grass','water'].map(name=>[name,ctx.createPattern(this.scene.textures.get(`ground-${name}`).getSourceImage() as HTMLCanvasElement,'repeat')!]));
+    for(let y=0;y<32;y++)for(let x=0;x<32;x++){const tx=c.cx*16+(x+.5)/2,ty=c.cy*16+(y+.5)/2;ctx.fillStyle=materials[w instanceof ArlongArenaWorld?'stone':arlongGround(w.seed,tx,ty)];ctx.fillRect(x*8,y*8,8,8);}
+    for(const o of c.obstacles)if(o.kind==='water'){
+      const x=(o.x-c.cx*512)/2,y=(o.y-c.cy*512)/2;ctx.fillStyle=materials.water;ctx.fillRect(x,y,o.width/2,o.height/2);ctx.strokeStyle='#73d8d0';ctx.lineWidth=1;ctx.strokeRect(x+1,y+1,o.width/2-2,o.height/2-2);
+    }
+    if(w instanceof ArlongArenaWorld&&w.transformed){ctx.strokeStyle='#665b52';ctx.lineWidth=2;for(const o of ARLONG_ARENA.covers.filter(o=>o.breakable)){const x=(o.x-c.cx*512)/2,y=(o.y-c.cy*512)/2;ctx.beginPath();ctx.moveTo(x-6,y+8);ctx.lineTo(x+12,y+19);ctx.lineTo(x+24,y+9);ctx.lineTo(x+39,y+24);ctx.stroke();}}
+    slot.texture.refresh();slot.chunk=c;slot.props=c.obstacles.filter(o=>o.kind!=='water');
+    for(const [i,o]of slot.props.entries()){
+      const sprite=slot.decorations[i]??(slot.decorations[i]=this.scene.add.image(0,0,'coastal-crates').setOrigin(.5,1));
+      const width=o.kind==='tree'?76:o.art==='arlong-flag'?56:o.width;
+      sprite.setTexture(o.art??(o.kind==='wall'?'coastal-wall':o.kind==='fence'?'coastal-fence':o.kind==='lamp'?'coastal-lamp':o.kind==='tree'?'coastal-palm':'coastal-crates')).setDisplaySize(width,o.kind==='dock'?o.height:width*sprite.height/sprite.width).setVisible(true);
+    }
+    for(let i=slot.props.length;i<slot.decorations.length;i++)slot.decorations[i].setVisible(false);
+  }
   private paintTownGround(ctx: CanvasRenderingContext2D, chunk: Chunk, ground: Record<string, CanvasPattern>, orange: boolean): void {
     // Half-tile material boundaries are sampled in world space, never per-chunk rectangles.
     for (let y=0;y<32;y++) for(let x=0;x<32;x++) {
@@ -208,14 +227,14 @@ export class WorldRenderer {
     }
   }
   update(world: ProceduralWorld, view: View, origin: Vector): void {
-    this.waves.clear().setVisible(world.theme==='baratie');
-    if(world.theme==='baratie'){
+    this.waves.clear().setVisible(world.theme==='baratie'||world.theme==='arlong');
+    if(world.theme==='baratie'||world.theme==='arlong'){
       const phase=this.scene.time.now/900;this.waves.lineStyle(1,0x9fe3e3,.45);
       for(let y=Math.floor((view.centerY-view.height/2)/96)*96;y<view.centerY+view.height/2;y+=96)for(let x=Math.floor((view.centerX-view.width/2)/96)*96;x<view.centerX+view.width/2;x+=96){
-        if(world.canOccupy(x,y,1))continue;const sx=x-origin.x+Math.sin(phase+y)*5,sy=y-origin.y;this.waves.lineBetween(sx,sy,sx+16,sy);this.waves.lineBetween(sx+16,sy,sx+21,sy-2);
+        if(!world.isWater(x,y))continue;const sx=x-origin.x+Math.sin(phase+y)*5,sy=y-origin.y;this.waves.lineBetween(sx,sy,sx+16,sy);this.waves.lineBetween(sx+16,sy,sx+21,sy-2);
       }
     }
-    if (this.world !== world) { for (const slot of this.active.values()) this.release(slot); this.active.clear(); this.world = world; }
+    if (this.world !== world||this.revision!==world.revision) {this.revision=world.revision; for (const slot of this.active.values()) this.release(slot); this.active.clear(); this.world = world; }
     const minX = Math.floor((view.centerX - view.width / 2) / CHUNK_SIZE) - 1;
     const maxX = Math.floor((view.centerX + view.width / 2) / CHUNK_SIZE) + 1;
     const minY = Math.floor((view.centerY - view.height / 2) / CHUNK_SIZE) - 1;

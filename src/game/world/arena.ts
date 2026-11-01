@@ -8,7 +8,7 @@ export const MORGAN_ARENA: ArenaDefinition = { width: 3072, height: 2176, player
     { x: 32, y: 32, width: 128, height: 128, art: 'naval-tower' }, { x: 2400, y: 32, width: 128, height: 128, art: 'naval-tower' },
     { x: 1152, y: 128, width: 256, height: 96, art: 'naval-gate' }],
   decorations: [{ x: 832, y: 160, width: 48, height: 112, art: 'naval-flag' }, { x: 1680, y: 160, width: 48, height: 112, art: 'naval-flag' }] };
-export interface ArenaDefinition { edgeInset?:number; width: number; height: number; playerSpawn: { x: number; y: number }; bossSpawn: { x: number; y: number }; gates: readonly { x: number; y: number }[]; covers: readonly { x: number; y: number; width: number; height: number; art?: string }[]; decorations?: readonly { x: number; y: number; width: number; height: number; art: string }[] }
+export interface ArenaDefinition { edgeInset?:number; width: number; height: number; playerSpawn: { x: number; y: number }; bossSpawn: { x: number; y: number }; gates: readonly { x: number; y: number }[]; covers: readonly { x: number; y: number; width: number; height: number; art?: string; breakable?:boolean }[]; decorations?: readonly { x: number; y: number; width: number; height: number; art: string }[] }
 export const BUGGY_ARENA: ArenaDefinition = {
   width: 2816, height: 2048, playerSpawn: { x: 1408, y: 1152 }, bossSpawn: { x: 1648, y: 1152 },
   gates: [{x:256,y:256},{x:2560,y:256},{x:256,y:1792},{x:2560,y:1792}],
@@ -33,8 +33,8 @@ export const KRIEG_ARENA:ArenaDefinition={edgeInset:128,width:3072,height:2176,p
  decorations:[{x:1184,y:32,width:704,height:64,art:'baratie-restaurant'},{x:192,y:256,width:64,height:96,art:'krieg-flag'},{x:2816,y:256,width:64,height:96,art:'krieg-flag'}]};
 export class ArenaWorld extends ProceduralWorld {
   readonly arena: ArenaDefinition;
-  constructor(seed: number, arena: ArenaDefinition = MORGAN_ARENA, theme: 'shells' | 'orange' | 'syrup' | 'baratie' = 'shells') { super(seed, theme); this.arena = arena; }
-  private arenaChunks = new Map<string, Chunk>();
+  constructor(seed: number, arena: ArenaDefinition = MORGAN_ARENA, theme: 'shells' | 'orange' | 'syrup' | 'baratie' | 'arlong' = 'shells') { super(seed, theme); this.arena = arena; }
+  protected arenaChunks = new Map<string, Chunk>();
   override getChunk(cx: number, cy: number): Chunk {
     const key = cellKey(cx, cy); let chunk = this.arenaChunks.get(key); if (chunk) return chunk;
     chunk = { key, cx, cy, district: 'plaza', solids: new Uint8Array(256), obstacles: [], variation: 37 };

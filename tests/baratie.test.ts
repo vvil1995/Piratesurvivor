@@ -84,9 +84,9 @@ test('gun: siete proyectiles fijos; bombardeo5–7 sin daño previo y lanza sin 
  for(const ratio of [1,.2]){b.body.hp=b.body.maxHp*ratio;b.prepare(a('naval'),p,r.world);assert.equal(1+b.extraWarnings.length,ratio===1?5:7);b.cancel();}
  b.body.hp=b.body.maxHp;Object.assign(b.body,{x:1500,y:1200});Object.assign(p,{x:1700,y:1200,hp:100,hurtTimer:0});b.prepare(a('spear'),p,r.world);tick(b,p,.8,r.world);assert.equal(p.hp,55);tick(b,p,.2,r.world);assert.equal(p.hp,55);
 });
-test('victoria, unión y Arlong pendiente; perder regresa al mismo Baratie con25HP',()=>{
+test('victoria, unión y Arlong voluntario; perder regresa al mismo Baratie con25HP',()=>{
  const r=baratie(),world=r.world,field=r.explorationChests;improveAttack(r.player,'gatling');r.beginKrieg();r.player.hp=0;step(r,.02);assert.equal(r.voyage?.destination,'baratie-return');for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);assert.equal(r.player.hp,25);assert.equal(r.world,world);assert.equal(r.explorationChests,field);
- r.beginKrieg();const b=r.encounter as KriegEncounter;b.body.hp=1;damageEnemy(r.player,b.body,100,0,r.player,r.world,e=>r.dropXp(e,r.player.id),()=>1);step(r,.02);step(r,1.4);assert.ok(r.kriegDefeated);assert.equal(r.status,'combining');const n=r.unionTokens;assert.ok(r.joinPair(0,1));assert.equal(r.unionTokens,n-1);assert.equal(r.status,'playing');assert.ok(r.exitSignal);assert.ok(r.arlongUnlocked);assert.equal(r.sailToArlong(),false);assert.equal(r.voyage,undefined);assert.equal(r.zone,'krieg-arena');
+ r.beginKrieg();const b=r.encounter as KriegEncounter;b.body.hp=1;damageEnemy(r.player,b.body,100,0,r.player,r.world,e=>r.dropXp(e,r.player.id),()=>1);step(r,.02);step(r,1.4);assert.ok(r.kriegDefeated);assert.equal(r.status,'combining');const n=r.unionTokens;assert.ok(r.joinPair(0,1));assert.equal(r.unionTokens,n-1);assert.equal(r.status,'playing');assert.ok(r.exitSignal);assert.ok(r.arlongUnlocked);assert.equal(r.zone,'krieg-arena');assert.equal(r.voyage,undefined);assert.equal(r.sailToArlong(),true);assert.equal(r.voyage?.destination,'arlong');
 });
 test('tres enemigos ejecutan su IA real: corte, ráfaga recargada y golpe blindado',()=>{
  for(const id of ['krieg-saber','krieg-gunner','krieg-armored']){

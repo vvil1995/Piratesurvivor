@@ -495,3 +495,42 @@ Comprobaciones realizadas:
 Archivos principales: `content/{worlds/baratie,bosses/krieg,catalog,types}.ts`; `game/world/{baratie,world,arena}.ts`; `game/bosses/krieg.ts`; `game/core/{run,types}.ts`; `game/navigation/flow-field.ts`; `game/systems/{hits,spawner}.ts`; `game/scenes/{battle,boss-renderer,island-art,world-renderer}.ts`; textos de viaje/recompensa en `ui/{view,combinations}.ts`; ocho PNG, manifiesto y pruebas de Baratie/regresión. Detalle de cifras y reglas en `BARATIE.md`.
 
 Pendiente de validación manual: campaña completa sin fixtures con los cinco personajes, equilibrio económico/de combate, controles y FPS en teléfonos físicos/Safari. Los sprites, animaciones y acabados de cubierta son provisionales; no se presentan como arte definitivo ni se afirma haber completado una sesión manual de toda la campaña.
+
+## 2026-11-01 · Arlong Park y Arlong
+
+Quinto mundo implementado sobre los generadores, navegación y controlador de patrones existentes. Krieg→Arlong es voluntario; se conserva la partida y Arlong→Roger queda como destino pendiente, sin cargar mapas vacíos. No se cambian datos de los cuatro bosses anteriores ni el balance de los mundos 1–3.
+
+Comprobaciones de simulación:
+- `npm run check` y `npm test`: 206/206. Se añaden 17 casos en `tests/arlong.test.ts`.
+- 243 chunks de tres semillas y coordenadas negativas: generación determinista, canales coincidentes, tres regiones, puentes y superficies terrestres conectadas. Cofres candidatos 3/24, fuera del agua y alcanzables.
+- Movilidad explícita: jugador bloqueado por agua, hombres-pez cruzan canales y conservan colisiones de edificios. IA real de luchador, escupidor y karateka; proyectiles de agua y combos separados. Recompensas de bajas acuáticas colocadas en tierra.
+- Los cinco personajes conservan una instantánea completa de build al viajar desde Krieg y entrar en la arena: nivel, XP, HP, berries, niveles/evoluciones/cooldowns, combinaciones, buffs, objeto y fruta.
+- Los seis patrones, tres fases y presión final de Arlong pasan simulación natural y casos dirigidos. Mordida sin daño temprano; tres cortes; dentadura de ida/vuelta con control por tramo; inmersión vulnerable, salida advertida y retorno a tierra; tres cargas con detección continua incluso a pasos de 0,4 s.
+- Furia una sola vez al 33%: cuatro coberturas se sustituyen por escombros, se abren colisiones y se reconstruye la navegación mediante revisión del mundo. No se destruyen límites ni piscinas.
+- Victoria con caída, limpieza, combinación y Log Pose de Roger pendiente; derrota con retorno al mismo mundo/cofres y 25 HP.
+
+Detalle de arquitectura, cifras y límites en `ARLONG-PARK.md`; procedencia de diez PNG y manifiesto en `asset-register.md`. Sin nuevas dependencias. Los sprites y las animaciones son provisionales y comparten perfiles direccionales; no son secuencias artísticas definitivas.
+
+No se ha realizado una campaña manual completa con los cinco personajes ni medido FPS/controles en un teléfono físico o Safari. El equilibrio necesita partidas reales. Roger, el balance solicitado de mundos 1–3 y la incidencia táctil de selección de habilidades siguen pendientes.
+
+## 2026-11-01 · desafío de Roger y cierre de Arlong Park
+
+El mundo 5 pendiente se conserva e integra con el nuevo final. Roger reutiliza el punto común de daño con inmortalidad explícita; no hay reserva enorme de vida ni barra de HP. Su arena fija reutiliza las clases originales de los cinco bosses y piscinas compatibles con Arlong. Los controladores y ataques originales no se copian. Los cambios al controlador compartido se limitan al método de selección de fase para permitir progresión temporal de Roger.
+
+- `npm run check` correcto. `npm test`:220/220, incluyendo14 casos nuevos de Roger además de los17 de Arlong.
+- Acceso voluntario y estado completo de los cinco personajes, arena sin cofres, inmortalidad con críticos/área/daño secundario, marcador independiente de otros objetivos.
+- Calendario40/80/120/160/200/240/280/320/360/400/440/480/520s; tandas1/1/1/2/2/3/3/3/4/4/4/5/5. Plazas reservadas durante materialización, máximo8 vivos, descarte de sobrantes, tipos únicos por tanda, duplicados entre tandas con IDs independientes y bajas contadas una sola vez.
+- Instancias reales de Morgan/Buggy/Kuro/Krieg/Arlong, HP60%, aceleración configurable1,2× y mínimos de aviso en tiempo real. Materialización2s. Pools, campos de navegación compartidos por tamaño/capacidad y limpieza por propietario.
+- Desbloqueos temporales de Roger, anillo expansivo, trayectorias fijas y sectores con rutas libres. Hordas activas aun con8bosses. Pausa detiene relojes. La muerte termina definitivamente el desafío, limpia ataques y congela resultados.
+- Récords independientes globales/personaje, datos inferiores no sobrescriben superiores, persistencia tras recarga y entrenamiento previo conservado. El resultado se registra una sola vez.
+
+Archivos principales de Roger: `content/bosses/roger.ts`, `game/{bosses/roger,challenges/roger,world/roger-arena,core/run,core/types,systems/hits}.ts`, método de fase en `bosses/pattern-encounter.ts`, integración visual en `scenes/{island-art,boss-renderer,battle}.ts`, `platform/persistence/save.ts`, `ui/{view.ts,hud.css}`, `index.html`, tres PNG y su manifiesto, `tests/roger.test.ts` y pruebas de navegador. Arlong añade los archivos indicados en `ARLONG-PARK.md`; detalles del desafío en `ROGER.md`.
+
+Límites: no se ha completado manualmente una campaña de seis mundos con cada personaje; no hay medición de FPS ni prueba de controles en un teléfono físico/Safari. Los assets son provisionales y reutilizan perfiles. El balance de una supervivencia larga con superposición de ocho bosses necesita partidas reales. La furia de Arlong invocado no destruye estructuras de la arena principal. El balance de mundos1–3 y la incidencia táctil previa siguen pendientes, sin presentarlos como corregidos.
+
+Comprobaciones finales de integración:
+- Chromium real:14/14 en escritorio1440×1000 y móvil horizontal emulado844×390, con Morgan, Buggy, Kuro, Krieg, Arlong y Roger, transiciones y HUD. Repetición final de Roger tras secuenciar Voluntad del Rey y ajustar resultados:2/2. Sin errores JS ni404.
+- Se revisaron capturas de cinco invocados con sprites originales, avisos/impactos, marcador y pantalla final. Se corrigió el recorte del título provocado por el foco en los botones del resultado en móvil; la prueba comprueba su posición visible. Persistencia confirmada tras recargar la página.
+- Simulación dirigida adicional de30s con ocho invocados activos: pico70 enemigos normales y56 proyectiles en el pool compartido, sin superar límites y Roger vivo. Esto comprueba topes y estabilidad de simulación, no mide FPS del render ni de un teléfono.
+- `PAGES_BASE_PATH=/Piratesurvivor/ npm run build` correcto, HTML autónomo11,11MiB. Permanece el aviso previo de tamaño del bundle.
+- `scripts/check-pages.mjs`: producción bajo `/Piratesurvivor/` en PC/móvil emulado, cinco personajes,13sprites/14tarjetas de entrenamiento, arranque y pausa; sin404, errores JS ni hookQA. Sin dependencias nuevas y sin modificaciones a la configuración de Netlify.

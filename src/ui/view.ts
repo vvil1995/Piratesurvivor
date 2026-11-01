@@ -114,9 +114,11 @@ export class View {
     el('union-count').textContent = String(run.unionTokens);
     el('manage-abilities').title = `Objeto de unión: ${run.unionTokens}. Se obtiene al vencer a Morgan u otro jefe.`;
     el('loot-notice').textContent = run.lootNoticeFor > 0 ? run.lootNotice : '';
-    const boss = run.encounter;
+    const boss = run.encounter,challenge=run.finalChallenge;
+    el('roger-score').hidden=!challenge;
+    if(challenge)el('roger-score').textContent=`ROGER · DAÑO ${Math.floor(challenge.damage).toLocaleString('es')} · BOSSES ${challenge.bossesDefeated}`;
     el('hud').classList.toggle('boss-active', !!boss);
-    el('boss-panel').hidden = !boss;
+    el('boss-panel').hidden = !boss||!!challenge;
     if (boss) {
       el('boss-name').textContent = boss.profile.name;
       el('boss-panel').querySelector('[role="progressbar"]')!.setAttribute('aria-label', `Vida de ${boss.profile.name}`);
@@ -130,13 +132,13 @@ export class View {
     el('navigation-hint').textContent=signal?`${run.exitSignal?'LOG POSE':'CARTA NÁUTICA'} · ${run.navigationTarget} · ${Math.round(Math.hypot(signal.x-p.x,signal.y-p.y))}m · camina sobre ella`:run.navigationSeconds<MORGAN_ROUTE.availableAt?`Ruta de ${run.navigationTarget}: cartas a partir de05:00 en esta isla`:'';
     if (run.voyage) {
       const destination = run.voyage.destination;
-      el('voyage-title').textContent = destination==='baratie'?'KURO DERROTADO · BARATIE':destination==='krieg'?'RUMBO A DON KRIEG':destination==='baratie-return'?'REGRESO A BARATIE':destination === 'kuro' ? 'RUMBO A KURO' : destination==='syrup-return'?'REGRESO A SYRUP VILLAGE':destination === 'buggy' ? 'RUMBO A BUGGY' : destination === 'syrup' ? 'BUGGY DERROTADO · SYRUP VILLAGE' : destination === 'orange-return' ? 'REGRESO A ORANGE TOWN' : destination === 'morgan' ? 'RUMBO A MORGAN' : destination === 'orange' ? 'MORGAN DERROTADO · ORANGE TOWN' : 'REGRESO A SHELLS TOWN';
-      el('voyage-description').textContent = destination==='baratie'?'Conservas vida y build. Te esperan las cubiertas de Krieg.':destination==='krieg'?'Explosiones y gas: busca las zonas seguras.':destination==='baratie-return'?'Regresas a la flota con25HP y tu build.':destination==='kuro'?'Jardines de Kaya: anticipa las trayectorias de Kuro.':destination==='syrup-return'?'Conservas tu build y regresas con25HP.':destination === 'buggy' ? 'Bombas y cuchillas: sal de las marcas rojas antes del impacto.' : destination === 'syrup' ? 'Conservas vida y build. Te esperan los Piratas del Gato Negro y Kuro.' : destination === 'orange-return' ? 'Regresas a Orange Town con25HP y tu build. Busca otra carta para reintentar Buggy.' : destination === 'shells' ? 'Regresas con25HP y tu build. Otra carta náutica permitirá reintentarlo.' : destination === 'orange' ? 'Conservas vida y build. Te esperan los piratas de Buggy y la ruta hacia su arena.' : 'Desembarcando en la base naval. Esquiva las marcas rojas de Morgan.';
+      el('voyage-title').textContent = destination==='roger'?'EL DESAFÍO DE GOL D. ROGER':destination==='arlong'?'KRIEG DERROTADO · ARLONG PARK':destination==='arlong-boss'?'RUMBO A ARLONG':destination==='arlong-return'?'REGRESO A ARLONG PARK':destination==='baratie'?'KURO DERROTADO · BARATIE':destination==='krieg'?'RUMBO A DON KRIEG':destination==='baratie-return'?'REGRESO A BARATIE':destination === 'kuro' ? 'RUMBO A KURO' : destination==='syrup-return'?'REGRESO A SYRUP VILLAGE':destination === 'buggy' ? 'RUMBO A BUGGY' : destination === 'syrup' ? 'BUGGY DERROTADO · SYRUP VILLAGE' : destination === 'orange-return' ? 'REGRESO A ORANGE TOWN' : destination === 'morgan' ? 'RUMBO A MORGAN' : destination === 'orange' ? 'MORGAN DERROTADO · ORANGE TOWN' : 'REGRESO A SHELLS TOWN';
+      el('voyage-description').textContent = destination==='roger'?'Conservas tu build. Sobrevive y acumula daño contra el Rey de los Piratas.':destination==='arlong'?'Conservas tu build. Canales, selva y los Piratas de Arlong.':destination==='arlong-boss'?'Esquiva las cargas y observa las piscinas.':destination==='arlong-return'?'Regresas con25HP y tu build.':destination==='baratie'?'Conservas vida y build. Te esperan las cubiertas de Krieg.':destination==='krieg'?'Explosiones y gas: busca las zonas seguras.':destination==='baratie-return'?'Regresas a la flota con25HP y tu build.':destination==='kuro'?'Jardines de Kaya: anticipa las trayectorias de Kuro.':destination==='syrup-return'?'Conservas tu build y regresas con25HP.':destination === 'buggy' ? 'Bombas y cuchillas: sal de las marcas rojas antes del impacto.' : destination === 'syrup' ? 'Conservas vida y build. Te esperan los Piratas del Gato Negro y Kuro.' : destination === 'orange-return' ? 'Regresas a Orange Town con25HP y tu build. Busca otra carta para reintentar Buggy.' : destination === 'shells' ? 'Regresas con25HP y tu build. Otra carta náutica permitirá reintentarlo.' : destination === 'orange' ? 'Conservas vida y build. Te esperan los piratas de Buggy y la ruta hacia su arena.' : 'Desembarcando en la base naval. Esquiva las marcas rojas de Morgan.';
       const progress = Math.min(1, run.voyage.elapsed / MORGAN_ROUTE.voyageSeconds);
       el('voyage').style.setProperty('--progress', String(progress));
       el('voyage-progress').style.width = `${progress * 100}%`;
     }
-    el('area-label').textContent = run.zone==='baratie'?'BARATIE · PIRATAS DE KRIEG':run.zone==='krieg-arena'?'GRAN CUBIERTA · DON KRIEG':run.zone === 'buggy-arena' ? 'ORANGE TOWN · CIRCO DE BUGGY' : run.zone==='kuro-arena'?'JARDINES DE KAYA · CAPITÀ KURO':run.zone === 'syrup-village' ? 'SYRUP VILLAGE · PIRATAS DEL GATO NEGRO' : run.zone === 'morgan-arena' ? 'BASE NAVAL · ARENA DE MORGAN' : run.zone === 'orange-town' ? 'ORANGE TOWN · PIRATAS DE BUGGY' : 'SHELLS TOWN · BASE NAVAL';
+    el('area-label').textContent = run.zone==='roger-arena'?'LOGUETOWN · DESAFÍO FINAL':run.zone==='arlong-park'?'ARLONG PARK · PIRATAS DE ARLONG':run.zone==='arlong-arena'?'ARLONG PARK · PLAZA CENTRAL':run.zone==='baratie'?'BARATIE · PIRATAS DE KRIEG':run.zone==='krieg-arena'?'GRAN CUBIERTA · DON KRIEG':run.zone === 'buggy-arena' ? 'ORANGE TOWN · CIRCO DE BUGGY' : run.zone==='kuro-arena'?'JARDINES DE KAYA · CAPITÀ KURO':run.zone === 'syrup-village' ? 'SYRUP VILLAGE · PIRATAS DEL GATO NEGRO' : run.zone === 'morgan-arena' ? 'BASE NAVAL · ARENA DE MORGAN' : run.zone === 'orange-town' ? 'ORANGE TOWN · PIRATAS DE BUGGY' : 'SHELLS TOWN · BASE NAVAL';
     el('character-name').textContent = (run.character.shortName ?? run.character.name).toUpperCase();
     el('run-items').textContent = `OBJETO ${Object.keys(p.items).length}/1`;
     el('run-items').title = Object.entries(p.items).map(([id, level]) => `${ITEMS[id].name} ${level}/3`).join(' · ') || 'Sin objeto';
@@ -177,7 +179,7 @@ export class View {
       }
     }
     el('attack-selection-label').textContent = 'ACTIVA: ' + p.abilitySlots[p.selectedSlot].map(id => ABILITIES[id].shortName).join(' + ') + ' · TOCA PARA CAMBIAR';
-    el('clock').textContent = timeLabel(run.time);
+    el('clock').textContent = timeLabel(run.finalChallenge?.seconds??run.time);
     el('level').textContent = `NV. ${p.level}`;
     el('kills').textContent = p.kills.toString();
     el('health-text-inline').textContent = `${Math.ceil(p.hp)} / ${Math.round(p.stats.maxHp)}`;
@@ -224,6 +226,15 @@ export class View {
     el('result-copy').textContent = victory ? 'Una promesa cumplida. El mar te espera.' : 'Vuelve al puerto, entrena y regresa más fuerte.';
     el('result-time').textContent = timeLabel(result.seconds); el('result-kills').textContent = String(result.kills);
     el('result-level').textContent = String(result.level); el('result-coins').textContent = `+${result.coins} ◉`;
+    const challenge=result.challenge;el('roger-results').hidden=!challenge;el('result').querySelector('.result-card')!.classList.toggle('roger-result',!!challenge);el('result-kills-label').textContent=challenge?'BOSSES':'MARINES';
+    if(challenge){
+      el('result-title').textContent='FIN DE LA AVENTURA — EL REY DE LOS PIRATAS';
+      el('result-eyebrow').textContent=CHARACTERS[challenge.characterId]?.name??challenge.characterId;
+      el('result-copy').textContent='La voluntad de un pirata nunca se apaga.';
+      el('result-time').textContent=timeLabel(challenge.seconds);el('result-kills').textContent=String(challenge.bosses);
+      const records=challenge.newRecords?.map(s=>s.replace('damage','daño').replace('seconds','tiempo').replace('bosses','bosses derrotados')).join(' · ')||'Sin nuevos récords';
+      el('roger-results').textContent=`Daño a Roger: ${Math.floor(challenge.damage).toLocaleString('es')} · Bosses derrotados: ${challenge.bosses} · Récords: ${records}`;
+    }
     this.showModal('result');
   }
 }

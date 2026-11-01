@@ -8,11 +8,13 @@ export interface CharacterDefinition {
   initialAbility: string; abilities: readonly string[]; visual: string;
 }
 export interface RangedEnemyAttack {
+  visual?:'water';
   interval: number; speed: number; range: number;
   slow?: {multiplier:number;duration:number};
   preparation?: number; pellets?: number; spread?: number; preferredDistance?: number; lifetime?: number;
 }
 export interface EnemyDefinition {
+  swimming?:boolean;
   frontalReduction?:number;
   id: string; hp: number; damage: number; speed: number;
   xp: number; radius: number; visual: string; melee?: {preparation:number;interval:number;reach:number;hits:number;gap:number}; ranged?: RangedEnemyAttack;

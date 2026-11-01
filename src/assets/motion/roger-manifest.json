@@ -1,0 +1,54 @@
+{
+  "source": "exec-2a334d6d-bcd4-4d23-bc72-edfa971d4ee5.png",
+  "boxes": [
+    [
+      0,
+      0,
+      365,
+      460
+    ],
+    [
+      366,
+      0,
+      748,
+      460
+    ],
+    [
+      749,
+      0,
+      1100,
+      460
+    ],
+    [
+      1101,
+      0,
+      1536,
+      460
+    ]
+  ],
+  "poses": [
+    0,
+    1,
+    2,
+    1,
+    3
+  ],
+  "cell": 128,
+  "feet": 120,
+  "sharedDirections": true,
+  "provisional": true,
+  "assets": {
+    "roger.png": {
+      "bytes": 90703,
+      "sha256": "e5166480ac01f167e5be8c5afc02e1f6be123f2f2ec51823639395cc5ecc6887"
+    },
+    "roger-scaffold.png": {
+      "bytes": 201176,
+      "sha256": "c47ef228145da18770509e9bb68670165488b930dbcd5a2d53c158a1aea0cace"
+    },
+    "loguetown-houses.png": {
+      "bytes": 148440,
+      "sha256": "7891b26347b040c95c77ed91ebdad5ac0dab54a35b5fa917459f129a864e0de3"
+    }
+  }
+}

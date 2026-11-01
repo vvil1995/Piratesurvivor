@@ -28,13 +28,14 @@ export class PatternEncounter {
   private hit = new Set<string>();
   private travel = 0; private travelled = 0; private blocked = false;
   private pursuit = 0;
+  protected encounterPhase():number{return bossPhase(this.body.hp,this.body.maxHp,this.profile.phaseThresholds[0]);}
   get stage() { return this.telegraph ? warningStage(this.telegraph) : undefined; }
   get moveName(): string { return this.state === 'dead' ? 'VICTORIA · EMBARCANDO' : this.state === 'stunned' ? 'ATURDIT · CONTRAATACA' : this.state === 'recovering' ? 'EXPOSAT · CONTRAATACA' : this.attack?.name ?? 'APROXIMACIÓ'; }
   cancel(): void { this.telegraph = undefined; this.impactZone = undefined; this.hit.clear(); this.attack = undefined; this.fixedZone = undefined; this.extraWarnings = []; this.extraImpacts = []; }
   defeated(): void { this.body.active = false; this.state = 'dead'; this.elapsed = 0; this.cancel(); }
   // Gancho determinista para secuenciación del controlador; también permite probar cada patrón.
   prepare(attack: BossAttack, target: Vector, world: CollisionWorld): void {
-    this.phase = bossPhase(this.body.hp,this.body.maxHp,this.profile.phaseThresholds[0]);
+    this.phase = this.encounterPhase();
     attack = pressuredAttack(attack,this.phase);
     this.attack = attack; this.elapsed = 0; this.state = 'preparing'; this.impactZone = undefined; this.hit.clear();
     const zone = zoneFor(attack, attack.targeted ? target : this.body, target);
@@ -61,7 +62,7 @@ export class PatternEncounter {
   tick(dt: number, player: Player, world: CollisionWorld, direction: (from: Vector) => Vector, reinforce: () => void): void {
     if (player.hp <= 0) { this.cancel(); return; }
     if (!this.body.active || this.body.hp <= 0) { if (this.state !== 'dead') this.defeated(); this.elapsed += dt; return; }
-    this.phase = bossPhase(this.body.hp,this.body.maxHp,this.profile.phaseThresholds[0]);
+    this.phase = this.encounterPhase();
     this.body.flash = Math.max(0, this.body.flash - dt);
     for (const [id, seconds] of this.ready) this.ready.set(id, Math.max(0, seconds - dt));
     this.elapsed += dt;

@@ -4,7 +4,7 @@
 
 Tras derrotar a Kuro, cerrar la recompensa de unión y caminar sobre su Log Pose se inicia la travesía voluntaria a Baratie. Se conserva el mismo actor con HP, XP, nivel, moneda, ataques y cooldowns, combinaciones, buffs, fruta, objeto y entrenamiento. La ruta a Don Krieg usa las cartas existentes: disponible desde05:00 de tiempo en Baratie, con demora inicial aleatoria de hasta45s y reintentos. No exige nivel ni cambia automáticamente de isla.
 
-Perder contra Krieg devuelve al mismo mundo y campo de cofres con25HP, manteniendo la build y el mecanismo existente de nueva carta. Ganar cancela ataques y efectos, concede el objeto de unión y presenta su menú. Un solo ataque permite continuar sin combinar. El Log Pose de Arlong Park se puede visitar, pero muestra contenido pendiente: el mundo5 no existe y no se crea un mapa vacío.
+Perder contra Krieg devuelve al mismo mundo y campo de cofres con25HP, manteniendo la build y el mecanismo existente de nueva carta. Ganar cancela ataques y efectos, concede el objeto de unión y presenta su menú. Un solo ataque permite continuar sin combinar. El Log Pose de Arlong Park inicia ahora el viaje voluntario al mundo 5, conservando la partida. Véase `ARLONG-PARK.md`.
 
 ## Flota procedural
 

@@ -133,12 +133,12 @@ export function tickEffects(effects: Effects, actors: ReadonlyMap<string, Player
 }
 
 export function spawnProjectile(effects: Effects, x: number, y: number, targetX: number, targetY: number,
-  damage: number, speed: number, ownerId: string, hostile = false, hits = 1, details?: { abilityId: string; level: number; bounces: number }, lifetime = 2.5, slow?: Projectile['slow']): boolean {
+  damage: number, speed: number, ownerId: string, hostile = false, hits = 1, details?: { abilityId: string; level: number; bounces: number }, lifetime = 2.5, slow?: Projectile['slow'],visual?:Projectile['visual']): boolean {
   const projectile = effects.projectiles.acquire(); if (!projectile) return false;
   const d = Math.max(1, Math.hypot(targetX - x, targetY - y));
   projectile.hit.clear();
   Object.assign(projectile, { x, y, vx: (targetX - x) / d * speed, vy: (targetY - y) / d * speed,
-    radius: slow ? 7 : 3, life: lifetime, damage, ownerId, slow, hostile, reflected: false, remainingHits: hits, abilityId: details?.abilityId, level: details?.level ?? 1, bounces: details?.bounces ?? 0 });
+    radius: slow ? 7 : 3, life: lifetime, damage, ownerId, slow, visual,hostile, reflected: false, remainingHits: hits, abilityId: details?.abilityId, level: details?.level ?? 1, bounces: details?.bounces ?? 0 });
   return true;
 }
 

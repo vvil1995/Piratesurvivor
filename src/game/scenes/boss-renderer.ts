@@ -1,3 +1,5 @@
+import { RogerEncounter } from '../bosses/roger.ts';
+import { ArlongEncounter } from '../bosses/arlong.ts';
 import { KriegEncounter,gasZone } from '../bosses/krieg.ts';
 import type { KuroEncounter } from '../bosses/kuro.ts';
 import { BuggyRenderer } from './buggy-renderer.ts';
@@ -32,13 +34,14 @@ export class BossRenderer {
   private idleTime=0;
   private echoes:Phaser.GameObjects.Image[];
   private body: Phaser.GameObjects.Image;
+  private tooth:Phaser.GameObjects.Image;
   private head: Phaser.GameObjects.Image;
   private arm: Phaser.GameObjects.Image;
   private warnings: Phaser.GameObjects.Graphics;
   private details: Phaser.GameObjects.Graphics;
   get texture(): string { return this.showingBuggy ? this.buggy.texture : this.body.texture.key; }
   constructor(scene: Phaser.Scene) {
-    this.buggy = new BuggyRenderer(scene);
+    this.buggy = new BuggyRenderer(scene);this.tooth=scene.add.image(0,0,'arlong-tooth').setVisible(false).setDepth(9001);
     this.echoes=Array.from({length:12},()=>scene.add.image(0,0,'kuro-s-0').setOrigin(.5,120/128).setVisible(false));
     this.body = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
     this.head = scene.add.image(0, 0, 'morgan').setOrigin(0.5, 0.94).setScale(1.1).setVisible(false);
@@ -48,7 +51,7 @@ export class BossRenderer {
     this.details = scene.add.graphics().setDepth(-950);
   }
   update(boss: PatternEncounter | undefined, origin: Vector, arena: ArenaDefinition = MORGAN_ARENA, dt=1/60, animate=true): void {
-    this.warnings.clear(); this.details.clear();for(const e of this.echoes)e.setVisible(false);
+    this.warnings.clear(); this.details.clear();this.tooth.setVisible(false);for(const e of this.echoes)e.setVisible(false);
     this.showingBuggy = boss?.profile.id === 'buggy';
     if(this.showingBuggy){this.body.setVisible(false);this.head.setVisible(false);this.arm.setVisible(false);this.buggy.update(boss as BuggyEncounter,origin,dt,animate,drawDanger);return;}
     this.buggy.hide();
@@ -81,6 +84,21 @@ export class BossRenderer {
       if(kuro.attackId==='shakushi'&&boss.state==='impact')this.body.setTint(0x69717c).setAlpha(.9);
       if(boss.body.flash>0&&!dead)this.body.setRotation(-.1).setTint(0xffc9c9);
       for(const [i,t]of (boss as KuroEncounter).trails.entries())if(this.echoes[i])this.echoes[i].setTexture(`kuro-${d}-${frame}`).setPosition(t.x-origin.x,t.y-origin.y).setScale(.9).setAlpha(Math.min(.28,t.life)).setTint(0x535967).setDepth(t.y-origin.y+999).setVisible(true);
+    }
+    if(boss instanceof RogerEncounter){
+      this.motion.update(boss.body.id,boss.body.x,boss.body.y,animate,dt,true);
+      const d=this.motion.direction,frame=preparing||boss.state==='impact'||boss.summoningFor>0?4:this.motion.frame?this.motion.frame-1:0;
+      this.body.setOrigin(.5,120/128).setTexture(`roger-${d}-${frame}`).setScale(1.15).setRotation(preparing?-.06:boss.state==='impact'?.08:0);this.arm.setVisible(false);
+      if(boss.ring)drawDanger(this.warnings,boss.ring,origin,0xe275ff,.6);
+      if(boss.summoningFor>0){this.warnings.lineStyle(4,0xd66bff,.7);this.warnings.strokeCircle(x,y-30,45+Math.sin(boss.summoningFor*5)*12);}
+    }
+    if(boss instanceof ArlongEncounter){
+      this.motion.update(boss.body.id,boss.body.x,boss.body.y,animate,dt,true);
+      const action=preparing||boss.state==='impact',frame=action?4:this.motion.frame?this.motion.frame-1:0,d=this.motion.direction;
+      this.body.setOrigin(.5,120/128).setTexture(`arlong-${d}-${frame}`).setScale(1.35,boss.submerged?.8:1.35).setAlpha(alpha*(boss.submerged?.45:1)).setRotation(dead?Math.min(1.5,boss.elapsed*2):boss.attackId==='rage'?Math.sin(boss.elapsed*35)*.05:boss.state==='impact'&&boss.impactZone?.shape==='line'?.1:0).setTint(boss.body.flash>0?0xffd1bd:boss.phase===3?0xffb3ba:boss.submerged?0x70d7ed:0xffffff);this.arm.setVisible(false);
+      for(const [i,t]of boss.trails.entries())this.echoes[i].setTexture(`arlong-${d}-${frame}`).setPosition(t.x-origin.x,t.y-origin.y).setScale(1.35).setAlpha(t.life*.6).setTint(0x5ddce6).setDepth(t.y-origin.y+999).setVisible(true);
+      if(boss.submerged){this.warnings.lineStyle(3,0x8cefff,.7);this.warnings.strokeEllipse(x,y-10,58,14);for(let i=0;i<3;i++)this.warnings.strokeCircle(x-15+i*13,y-28-i*4,3);}
+      if(boss.tooth){const t=boss.tooth;this.tooth.setPosition(t.x-origin.x,t.y-origin.y-18).setDisplaySize(32,38).setRotation(t.path.angle+(t.returning?Math.PI:0)).setVisible(true);if(t.returning)drawDanger(this.warnings,t.path,origin,0xffbd6e,.12);}
     }
     if(boss instanceof KriegEncounter){
       this.motion.update(boss.body.id,boss.body.x,boss.body.y,animate,dt,true);
@@ -128,7 +146,7 @@ export class BossRenderer {
     if (boss.telegraph) {
       const warning = boss.telegraph, final = boss.stage === 'final';
       const intensity = final ? 0.48 + (Math.floor(boss.elapsed * 12) % 2) * 0.16 : 0.32;
-      if (kind !== 'order'||boss.profile.id==='krieg') for (const zone of [warning.zone, ...boss.extraWarnings]) drawDanger(this.warnings, zone, origin, 0xf23f46, intensity);
+      if (kind !== 'order'||boss.profile.id==='krieg'||boss.profile.id==='arlong'||boss.profile.id==='roger') for (const zone of [warning.zone, ...boss.extraWarnings]) drawDanger(this.warnings, zone, origin, 0xf23f46, intensity);
       else for (const gate of arena.gates) { this.warnings.lineStyle(final ? 4 : 2, 0xffb26a, 0.85); this.warnings.strokeCircle(gate.x - origin.x, gate.y - origin.y, 28); }
       if (kind === 'bomb') for (const zone of [warning.zone, ...boss.extraWarnings]) {
         const bx = zone.x - origin.x, by = zone.y - origin.y;
@@ -146,4 +164,12 @@ export class BossRenderer {
       for (let i = 0; i < 3; i++) { const a = boss.elapsed * 4 + i * Math.PI * 2 / 3; this.warnings.fillStyle(0xffde7d); this.warnings.fillRect(x + Math.cos(a) * 18 - 2, y - 84 + Math.sin(a) * 5, 4, 4); }
     }
   }
+  materialize(boss:PatternEncounter,origin:Vector,remaining:number):void{
+    this.body.setAlpha(.22);this.arm.setAlpha(.22);
+    const x=boss.body.x-origin.x,y=boss.body.y-origin.y;
+    this.warnings.lineStyle(3,0xf34f65,.9);this.warnings.strokeCircle(x,y,50);this.warnings.fillStyle(0xf23f46,.16);this.warnings.fillCircle(x,y,50);
+    // Silueta reconocible incluso cuando el renderer propio usa partes separadas.
+    this.body.setTexture(boss.profile.visual).setVisible(true).setTint(0x342b51).setAlpha(.35+(.2*(1-remaining/2))).setPosition(x,y).setScale(1.1);
+  }
+
 }

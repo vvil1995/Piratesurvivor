@@ -1,30 +1,34 @@
+import { generateArlongChunk } from './arlong.ts';
 import { generateBaratieChunk } from './baratie.ts';
 import type { Vector } from '../core/types.ts';
 import { cellKey, CHUNK_SIZE, generateChunk, generateOrangeChunk, generateSyrupChunk, TILE, type Chunk } from './generator.ts';
 
 export interface CollisionWorld {
+  readonly revision?:number;
   canOccupy(x: number, y: number, radius: number, layer?: 'movement' | 'attack'): boolean;
   moveCircle(actor: Vector, dx: number, dy: number, radius: number): void;
   segmentClear(ax: number, ay: number, bx: number, by: number, radius: number, layer?: 'movement' | 'attack'): boolean;
 }
 export class ProceduralWorld implements CollisionWorld {
+  revision=0;
   private attackMasks = new WeakMap<Chunk, Uint8Array>();
   private chunks = new Map<string, Chunk>();
   readonly maxChunks = 128;
   readonly seed: number;
-  readonly theme: 'shells' | 'orange' | 'syrup' | 'baratie';
-  constructor(seed: number, theme: 'shells' | 'orange' | 'syrup' | 'baratie' = 'shells') { this.seed = seed; this.theme = theme; }
+  readonly theme: 'shells' | 'orange' | 'syrup' | 'baratie' | 'arlong';
+  constructor(seed: number, theme: 'shells' | 'orange' | 'syrup' | 'baratie' | 'arlong' = 'shells') { this.seed = seed; this.theme = theme; }
   get chunkCount(): number { return this.chunks.size; }
   getChunk(cx: number, cy: number): Chunk {
     const key = cellKey(cx, cy);
     let chunk = this.chunks.get(key);
     if (!chunk) {
-      chunk = this.theme === 'baratie' ? generateBaratieChunk(this.seed,cx,cy) : this.theme === 'orange' ? generateOrangeChunk(this.seed, cx, cy) : this.theme === 'syrup' ? generateSyrupChunk(this.seed,cx,cy) : generateChunk(this.seed, cx, cy);
+      chunk = this.theme === 'arlong' ? generateArlongChunk(this.seed,cx,cy) : this.theme === 'baratie' ? generateBaratieChunk(this.seed,cx,cy) : this.theme === 'orange' ? generateOrangeChunk(this.seed, cx, cy) : this.theme === 'syrup' ? generateSyrupChunk(this.seed,cx,cy) : generateChunk(this.seed, cx, cy);
       if (this.chunks.size >= this.maxChunks) this.chunks.delete(this.chunks.keys().next().value!);
       this.chunks.set(key, chunk);
     }
     return chunk;
   }
+  isWater(x:number,y:number):boolean{return this.getChunk(Math.floor(x/512),Math.floor(y/512)).obstacles.some(o=>o.kind==='water'&&x>=o.x&&y>=o.y&&x<o.x+o.width&&y<o.y+o.height);}
   prune(centers: readonly Vector[], radius = 4): void {
     for (const [key, chunk] of this.chunks) if (!centers.some(p => Math.abs(chunk.cx - Math.floor(p.x / CHUNK_SIZE)) <= radius && Math.abs(chunk.cy - Math.floor(p.y / CHUNK_SIZE)) <= radius)) this.chunks.delete(key);
   }

@@ -21,6 +21,9 @@ export const CHARACTERS: Record<string, CharacterDefinition> = {
 };
 const MARINE_BASE_HP = 32;
 export const ENEMIES: Record<string, EnemyDefinition> = {
+  'fishman-fighter':{id:'fishman-fighter',hp:135,speed:92,damage:27,xp:22,radius:14,visual:'fishman-fighter',swimming:true,melee:{preparation:.55,interval:2,reach:65,hits:1,gap:.3}},
+  'fishman-spitter':{id:'fishman-spitter',hp:110,speed:77,damage:27,xp:26,radius:13,visual:'fishman-spitter',swimming:true,ranged:{interval:3.1,preparation:.8,speed:195,range:360,preferredDistance:250,pellets:3,spread:.3,visual:'water'}},
+  'fishman-karate':{id:'fishman-karate',hp:210,speed:83,damage:29,xp:34,radius:16,visual:'fishman-karate',swimming:true,melee:{preparation:.85,interval:3,reach:85,hits:3,gap:.42}},
   'krieg-saber':{id:'krieg-saber',hp:105,speed:91,damage:23,xp:18,radius:13,visual:'krieg-saber',melee:{preparation:.55,interval:1.9,reach:60,hits:1,gap:.3}},
   'krieg-gunner':{id:'krieg-gunner',hp:95,speed:73,damage:24,xp:22,radius:13,visual:'krieg-gunner',ranged:{interval:3.3,preparation:.8,speed:180,range:340,preferredDistance:230,pellets:3,spread:.24}},
   'krieg-armored':{id:'krieg-armored',hp:180,speed:56,damage:32,xp:29,radius:16,visual:'krieg-armored',frontalReduction:.25,melee:{preparation:.9,interval:2.8,reach:75,hits:1,gap:.3}},

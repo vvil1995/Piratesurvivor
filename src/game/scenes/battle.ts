@@ -33,6 +33,7 @@ export interface BattleBridge {
 export class BattleScene extends Phaser.Scene {
   private navigationSignal!: Phaser.GameObjects.Image;
   private bossRenderer!: BossRenderer;
+  private summonedRenderers:BossRenderer[]=[];
   private bridge: BattleBridge;
   private captain!: Phaser.GameObjects.Image;
   private balloonRig!: BalloonRig;
@@ -169,7 +170,7 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(visible); shadow.setVisible(visible);
       if (!visible || !e) { this.enemyRigs[i].hide(); continue; }
       const animation = this.enemyAnimations[i];
-      const cat=e.visual?.startsWith('blackcat-')||e.visual?.startsWith('krieg-');
+      const cat=e.visual?.startsWith('blackcat-')||e.visual?.startsWith('krieg-')||e.visual?.startsWith('fishman-');
       const pirate = e.visual?.startsWith('buggy-')||cat;
       const marine = e.visual?.startsWith('marine-');
       animation.update(`${run!.id}/${e.id}`, e.x, e.y, !!animate && !(e.launchTime && e.launchTime > 0), delta / 1000, !!marine);
@@ -180,6 +181,7 @@ export class BattleScene extends Phaser.Scene {
       sprite.setOrigin(.5, pirate || marine ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${facing}-${frame}`).setFlipX(false).setScale(marine ? .6 : 0.6 * (1 + animation.weight / 2), marine ? .6 : 0.6 * (1 - animation.weight)).setAngle(marine ? 0 : animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
+      sprite.setAlpha(e.swimming&&run?.world.isWater(e.x,e.y)?.85:1);
       sprite.setTint(e.flash > 0 ? 0xffb689 : (e.statuses?.root ?? 0) > 0 ? 0x9cc9eb : (e.statuses?.confuse ?? 0) > 0 ? 0xc2a5dd : (e.statuses?.stun ?? 0) > 0 ? 0xf3e3a8 : e.ranged && e.visual === 'marine' ? 0xb6d9f2 : 0xffffff); shadow.setPosition(e.x - origin.x, e.y - origin.y + 2);
       if ((pirate || marine) && !animation.frame && !attacking && !(e.shotWindup! > 0) && !(e.shotRecovery! > 0)) sprite.setScale(.6,.6*(1+Math.sin(this.enemyIdle*2+e.id)*.01));
       if ((pirate || marine) && e.flash > 0) sprite.setAngle(-9 * e.flash/.15);
@@ -217,12 +219,18 @@ export class BattleScene extends Phaser.Scene {
     }
     this.enemyDeaths.update(run, origin, delta/1000);
     this.bossRenderer.update(run?.encounter, origin, run?.arena, delta/1000, !!animate);
+    const summons=run?.finalChallenge?.summons??[];
+    for(let i=0;i<Math.max(summons.length,this.summonedRenderers.length);i++){
+      const entry=summons[i];if(entry&&!this.summonedRenderers[i])this.summonedRenderers[i]=new BossRenderer(this);
+      this.summonedRenderers[i]?.update(entry&&entry.remaining<=0?entry.boss:undefined,origin,run?.arena,delta/1000*1.2,!!animate);
+      if(entry&&entry.remaining>0)this.summonedRenderers[i].materialize(entry.boss,origin,entry.remaining);
+    }
     const signal = run?.navigationSignal;
     this.navigationSignal.setVisible(!!signal);
     if (signal) {
       const bob = this.bridge.reducedMotion() ? 0 : Math.sin((run?.time ?? 0) * 4) * 3;
-      this.navigationSignal.setPosition(signal.x - origin.x, signal.y - origin.y - 12 + bob);
-      this.effects.lineStyle(2, 0xf5d784, 0.85); this.effects.strokeCircle(signal.x - origin.x, signal.y - origin.y, 24);
+      this.navigationSignal.setScale(run?.arlongDefeated?1.5:1.3).setTint(run?.arlongDefeated?0xffdf86:0xffffff).setPosition(signal.x - origin.x, signal.y - origin.y - 12 + bob);
+      this.effects.lineStyle(2, 0xf5d784, 0.85); this.effects.strokeCircle(signal.x - origin.x, signal.y - origin.y, 24);if(run?.arlongDefeated){this.effects.lineStyle(2,0xffd15b,.7);this.effects.strokeCircle(signal.x-origin.x,signal.y-origin.y,32);this.effects.lineBetween(signal.x-origin.x,signal.y-origin.y-60,signal.x-origin.x,signal.y-origin.y-36);}
     }
     if (run) {
       for (const chest of run.visibleChests) if (chest.active && chest.large && ((chest.openProgress ?? 0) > 0 || Math.hypot(chest.x - worldX, chest.y - worldY) < 110)) {
@@ -258,6 +266,7 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const bullet of run.projectiles.items) if (bullet.active) {
         const x = bullet.x - origin.x, y = bullet.y - origin.y - 18;
+        if(bullet.visual==='water'){this.effects.lineStyle(6,0x145b88,.95);this.effects.lineBetween(x,y,x-bullet.vx*.065,y-bullet.vy*.065);this.effects.lineStyle(3,0x8be9ff,1);this.effects.lineBetween(x,y,x-bullet.vx*.065,y-bullet.vy*.065);this.effects.fillStyle(0xe4ffff);this.effects.fillCircle(x,y,4);continue;}
         if (bullet.hostile && bullet.slow){this.effects.lineStyle(3,0xa580ed,.95);this.effects.strokeCircle(x,y,9);this.effects.fillStyle(0xf7df8b);this.effects.fillCircle(x,y,5);this.effects.lineStyle(2,0xd7c6ff,.8);this.effects.lineBetween(x,y-8,x-bullet.vx*.06,y-12-bullet.vy*.06);continue;}
         if (bullet.hostile) {
           this.effects.lineStyle(7, 0x3b151f, .95); this.effects.lineBetween(x, y, x - bullet.vx * .07, y - bullet.vy * .07);

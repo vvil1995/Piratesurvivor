@@ -15,10 +15,12 @@ export class FlowField {
   private elapsed = 1;
   readonly world: CollisionWorld;
   rebuilds = 0;
+  private revision=-1;
   private clearance: number;
   private centerWaypoints:boolean;
   constructor(world: CollisionWorld, clearance = 14, centerWaypoints=false) { this.world = world; this.clearance = clearance;this.centerWaypoints=centerWaypoints; this.distances.fill(-1); }
   update(target: Vector, dt: number): void {
+    if(this.revision!==(this.world.revision??0)){this.revision=this.world.revision??0;this.targetX=Infinity;}
     this.elapsed += dt;
     const tx = Math.floor(target.x / TILE), ty = Math.floor(target.y / TILE);
     if (tx === this.targetX && ty === this.targetY) return;

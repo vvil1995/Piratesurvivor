@@ -1,6 +1,6 @@
 import type { DifficultyDefinition } from '../types.ts';
 export interface WorldDefinition {
-  id: string; name: string; subtitle: string; biome: 'naval-town' | 'rural-village' | 'pirate-fleet';
+  id: string; name: string; subtitle: string; biome: 'naval-town' | 'rural-village' | 'pirate-fleet' | 'fishman-park';
   enemyId: string; enemyVariants?: readonly { id: string; weight: number; minSeconds: number }[]; enemyCap: number; pickupCap: number;
   difficulty?: DifficultyDefinition;
   distributions?: readonly { at: number; weights: readonly { id: string; weight: number }[] }[];

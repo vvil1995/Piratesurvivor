@@ -1302,6 +1302,75 @@ test('Baratie completo: Log Pose voluntario, flota conectada, Krieg seis patrone
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.cancel();b.state='approach';b.body.x=r.player.x+35;b.body.y=r.player.y;b.body.hp=1;r.player.attacks[0].cooldown=0;r.player.hurtTimer=10;
   for(let i=0;i<100&&r.status==='playing';i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
  await expect(page.locator('#combinations')).toBeVisible();await expect(page.locator('#combination-message')).toContainText('Krieg');await page.locator('#combination-done').click();await expect(page.locator('#navigation-hint')).toContainText('ARLONG');
- expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.kriegDefeated,unlocked:r.arlongUnlocked,travel:r.sailToArlong(),zone:r.zone,projectiles:r.projectiles.count};})).toEqual({won:true,unlocked:true,travel:false,zone:'krieg-arena',projectiles:0});
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.kriegDefeated,unlocked:r.arlongUnlocked,travel:!!r.exitSignal,zone:r.zone,projectiles:r.projectiles.count};})).toEqual({won:true,unlocked:true,travel:true,zone:'krieg-arena',projectiles:0});
  await page.screenshot({path:info.outputPath('krieg-victory-arlong-pending.png')});await page.locator('#pause').click();await expect(page.locator('#paused')).toBeVisible();expect(errors).toEqual([]);
+});
+
+test('Arlong Park completo: canales, hombres-pez, seis ataques, furia y Roger pendiente',async({page},info)=>{
+ test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
+ await page.locator('#start').click();const zoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,axis={x:0,y:0};
+  const voyage=()=>{for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,axis);};const wait=()=>{for(let i=0;i<90;i++)r.update(1/60,axis);};
+  r.morganDefeated=true;r.boardToOrangeTown();r.beginBuggy();r.buggyDefeated=true;r.encounter!.defeated();wait();r.sailToSyrup();voyage();r.beginKuro();r.kuroDefeated=true;r.encounter!.defeated();wait();r.finishCombinations();r.sailToBaratie();voyage();r.beginKrieg();
+  r.player.hp=70;r.player.level=45;r.player.xp=9;r.player.collectedBerries=456;r.player.hurtTimer=10;r.encounter!.body.hp=1;r.encounter!.body.x=r.player.x+35;r.encounter!.body.y=r.player.y;r.player.attacks[0].cooldown=0;
+  for(let i=0;i<100&&r.status==='playing';i++)r.update(1/60,axis);r.update=()=>{};q.draw();q.tick();
+ });
+ await expect(page.locator('#combinations')).toBeVisible();await page.locator('#combination-done').click();await expect(page.locator('#navigation-hint')).toContainText('ARLONG PARK');expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.zone)).toBe('krieg-arena');
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=Object.getPrototypeOf(r).update;Object.assign(r.player,r.exitSignal);r.update(1/60,{x:0,y:0});q.tick();});await expect(page.locator('#voyage-title')).toContainText('ARLONG PARK');
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.update=()=>{};r.player.hurtTimer=0;r.player.x=256;r.player.y=400;for(let i=0;i<30;i++)q.draw(33);q.tick();});
+ await expect(page.locator('#area-label')).toContainText('ARLONG PARK');expect(await page.evaluate(()=>{const p=window.__OPS_QA__!.getRun()!.player;return [p.level,p.xp,p.collectedBerries];})).toEqual([45,9,456]);
+ await page.evaluate(async()=>{const path='/src/content/catalog.ts',{ENEMIES}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!;
+  for(const[i,id]of ['fishman-fighter','fishman-spitter','fishman-karate'].entries()){const d=ENEMIES[id],e=r.enemies.acquire()!;Object.assign(e,d,{id:1200+i,active:true,x:48+i*96,y:400,maxHp:d.hp,flash:0,meleeTimer:0,meleeWindup:0,meleeHits:0,shotTimer:0,shotWindup:0,shotRecovery:0});}q.draw();q.tick();
+ });
+ await page.screenshot({path:info.outputPath('arlong-canals-fishmen.png')});const textures=await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyTextures);for(const id of ['fishman-fighter','fishman-spitter','fishman-karate'])expect(textures.some(t=>t.startsWith(id))).toBe(true);
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.enemies.clear();r.player.hurtTimer=1e6;for(const a of r.player.attacks)a.cooldown=1e6;for(let i=0;i<100;i++){Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:1});if(!r.world.canOccupy(r.player.x,r.player.y,14))throw Error('El jugador pisa agua');}r.beginArlong();r.player.hurtTimer=0;q.draw();q.tick();});
+ await expect(page.locator('#boss-name')).toHaveText('ARLONG');await expect(page.locator('#boss-phase,#boss-pattern,#boss-hp')).toHaveCount(0);expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);expect((await page.evaluate(()=>window.__OPS_QA__!.metrics().bossTexture))?.startsWith('arlong-')).toBe(true);await page.screenshot({path:info.outputPath('arlong-arena-before.png')});
+ const before=await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.x=1152;r.player.y=1216;for(let i=0;i<30;i++)q.draw(33);return {slots:q.metrics().textureSlots,solid:r.world.canOccupy(1152,1088,14)};});expect(before.solid).toBe(false);await page.screenshot({path:info.outputPath('arlong-columns-before.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.body.hp=b.body.maxHp*.2;r.player.hurtTimer=1e6;for(let i=0;i<100;i++)b.tick(.01,r.player,r.world,()=>({x:0,y:0}),()=>{});r.player.hurtTimer=0;q.draw();q.tick();});
+ const after=await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;return {revision:r.world.revision,slots:q.metrics().textureSlots,free:r.world.canOccupy(1152,1088,14)};});expect(after.revision).toBe(1);expect(after.free).toBe(true);expect(after.slots).toBeLessThanOrEqual(before.slots+2);await page.screenshot({path:info.outputPath('arlong-columns-after-rage.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.x=1536;r.player.y=1216;for(let i=0;i<30;i++)q.draw(33);});
+ for(const id of ['bite','kiribachi','water','tooth','dive','darts']){
+  await page.evaluate(async id=>{const path='/src/content/bosses/arlong.ts',{ARLONG_ATTACKS}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;
+   b.cancel();b.body.x=1728;b.body.y=1216;b.body.hp=b.body.maxHp*.2;r.player.x=1536;r.player.y=1216;r.player.hurtTimer=1e6;b.prepare(ARLONG_ATTACKS.find((a:{id:string})=>a.id===id)!,r.player,r.world);
+   if(id==='dive')for(let i=0;i<1600&&!b.telegraph;i++)b.tick(.01,r.player,r.world,()=>({x:0,y:0}),()=>{});
+   if(!b.telegraph)throw Error('Falta aviso '+id);b.elapsed=b.telegraph.attack.preparation-.15;b.telegraph.elapsed=b.elapsed;r.player.hurtTimer=0;q.draw();q.tick();
+  },id);await page.screenshot({path:info.outputPath(`arlong-${id}-warning.png`)});
+  await page.evaluate(async()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.hurtTimer=1e6;for(let i=0;i<30;i++)r.encounter!.tick(.01,r.player,r.world,()=>({x:0,y:0}),()=>{});
+   const path='/src/game/systems/effects.ts',{tickEffects}=await import(/* @vite-ignore */path);tickEffects(r,r.players,r.grid,r.world,.2,()=>{},()=>.5);r.player.hurtTimer=0;q.draw();q.tick();});
+  await page.screenshot({path:info.outputPath(`arlong-${id}-impact.png`)});
+ }
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.encounter!;b.cancel();b.state='approach';b.body.x=r.player.x+35;b.body.y=r.player.y;b.body.hp=1;r.player.attacks[0].cooldown=0;r.player.hurtTimer=10;
+  for(let i=0;i<100&&r.status==='playing';i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
+ await expect(page.locator('#combinations')).toBeVisible();await expect(page.locator('#combination-message')).toContainText('Arlong');await page.locator('#combination-done').click();await expect(page.locator('#navigation-hint')).toContainText('ROGER');
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return {won:r.arlongDefeated,unlocked:r.rogerUnlocked,travel:!!r.exitSignal,zone:r.zone,projectiles:r.projectiles.count};})).toEqual({won:true,unlocked:true,travel:true,zone:'arlong-arena',projectiles:0});await page.screenshot({path:info.outputPath('arlong-victory-roger-pending.png')});await page.locator('#pause').click();await expect(page.locator('#paused')).toBeVisible();expect(errors).toEqual([]);
+});
+
+test('Roger final: viaje voluntario, seis acciones, cinco invocados, marcador y récords',async({page},info)=>{
+ test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
+ await page.locator('#start').click();const zoom=await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom);
+ await page.evaluate(async()=>{const path='/src/game/bosses/arlong.ts',{ArlongEncounter}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!;
+  const worldPath='/src/game/world/arlong-arena.ts',{ArlongArenaWorld}=await import(/* @vite-ignore */worldPath);r.world=new ArlongArenaWorld(42);r.player.x=1536;r.player.y=1216;r.zone='arlong-arena';r.arlongDefeated=true;r.rogerUnlocked=true;r.encounter=new ArlongEncounter();r.encounter.defeated();r.encounter.elapsed=2;r.exitSignal={x:r.player.x+180,y:r.player.y};r.player.level=45;r.player.xp=9;r.player.collectedBerries=456;r.player.hp=74;r.update=()=>{};q.draw();q.tick();});
+ expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.finalChallenge)).toBeUndefined();
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=Object.getPrototypeOf(r).update;Object.assign(r.player,r.exitSignal);r.update(1/60,{x:0,y:0});q.tick();});
+ await expect(page.locator('#voyage-title')).toContainText('GOL D. ROGER');
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<190&&r.status==='voyage';i++)r.update(1/60,{x:0,y:0});r.update=()=>{};r.player.hurtTimer=1000;for(let i=0;i<30;i++)q.draw(33);q.tick();});
+ await expect(page.locator('#roger-score')).toBeVisible();await expect(page.locator('#boss-panel')).toBeHidden();expect(await page.evaluate(()=>window.__OPS_QA__!.metrics().cameraZoom)).toBe(zoom);
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return [r.zone,r.player.level,r.player.xp,r.player.collectedBerries,r.visibleChests.length];})).toEqual(['roger-arena',45,9,456,0]);await page.screenshot({path:info.outputPath('roger-arena.png')});
+ for(const id of ['king','kamusari','haki','storm','will']){
+  await page.evaluate(async id=>{const path='/src/content/bosses/roger.ts',{ROGER_ATTACKS}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,b=r.finalChallenge!.roger;
+   b.cancel();b.seconds=240;b.body.x=r.player.x+190;b.body.y=r.player.y;b.prepare(ROGER_ATTACKS.find((a:{id:string})=>a.id===id)!,r.player,r.world);if(id==='king')for(let i=0;i<8&&b.attackId!=='king';i++)b.prepare(ROGER_ATTACKS[0],r.player,r.world);q.draw();q.tick();},id);
+  await page.screenshot({path:info.outputPath(`roger-${id}-warning.png`)});
+  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,b=r.finalChallenge!.roger;for(let i=0;i<260&&b.state==='preparing';i++)b.tick(.01,r.player,r.world,()=>({x:0,y:0}),()=>{});for(let i=0;i<25;i++)b.tick(.01,r.player,r.world,()=>({x:0,y:0}),()=>{});q.draw();q.tick();});await page.screenshot({path:info.outputPath(`roger-${id}-impact.png`)});
+ }
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!,f=r.finalChallenge!;f.seconds=479.98;f.nextSummon=480;for(let i=0;i<2;i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});
+  for(const [i,s]of f.summons.entries()){s.boss.body.x=r.player.x+(i-2)*135;s.boss.body.y=r.player.y-90;}q.draw();q.tick();});
+ expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.finalChallenge!.living)).toBe(5);await page.screenshot({path:info.outputPath('roger-summon-silhouettes.png')});
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let i=0;i<125;i++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});await page.screenshot({path:info.outputPath('roger-five-bosses.png')});
+ await page.evaluate(async()=>{const path='/src/game/systems/hits.ts',{damageEnemy}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,f=r.finalChallenge!;
+  r.player.stats.critChance=0;f.roger.body.statuses=undefined;damageEnemy(r.player,f.roger.body,12345,0,r.player,r.world,()=>{throw Error('Roger murió');},()=>1);const s=f.summons[0];s.boss.body.hp=1;damageEnemy(r.player,s.boss.body,100,0,r.player,r.world,e=>Object.getPrototypeOf(r).dropXp.call(r,e,r.player.id),()=>1);q.draw();q.tick();});
+ await expect(page.locator('#roger-score')).toContainText('12.345');expect(await page.evaluate(()=>{const f=window.__OPS_QA__!.getRun()!.finalChallenge!;return [f.roger.body.hp,f.roger.body.active,f.bossesDefeated];})).toEqual([1,true,1]);
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.hp=0;Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
+ await expect(page.locator('#result-title')).toContainText('EL REY DE LOS PIRATAS');await expect(page.locator('#roger-results')).toContainText('12.345');await page.screenshot({path:info.outputPath('roger-results-records.png')});
+ const titleBox=await page.locator('#result-title').boundingBox();expect(titleBox?.y).toBeGreaterThanOrEqual(0);
+ expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.rogerRecords?.global.damage)).toBe(12345);await page.reload();await expect(page.locator('#loading')).toBeHidden();expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.rogerRecords?.characters.luffy.damage)).toBe(12345);expect(errors).toEqual([]);
 });

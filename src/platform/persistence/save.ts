@@ -4,7 +4,9 @@ import { TRAINING_MAX } from '../../content/catalog.ts';
 import type { RunResult } from '../../game/core/types.ts';
 
 export const SAVE_KEY = 'ops.progress.v1';
+export interface RogerRecords {damage:number;seconds:number;bosses:number}
 export interface Progress {
+  rogerRecords?:{global:RogerRecords;characters:Record<string,RogerRecords>};
   characterTraining?: Record<string, CharacterTraining>;
   version: 1; coins: number; training: number; runs: number; wins: number;
   totalKills: number; bestTime: number; bestLevel: number;
@@ -25,10 +27,17 @@ function validTraining(value: unknown): boolean {
       !p.bans.includes(initial) && !p.bans.includes(p.second);
   });
 }
+function validRecords(value:unknown):boolean{
+ if(value===undefined)return true;
+ if(!value||typeof value!=='object')return false;
+ const v=value as {global?:unknown;characters?:unknown};
+ const record=(r:unknown)=>!!r&&typeof r==='object'&&['damage','seconds','bosses'].every(k=>{const n=(r as Record<string,unknown>)[k];return typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=Number.MAX_SAFE_INTEGER;});
+ return record(v.global)&&!!v.characters&&typeof v.characters==='object'&&!Array.isArray(v.characters)&&Object.entries(v.characters).every(([id,r])=>Object.hasOwn(CHARACTERS,id)&&record(r));
+}
 function valid(value: unknown): value is Progress {
   if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
-  return v.version === 1 && validTraining(v.characterTraining) && ['coins', 'training', 'runs', 'wins', 'totalKills', 'bestTime', 'bestLevel'].every(key =>
+  return v.version === 1 && validRecords(v.rogerRecords) && validTraining(v.characterTraining) && ['coins', 'training', 'runs', 'wins', 'totalKills', 'bestTime', 'bestLevel'].every(key =>
     typeof v[key] === 'number' && Number.isSafeInteger(v[key]) && (v[key] as number) >= 0 && (v[key] as number) <= 1e9) &&
     (v.training as number) <= TRAINING_MAX && typeof v.lastRunId === 'string' &&
     v.lastRunId.length < 150 && (v.berryRunId === undefined || typeof v.berryRunId === 'string' && v.berryRunId.length < 150) &&
@@ -81,11 +90,21 @@ export class SaveStore {
   record(result: RunResult): boolean {
     if (result.id === this.progress.lastRunId) return false;
     const p = this.progress;
+    if(result.challenge)this.recordRoger(result.challenge);
     this.bank(result.id, result.coins);
     p.lastRunId = result.id; p.runs++;
     p.wins += result.outcome === 'victory' ? 1 : 0;
     p.totalKills += result.kills; p.bestTime = Math.max(p.bestTime, result.seconds);
     p.bestLevel = Math.max(p.bestLevel, result.level); this.flush(); return true;
+  }
+  recordRoger(result:NonNullable<RunResult['challenge']>):void{
+    if(!Object.hasOwn(CHARACTERS,result.characterId)||!['damage','seconds','bosses'].every(k=>{const n=result[k as 'damage'|'seconds'|'bosses'];return Number.isFinite(n)&&n>=0&&n<=Number.MAX_SAFE_INTEGER;}))return;
+    const records=this.progress.rogerRecords??={global:{damage:0,seconds:0,bosses:0},characters:{}};
+    const personal=records.characters[result.characterId]??={damage:0,seconds:0,bosses:0};result.newRecords=[];
+    for(const key of ['damage','seconds','bosses'] as const){
+      if(result[key]>records.global[key]){records.global[key]=result[key];result.newRecords.push(`Global: ${key}`);}
+      if(result[key]>personal[key]){personal[key]=result[key];result.newRecords.push(`${result.characterId}: ${key}`);}
+    }
   }
   recordMorganVictory(runId: string): boolean {
     if (!runId || runId.length >= 150 || this.progress.lastMorganRunId === runId) return false;

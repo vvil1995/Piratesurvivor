@@ -1,3 +1,11 @@
+import { RogerChallenge } from '../challenges/roger.ts';
+import { ROGER_RULES } from '../../content/bosses/roger.ts';
+import { ROGER_ARENA } from '../world/roger-arena.ts';
+import { ARLONG_PARK } from '../../content/worlds/arlong-park.ts';
+import { ArlongEncounter } from '../bosses/arlong.ts';
+import { ARLONG,ARLONG_RULES } from '../../content/bosses/arlong.ts';
+import { ArlongArenaWorld,ARLONG_ARENA } from '../world/arlong-arena.ts';
+import { aquaticWorld,landReward } from '../world/aquatic.ts';
 import { BARATIE } from '../../content/worlds/baratie.ts';
 import { KriegEncounter } from '../bosses/krieg.ts';
 import { KRIEG,KRIEG_RULES } from '../../content/bosses/krieg.ts';
@@ -55,22 +63,26 @@ export class Run {
   readonly buggyRoute = new NavigationRoute();
   readonly kuroRoute = new NavigationRoute();
   readonly kriegRoute = new NavigationRoute();
-  exitSignal?:Vector; kuroDefeated=false; baratieUnlocked=false; kriegDefeated=false; arlongUnlocked=false;
+  readonly arlongRoute = new NavigationRoute();
+  exitSignal?:Vector; kuroDefeated=false; baratieUnlocked=false; kriegDefeated=false; arlongUnlocked=false;arlongDefeated=false;rogerUnlocked=false;
   get navigationSignal():Vector|undefined{return this.exitSignal??(!this.inArena?this.navigationRoute.signal:undefined);}
-  get navigationTarget():string{return this.exitSignal?this.kriegDefeated?"ARLONG PARK · PRÓXIMAMENTE":this.kuroDefeated?"BARATIE":"SYRUP VILLAGE":this.zone==='baratie'?'Don Krieg':this.zone==='syrup-village'?'Kuro':this.zone==='orange-town'?'Buggy':'Morgan';}
-  get navigationRoute(): NavigationRoute { return this.zone==='baratie'?this.kriegRoute:this.zone==='syrup-village'?this.kuroRoute:this.zone === 'orange-town' ? this.buggyRoute : this.route; }
+  get navigationTarget():string{return this.exitSignal?this.arlongDefeated?"GOL D. ROGER":this.kriegDefeated?"ARLONG PARK":this.kuroDefeated?"BARATIE":"SYRUP VILLAGE":this.zone==='arlong-park'?'Arlong':this.zone==='baratie'?'Don Krieg':this.zone==='syrup-village'?'Kuro':this.zone==='orange-town'?'Buggy':'Morgan';}
+  get navigationRoute(): NavigationRoute { return this.zone==='arlong-park'?this.arlongRoute:this.zone==='baratie'?this.kriegRoute:this.zone==='syrup-village'?this.kuroRoute:this.zone === 'orange-town' ? this.buggyRoute : this.route; }
   get navigationSeconds(): number { return this.zone === 'shells-town' ? this.time : this.zoneTime; }
-  get inArena(): boolean { return this.zone === 'morgan-arena' || this.zone === 'buggy-arena' || this.zone === 'kuro-arena' || this.zone==='krieg-arena'; }
+  get inArena(): boolean { return this.zone === 'morgan-arena' || this.zone === 'buggy-arena' || this.zone === 'kuro-arena' || this.zone==='krieg-arena'||this.zone==='arlong-arena'||this.zone==='roger-arena'; }
   get arena() { return this.world instanceof ArenaWorld ? this.world.arena : MORGAN_ARENA; }
-  voyage?: { destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return' | 'baratie' | 'krieg' | 'baratie-return'; elapsed: number };
+  voyage?: { destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return' | 'baratie' | 'krieg' | 'baratie-return' | 'arlong' | 'arlong-boss' | 'arlong-return' | 'roger'; elapsed: number };
   private zoneTime = 0;
   world: ProceduralWorld;
   private shellsWorld: ProceduralWorld;
   private orangeWorld?: ProceduralWorld;
   private syrupWorld?:ProceduralWorld;
   private baratieWorld?:ProceduralWorld;
-  zone: 'shells-town' | 'morgan-arena' | 'orange-town' | 'buggy-arena' | 'syrup-village' | 'kuro-arena' | 'baratie' | 'krieg-arena' = 'shells-town';
+  private arlongWorld?:ProceduralWorld;
+  zone: 'shells-town' | 'morgan-arena' | 'orange-town' | 'buggy-arena' | 'syrup-village' | 'kuro-arena' | 'baratie' | 'krieg-arena' | 'arlong-park' | 'arlong-arena' | 'roger-arena' = 'shells-town';
   encounter?: PatternEncounter;
+  finalChallenge?:RogerChallenge;
+  get bossBodies():Enemy[]{return this.finalChallenge?.bodies??(this.encounter?.body.active?[this.encounter.body]:[]);}
   morganDefeated = false; buggyDefeated = false;
   readonly enemies: Pool<Enemy>;
   readonly pickups: Pool<Pickup>;
@@ -89,6 +101,7 @@ export class Run {
   readonly strikes: Strike[] = [];
   private bossField?: FlowField;
   private fields = new Map<string, FlowField>();
+  private swimFields=new Map<string,FlowField>();
   private choicePlayerId = this.localPlayerId;
   status: RunStatus = 'playing';
   pendingAbility?: AbilityChoice;
@@ -138,15 +151,16 @@ export class Run {
     this.chests.sync(this.world, this.player);
     this.fieldFor(this.player).update(this.player, 1);
   }
-  private fieldFor(actor: Player): FlowField {
-    let field = this.fields.get(actor.id);
-    if (!field) { field = new FlowField(this.world,14,this.world.theme==='baratie'); this.fields.set(actor.id, field); }
+  private fieldFor(actor: Player, swimming=false): FlowField {
+    const fields=swimming?this.swimFields:this.fields;
+    let field = fields.get(actor.id);
+    if (!field) { field = new FlowField(swimming?aquaticWorld(this.world):this.world,14,swimming||this.world.theme==='baratie'||this.world.theme==='arlong'); fields.set(actor.id, field); }
     return field;
   }
   private clearBattlefield(): void {
     this.visualDeaths.length=0;
     this.enemies.clear(); this.pickups.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
-    this.fields.clear(); this.bossField = undefined;
+    this.fields.clear();this.swimFields.clear(); this.bossField = undefined;
     for (const state of this.player.attacks) { state.pending = 0; state.targetId = undefined; }
   }
   private arenaReinforcementTimer = 6;
@@ -192,9 +206,35 @@ export class Run {
     if(!this.kuroDefeated||this.zone!=='kuro-arena'||this.encounter?.state!=='dead'||this.status!=='playing')return false;
     this.startVoyage('baratie');return true;
   }
+  beginArlong():boolean{
+    if(!['playing','paused','voyage'].includes(this.status)||this.zone!=='arlong-park'||!this.kriegDefeated||this.arlongDefeated)return false;
+    this.arlongRoute.consume();this.clearBattlefield();this.lootNoticeFor=0;this.arlongWorld=this.world;
+    const world=new ArlongArenaWorld(this.world.seed);this.world=world;this.zone='arlong-arena';
+    this.encounter=new ArlongEncounter({fire:(from,angle,damage)=>spawnProjectile(this,from.x,from.y,from.x+Math.cos(angle)*100,from.y+Math.sin(angle)*100,damage,ARLONG_RULES.waterSpeed,'',true,1,undefined,ARLONG_RULES.waterRange/ARLONG_RULES.waterSpeed,undefined,'water'),clear:()=>{for(const p of this.projectiles.items)if(p.hostile)p.active=false;},rage:()=>world.breakObstacles()});
+    Object.assign(this.encounter.body,ARLONG_ARENA.bossSpawn);Object.assign(this.player,ARLONG_ARENA.playerSpawn);
+    this.bossField=new FlowField(aquaticWorld(this.world),ARLONG.radius,true);this.status='playing';this.voyage=undefined;this.fieldFor(this.player).update(this.player,1);return true;
+  }
   sailToArlong():boolean{
-    if(!this.kriegDefeated||this.zone!=='krieg-arena')return false;
-    this.lootNotice='Arlong Park desbloqueado · el mundo5 todavía no está disponible. Has completado Baratie.';this.lootNoticeFor=6;return false;
+    if(!this.kriegDefeated||this.zone!=='krieg-arena'||this.encounter?.state!=='dead'||this.status!=='playing')return false;
+    this.startVoyage('arlong');return true;
+  }
+  sailToRoger():boolean{
+    if(!this.arlongDefeated||this.zone!=='arlong-arena'||this.encounter?.state!=='dead'||this.status!=='playing')return false;
+    this.startVoyage('roger');return true;
+  }
+  private beginRoger():void{
+    this.clearBattlefield();this.zone='roger-arena';this.exitSignal=undefined;
+    this.finalChallenge=new RogerChallenge(this.world.seed,this.random,{
+      fire:(id,from,angle,damage,water)=>spawnProjectile(this,from.x,from.y,from.x+Math.cos(angle)*100,from.y+Math.sin(angle)*100,damage,water?220:230,`boss:${id}`,true,1,undefined,3.8,undefined,water?'water':undefined),
+      clear:id=>{for(const p of this.projectiles.items)if(p.hostile&&p.ownerId===`boss:${id}`)p.active=false;},
+      reflect:(body,damage)=>damageEnemy(this.player,body,damage,0,this.player,this.world,e=>this.dropXp(e,this.player.id),this.random),
+      counter:origin=>counterGuard(this.player,origin,this.grid,this.world,e=>this.dropXp(e,this.player.id),this.random),
+      absorb:(position,damage)=>{const lure=this.areas.items.find(a=>a.active&&a.kind==='decoy'&&Math.hypot(a.x-position.x,a.y-position.y)<a.radius+6);if(!lure)return false;lure.hp=(lure.hp??0)-damage;return true;},
+      reinforce:boss=>this.callReinforcements(boss)
+    });
+    this.world=this.finalChallenge.world;this.encounter=this.finalChallenge.roger;
+    Object.assign(this.player,ROGER_ARENA.playerSpawn);this.voyage=undefined;this.status='playing';this.zoneTime=0;
+    this.fieldFor(this.player).update(this.player,1);
   }
   private placeExit():void{
     if(this.exitSignal)return;
@@ -212,13 +252,15 @@ export class Run {
     this.world = new ProceduralWorld(this.shellsWorld.seed ^ 0x42756767, 'orange'); this.orangeWorld = this.world;
     Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1); return true;
   }
-  private startVoyage(destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return' | 'baratie' | 'krieg' | 'baratie-return'): void {
+  private startVoyage(destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return' | 'baratie' | 'krieg' | 'baratie-return' | 'arlong' | 'arlong-boss' | 'arlong-return' | 'roger'): void {
     this.encounter?.cancel(); this.exitSignal=undefined;this.clearBattlefield();
     this.voyage = { destination, elapsed: 0 }; this.status = 'voyage';
   }
   private finishVoyage(): void {
     const destination = this.voyage!.destination;
+    if(destination==='roger'){this.beginRoger();return;}
     if (destination === 'morgan') { this.beginMorgan(); return; }
+    if(destination==='arlong-boss'){this.beginArlong();return;}
     if(destination==='krieg'){this.beginKrieg();return;}
     if (destination === 'kuro') {this.beginKuro();return;}
     if (destination === 'buggy') { this.beginBuggy(); return; }
@@ -227,6 +269,17 @@ export class Run {
       this.world = this.syrupWorld??new ProceduralWorld(this.shellsWorld.seed ^ SYRUP_VILLAGE.seedSalt, 'syrup');this.syrupWorld=this.world; this.zoneTime = 0; this.spawnTimer = 0; this.voyage = undefined;
       Object.assign(this.player, { x: 256, y: 256 }); this.status = 'playing'; this.fieldFor(this.player).update(this.player, 1);
       this.lootNotice = 'Syrup Village · busca la ruta a Kuro después de05:00 en esta isla. Conservas tu vida y tu build.'; this.lootNoticeFor = 8; return;
+    }
+    if(destination==='arlong'){
+      this.clearBattlefield();this.encounter=undefined;this.zone='arlong-park';this.definition=ARLONG_PARK;
+      this.world=this.arlongWorld??new ProceduralWorld(this.shellsWorld.seed^ARLONG_PARK.seedSalt,'arlong');this.arlongWorld=this.world;
+      this.zoneTime=0;this.spawnTimer=1;this.voyage=undefined;Object.assign(this.player,{x:256,y:256});this.status='playing';this.fieldFor(this.player).update(this.player,1);
+      this.lootNotice='Arlong Park · los hombres-pez cruzan los canales. Busca la ruta a Arlong después de05:00 en esta isla.';this.lootNoticeFor=8;return;
+    }
+    if(destination==='arlong-return'){
+      this.clearBattlefield();this.encounter=undefined;this.world=this.arlongWorld!;this.definition=ARLONG_PARK;this.zone='arlong-park';
+      Object.assign(this.player,{x:256,y:256,hp:MORGAN_ROUTE.recoveryHp,hurtTimer:MORGAN_ROUTE.recoveryGrace});
+      this.spawnTimer=1;this.arlongRoute.retry(this.zoneTime,this.random);this.voyage=undefined;this.status='playing';this.fieldFor(this.player).update(this.player,1);return;
     }
     if(destination==='baratie'){
       this.clearBattlefield();this.encounter=undefined;this.zone='baratie';this.definition=BARATIE;
@@ -261,11 +314,11 @@ export class Run {
   }
   private defeatBoss(): void {
     if (this.encounter?.state === 'dead') return;
-    if(this.zone==='krieg-arena'){this.kriegDefeated=true;this.arlongUnlocked=true;}else if(this.zone==='kuro-arena'){this.kuroDefeated=true;this.baratieUnlocked=true;}else if (this.zone === 'buggy-arena') this.buggyDefeated = true; else this.morganDefeated = true; this.encounter!.defeated(); this.enemies.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
+    if(this.zone==='arlong-arena'){this.arlongDefeated=true;this.rogerUnlocked=true;}else if(this.zone==='krieg-arena'){this.kriegDefeated=true;this.arlongUnlocked=true;}else if(this.zone==='kuro-arena'){this.kuroDefeated=true;this.baratieUnlocked=true;}else if (this.zone === 'buggy-arena') this.buggyDefeated = true; else this.morganDefeated = true; this.encounter!.defeated(); this.enemies.clear(); this.projectiles.clear(); this.areas.clear(); this.strikes.length = 0;
     this.grantCombinationReward();
   }
-  private callReinforcements(): void {
-    const profile = this.encounter!.profile;
+  private callReinforcements(boss=this.encounter!): void {
+    const profile = boss.profile;
     let remaining = Math.min(profile.reinforcementCount, profile.reinforcementCap - this.enemies.count);
     const gates = [...this.arena.gates].sort((a, b) => Math.hypot(b.x - this.player.x, b.y - this.player.y) - Math.hypot(a.x - this.player.x, a.y - this.player.y));
     for (const gate of gates) {
@@ -373,15 +426,19 @@ export class Run {
   }
   readonly visualDeaths: { x:number;y:number;visual:string }[] = [];
   private dropXp(enemy: Enemy, ownerId: string, allowFruit = true): void {
-    if ((enemy.visual?.startsWith('buggy-') || enemy.visual?.startsWith('marine-') || enemy.visual?.startsWith('blackcat-') || enemy.visual?.startsWith('krieg-')) && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
-    if (enemy.kind === 'boss') { this.defeatBoss(); return; }
+    if ((enemy.visual?.startsWith('buggy-') || enemy.visual?.startsWith('marine-') || enemy.visual?.startsWith('blackcat-') || enemy.visual?.startsWith('krieg-') || enemy.visual?.startsWith('fishman-')) && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
+    if (enemy.kind === 'boss') {
+      if(this.finalChallenge){if(this.finalChallenge.defeated(enemy)){const p=this.pickups.acquire();if(p)Object.assign(p,{x:enemy.x,y:enemy.y,kind:'xp',value:ROGER_RULES.bossXp,ownerId,life:undefined});this.player.collectedBerries+=ROGER_RULES.bossBerries;}return;}
+      this.defeatBoss(); return;
+    }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
+    const rewardPosition=enemy.swimming?landReward(this.world,enemy):enemy;
     const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;
     if (allowFruit && owner && fruit && this.fruitCooldown <= 0) { this.fruitCooldown = fruit.cooldown; queueImpact(this, owner, enemy.x, enemy.y, fruit.radius, owner.stats.damage * fruit.damage, 0.12, 'bomu-explosion'); }
-    if (this.random() < LOOT.enemyFoodChance) dropLoot(this.pickups, { x: enemy.x, y: enemy.y + 16 }, ownerId, 'food', LOOT.enemyFoodHeal);
-    if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, enemy, ownerId, 'berry', LOOT.enemyBerries);
+    if (this.random() < LOOT.enemyFoodChance) dropLoot(this.pickups, { x: rewardPosition.x, y: rewardPosition.y + 16 }, ownerId, 'food', LOOT.enemyFoodHeal);
+    if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, rewardPosition, ownerId, 'berry', LOOT.enemyBerries);
     const pickup = this.pickups.acquire();
-    if (pickup) { Object.assign(pickup, { x: enemy.x, y: enemy.y, value: enemy.xp, ownerId, kind: 'xp', abilityId: undefined, life: undefined, level: undefined, fruitId: undefined, itemId: undefined }); return; }
+    if (pickup) { Object.assign(pickup, { x: rewardPosition.x, y: rewardPosition.y, value: enemy.xp, ownerId, kind: 'xp', abilityId: undefined, life: undefined, level: undefined, fruitId: undefined, itemId: undefined }); return; }
     let nearest: Pickup | undefined, best = Infinity;
     for (const item of this.pickups.items) {
       if (item.ownerId !== ownerId || item.kind && item.kind !== 'xp') continue;
@@ -411,23 +468,34 @@ export class Run {
       tickItem(actor,dt);
       actor.hurtTimer = Math.max(0, actor.hurtTimer - dt);
       actor.hp = Math.min(actor.stats.maxHp, actor.hp + regenerationRate(actor.stats) * dt);
-      this.fieldFor(actor).update(actor, dt);
+      this.fieldFor(actor).update(actor, dt);if(this.world.theme==='arlong')this.fieldFor(actor,true).update(actor,dt);
     }
     if (!living.length) { this.defeat(); return; }
     if (this.zone === 'shells-town' && !this.morganDefeated && this.route.tick(this.time, this.player, this.world, this.random, p => this.fieldFor(this.player).reachable(p))) {
       this.startVoyage('morgan'); return;
     }
     if (this.zone === 'orange-town' && !this.buggyDefeated && this.buggyRoute.tick(this.zoneTime, this.player, this.world, this.random, p => this.fieldFor(this.player).reachable(p))) { this.startVoyage('buggy'); return; }
+    if(this.zone==='arlong-park'&&!this.arlongDefeated&&this.arlongRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('arlong-boss');return;}
     if(this.zone==='baratie'&&!this.kriegDefeated&&this.kriegRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('krieg');return;}
     if(this.zone==='syrup-village'&&!this.kuroDefeated&&this.kuroRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('kuro');return;}
     const threatTime = this.zone === 'shells-town' ? this.time : this.zoneTime;
     this.spawnTimer -= dt;
     if (!this.inArena && this.spawnTimer <= 0) {
       const threat = difficultyAt(threatTime, this.definition.spawnInterval, this.definition.difficulty);
-      for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player), this.definition, this.random, ++this.enemyId, threatTime);
+      for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player,this.world.theme==='arlong'), this.definition, this.random, ++this.enemyId, threatTime,this.world.theme==='arlong'?aquaticWorld(this.world):undefined);
       this.spawnTimer = threat.interval;
     }
-    if (this.encounter && this.encounter.state !== 'dead') {
+    if(this.finalChallenge){
+      this.finalChallenge.tick(dt,this.player);
+      const worlds=[SHELLS_TOWN,ORANGE_TOWN,SYRUP_VILLAGE,BARATIE,ARLONG_PARK];
+      for(let i=0,n=this.finalChallenge.spawnBudget(dt);i<n;i++){
+        const base=worlds[Math.floor(this.random()*this.finalChallenge.worlds)],last=base.distributions?.at(-1);
+        const definition={...base,enemyCap:ROGER_RULES.enemyCap,distributions:last?[{at:0,weights:last.weights}]:base.distributions};
+        const swims=base.id==='arlong-park';
+        spawnEnemy(this.enemies,living,this.view,this.world,this.fieldFor(this.player,swims),definition,this.random,++this.enemyId,this.finalChallenge.seconds,swims?aquaticWorld(this.world):undefined);
+      }
+      if(this.player.hp<=0){this.defeat();return;}
+    } else if (this.encounter && this.encounter.state !== 'dead') {
       this.bossField!.update(this.player, dt);
       if (this.encounter.profile.id === 'morgan') {
         this.arenaReinforcementTimer -= dt;
@@ -440,11 +508,11 @@ export class Run {
       this.encounter.tick(dt, this.player, this.world, () => ({ x: 0, y: 0 }), () => {});
       if (this.encounter.elapsed >= 1.3) {
         if (this.zone === 'morgan-arena') { this.openCombinations(); this.bossCombinationReward = true; return; }
-        if(this.zone==='buggy-arena'||this.zone==='kuro-arena'||this.zone==='krieg-arena'){
+        if(this.zone==='buggy-arena'||this.zone==='kuro-arena'||this.zone==='krieg-arena'||this.zone==='arlong-arena'){
           const first=!this.exitSignal;this.placeExit();
-          if(first){this.lootNotice=this.zone==='buggy-arena'?'Buggy derrotado · camina hasta el Log Pose para navegar a Syrup.':this.zone==='krieg-arena'?'Don Krieg derrotado · unión ganada. Arlong Park estará disponible próximamente.':'Kuro derrotado · unión ganada. Camina hasta el Log Pose para navegar a Baratie.';this.lootNoticeFor=8;
-            if(this.zone==='kuro-arena'||this.zone==='krieg-arena'){this.openCombinations();this.bossCombinationReward=true;return;}}
-          if(this.exitSignal&&Math.hypot(this.player.x-this.exitSignal.x,this.player.y-this.exitSignal.y)<=MORGAN_ROUTE.radius){if(this.zone==='buggy-arena')this.sailToSyrup();else if(this.zone==='kuro-arena')this.sailToBaratie();else this.sailToArlong();}
+          if(first){this.lootNotice=this.zone==='buggy-arena'?'Buggy derrotado · camina hasta el Log Pose para navegar a Syrup.':this.zone==='arlong-arena'?'Arlong derrotado · East Blue completado. Unión ganada y Log Pose hacia Roger.':this.zone==='krieg-arena'?'Don Krieg derrotado · unión ganada. Camina hasta el Log Pose para navegar a Arlong Park.':'Kuro derrotado · unión ganada. Camina hasta el Log Pose para navegar a Baratie.';this.lootNoticeFor=8;
+            if(this.zone==='kuro-arena'||this.zone==='krieg-arena'||this.zone==='arlong-arena'){this.openCombinations();this.bossCombinationReward=true;return;}}
+          if(this.exitSignal&&Math.hypot(this.player.x-this.exitSignal.x,this.player.y-this.exitSignal.y)<=MORGAN_ROUTE.radius){if(this.zone==='buggy-arena')this.sailToSyrup();else if(this.zone==='kuro-arena')this.sailToBaratie();else if(this.zone==='krieg-arena')this.sailToArlong();else this.sailToRoger();}
           return;
         }
         return; }
@@ -460,7 +528,7 @@ export class Run {
       enemy.flash = Math.max(0, enemy.flash - dt);
       enemy.steeringTime = (enemy.steeringTime ?? 0) - dt;
       if (enemy.steeringTime <= 0 || enemy.targetId !== target.id) {
-        const direction = this.fieldFor(target).direction(enemy, target, enemy.radius);
+        const direction = this.fieldFor(target,!!enemy.swimming).direction(enemy, target, enemy.radius);
         enemy.lureIndex = undefined;
         if (nearest > 80) {
           let best = Math.min(240, nearest + 40);
@@ -493,18 +561,18 @@ export class Run {
       if ((enemy.statuses?.confuse ?? 0) > 0) { const turn = Math.sin(this.time * 3 + enemy.id) * 1.5, c = Math.cos(turn), s = Math.sin(turn); [steerX, steerY] = [steerX * c - steerY * s, steerX * s + steerY * c]; }
       const speed = enemy.speed * ((enemy.statuses?.slow ?? 0) > 0 ? 0.6 : 1);
       const launched = (enemy.launchTime ?? 0) > 0;
-      if (launched) { this.world.moveCircle(enemy, (enemy.launchX ?? 0) * dt, (enemy.launchY ?? 0) * dt, enemy.radius); enemy.launchTime = Math.max(0, enemy.launchTime! - dt); }
-      else this.world.moveCircle(enemy, frozen ? 0 : steerX * speed * dt * chase + sx * dt * 5, frozen ? 0 : steerY * speed * dt * chase + sy * dt * 5, enemy.radius);
+      if (launched) { (enemy.swimming?aquaticWorld(this.world):this.world).moveCircle(enemy, (enemy.launchX ?? 0) * dt, (enemy.launchY ?? 0) * dt, enemy.radius); enemy.launchTime = Math.max(0, enemy.launchTime! - dt); }
+      else (enemy.swimming?aquaticWorld(this.world):this.world).moveCircle(enemy, frozen ? 0 : steerX * speed * dt * chase + sx * dt * 5, frozen ? 0 : steerY * speed * dt * chase + sy * dt * 5, enemy.radius);
       enemy.decoyHitTimer = Math.max(0, (enemy.decoyHitTimer ?? 0) - dt);
       if (aim !== target && aimDistance < enemy.radius + (lure?.radius ?? 0) && enemy.decoyHitTimer <= 0) { lure!.hp = (lure!.hp ?? 0) - enemy.damage; enemy.decoyHitTimer = 0.8; }
       if (enemy.ranged) {
         tickEnemyShot(enemy, aim, dt, !launched && !!firing, (angle, lifetime) => {
           const x = enemy.ranged!.preparation ? enemy.x + Math.cos(angle)*100 : aim.x;
           const y = enemy.ranged!.preparation ? enemy.y + Math.sin(angle)*100 : aim.y;
-          return spawnProjectile(this, enemy.x, enemy.y, x, y, enemy.damage, enemy.ranged!.speed, '', true, 1, undefined, lifetime,enemy.ranged!.slow);
+          return spawnProjectile(this, enemy.x, enemy.y, x, y, enemy.damage, enemy.ranged!.speed, '', true, 1, undefined, lifetime,enemy.ranged!.slow,enemy.ranged!.visual);
         });
       }
-      if(enemy.melee)tickEnemyMelee(enemy,target,this.world,dt,()=>counterGuard(target,enemy,this.grid,this.world,e=>this.dropXp(e,target.id),this.random));
+      if(enemy.melee)tickEnemyMelee(enemy,target,enemy.swimming?aquaticWorld(this.world):this.world,dt,()=>counterGuard(target,enemy,this.grid,this.world,e=>this.dropXp(e,target.id),this.random));
       if (!enemy.melee && !launched && !isInvulnerable(target) && (enemy.statuses?.stun ?? 0) <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
         if (enemy.visual === 'marine-sword') enemy.shotRecovery = .3;
         if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) { const before = target.hp; target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor)); if (target.hp < before) { target.lastHit = 'CONTACTO'; target.damageNoticeFor = 1.2; } } target.hurtTimer = 0.65;
@@ -512,7 +580,7 @@ export class Run {
     }
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
     this.explorationChests?.sync(this.world, this.player);
-    this.grid.rebuild([...this.enemies.items, ...this.visibleChests.filter(c => !c.large), ...(this.encounter?.body.active ? [this.encounter.body] : [])]);
+    this.grid.rebuild([...this.enemies.items, ...this.visibleChests.filter(c => !c.large), ...this.bossBodies]);
     for (const actor of living) {
       if (actor.hp <= 0) continue;
       tickAttacks(actor, this.grid, this.world, dt, enemy => this.dropXp(enemy, actor.id), strike => {
@@ -564,8 +632,8 @@ export class Run {
     if (this.maintenance >= 0.5) { this.world.prune(living); this.maintenance = 0; }
   }
   private defeat(): void {
-    if (this.inArena && this.encounter?.state !== 'dead') { this.startVoyage(this.zone==='krieg-arena'?'baratie-return':this.zone==='kuro-arena'?'syrup-return':this.zone === 'buggy-arena' ? 'orange-return' : 'shells'); return; }
-    this.status = 'defeat'; this.encounter?.cancel(); this.strikes.length = 0;
+    if (!this.finalChallenge && this.inArena && this.encounter?.state !== 'dead') { this.startVoyage(this.zone==='arlong-arena'?'arlong-return':this.zone==='krieg-arena'?'baratie-return':this.zone==='kuro-arena'?'syrup-return':this.zone === 'buggy-arena' ? 'orange-return' : 'shells'); return; }
+    this.status = 'defeat'; this.finalChallenge?.stop();this.encounter?.cancel(); this.strikes.length = 0;
     for (const p of this.projectiles.items) { p.active = false; p.hit.clear(); }
     for (const a of this.areas.items) a.active = false;
     for (const p of this.pickups.items) if (p.kind === 'food') p.active = false;
@@ -574,6 +642,6 @@ export class Run {
   result(): RunResult | undefined {
     if (this.status !== 'defeat' && this.status !== 'victory') return;
     return { id: this.id, outcome: this.status, seconds: Math.floor(this.time), kills: this.player.kills, level: this.player.level,
-      coins: Math.floor(this.player.collectedBerries) };
+      coins: Math.floor(this.player.collectedBerries),challenge:this.finalChallenge?{characterId:this.player.characterId,damage:this.finalChallenge.damage,seconds:this.finalChallenge.seconds,bosses:this.finalChallenge.bossesDefeated}:undefined };
   }
 }

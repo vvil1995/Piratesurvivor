@@ -215,3 +215,17 @@ Extracción por componentes alpha para no mezclar figuras; escala común por act
 - `motion/{krieg-saber,krieg-gunner,krieg-armored,don-krieg}.png`: atlas1024×640, celdas128px, pies120px, extracción por componentes conectados para evitar fragmentos vecinos, escala común por actor, nearest-neighbor y transparencia real. Perfiles compartidos entre direcciones sin reflejar las armas; ciclo provisional con pasos alternos.
 - `worlds/{baratie-restaurant,baratie-mast,krieg-cannon,krieg-flag}.png`: módulos independientes con transparencia, reducidos a384/128/96/64px de ancho, sin suavizado.
 - `motion/baratie-manifest.json` conserva cajas de origen, tamaños y SHA256. Peso conjunto inferior a150KiB; no se sustituyen assets anteriores.
+
+## Arlong Park · recursos provisionales originales (2026-11-01)
+
+- Fuentes generadas con ImageGen para este proyecto: `exec-f754f352-adca-4b40-b6a7-88d289bc6e02.png` (cuatro actores × cuatro poses) y `exec-ad692f75-0b57-44f5-87e6-ec333f29a688.png` (props). Fuentes conservadas en generated_images del espacio de trabajo. No se copian sprites de otros juegos ni se usan las referencias como fondos. Mismos derechos de franquicia que el resto del fan game.
+- `motion/{fishman-fighter,fishman-spitter,fishman-karate,arlong}.png`: atlas 1024×640, celdas 128 px, pies 120 px. Extracción por componentes alfa, sin fragmentos vecinos; escala común por actor, transparencia y nearest-neighbor. Cinco poses de ejecución reutilizando reposo, dos pasos y ataque; perfiles compartidos, sin reflejar armas. Animaciones provisionales.
+- `worlds/{arlong-pagoda,cocoyasi-house,arlong-column,arlong-flag,arlong-rubble,arlong-tooth}.png`: módulos transparentes de 320/128/64/64/96/48 px de ancho. Cajas explícitas excluyen props vecinos; limpieza de alfa y reducción nearest, sin suavizado.
+- `motion/arlong-manifest.json` registra fuentes, cajas, tamaños y hashes. Se reutilizan césped, piedra, tierra, agua, puentes, palmeras y árboles existentes. No se sustituyen assets de otros mundos ni se añaden dependencias.
+
+## Roger y Loguetown · recursos provisionales originales (2026-11-01)
+
+- Fuente generada con ImageGen para esta tarea: `exec-2a334d6d-bcd4-4d23-bc72-edfa971d4ee5.png`, conservada en generated_images del espacio de trabajo. Cuatro poses completas de Roger, plataforma y edificios separados, sin copiar la imagen de referencia como fondo. Mismos derechos de franquicia que el resto del fan game.
+- `motion/roger.png`: atlas1024×640, celdas128 y pies120. Extracción de cuatro cajas independientes, escala común, cinco poses de ejecución (reposo/paso1/paso2/paso1/ataque), direcciones compartidas sin invertir armas. Alpha limpio y reducción nearest, sin interpolación. Animación provisional.
+- `worlds/{roger-scaffold,loguetown-houses}.png`: módulos transparentes de384/320px de ancho. Se reutilizan piedra, banderas y cajas existentes. La plaza no es una imagen de fondo.
+- Cajas, tamaños, hashes y limitaciones en `motion/roger-manifest.json`. Sin dependencias nuevas.
