@@ -5,6 +5,7 @@ export interface WorldDefinition {
   difficulty?: DifficultyDefinition;
   distributions?: readonly { at: number; weights: readonly { id: string; weight: number }[] }[];
   spawnInterval: number; enemyScale: number; seedSalt: number;
+  enemyDamageScale?:number;
   xpMultiplier?: number; xpThreatScaling?: number;
 }
 export const SHELLS_TOWN: WorldDefinition = {

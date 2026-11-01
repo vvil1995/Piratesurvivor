@@ -1388,3 +1388,11 @@ test('selección de habilidad responde a un solo toque y al inicio del contacto'
  await page.locator('button[data-slot="1"]').dispatchEvent('pointerdown',{pointerType:'touch',pointerId:17,button:0,bubbles:true});
  expect(await page.evaluate(()=>window.__OPS_QA__!.getRun()!.player.selectedSlot)).toBe(1);
 });
+
+test('Beta test público: Kuro con tres ataques enlazados y progreso protegido',async({page},info)=>{
+ const before=await page.evaluate(()=>window.__OPS_QA__!.store.progress.coins);
+ await page.locator('#beta-test').click();await page.selectOption('#beta-destination','kuro');await expect(page.locator('#beta-level')).toHaveValue('35');await page.locator('#beta-enter').click();await expect(page.locator('#boss-name')).toHaveText('CAPITÀ KURO');
+ expect(await page.evaluate(()=>{const r=window.__OPS_QA__!.getRun()!;return [r.practice,r.player.level,r.player.abilitySlots[0].length];})).toEqual([true,35,3]);
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.collectedBerries=999;r.morganDefeated=true;r.buggyDefeated=true;q.tick();});expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.coins)).toBe(before);
+ await page.screenshot({path:info.outputPath('beta-kuro-three-linked.png')});await page.locator('#pause').click();await page.locator('#abandon').click();expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.coins)).toBe(before);
+});

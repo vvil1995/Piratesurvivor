@@ -1,3 +1,4 @@
+import { earlyBalance,densityTarget } from '../../content/early-balance.ts';
 import { RogerChallenge } from '../challenges/roger.ts';
 import { ROGER_RULES } from '../../content/bosses/roger.ts';
 import { ROGER_ARENA } from '../world/roger-arena.ts';
@@ -53,6 +54,7 @@ import type { AreaEffect, Projectile, Enemy, Pickup, Player, RunResult, RunStatu
 
 export interface RunOptions { world?: WorldDefinition; seed?: number }
 export class Run {
+  practice=false;
   readonly id: string;
   readonly localPlayerId = 'player-1';
   readonly players = new Map<string, Player>();
@@ -73,6 +75,7 @@ export class Run {
   get arena() { return this.world instanceof ArenaWorld ? this.world.arena : MORGAN_ARENA; }
   voyage?: { destination: 'morgan' | 'shells' | 'orange' | 'buggy' | 'orange-return' | 'syrup' | 'kuro' | 'syrup-return' | 'baratie' | 'krieg' | 'baratie-return' | 'arlong' | 'arlong-boss' | 'arlong-return' | 'roger'; elapsed: number };
   private zoneTime = 0;
+  private densityPressure=0;
   world: ProceduralWorld;
   private shellsWorld: ProceduralWorld;
   private orangeWorld?: ProceduralWorld;
@@ -168,7 +171,7 @@ export class Run {
     if (!['playing', 'paused', 'voyage'].includes(this.status) || this.zone !== 'shells-town' || this.morganDefeated) return false;
     this.route.consume(); this.clearBattlefield(); this.arenaReinforcementTimer = 6;
     this.world = new ArenaWorld(this.world.seed); this.zone = 'morgan-arena'; this.bossField = new FlowField(this.world, MORGAN.radius);
-    Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter(); Object.assign(this.encounter.body, MORGAN_ARENA.bossSpawn);
+    Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter();this.encounter.body.hp=this.encounter.body.maxHp*=earlyBalance('shells-town')!.bossHp; Object.assign(this.encounter.body, MORGAN_ARENA.bossSpawn);
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
   beginBuggy(): boolean {
@@ -179,14 +182,14 @@ export class Run {
       counter: origin => counterGuard(this.player, origin, this.grid, this.world, e => this.dropXp(e, this.player.id), this.random),
       absorb: (position, damage) => { const lure = this.areas.items.find(a => a.active && a.kind === 'decoy' && Math.hypot(a.x-position.x,a.y-position.y) < a.radius+6); if(!lure)return false; lure.hp=(lure.hp??0)-damage;return true; },
     });
-    this.encounter = encounter; Object.assign(this.encounter.body, BUGGY_ARENA.bossSpawn); this.world = new ArenaWorld(this.world.seed, BUGGY_ARENA, 'orange'); this.zone = 'buggy-arena';
+    encounter.body.hp=encounter.body.maxHp*=earlyBalance('orange-town')!.bossHp;this.encounter = encounter; Object.assign(this.encounter.body, BUGGY_ARENA.bossSpawn); this.world = new ArenaWorld(this.world.seed, BUGGY_ARENA, 'orange'); this.zone = 'buggy-arena';
     this.bossField = new FlowField(this.world, this.encounter.body.radius); Object.assign(this.player, BUGGY_ARENA.playerSpawn);
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
   beginKuro():boolean{
     if(!['playing','paused','voyage'].includes(this.status)||this.zone!=='syrup-village'||!this.buggyDefeated||this.kuroDefeated)return false;
     this.kuroRoute.consume();this.clearBattlefield();this.syrupWorld=this.world;
-    this.world=new ArenaWorld(this.world.seed,KURO_ARENA,'syrup');this.zone='kuro-arena';this.encounter=new KuroEncounter();
+    this.world=new ArenaWorld(this.world.seed,KURO_ARENA,'syrup');this.zone='kuro-arena';this.encounter=new KuroEncounter();this.encounter.body.hp=this.encounter.body.maxHp*=earlyBalance('syrup-village')!.bossHp;
     Object.assign(this.encounter.body,KURO_ARENA.bossSpawn);Object.assign(this.player,KURO_ARENA.playerSpawn);
     this.bossField=new FlowField(this.world,KURO.radius);this.status='playing';this.voyage=undefined;this.fieldFor(this.player).update(this.player,1);return true;
   }
@@ -481,9 +484,13 @@ export class Run {
     const threatTime = this.zone === 'shells-town' ? this.time : this.zoneTime;
     this.spawnTimer -= dt;
     if (!this.inArena && this.spawnTimer <= 0) {
+      const balance=earlyBalance(this.zone);
+      this.densityPressure=densityTarget(this.zone,threatTime,this.densityPressure);
+      const target=Math.ceil(this.densityPressure);
+      const definition=balance?{...this.definition,enemyCap:target,enemyScale:this.definition.enemyScale*balance.hp,enemyDamageScale:balance.damage}:this.definition;
       const threat = difficultyAt(threatTime, this.definition.spawnInterval, this.definition.difficulty);
-      for (let i = 0; i < threat.batch; i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player,this.world.theme==='arlong'), this.definition, this.random, ++this.enemyId, threatTime,this.world.theme==='arlong'?aquaticWorld(this.world):undefined);
-      this.spawnTimer = threat.interval;
+      for (let i = 0; i < (balance?Math.min(2,Math.max(0,target-this.enemies.count)):threat.batch); i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player,this.world.theme==='arlong'), definition, this.random, ++this.enemyId, threatTime,this.world.theme==='arlong'?aquaticWorld(this.world):undefined);
+      this.spawnTimer = balance?.45:threat.interval;
     }
     if(this.finalChallenge){
       this.finalChallenge.tick(dt,this.player);

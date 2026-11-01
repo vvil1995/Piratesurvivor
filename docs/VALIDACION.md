@@ -549,3 +549,17 @@ La selección táctil responde desde pointerdown, antes de que una actualizació
 Verificación: check,223/223 pruebas de lógica, compilación bajo /Piratesurvivor/ y smoke de producción correctos. Chromium:6/6 pruebas de Buggy/viaje, Syrup/Kuro y selección inmediata, tanto en escritorio como en móvil horizontal emulado. Doce selecciones consecutivas y selección desde el inicio del contacto. No se ha probado teléfono físico. Las fixtures anteriores se actualizan para cerrar la recompensa antes de viajar.
 
 Esta publicación contiene estas dos correcciones. La densidad, estadísticas, resistencia/patrones y XP solicitados para el balance de los tres primeros mundos siguen pendientes; no se presentan como implementados.
+
+## Balance inicial de mundos1–3 · trabajo local pendiente
+
+Configuración nueva `content/early-balance.ts`: objetivos de densidad8→22/20→35/32→48, presión máxima conservada entre mundos, entrada de hasta dos enemigos cada0,45s hasta el objetivo, respetando el spawner y sus comprobaciones de acceso. Vida/dano normal por mundo1/1,35/1,8 y1/1,2/1,4. Vida de bosses principales ×1,5/2,5/3 aplicada en Run al entrar, conservando las estadísticas originales utilizadas por Krieg/Arlong y las invocaciones de Roger.
+
+Check y223/223 pruebas existentes correctos. Estos cambios aún no están publicados ni validados visualmente; faltan pruebas específicas de los objetivos, revisión de XP y ajustes de ataques. No constituyen la tarea completa de balance.
+
+## Selector público Beta test
+
+`src/beta/{config,prepare,launcher}.ts`, flag practice en Run y protección de persistencia en main. Selector de mundo/boss, niveles y ranuras editables con presets orientativos. Retirable mediante un único flag. Usa mapas/controladores y validación de habilidades reales.
+
+Check y225/225 pruebas de lógica:55 entradas (11 destinos ×5 personajes), builds válidas, nivel/HP, sin berries, rechazo de duplicados/build vacía. Chromium2/2: escritorio y móvil horizontal emulado, acceso a Kuro nivel35 con tres ataques enlazados; se comprueba que incrementar moneda y flags de victoria en práctica no modifica las berries persistidas, ni al abandonar. Captura real inspeccionada. No se ha probado teléfono físico.
+
+El primer bloque local de balance descrito arriba se incorpora con esta versión; la revisión de ataques/XP y el balance completo siguen pendientes.
