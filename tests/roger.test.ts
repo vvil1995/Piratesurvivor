@@ -50,7 +50,7 @@ test('cada tanda reserva plazas, no repite tipos y a8min invoca cinco originales
 });
 test('límite8, sobrantes descartados, pueden coexistir instancias y reaparecer derrotados',()=>{
  const {f,p}=challenge();f.seconds=480;f.summon(p);f.seconds=520;f.summon(p);assert.equal(f.living,8);assert.equal(new Set(f.summons.map(s=>s.boss.body.id)).size,8);assert.ok(new Set(f.summons.map(s=>s.boss.profile.id)).size<8);
- f.summon(p);assert.equal(f.living,8);const s=f.summons[0];assert.ok(f.defeated(s.boss.body));assert.equal(f.defeated(s.boss.body),false);assert.equal(f.bossesDefeated,1);f.summon(p);assert.equal(f.living,8);assert.equal(R.bossCap,8);
+ f.summon(p);assert.equal(f.living,8);const s=f.summons[0];assert.ok(f.defeated(s.boss.body));assert.equal(f.defeated(s.boss.body),false);assert.equal(f.bossesDefeated,1);f.tick(.1,p);assert.ok(s.boss.elapsed>0);f.summon(p);assert.equal(f.living,8);assert.equal(R.bossCap,8);
 });
 test('materialización dura2s y luego usa el controlador original acelerado con aviso mínimo',()=>{
  const {f,p}=challenge();f.seconds=40;f.summon(p);const s=f.summons[0],old=s.boss.body.x;
@@ -100,4 +100,15 @@ test('Morgan invocado se desplaza20% más rápido que su controlador original, s
 test('Voluntad del Rey ejecuta sectores sucesivos sin daño antes del aviso',()=>{
  const {f,p}=challenge(),b=f.roger;b.seconds=200;p.hurtTimer=0;p.hp=1000;Object.assign(b.body,{x:1760,y:1216});b.prepare(ROGER_ATTACKS[5],p,f.world);const before=p.hp;
  b.tick(1,p,f.world,()=>axis,noop);assert.equal(p.hp,before);b.tick(.81,p,f.world,()=>axis,noop);assert.equal(b.extraImpacts.length,1);const first=b.extraImpacts[0].y;b.tick(.26,p,f.world,()=>axis,noop);assert.equal(b.extraImpacts.length,1);assert.notEqual(b.extraImpacts[0].y,first);
+});
+test('proyectiles invocados conservan alcance original y se limpian solo por propietario',async()=>{
+ const {ARLONG_ATTACKS,ARLONG_RULES}=await import('../src/content/bosses/arlong.ts'),{KRIEG_ATTACKS,KRIEG_RULES}=await import('../src/content/bosses/krieg.ts');
+ const r=finalRun();r.sailToRoger();voyage(r);const f=r.finalChallenge!;f.seconds=480;f.summon(r.player);r.player.hurtTimer=100;
+ for(const [id,attack]of [['arlong',ARLONG_ATTACKS.find(a=>a.id==='water')!],['krieg',KRIEG_ATTACKS.find(a=>a.id==='gun')!]] as const){
+  const b=f.summons.find(s=>s.boss.profile.id===id)!.boss;b.prepare(attack,r.player,r.world);for(let i=0;i<200&&b.state==='preparing';i++)b.tick(.01,r.player,r.world,()=>axis,noop);
+ }
+ const arlong=f.summons.find(s=>s.boss.profile.id==='arlong')!.boss,krieg=f.summons.find(s=>s.boss.profile.id==='krieg')!.boss;
+ const water=r.projectiles.items.filter(p=>p.active&&p.ownerId===`boss:${arlong.body.id}`),bullets=r.projectiles.items.filter(p=>p.active&&p.ownerId===`boss:${krieg.body.id}`);
+ assert.equal(water.length,5);assert.equal(bullets.length,7);assert.equal(water[0].life,ARLONG_RULES.waterRange/ARLONG_RULES.waterSpeed);assert.equal(bullets[0].life,KRIEG_RULES.bulletRange/KRIEG_RULES.bulletSpeed);
+ f.defeated(arlong.body);assert.ok(water.every(p=>!p.active));assert.ok(bullets.every(p=>p.active));
 });

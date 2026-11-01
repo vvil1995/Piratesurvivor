@@ -76,7 +76,7 @@ export class RogerChallenge {
   this.roger.body.statuses??={};this.roger.body.statuses.stun=Math.max(0,(this.roger.body.statuses.stun??0)-dt);
   this.roger.tick(dt,p,this.world,from=>(this.roger.body.statuses?.stun??0)>0?{x:0,y:0}:this.field.direction(from,p,25),()=>{});
   for(const s of this.summons){
-   if(s.boss.state==='dead'){s.deathFor+=dt;continue;}
+   if(s.boss.state==='dead'){s.deathFor+=dt;s.boss.elapsed+=dt;continue;}
    if(s.remaining>0){s.remaining=Math.max(0,s.remaining-dt);continue;}
    s.boss.body.statuses??={};s.boss.body.statuses.stun=Math.max(0,(s.boss.body.statuses.stun??0)-dt);
    if(s.boss.profile.id==='morgan'){s.ambientFor-=dt;if(s.ambientFor<=0){s.ambientFor=MORGAN.ambientReinforcementSeconds;this.hooks.reinforce(s.boss);}}

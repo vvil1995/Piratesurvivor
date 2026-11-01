@@ -225,7 +225,7 @@ export class Run {
   private beginRoger():void{
     this.clearBattlefield();this.zone='roger-arena';this.exitSignal=undefined;
     this.finalChallenge=new RogerChallenge(this.world.seed,this.random,{
-      fire:(id,from,angle,damage,water)=>spawnProjectile(this,from.x,from.y,from.x+Math.cos(angle)*100,from.y+Math.sin(angle)*100,damage,water?220:230,`boss:${id}`,true,1,undefined,3.8,undefined,water?'water':undefined),
+      fire:(id,from,angle,damage,water)=>spawnProjectile(this,from.x,from.y,from.x+Math.cos(angle)*100,from.y+Math.sin(angle)*100,damage,water?ARLONG_RULES.waterSpeed:KRIEG_RULES.bulletSpeed,`boss:${id}`,true,1,undefined,water?ARLONG_RULES.waterRange/ARLONG_RULES.waterSpeed:KRIEG_RULES.bulletRange/KRIEG_RULES.bulletSpeed,undefined,water?'water':undefined),
       clear:id=>{for(const p of this.projectiles.items)if(p.hostile&&p.ownerId===`boss:${id}`)p.active=false;},
       reflect:(body,damage)=>damageEnemy(this.player,body,damage,0,this.player,this.world,e=>this.dropXp(e,this.player.id),this.random),
       counter:origin=>counterGuard(this.player,origin,this.grid,this.world,e=>this.dropXp(e,this.player.id),this.random),
