@@ -12,7 +12,7 @@ export class RogerEncounter extends PatternEncounter {
  private ringOrigin:Vector={x:0,y:0};ring?:DangerZone;
  constructor(){super(ROGER,ROGER_ATTACKS);this.body.immortal=true;this.body.damageTaken=0;}
  get attackId(){return this.current;}
- protected override encounterPhase():number{return this.seconds>=240?3:this.seconds>=120?2:1;}
+ protected override encounterPhase():number{return this.seconds>=240?3:this.seconds>=60?2:1;}
  override prepare(a:BossAttack,p:Vector,w:CollisionWorld):void{
   if(a.id==='king'){
    const ids=['king','kamusari',...(this.seconds>=60?['haki']:[]),...(this.seconds>=120?['storm']:[]),...(this.seconds>=180?['will']:[])];

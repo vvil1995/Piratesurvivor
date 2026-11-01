@@ -81,7 +81,7 @@ test('hordas continúan con8bosses, cap configurable y muerte termina el desafí
  const seconds=f.seconds;r.pause();step(r,1);assert.equal(f.seconds,seconds);r.resume();r.player.hp=0;r.update(1/60,axis);assert.equal(r.status,'defeat');assert.ok(f.stopped);assert.equal(r.voyage,undefined);const result=r.result()!;assert.ok(result.challenge);const end=f.seconds;step(r,1);assert.equal(f.seconds,end);assert.equal(r.projectiles.count,0);
 });
 test('baja invocada suma1 y recompensa sin combinación, transición ni cambio de flags',()=>{
- const r=finalRun();r.sailToRoger();voyage(r);const f=r.finalChallenge!;f.seconds=480;f.summon(r.player);const b=f.summons[0];b.remaining=0;damageEnemy(r.player,b.boss.body,1e9,0,r.player,r.world,e=>(r as any).dropXp(e,r.player.id),()=>1);assert.equal(f.bossesDefeated,1);assert.equal(r.status,'playing');assert.equal(r.zone,'roger-arena');assert.equal(r.unionTokens,0);assert.equal(r.pickups.count,1);
+ const r=finalRun();r.sailToRoger();voyage(r);const f=r.finalChallenge!;f.seconds=480;f.summon(r.player);const b=f.summons[0];b.remaining=0;damageEnemy(r.player,b.boss.body,1e9,0,r.player,r.world,e=>(r as any).dropXp(e,r.player.id),()=>1);assert.equal(f.bossesDefeated,1);assert.equal(r.status,'playing');assert.equal(r.zone,'roger-arena');assert.equal(r.unionTokens,0);assert.equal(r.pickups.count,2);for(const p of r.pickups.items)if(p.active)assert.ok(r.world.canOccupy(p.x,p.y,14));
 });
 test('récords independientes globales/personaje persisten sin sobrescribir entrenamiento ni valores mayores',()=>{
  const memory=new Map<string,string>(),storage={getItem:(k:string)=>memory.get(k)??null,setItem:(k:string,v:string)=>{memory.set(k,v);}};

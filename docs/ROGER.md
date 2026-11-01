@@ -12,7 +12,7 @@ La condición `Enemy.immortal` evita explícitamente la pérdida de HP y la muer
 
 Roger conserva cinco patrones ofensivos y la acción de invocación independiente cada 40 s: corte frontal, Kamusari de trayectoria fija, anillo expansivo, secuencia de 4/6 ondas y sectores de Voluntad del Rey. El anillo tiene interior libre; los sectores dejan pasos entre franjas. Cada impacto usa la geometría advertida. La invocación muestra gesto/Haki y siluetas durante dos segundos mientras Roger y las hordas continúan actuando.
 
-Desbloqueos: corte/Kamusari al inicio, anillo desde60 s, tormenta desde120 s, voluntad desde180 s. Desde240 s aplica la presión compartida: mayor movilidad/cadencia y avisos ×0,7 respetando mínimos. No aumenta artificialmente el daño.
+Desbloqueos: corte/Kamusari al inicio, primera mejora de cadencia y anillo desde60 s, tormenta desde120 s, voluntad desde180 s. Desde240 s aplica la presión compartida: mayor movilidad/cadencia y avisos ×0,7 respetando mínimos. No aumenta artificialmente el daño.
 
 ## Bosses invocados
 
@@ -28,7 +28,7 @@ Los campos de navegación se comparten por tamaño y capacidad de nadar. Renderi
 
 Se incorporan los mundos1–5 a0/30/60/90/120 s; desde150 s queda disponible la variedad completa. Se reutilizan catálogos, pesos, IA y recompensas originales. Intervalo de entrada0,9 s que se reduce progresivamente hasta0,24 s; dos intentos por tanda desde180 s. Cap configurable70 enemigos normales, independiente del límite de bosses. Se respetan navegación, distancias de aparición y capacidad de nadar.
 
-Los bosses derrotados suman exactamente una eliminación y dan una recompensa inicial configurable en la integración (80 XP y10 berries), sin pantallas de victoria, combinación, viaje ni cambios en flags de los mundos. Los enemigos normales conservan sus recompensas; no se generan cofres de chunks en esta arena.
+Los bosses derrotados suman exactamente una eliminación y dan una recompensa inicial configurable en la integración (80 XP y10 berries), mediante pickups normales para conservar los multiplicadores de objetos, sin pantallas de victoria, combinación, viaje ni cambios en flags de los mundos. Los enemigos normales conservan sus recompensas; no se generan cofres de chunks en esta arena.
 
 ## Final y persistencia
 

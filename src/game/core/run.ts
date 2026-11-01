@@ -428,7 +428,7 @@ export class Run {
   private dropXp(enemy: Enemy, ownerId: string, allowFruit = true): void {
     if ((enemy.visual?.startsWith('buggy-') || enemy.visual?.startsWith('marine-') || enemy.visual?.startsWith('blackcat-') || enemy.visual?.startsWith('krieg-') || enemy.visual?.startsWith('fishman-')) && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
     if (enemy.kind === 'boss') {
-      if(this.finalChallenge){if(this.finalChallenge.defeated(enemy)){const p=this.pickups.acquire();if(p)Object.assign(p,{x:enemy.x,y:enemy.y,kind:'xp',value:ROGER_RULES.bossXp,ownerId,life:undefined});this.player.collectedBerries+=ROGER_RULES.bossBerries;}return;}
+      if(this.finalChallenge){if(this.finalChallenge.defeated(enemy)){const at=landReward(this.world,enemy),p=this.pickups.acquire();if(p)Object.assign(p,{x:at.x,y:at.y,kind:'xp',value:ROGER_RULES.bossXp,ownerId,life:undefined});dropLoot(this.pickups,at,ownerId,'berry',ROGER_RULES.bossBerries);}return;}
       this.defeatBoss(); return;
     }
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
