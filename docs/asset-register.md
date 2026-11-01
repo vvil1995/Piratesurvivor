@@ -229,3 +229,9 @@ Extracción por componentes alpha para no mezclar figuras; escala común por act
 - `motion/roger.png`: atlas1024×640, celdas128 y pies120. Extracción de cuatro cajas independientes, escala común, cinco poses de ejecución (reposo/paso1/paso2/paso1/ataque), direcciones compartidas sin invertir armas. Alpha limpio y reducción nearest, sin interpolación. Animación provisional.
 - `worlds/{roger-scaffold,loguetown-houses}.png`: módulos transparentes de384/320px de ancho. Se reutilizan piedra, banderas y cajas existentes. La plaza no es una imagen de fondo.
 - Cajas, tamaños, hashes y limitaciones en `motion/roger-manifest.json`. Sin dependencias nuevas.
+
+## Loguetown · rediseño visual de la arena final
+
+Cuatro módulos originales generados con ImageGen para este proyecto: `worlds/loguetown-{scaffold,hall,shop,arcade}.png`. Fuente `exec-ca13ed44-9402-4af3-ae54-2e65afcc6efa.png` conservada en generated_images del espacio de trabajo. Extracción de cuatro cajas independientes, fondo alpha real, escala proporcional nearest sin suavizado. Cadafal768px, edificio cívico512px, tienda384px, arcada512px; no se utiliza ninguna referencia como fondo. Cajas, dimensiones y hashes en `worlds/loguetown-manifest.json`. Se reutilizan banderas, faroles, cañones, mercado, carro y cajas existentes.
+
+Se consultaron las referencias2/3/4 del usuario (arquitectura clara/arcos, entrada de la ciudad y organización pixel art), además de la imagen adjunta. La referencia1 devolvió403 del proxy y no pudo abrirse. Las imágenes descargadas solo se usaron como referencia, sin incorporarlas a la distribución. Mismos derechos de franquicia que el resto del fan game. El pavimento y la atmósfera se dibujan con el renderer existente, sin assets remotos ni dependencias nuevas.

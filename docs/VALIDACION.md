@@ -563,3 +563,14 @@ Check y223/223 pruebas existentes correctos. Estos cambios aún no están public
 Check y225/225 pruebas de lógica:55 entradas (11 destinos ×5 personajes), builds válidas, nivel/HP, sin berries, rechazo de duplicados/build vacía. Chromium2/2: escritorio y móvil horizontal emulado, acceso a Kuro nivel35 con tres ataques enlazados; se comprueba que incrementar moneda y flags de victoria en práctica no modifica las berries persistidas, ni al abandonar. Captura real inspeccionada. No se ha probado teléfono físico.
 
 El primer bloque local de balance descrito arriba se incorpora con esta versión; la revisión de ataques/XP y el balance completo siguen pendientes.
+
+## Loguetown · composición visual del escenario de Roger
+
+Cambios limitados a `game/world/roger-arena.ts`, `game/scenes/{world-renderer,island-art}.ts`, cuatro PNG modulares y manifiesto. Se sustituyen el cadafal y los edificios genéricos por arquitectura propia de piedra clara/tejados rojizos, tiendas y arcadas. Fachadas perimetrales sólidas y dos referencias urbanas en las esquinas superiores del campo central; centro amplio. Cadafal768px con escaleras y soportes. Piscinas, canales, límites, spawns y escala conservados. No se cambian controladores de Roger, ataques, invocaciones, contadores, recompensas ni personajes.
+
+El pavimento de Roger tiene cursos de longitud variable en coordenadas globales, tonos próximos, desgaste, grietas, franjas claras e incrustación central. Rasterizado por chunk y reutilizado mediante los slots existentes. Atmósfera bajo personajes/avisos: sombras muy leves,14 trazos de polvo/viento y relámpago lineal ocasional, sin flash a pantalla completa. No se añaden timers de simulación ni efectos físicos.
+
+Check y227/227 pruebas de lógica correctos: se añaden pruebas de cadafal sólido/centro libre/piscinas y rutas para radio28 junto a ambas piscinas. Chromium4/4 en escritorio y móvil horizontal emulado: recorrido de capturas plaza/cadafal/fachadas/arcadas y regresión completa de Roger (patrones, invocados, daño, final y récords). Capturas reales inspeccionadas; se ajustaron juntas/variación del suelo tras la primera revisión y se repitió la comprobación. Sin errores JS. Procedencia y acceso a referencias en asset-register.md.
+
+Límites: no se ha medido FPS en teléfono físico/Safari ni se garantiza rendimiento de todos los dispositivos. La composición visual se ha inspeccionado en Chromium; no se afirma una campaña manual completa. Se conservan los efectos existentes de Haki; el nuevo desgaste del pavimento es decorativo y no destruye colisiones.
+Compilación con `PAGES_BASE_PATH=/Piratesurvivor/` correcta (HTML autónomo13,01MiB; permanece el aviso de tamaño del bundle). Smoke de producción en PC y móvil emulado correcto bajo ese prefijo, sin404 ni errores JS y sin hookQA.

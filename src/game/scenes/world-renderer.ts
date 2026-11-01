@@ -1,3 +1,4 @@
+import { RogerArenaWorld } from '../world/roger-arena.ts';
 import { arlongGround } from '../world/arlong.ts';
 import { ArlongArenaWorld,ARLONG_ARENA } from '../world/arlong-arena.ts';
 import { deckAt } from '../world/baratie.ts';
@@ -17,9 +18,10 @@ export class WorldRenderer {
   private world?: ProceduralWorld;
   private serial = 0;
   private revision=-1;
+  private atmosphere:Phaser.GameObjects.Graphics;
   private waves:Phaser.GameObjects.Graphics;
   private scene: Phaser.Scene;
-  constructor(scene: Phaser.Scene) { this.scene = scene;this.waves=scene.add.graphics().setDepth(-1900); }
+  constructor(scene: Phaser.Scene) { this.scene = scene;this.atmosphere=scene.add.graphics().setDepth(-1700);this.waves=scene.add.graphics().setDepth(-1900); }
   get activeChunks(): number { return this.active.size; }
   get allocatedChunks(): number { return this.serial; }
   private createSlot(): Slot {
@@ -201,6 +203,7 @@ export class WorldRenderer {
     const ctx=slot.texture.context,w=this.world!;ctx.imageSmoothingEnabled=false;
     const materials=Object.fromEntries(['stone','earth','grass','water'].map(name=>[name,ctx.createPattern(this.scene.textures.get(`ground-${name}`).getSourceImage() as HTMLCanvasElement,'repeat')!]));
     for(let y=0;y<32;y++)for(let x=0;x<32;x++){const tx=c.cx*16+(x+.5)/2,ty=c.cy*16+(y+.5)/2;ctx.fillStyle=materials[w instanceof ArlongArenaWorld?'stone':arlongGround(w.seed,tx,ty)];ctx.fillRect(x*8,y*8,8,8);}
+    if(w instanceof RogerArenaWorld)this.paintLoguetown(ctx,c);
     for(const o of c.obstacles)if(o.kind==='water'){
       const x=(o.x-c.cx*512)/2,y=(o.y-c.cy*512)/2;ctx.fillStyle=materials.water;ctx.fillRect(x,y,o.width/2,o.height/2);ctx.strokeStyle='#73d8d0';ctx.lineWidth=1;ctx.strokeRect(x+1,y+1,o.width/2-2,o.height/2-2);
     }
@@ -212,6 +215,25 @@ export class WorldRenderer {
       sprite.setTexture(o.art??(o.kind==='wall'?'coastal-wall':o.kind==='fence'?'coastal-fence':o.kind==='lamp'?'coastal-lamp':o.kind==='tree'?'coastal-palm':'coastal-crates')).setDisplaySize(width,o.kind==='dock'?o.height:width*sprite.height/sprite.width).setVisible(true);
     }
     for(let i=slot.props.length;i<slot.decorations.length;i++)slot.decorations[i].setVisible(false);
+  }
+  private paintLoguetown(ctx:CanvasRenderingContext2D,c:Chunk):void{
+    const shades=['#8e9498','#999d9f','#a0a2a1','#93999c','#a5a6a2','#969b9e'];
+    ctx.fillStyle='#878d90';ctx.fillRect(0,0,256,256);
+    const ox=c.cx*256,oy=c.cy*256;
+    for(let row=Math.floor(oy/6);row<=Math.floor((oy+256)/6);row++){
+      let gx=-32,index=0;while(gx<1600){const n=hash(719,row,index++),width=8+n%9,x=gx-ox,y=row*6-oy;gx+=width;
+        if(x+width<0||x>256)continue;
+        const wx=(x+ox)*2,wy=row*12,band=Math.abs(wx-1536)<48||Math.abs(wy-1216)<24;
+        ctx.fillStyle=band?'#b1b1a8':shades[n%shades.length];ctx.fillRect(x,y,width-1,5);
+        ctx.fillStyle='rgba(227,223,207,.16)';ctx.fillRect(x+1,y,width-3,1);
+        ctx.fillStyle='rgba(62,72,79,.2)';ctx.fillRect(x+2+n%3,y+2,1,1);ctx.fillRect(x+width-3,y+4,2,1);
+        if(n%17===0){ctx.fillStyle='#717b81';ctx.fillRect(x+3,y,1,3);ctx.fillRect(x+4,y+2,3,1);}
+      }
+    }
+    const x=(1536-c.cx*512)/2,y=(1216-c.cy*512)/2;
+    ctx.strokeStyle='#c4ba9c';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,160,0,Math.PI*2);ctx.stroke();ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,145,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#596a7a';ctx.beginPath();ctx.moveTo(x,y-60);ctx.lineTo(x+8,y);ctx.lineTo(x,y+60);ctx.lineTo(x-8,y);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(x-60,y);ctx.lineTo(x,y-8);ctx.lineTo(x+60,y);ctx.lineTo(x,y+8);ctx.closePath();ctx.fill();
   }
   private paintTownGround(ctx: CanvasRenderingContext2D, chunk: Chunk, ground: Record<string, CanvasPattern>, orange: boolean): void {
     // Half-tile material boundaries are sampled in world space, never per-chunk rectangles.
@@ -227,6 +249,15 @@ export class WorldRenderer {
     }
   }
   update(world: ProceduralWorld, view: View, origin: Vector): void {
+    this.atmosphere.clear().setVisible(world instanceof RogerArenaWorld);
+    if(world instanceof RogerArenaWorld){
+      const t=this.scene.time.now/1000,left=view.centerX-view.width/2,top=view.centerY-view.height/2;
+      this.atmosphere.lineStyle(50,0x192940,.045);
+      for(let i=0;i<3;i++){const y=top+30+i*100;this.atmosphere.lineBetween(left-origin.x,y-origin.y,left+view.width-origin.x,y+30-origin.y);}
+      this.atmosphere.lineStyle(1,0xc3c5b8,.25);
+      for(let i=0;i<14;i++){const x=left+(i*137+t*22)%view.width,y=top+(i*73+Math.sin(t+i)*8)%view.height;this.atmosphere.lineBetween(x-origin.x,y-origin.y,x+5-origin.x,y-2-origin.y);}
+      if(t%19<.12){this.atmosphere.lineStyle(2,0xd5dbf7,.35);const x=left+view.width*.75-origin.x,y=top-origin.y;this.atmosphere.lineBetween(x,y,x-8,y+35);this.atmosphere.lineBetween(x-8,y+35,x+8,y+28);this.atmosphere.lineBetween(x+8,y+28,x-30,y+70);}
+    }
     this.waves.clear().setVisible(world.theme==='baratie'||world.theme==='arlong');
     if(world.theme==='baratie'||world.theme==='arlong'){
       const phase=this.scene.time.now/900;this.waves.lineStyle(1,0x9fe3e3,.45);

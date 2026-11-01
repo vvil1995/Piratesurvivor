@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {RogerArenaWorld,ROGER_ARENA} from '../src/game/world/roger-arena.ts';import {FlowField} from '../src/game/navigation/flow-field.ts';import {aquaticWorld} from '../src/game/world/aquatic.ts';
+test('Loguetown: cadafal sólido, centro libre y agua preservada',()=>{const w=new RogerArenaWorld(42);assert.ok(ROGER_ARENA.covers.some(c=>c.art==='loguetown-scaffold'&&c.width>=768));assert.equal(w.canOccupy(1536,400,25),false);assert.ok(w.canOccupy(1536,1216,28));assert.equal(w.canOccupy(480,1056,14),false);assert.ok(aquaticWorld(w).canOccupy(480,1056,25));});
+test('Loguetown: rutas de bosses grandes a ambos lados de las piscinas',()=>{const w=new RogerArenaWorld(42),p={x:1536,y:1216},f=new FlowField(w,28,true);f.update(p,1);for(const x of [272,304,2784,2816])for(const y of [848,1168,1552,1840])if(w.canOccupy(x,y,28))assert.ok(f.reachable({x,y}),`${x}/${y}`);});

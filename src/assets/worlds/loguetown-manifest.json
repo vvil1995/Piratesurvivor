@@ -1,0 +1,57 @@
+{
+  "source": "exec-ca13ed44-9402-4af3-ae54-2e65afcc6efa.png",
+  "assets": {
+    "loguetown-scaffold": {
+      "box": [
+        0,
+        0,
+        810,
+        520
+      ],
+      "size": [
+        768,
+        503
+      ],
+      "sha256": "39928de87f93d0ea3449b8993d68ac3adc79b009d21f099ad4ae6d392080741f"
+    },
+    "loguetown-hall": {
+      "box": [
+        820,
+        0,
+        1536,
+        525
+      ],
+      "size": [
+        512,
+        420
+      ],
+      "sha256": "e578e2900f4d529a879c95d67d37e6c79f2e4e0817e2cc09fae04b443ae8e33a"
+    },
+    "loguetown-shop": {
+      "box": [
+        0,
+        525,
+        780,
+        1024
+      ],
+      "size": [
+        384,
+        294
+      ],
+      "sha256": "0532689fcef2d2c4400a093c0e5984317acc41cea98523ec5cb8a8391a945686"
+    },
+    "loguetown-arcade": {
+      "box": [
+        790,
+        530,
+        1536,
+        1024
+      ],
+      "size": [
+        512,
+        237
+      ],
+      "sha256": "c34b98c6c12b8d1b8ac3234208985aed7765a0a19e1f4cc0413861095cdd2ce2"
+    }
+  }
+}

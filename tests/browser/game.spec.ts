@@ -1396,3 +1396,13 @@ test('Beta test público: Kuro con tres ataques enlazados y progreso protegido',
  await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.collectedBerries=999;r.morganDefeated=true;r.buggyDefeated=true;q.tick();});expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.coins)).toBe(before);
  await page.screenshot({path:info.outputPath('beta-kuro-three-linked.png')});await page.locator('#pause').click();await page.locator('#abandon').click();expect(await page.evaluate(()=>window.__OPS_QA__!.store.progress.coins)).toBe(before);
 });
+
+test('Loguetown visual: plaza, cadafal monumental y fachadas en móvil y escritorio',async({page},info)=>{
+ test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#beta-test').click();await page.selectOption('#beta-destination','roger');await page.locator('#beta-enter').click();
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=()=>{};r.player.hurtTimer=0;for(let i=0;i<30;i++)q.draw(33);q.tick();});
+ for(const [name,x,y]of [['plaza',1536,1216],['cadafal',1536,620],['fachadas',720,1080],['arcadas',1536,1952]] as const){
+  await page.evaluate(({x,y})=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.player.x=x;r.player.y=y;for(let i=0;i<40;i++)q.draw(33);q.tick();},{x,y});await page.screenshot({path:info.outputPath(`loguetown-${name}.png`)});
+ }
+ expect(errors).toEqual([]);await expect(page.locator('#roger-score')).toBeVisible();
+});
