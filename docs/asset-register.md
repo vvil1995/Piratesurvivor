@@ -235,3 +235,7 @@ Extracción por componentes alpha para no mezclar figuras; escala común por act
 Cuatro módulos originales generados con ImageGen para este proyecto: `worlds/loguetown-{scaffold,hall,shop,arcade}.png`. Fuente `exec-ca13ed44-9402-4af3-ae54-2e65afcc6efa.png` conservada en generated_images del espacio de trabajo. Extracción de cuatro cajas independientes, fondo alpha real, escala proporcional nearest sin suavizado. Cadafal768px, edificio cívico512px, tienda384px, arcada512px; no se utiliza ninguna referencia como fondo. Cajas, dimensiones y hashes en `worlds/loguetown-manifest.json`. Se reutilizan banderas, faroles, cañones, mercado, carro y cajas existentes.
 
 Se consultaron las referencias2/3/4 del usuario (arquitectura clara/arcos, entrada de la ciudad y organización pixel art), además de la imagen adjunta. La referencia1 devolvió403 del proxy y no pudo abrirse. Las imágenes descargadas solo se usaron como referencia, sin incorporarlas a la distribución. Mismos derechos de franquicia que el resto del fan game. El pavimento y la atmósfera se dibujan con el renderer existente, sin assets remotos ni dependencias nuevas.
+
+### Orientación de perfiles provisionales de enemigos
+
+No se crean ni modifican assets. Baratie y Arlong Park usan ahora reflexión completa del perfil existente cuando miran al oeste o sus diagonales. Syrup conserva sus dos variantes pintadas/preparadas. No hay deformación parcial de piernas ni nuevas direcciones dibujadas; se mantienen identidad, alpha y paleta originales.

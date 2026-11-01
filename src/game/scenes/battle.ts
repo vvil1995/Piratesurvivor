@@ -1,3 +1,4 @@
+import { enemyFlipX } from './enemy-facing.ts';
 import { ITEM_IMAGES } from '../../ui/item-art.ts';
 import { EnemyDeaths } from './enemy-motion.ts';
 import { arenaCamera } from './arena-camera.ts';
@@ -60,7 +61,7 @@ export class BattleScene extends Phaser.Scene {
   private actorLoads = new Map<string, Promise<void>>();
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
-  get diagnostics() { return { enemyTextures: this.enemies.filter(e=>e.visible).map(e=>e.texture.key), bossTexture: this.bossRenderer?.texture, cameraZoom: this.cameras.main.zoom, cameraX: this.arenaCameraPosition?.x, cameraY: this.arenaCameraPosition?.y, legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  get diagnostics() { return { enemyFacings:this.enemies.filter(e=>e.visible).map(e=>({texture:e.texture.key,flipped:e.flipX})), enemyTextures: this.enemies.filter(e=>e.visible).map(e=>e.texture.key), bossTexture: this.bossRenderer?.texture, cameraZoom: this.cameras.main.zoom, cameraX: this.arenaCameraPosition?.x, cameraY: this.arenaCameraPosition?.y, legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
   async ensureActorArt(visual: string): Promise<void> {
     if (this.textures.exists(`${visual}-s-0`)) return;
     const known = this.actorLoads.get(visual); if (known) return known;
@@ -178,7 +179,7 @@ export class BattleScene extends Phaser.Scene {
       let frame = attacking ? 4 : animation.frame ? pirate ? animation.frame - 1 : (animation.frame - 1) % 2 : 0;
       if (marine) frame = (e.shotWindup ?? 0) > 0 ? 5 : (e.shotRecovery ?? 0) > 0 ? e.ranged && e.shotRecovery! < .18 ? 0 : 6 : !e.ranged && Math.hypot(e.x-worldX,e.y-worldY)<e.radius+45 ? 5 : animation.frame;
       const facing = marine && ((e.shotWindup ?? 0)>0 || (e.shotRecovery ?? 0)>0) ? movementDirection(e.ranged ? Math.cos(e.shotAngle ?? 0) : worldX-e.x, e.ranged ? Math.sin(e.shotAngle ?? 0) : worldY-e.y) : attacking ? movementDirection(worldX-e.x,worldY-e.y) : animation.direction;
-      sprite.setOrigin(.5, pirate || marine ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${facing}-${frame}`).setFlipX(false).setScale(marine ? .6 : 0.6 * (1 + animation.weight / 2), marine ? .6 : 0.6 * (1 - animation.weight)).setAngle(marine ? 0 : animation.lean);
+      sprite.setOrigin(.5, pirate || marine ? 120/128 : .96).setTexture(`${e.visual ?? 'marine'}-${facing}-${frame}`).setFlipX(enemyFlipX(e.visual,facing)).setScale(marine ? .6 : 0.6 * (1 + animation.weight / 2), marine ? .6 : 0.6 * (1 - animation.weight)).setAngle(marine ? 0 : animation.lean);
       const lift = (e.launchTime ?? 0) > 0 ? Math.sin(Math.PI * (1 - e.launchTime! / 0.3)) * 16 : 0;
       sprite.setPosition(e.x - origin.x, e.y - origin.y - lift).setDepth(e.y - origin.y + 1000);
       sprite.setAlpha(e.swimming&&run?.world.isWater(e.x,e.y)?.85:1);

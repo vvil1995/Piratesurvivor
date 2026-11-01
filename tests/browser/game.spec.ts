@@ -1406,3 +1406,19 @@ test('Loguetown visual: plaza, cadafal monumental y fachadas en móvil y escrito
  }
  expect(errors).toEqual([]);await expect(page.locator('#roger-score')).toBeVisible();
 });
+
+test('enemigos mundos3–5: izquierda, derecha y diagonales sin cambiar sus diseños',async({page},info)=>{
+ test.setTimeout(120000);await page.locator('#start').click();
+ const families=[['blackcat-pirate','blackcat-claw','blackcat-hypnotist'],['krieg-saber','krieg-gunner','krieg-armored'],['fishman-fighter','fishman-spitter','fishman-karate']];
+ for(const [index,ids]of families.entries()){
+  await page.evaluate(async ids=>{const path='/src/content/catalog.ts',{ENEMIES}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!;r.update=()=>{};r.enemies.clear();
+   for(const [i,id]of ids.entries()){const d=ENEMIES[id],e=r.enemies.acquire()!;Object.assign(e,d,{active:true,id:4000+i,visual:id,x:r.player.x-90+i*90,y:r.player.y+60,hp:d.hp,maxHp:d.hp,flash:0,meleeWindup:0,meleeHits:0,shotWindup:0,shotRecovery:0,shotTimer:0});}q.draw(33);
+  },ids);
+  for(const [name,dx,dy]of [['oeste',-4,0],['este',4,0],['noroeste',-4,-2]] as const){
+   await page.evaluate(({dx,dy})=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let n=0;n<12;n++){for(const e of r.enemies.items)if(e.active){e.x+=dx;e.y+=dy;}q.draw(33);}}, {dx,dy});
+   const facings=await page.evaluate(()=>window.__OPS_QA__!.metrics().enemyFacings);
+   for(const id of ids){const sprite=facings.find(s=>s.texture.startsWith(id+'-'));expect(sprite).toBeDefined();expect(sprite!.flipped).toBe(index>0&&dx<0);expect(sprite!.texture).toMatch(dx>0?/-e-/:dy<0?/-nw-/:/-w-/);}
+   await page.screenshot({path:info.outputPath(`enemy-world-${index+3}-${name}.png`)});
+  }
+ }
+});

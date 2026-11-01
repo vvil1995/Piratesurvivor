@@ -574,3 +574,12 @@ Check y227/227 pruebas de lógica correctos: se añaden pruebas de cadafal sóli
 
 Límites: no se ha medido FPS en teléfono físico/Safari ni se garantiza rendimiento de todos los dispositivos. La composición visual se ha inspeccionado en Chromium; no se afirma una campaña manual completa. Se conservan los efectos existentes de Haki; el nuevo desgaste del pavimento es decorativo y no destruye colisiones.
 Compilación con `PAGES_BASE_PATH=/Piratesurvivor/` correcta (HTML autónomo13,01MiB; permanece el aviso de tamaño del bundle). Smoke de producción en PC y móvil emulado correcto bajo ese prefijo, sin404 ni errores JS y sin hookQA.
+
+## Orientación de enemigos de mundos3–5
+
+Revisión de atlas: blackcat-pirate/claw/hypnotist tienen dos perfiles; krieg-saber/gunner/armored y fishman-fighter/spitter/karate repetían el mismo perfil en las ocho columnas. El renderer elegía una textura oeste idéntica a la este y forzaba flipX=false.
+
+Nuevo helper visual `scenes/enemy-facing.ts`: refleja el sprite completo para oeste/noroeste/suroeste únicamente en los seis perfiles provisionales duplicados. Se restablece el giro al volver hacia el este y al reutilizar sprites. Syrup conserva sus variantes existentes. Sin cambios de PNG, tamaños, animaciones, IA, velocidades, colisiones ni bosses. Diagnóstico de flip por sprite disponible solo mediante QA de desarrollo.
+
+Check y229/229 pruebas correctos. Dos pruebas nuevas de selección de perfil y dos pruebas Chromium (escritorio/móvil horizontal emulado) recorren los nueve tipos hacia oeste, este y noroeste, comprobando textura y flip; capturas reales de hombres-pez a ambos lados inspeccionadas. Una primera ejecución de la suite detectó un fallo aleatorio previo en stats.test (curación adicional de15 por botín con Run sin semilla fija); repetición completa229/229 sin cambios de lógica de juego. No se presenta esta comprobación como prueba en teléfono físico.
+Compilación y smoke de producción bajo /Piratesurvivor/ correctos en PC/móvil emulado, sin404 ni errores JS. Permanece el aviso previo de tamaño del bundle.
