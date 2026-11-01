@@ -112,3 +112,7 @@ test('proyectiles invocados conservan alcance original y se limpian solo por pro
  assert.equal(water.length,5);assert.equal(bullets.length,7);assert.equal(water[0].life,ARLONG_RULES.waterRange/ARLONG_RULES.waterSpeed);assert.equal(bullets[0].life,KRIEG_RULES.bulletRange/KRIEG_RULES.bulletSpeed);
  f.defeated(arlong.body);assert.ok(water.every(p=>!p.active));assert.ok(bullets.every(p=>p.active));
 });
+test('si el jugador entra en la silueta, se recoloca y vuelve a avisar antes de materializar',()=>{
+ const {f,p}=challenge();f.seconds=40;f.nextSummon=80;f.summon(p);const s=f.summons[0];Object.assign(p,{x:s.boss.body.x,y:s.boss.body.y});
+ f.tick(2,p);assert.equal(s.remaining,2);assert.ok(Math.hypot(s.boss.body.x-p.x,s.boss.body.y-p.y)>=380);assert.equal(s.boss.state,'approach');assert.equal(f.bodies.length,1);
+});

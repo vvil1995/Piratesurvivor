@@ -77,7 +77,11 @@ export class RogerChallenge {
   this.roger.tick(dt,p,this.world,from=>(this.roger.body.statuses?.stun??0)>0?{x:0,y:0}:this.field.direction(from,p,25),()=>{});
   for(const s of this.summons){
    if(s.boss.state==='dead'){s.deathFor+=dt;s.boss.elapsed+=dt;continue;}
-   if(s.remaining>0){s.remaining=Math.max(0,s.remaining-dt);continue;}
+   if(s.remaining>0){
+    s.remaining=Math.max(0,s.remaining-dt);
+    if(s.remaining===0&&Math.hypot(s.boss.body.x-p.x,s.boss.body.y-p.y)<200){const at=this.position(p);if(at)Object.assign(s.boss.body,at);s.remaining=R.summonSeconds;}
+    continue;
+   }
    s.boss.body.statuses??={};s.boss.body.statuses.stun=Math.max(0,(s.boss.body.statuses.stun??0)-dt);
    if(s.boss.profile.id==='morgan'){s.ambientFor-=dt;if(s.ambientFor<=0){s.ambientFor=MORGAN.ambientReinforcementSeconds;this.hooks.reinforce(s.boss);}}
    // La aceleración se aplica a la simulación original completa, con suelo de aviso en tiempo real.

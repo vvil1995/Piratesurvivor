@@ -517,7 +517,7 @@ No se ha realizado una campaña manual completa con los cinco personajes ni medi
 
 El mundo 5 pendiente se conserva e integra con el nuevo final. Roger reutiliza el punto común de daño con inmortalidad explícita; no hay reserva enorme de vida ni barra de HP. Su arena fija reutiliza las clases originales de los cinco bosses y piscinas compatibles con Arlong. Los controladores y ataques originales no se copian. Los cambios al controlador compartido se limitan al método de selección de fase para permitir progresión temporal de Roger.
 
-- `npm run check` correcto. `npm test`:221/221, incluyendo15 casos nuevos de Roger además de los17 de Arlong.
+- `npm run check` correcto. `npm test`:222/222, incluyendo16 casos nuevos de Roger además de los17 de Arlong.
 - Acceso voluntario y estado completo de los cinco personajes, arena sin cofres, inmortalidad con críticos/área/daño secundario, marcador independiente de otros objetivos.
 - Calendario40/80/120/160/200/240/280/320/360/400/440/480/520s; tandas1/1/1/2/2/3/3/3/4/4/4/5/5. Plazas reservadas durante materialización, máximo8 vivos, descarte de sobrantes, tipos únicos por tanda, duplicados entre tandas con IDs independientes y bajas contadas una sola vez.
 - Instancias reales de Morgan/Buggy/Kuro/Krieg/Arlong, HP60%, aceleración configurable1,2× y mínimos de aviso en tiempo real. Materialización2s. Pools, campos de navegación compartidos por tamaño/capacidad y limpieza por propietario.
@@ -534,6 +534,8 @@ Comprobaciones finales de integración:
 - Simulación dirigida adicional de30s con ocho invocados activos: pico70 enemigos normales y56 proyectiles en el pool compartido, sin superar límites y Roger vivo. Esto comprueba topes y estabilidad de simulación, no mide FPS del render ni de un teléfono.
 - `PAGES_BASE_PATH=/Piratesurvivor/ npm run build` correcto, HTML autónomo11,11MiB. Permanece el aviso previo de tamaño del bundle.
 - `scripts/check-pages.mjs`: producción bajo `/Piratesurvivor/` en PC/móvil emulado, cinco personajes,13sprites/14tarjetas de entrenamiento, arranque y pausa; sin404, errores JS ni hookQA. Sin dependencias nuevas y sin modificaciones a la configuración de Netlify.
-- Ajuste final: Roger aumenta su cadencia desde60s y las recompensas de invocados usan pickups normales en tierra, incluidos los bosses derrotados dentro de piscinas. Así conservan los multiplicadores de objetos. Repetidos check,221/221 pruebas, build y smoke de producción después del ajuste.
+- Ajuste final: Roger aumenta su cadencia desde60s y las recompensas de invocados usan pickups normales en tierra, incluidos los bosses derrotados dentro de piscinas. Así conservan los multiplicadores de objetos. Repetidos check,222/222 pruebas, build y smoke de producción después del ajuste.
 
 - Se comprueba el alcance original de las balas de Krieg y agua de Arlong invocados, su limpieza por propietario y el avance de la animación de caída antes de retirar un boss derrotado. No se limpian los proyectiles de otras instancias.
+
+- Caso adicional: si el jugador entra en una silueta antes de los2s, la invocación se recoloca lejos y repite el aviso completo. No se materializa encima del jugador. Check,222/222 pruebas, build y smoke correctos; repetición de Roger en Chromium:2/2.
