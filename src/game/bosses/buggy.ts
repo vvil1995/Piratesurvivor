@@ -136,7 +136,7 @@ export class BuggyEncounter extends PatternEncounter {
     private damageTarget(player: Player, damage: number, name: string): void {
         if (player.hp <= 0 || player.hurtTimer > 0 || isInvulnerable(player))
             return;
-        player.hp = Math.max(0, player.hp - receivedDamage(damage, player.stats.armor));
+        player.hp = Math.max(0, player.hp - receivedDamage(damage, player.stats.armor,player));
         player.hurtTimer = .65;
         player.lastHit = name;
         player.damageNoticeFor = 1.2;

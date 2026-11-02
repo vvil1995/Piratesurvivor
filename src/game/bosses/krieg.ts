@@ -44,7 +44,7 @@ export class KriegEncounter extends PatternEncounter {
  }
  private hurtPlayer(p:Player,damage:number,name=this.current?.name??'Gas de Krieg'):void{
   if(p.hp<=0||p.hurtTimer>0||isInvulnerable(p))return;
-  p.hp=Math.max(0,p.hp-receivedDamage(damage,p.stats.armor));p.hurtTimer=.65;p.lastHit=name;p.damageNoticeFor=1.2;
+  p.hp=Math.max(0,p.hp-receivedDamage(damage,p.stats.armor,p));p.hurtTimer=.65;p.lastHit=name;p.damageNoticeFor=1.2;
  }
  override tick(dt:number,p:Player,w:CollisionWorld,direction:(from:Vector)=>Vector,reinforce:()=>void):void{
   const before=this.state,zones=this.telegraph?[this.telegraph.zone,...this.extraWarnings].map(z=>({...z})):[];

@@ -58,7 +58,7 @@ export class ArlongEncounter extends PatternEncounter {
  }
  private hurtPlayer(p:Player,damage:number,name:string):void{
   if(p.hp<=0||p.hurtTimer>0||isInvulnerable(p))return;
-  p.hp=Math.max(0,p.hp-receivedDamage(damage,p.stats.armor));p.hurtTimer=.65;p.lastHit=name;p.damageNoticeFor=1.2;
+  p.hp=Math.max(0,p.hp-receivedDamage(damage,p.stats.armor,p));p.hurtTimer=.65;p.lastHit=name;p.damageNoticeFor=1.2;
  }
  private nearestShore(w:CollisionWorld):Vector{
   const shore=this.shore(w),water=this.water(w);

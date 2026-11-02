@@ -14,7 +14,7 @@ export function tickEnemyMelee(e:Enemy,p:Player,world:CollisionWorld,dt:number,c
  e.meleeGap=Math.max(0,(e.meleeGap??0)-dt);if(e.meleeGap>0)return;
  const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy),angle=Math.atan2(dy,dx)-e.meleeAngle!;
  if(d<=a.reach && Math.cos(angle)>=.5 && world.segmentClear(e.x,e.y,p.x,p.y,2) && p.hurtTimer<=0&&!isInvulnerable(p)){
-  if(!counter?.()){p.hp=Math.max(0,p.hp-receivedDamage(e.damage,p.stats.armor));p.lastHit='URPES';p.damageNoticeFor=1.2;}p.hurtTimer=.65;
+  if(!counter?.()){p.hp=Math.max(0,p.hp-receivedDamage(e.damage,p.stats.armor,p));p.lastHit='URPES';p.damageNoticeFor=1.2;}p.hurtTimer=.65;
  }
  e.shotRecovery=.18;e.meleeHits!--;e.meleeGap=a.gap;if(!e.meleeHits)e.meleeTimer=a.interval;
 }

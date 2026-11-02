@@ -28,7 +28,7 @@ export class RogerEncounter extends PatternEncounter {
  override cancel():void{super.cancel();this.storm=0;this.ring=undefined;this.sectors=[];this.summoningFor=0;}
  private hurtWave(p:Player,z:DangerZone):void{
   if(this.ringHit||!inDanger(z,p)||p.hurtTimer>0||isInvulnerable(p))return;
-  this.ringHit=true;p.hp=Math.max(0,p.hp-receivedDamage(48,p.stats.armor));p.hurtTimer=.65;p.lastHit=this.current;p.damageNoticeFor=1.2;
+  this.ringHit=true;p.hp=Math.max(0,p.hp-receivedDamage(48,p.stats.armor,p));p.hurtTimer=.65;p.lastHit=this.current;p.damageNoticeFor=1.2;
  }
  override tick(dt:number,p:Player,w:CollisionWorld,direction:(from:Vector)=>Vector,reinforce:()=>void):void{
   this.seconds+=dt;this.summoningFor=Math.max(0,this.summoningFor-dt);const before=this.state;

@@ -1,3 +1,5 @@
+import {tickFruit,clearFruit} from '../systems/fruit-effects.ts';
+import {FRUIT_RULES,FRUIT_DROPS} from '../../content/fruits.ts';
 import { earlyBalance,densityTarget } from '../../content/early-balance.ts';
 import { RogerChallenge } from '../challenges/roger.ts';
 import { ROGER_RULES } from '../../content/bosses/roger.ts';
@@ -260,6 +262,7 @@ export class Run {
     this.voyage = { destination, elapsed: 0 }; this.status = 'voyage';
   }
   private finishVoyage(): void {
+    for(const p of this.players.values())clearFruit(p);
     const destination = this.voyage!.destination;
     if(destination==='roger'){this.beginRoger();return;}
     if (destination === 'morgan') { this.beginMorgan(); return; }
@@ -344,7 +347,7 @@ export class Run {
   }
   selectFruit(replace: boolean): boolean {
     if (this.status !== 'fruit' || !this.pendingFruit || !FRUITS[this.pendingFruit]) return false;
-    if (replace) { if (this.player.fruit !== this.pendingFruit) this.fruitCooldown = 0; this.player.fruit = this.pendingFruit; }
+    if (replace) { clearFruit(this.player); if (this.player.fruit !== this.pendingFruit) this.fruitCooldown = 0; this.player.fruit = this.pendingFruit; this.lootNotice=FRUITS[this.pendingFruit].name+': '+FRUITS[this.pendingFruit].description;this.lootNoticeFor=4; }
     this.pendingFruit = undefined; this.status = 'playing'; this.checkLevel(); return true;
   }
   selectSlot(slot: number): boolean {
@@ -430,6 +433,7 @@ export class Run {
   readonly visualDeaths: { x:number;y:number;visual:string }[] = [];
   private dropXp(enemy: Enemy, ownerId: string, allowFruit = true): void {
     if ((enemy.visual?.startsWith('buggy-') || enemy.visual?.startsWith('marine-') || enemy.visual?.startsWith('blackcat-') || enemy.visual?.startsWith('krieg-') || enemy.visual?.startsWith('fishman-')) && this.visualDeaths.length < 32) this.visualDeaths.push({x:enemy.x,y:enemy.y,visual:enemy.visual});
+    if (enemy.kind !== 'chest' && this.random() < (enemy.kind==='boss'?FRUIT_RULES.bossDrop:FRUIT_RULES.normalDrop)) {const at=landReward(this.world,enemy);if(this.world.canOccupy(at.x,at.y,10)){const p=this.pickups.acquire();if(p)Object.assign(p,{x:at.x,y:at.y,kind:'fruit',fruitId:FRUIT_DROPS[Math.min(5,Math.floor(this.random()*6))],value:0,ownerId,life:undefined,itemId:undefined});}}
     if (enemy.kind === 'boss') {
       if(this.finalChallenge){if(this.finalChallenge.defeated(enemy)){const at=landReward(this.world,enemy),p=this.pickups.acquire();if(p)Object.assign(p,{x:at.x,y:at.y,kind:'xp',value:ROGER_RULES.bossXp,ownerId,life:undefined});dropLoot(this.pickups,at,ownerId,'berry',ROGER_RULES.bossBerries);}return;}
       this.defeatBoss(); return;
@@ -437,7 +441,7 @@ export class Run {
     if (enemy.kind === 'chest') { chestReward(this.pickups, enemy, ownerId, this.random); return; }
     const rewardPosition=enemy.swimming?landReward(this.world,enemy):enemy;
     const owner = this.players.get(ownerId), fruit = owner?.fruit ? FRUITS[owner.fruit] : undefined;
-    if (allowFruit && owner && fruit && this.fruitCooldown <= 0) { this.fruitCooldown = fruit.cooldown; queueImpact(this, owner, enemy.x, enemy.y, fruit.radius, owner.stats.damage * fruit.damage, 0.12, 'bomu-explosion'); }
+    if (allowFruit && owner?.fruit==='bomu' && owner && fruit && this.fruitCooldown <= 0) { this.fruitCooldown = fruit.cooldown; queueImpact(this, owner, enemy.x, enemy.y, fruit.radius, owner.stats.damage * fruit.damage, 0.12, 'bomu-explosion'); }
     if (this.random() < LOOT.enemyFoodChance) dropLoot(this.pickups, { x: rewardPosition.x, y: rewardPosition.y + 16 }, ownerId, 'food', LOOT.enemyFoodHeal);
     if (this.random() < LOOT.enemyBerryChance) dropLoot(this.pickups, rewardPosition, ownerId, 'berry', LOOT.enemyBerries);
     const pickup = this.pickups.acquire();
@@ -582,7 +586,7 @@ export class Run {
       if(enemy.melee)tickEnemyMelee(enemy,target,enemy.swimming?aquaticWorld(this.world):this.world,dt,()=>counterGuard(target,enemy,this.grid,this.world,e=>this.dropXp(e,target.id),this.random));
       if (!enemy.melee && !launched && !isInvulnerable(target) && (enemy.statuses?.stun ?? 0) <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
         if (enemy.visual === 'marine-sword') enemy.shotRecovery = .3;
-        if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) { const before = target.hp; target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor)); if (target.hp < before) { target.lastHit = 'CONTACTO'; target.damageNoticeFor = 1.2; } } target.hurtTimer = 0.65;
+        if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) { const before = target.hp; target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor,target)); if (target.hp < before) { target.lastHit = 'CONTACTO'; target.damageNoticeFor = 1.2; } } target.hurtTimer = 0.65;
       }
     }
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
@@ -607,6 +611,7 @@ export class Run {
         damage: 0, knockback: 0, delay: 0, life: .2, triggered: true, evolved: false, kind: 'impact', visual: 'item-explosion',
       });
     }
+    for(const actor of this.players.values())tickFruit(actor,[...this.enemies.items,...this.bossBodies],this.world,dt,e=>this.dropXp(e,actor.id,false),this.random);
     tickEffects(this, this.players, this.grid, this.world, dt, (enemy, owner) => this.dropXp(enemy, owner), this.random);
     if (![...this.players.values()].some(actor => actor.hp > 0)) { this.defeat(); return; }
     for (let i = this.strikes.length - 1; i >= 0; i--) { this.strikes[i].life -= dt; if (this.strikes[i].life <= 0) this.strikes.splice(i, 1); }
@@ -618,7 +623,7 @@ export class Run {
       const dx = actor.x - pickup.x, dy = actor.y - pickup.y, d = Math.hypot(dx, dy);
       if (d < 20) {
         if (pickup.kind === 'item' && pickup.itemId && ITEMS[pickup.itemId]) { this.pendingItem = pickup.itemId; this.status = 'item'; }
-        else if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { this.pendingFruit = pickup.fruitId; this.status = 'fruit'; }
+        else if (pickup.kind === 'fruit' && pickup.fruitId && FRUITS[pickup.fruitId]) { if(!actor.fruit&&pickup.fruitId!=='bomu'){actor.fruit=pickup.fruitId;this.lootNotice=FRUITS[pickup.fruitId].name+': '+FRUITS[pickup.fruitId].description;this.lootNoticeFor=4;}else{this.pendingFruit = pickup.fruitId; this.status = 'fruit';} }
         else if (pickup.kind === 'food') { actor.xp += LOOT.foodXp * (actor.xpMultiplier ?? 1)*(1+itemValue(actor.items,'treasure')); actor.hp = Math.min(actor.stats.maxHp, actor.hp + pickup.value); if (pickup.level === 6) { const cook = actor.attacks.find(a => a.id === pickup.abilityId); if (cook) cook.activeFor = 4; } }
         else if (pickup.kind === 'berry') { actor.collectedBerries += pickup.value * (actor.berryMultiplier ?? 1)*(1+itemValue(actor.items,'berries')); actor.collectedBerries = Math.round(actor.collectedBerries * 1000) / 1000; }
         else actor.xp += pickup.value * (actor.xpMultiplier ?? 1)*(1+itemValue(actor.items,'treasure'));
@@ -640,7 +645,7 @@ export class Run {
   }
   private defeat(): void {
     if (!this.finalChallenge && this.inArena && this.encounter?.state !== 'dead') { this.startVoyage(this.zone==='arlong-arena'?'arlong-return':this.zone==='krieg-arena'?'baratie-return':this.zone==='kuro-arena'?'syrup-return':this.zone === 'buggy-arena' ? 'orange-return' : 'shells'); return; }
-    this.status = 'defeat'; this.finalChallenge?.stop();this.encounter?.cancel(); this.strikes.length = 0;
+    for(const p of this.players.values()){clearFruit(p);p.fruit=undefined;} this.status = 'defeat'; this.finalChallenge?.stop();this.encounter?.cancel(); this.strikes.length = 0;
     for (const p of this.projectiles.items) { p.active = false; p.hit.clear(); }
     for (const a of this.areas.items) a.active = false;
     for (const p of this.pickups.items) if (p.kind === 'food') p.active = false;

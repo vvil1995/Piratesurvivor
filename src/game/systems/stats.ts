@@ -1,3 +1,4 @@
+import {FRUIT_RULES} from '../../content/fruits.ts';
 import { itemValue } from '../../content/items.ts';
 import type { Stats, StatModifiers } from '../../content/types.ts';
 import { STAT_LIMITS } from '../../content/stat-rules.ts';
@@ -26,7 +27,8 @@ export function refreshStats(player: Player): void {
   player.stats = resolveStats(player.baseStats, Object.values(player.modifiers));
   player.hp = Math.min(player.hp, player.stats.maxHp);
 }
-export function receivedDamage(raw: number, armor: number): number {
+export function receivedDamage(raw: number, armor: number, player?:Player): number {
+  if(player?.fruit==='moku'&&(player.fruitState?.evade??0)>0){const s=player.fruitState!;s.evadeBudget+=FRUIT_RULES.evasion;if(s.evadeBudget>=1){s.evadeBudget-=1;return 0;}}
   return Math.max(0, raw) * (1 - clamp(armor, STAT_LIMITS.armor));
 }
 export function attackCooldown(base: number, atLevel: number, player: Player): number {

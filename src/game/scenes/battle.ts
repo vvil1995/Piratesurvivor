@@ -1,3 +1,4 @@
+import {FruitRenderer} from './fruit-renderer.ts';
 import { CrewEffects } from './crew-effects.ts';
 import { enemyFlipX } from './enemy-facing.ts';
 import { ITEM_IMAGES } from '../../ui/item-art.ts';
@@ -34,7 +35,7 @@ export interface BattleBridge {
 }
 export class BattleScene extends Phaser.Scene {
   private navigationSignal!: Phaser.GameObjects.Image;
-  private crewEffects!:CrewEffects;
+  private crewEffects!:CrewEffects;private fruitRenderer!:FruitRenderer;
   private bossRenderer!: BossRenderer;
   private summonedRenderers:BossRenderer[]=[];
   private bridge: BattleBridge;
@@ -78,7 +79,7 @@ export class BattleScene extends Phaser.Scene {
     try { await promise; } catch (error) { this.actorLoads.delete(visual); throw error; }
   }
   preload(): void {
-    preloadIslandArt(this);CrewEffects.preload(this);
+    preloadIslandArt(this);FruitRenderer.preload(this);CrewEffects.preload(this);
     for(const [id,url] of Object.entries(ITEM_IMAGES))this.load.image('item-source-'+id,url);
     this.load.image('source-atlas', atlasUrl);
     this.load.image('luffy-directions-source', luffyDirectionsUrl);
@@ -86,7 +87,7 @@ export class BattleScene extends Phaser.Scene {
   }
   create(): void {
     createTextures(this);
-    this.worldRenderer = new WorldRenderer(this);this.crewEffects=new CrewEffects(this);
+    this.worldRenderer = new WorldRenderer(this);this.crewEffects=new CrewEffects(this);this.fruitRenderer=new FruitRenderer(this);
     for (let i = 0; i < 18; i++) this.chestSprites.push(this.add.image(0, 0, 'barrel').setOrigin(0.5, 0.8).setVisible(false));
     for (let i = 0; i < 12; i++) this.dust.push({ sprite: this.add.image(0, 0, 'foot-dust').setDepth(-999).setVisible(false), x: 0, y: 0, life: 0 });
     for (let i = 0; i < SHELLS_TOWN.pickupCap; i++) this.crystals.push(this.add.image(0, 0, 'xp').setVisible(false).setDepth(2));
@@ -208,10 +209,10 @@ export class BattleScene extends Phaser.Scene {
       sprite.setVisible(!!pickup?.active);
       if (pickup?.active) {
         const kind = pickup.kind ?? 'xp', factor = kind === 'xp' && pickup.value >= 20 ? 1.3 : 1;
-        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : kind === 'food' ? 30 : 18) * factor, (kind === 'food' ? 27 : 18) * factor);
+        sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? (pickup.fruitId&&pickup.fruitId!=='bomu'?'fruit-'+pickup.fruitId:'devil-fruit') : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y+(kind==='fruit'?Math.sin((run?.time??0)*4)*3:0)).setDisplaySize((kind === 'xp' ? 14 : kind === 'food' ? 30 : kind==='fruit'?28:18) * factor, (kind === 'food' ? 27 : kind==='fruit'?28:18) * factor);
       }
     }
-    this.effects.clear();this.crewEffects.begin(run,origin);
+    this.effects.clear();this.crewEffects.begin(run,origin);this.fruitRenderer.draw(run,origin);
     for(const e of run?.enemies.items??[]){if(!e.active||!e.melee||!(e.meleeWindup!>0))continue;const x=e.x-origin.x,y=e.y-origin.y,a=e.meleeAngle??0;this.effects.fillStyle(0xe65971,.22);this.effects.beginPath();this.effects.moveTo(x,y);this.effects.arc(x,y,e.melee.reach,a-Math.PI/3,a+Math.PI/3);this.effects.closePath();this.effects.fillPath();}
     for (const e of run?.enemies.items ?? []) {
       if (!e.active || !e.ranged?.preparation || !(e.shotWindup! > 0)) continue;

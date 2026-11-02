@@ -248,3 +248,7 @@ Dos fuentes originales generadas con ImageGen para este proyecto: `exec-07a58d1e
 - `effects/{hammer,rope,decoy,loot,pepper}.png`: props128×128, contenido máximo120px proporcional nearest-neighbor, alfa96. `props-manifest.json` registra procedencia y hashes. Se conserva la comida existente, evitando duplicarla.
 - Animación por cuatro estados y combinación con dirección/recuperación de los eventos existentes. No son24 spritesheets independientes ni nuevos ciclos corporales de los personajes. Luffy conserva sus recursos y renderizado. Sin dependencias nuevas.
 - Inventario por técnica y alcance real: `docs/CREW-VFX.md`.
+
+## Seis frutas del Diablo ·2026-11-02
+
+`src/assets/fruits/{mera,goro,hie,suna,moku,nikyu}.svg` y sus seis `-effect.svg`: dibujos originales creados con código para el proyecto; sin recursos externos. Lienzo lógico32×32, exportación64×64, transparencia y bordes sin suavizado. Frutas con tallos, espirales y detalles elementales; efectos provisionales de fuego, rayo, cristal, arena, humo y cojinete. Animación por transformaciones, sin spritesheets multifotograma. El portable embebe SVG como dataURL. No se añaden dependencias.

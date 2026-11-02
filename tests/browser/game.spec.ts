@@ -1465,3 +1465,16 @@ test('efectos diferidos de Nami: explosión del señuelo y trampa evolucionada',
   await page.screenshot({path:info.outputPath(`${id}-evolved-trigger.png`)});
  }
 });
+
+test('seis frutas: sprites propios, poderes, sustitución y móvil horizontal',async({page},info)=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.locator('#start').click();
+ await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;r.update=()=>{};r.enemies.clear();r.pickups.clear();for(const [i,id]of ['mera','goro','hie','suna','moku','nikyu'].entries()){const p=r.pickups.acquire()!;Object.assign(p,{x:r.player.x-100+i*40,y:r.player.y+80,kind:'fruit',fruitId:id,value:0});}q.draw();q.tick();});await page.screenshot({path:info.outputPath('six-fruit-drops.png')});
+ for(const id of ['mera','goro','hie','suna','moku','nikyu']){
+  await page.evaluate(async id=>{const q=window.__OPS_QA__!,r=q.getRun()!,p=r.player;r.pickups.clear();r.enemies.clear();r.status='playing';p.hurtTimer=0;const f=r.pickups.acquire()!;Object.assign(f,{x:p.x,y:p.y,kind:'fruit',fruitId:id,value:0});Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.tick();},id);
+  if(id!=='mera'){await expect(page.locator('#fruit-found')).toBeVisible();await page.locator('#fruit-take').click();}
+  await page.evaluate(async()=>{const path='/src/game/systems/fruit-effects.ts',{fruitHit}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,p=r.player;r.update=()=>{};const e=r.enemies.acquire()!;Object.assign(e,{id:999,x:p.x+40,y:p.y,hp:10000,maxHp:10000,radius:12,speed:0,damage:0,xp:0,visual:'marine-sword',kind:undefined,statuses:undefined});fruitHit(p,e,10,()=>0);for(let n=0;n<(['mera','goro','hie'].includes(p.fruit??'')?8:65);n++)Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw();q.tick();});
+  await expect(page.locator('#fruit-active img')).toHaveAttribute('alt',new RegExp(id==='mera'?'Mera':id==='goro'?'Goro':id==='hie'?'Hie':id==='suna'?'Suna':id==='moku'?'Moku':'Nikyu'));await page.screenshot({path:info.outputPath(`fruit-${id}-power.png`)});
+ }
+ await page.locator('.fruit-details').click();await expect(page.locator('#fruit-info-dialog')).toBeVisible();await expect(page.locator('#fruit-info-description')).toContainText('Nikyu');await page.locator('#fruit-info-dialog button').click();await expect(page.locator('#fruit-info-dialog')).not.toBeVisible();
+ expect(errors).toEqual([]);
+});

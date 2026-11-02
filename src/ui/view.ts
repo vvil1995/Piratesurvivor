@@ -1,3 +1,4 @@
+import {FRUIT_ART} from './fruit-art.ts';
 import { trainingLevel, trainingModifiers } from '../content/training.ts';
 import { resolveStats } from '../game/systems/stats.ts';
 import { MORGAN_ROUTE } from '../content/navigation.ts';
@@ -109,7 +110,7 @@ export class View {
       badge.textContent = isInvulnerable(p) ? 'BALLOON · IMMUNE' : `↑DEF ${Math.round(p.stats.armor * 100)}%`; badge.title = isInvulnerable(p) ? 'Inmunidad solo durante la inflada; termina al desinflarse.' : `${ABILITIES[a.id].shortName}: reducción de daño activa, sujeta al límite global60%.`; badges.push(badge);
     }
     el('buff-strip').replaceChildren(...badges);
-    el('fruit-active').textContent = p.fruit ? `FRUTA: ${FRUITS[p.fruit].name}` : '';
+    const fruitBadge=el('fruit-active');if(fruitBadge.dataset.fruit!==(p.fruit??'')){fruitBadge.dataset.fruit=p.fruit??'';fruitBadge.replaceChildren();if(p.fruit){const f=FRUITS[p.fruit],b=document.createElement('button');b.className='fruit-details';b.title=f.name+': '+f.description;b.textContent='';const img=document.createElement('img');img.src=FRUIT_ART[p.fruit]??FRUIT_ART.mera;img.alt=f.name;b.append(img);b.onclick=()=>{const d=document.querySelector<HTMLDialogElement>('#fruit-info-dialog')!;el('fruit-info-description').textContent=b.title;run.status='paused';d.onclose=()=>{if(run.status==='paused')run.status='playing';};d.showModal();};fruitBadge.append(b);}}
     el('damage-feedback').textContent = (p.damageNoticeFor ?? 0) > 0 ? `DAÑO · ${p.lastHit}` : '';
     el('union-count').textContent = String(run.unionTokens);
     el('manage-abilities').title = `Objeto de unión: ${run.unionTokens}. Se obtiene al vencer a Morgan u otro jefe.`;
