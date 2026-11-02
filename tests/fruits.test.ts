@@ -14,3 +14,5 @@ test('all six drops use safe land, remain run-local across travel, and clear on 
 });
 
 test('replacing Hie preserves independent skill controls',()=>{const {p,e,tick}=setup('hie');e.statuses={slow:4,stun:2};fruitHit(p,e,10,()=>0);tick();assert.ok(e.fruitControl?.slow);clearFruit(p);assert.equal(e.statuses.slow,4);assert.equal(e.statuses.stun,2);assert.equal(e.fruitControl,undefined);});
+
+test('smoke affects enemies entering after activation',()=>{const {p,e,tick}=setup('moku');e.x=p.x+200;tick(1.1);assert.ok(!e.fruitControl?.confuse);e.x=p.x+30;tick(.1);assert.ok(e.fruitControl?.confuse);clearFruit(p);assert.equal(e.fruitControl,undefined);});

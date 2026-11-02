@@ -34,7 +34,7 @@ HUD: icono estable e interactivo, detalles en diálogo con pausa y aviso al adqu
 
 ## Verificación
 
-234pruebas de lógica aprobadas. Nuevas pruebas ejercitan las seis frutas con los cinco personajes, daño, estados, límites, evasión, sustitución, seis drops accesibles, viaje Morgan→Orange y muerte. Dos casos Chromium (escritorio/móvil horizontal emulado) ejercitan recogida/sustitución, cargan los seis sprites, ejecutan efectos y abren/cierran detalles. Capturas del suelo y seis poderes inspeccionadas. Compilación Pages y HTML autónomo aprobados; smoke de producción bajo `/Piratesurvivor/` sin404/erroresJS.
+235pruebas de lógica aprobadas. Nuevas pruebas ejercitan las seis frutas con los cinco personajes, daño, estados, límites, evasión, sustitución, seis drops accesibles, viaje Morgan→Orange y muerte. Dos casos Chromium (escritorio/móvil horizontal emulado) ejercitan recogida/sustitución, cargan los seis sprites, ejecutan efectos y abren/cierran detalles. Capturas del suelo y seis poderes inspeccionadas. Compilación Pages y HTML autónomo aprobados; smoke de producción bajo `/Piratesurvivor/` sin404/erroresJS.
 
 No se ha jugado una campaña completa con cada combinación de fruta/personaje, ni medido FPS en un teléfono físico o en la carga máxima de Roger. Las pruebas de simulación históricas de mundos/bosses siguen aprobadas, pero no sustituyen ese ensayo de balance. Los efectos visuales son provisionales; su mecánica sí está implementada.
 

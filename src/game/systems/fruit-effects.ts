@@ -13,6 +13,7 @@ export function tickFruit(p:Player,enemies:Enemy[],world:CollisionWorld,dt:numbe
  const visual=(e:{x:number;y:number},kind=p.fruit!)=>{if(s.visuals.length<24)s.visuals.push({x:e.x,y:e.y,kind,life:kind==='moku'?R.smokeDuration:.45});};
  const hit=(e:Enemy,amount:number,push=0)=>damageEnemy(p,e,p.stats.damage*amount,push,p,world,onKill,random,true,true);
  const control=(e:Enemy,key:'slow'|'stun'|'confuse',duration:number)=>{if(e.kind)return;let c=s.controls.find(c=>c.enemy===e&&c.id===e.id);if(!c){c={enemy:e,id:e.id};s.controls.push(c);}if(e.fruitControl?.id!==e.id)e.fruitControl={id:e.id};e.fruitControl![key]=Math.max(e.fruitControl![key]??0,duration);};
+ const cloud=s.visuals.find(v=>v.kind==='moku');if(p.fruit==='moku'&&cloud)for(const e of enemies)if(e.active&&!e.kind&&Math.hypot(e.x-cloud.x,e.y-cloud.y)<f.radius&&world.segmentClear(cloud.x,cloud.y,e.x,e.y,2,'attack'))control(e,'confuse',cloud.life);
  s.controls=s.controls.filter(c=>c.enemy.active&&c.enemy.id===c.id);if(s.controls.length>256)s.controls.splice(0,s.controls.length-256);
  for(const e of s.queue.splice(0)){
   if(p.fruit==='mera'){if(e.active){const old=s.burns.find(b=>b.enemy===e&&b.id===e.id);if(old)old.life=R.burnDuration;else if(s.burns.length<24)s.burns.push({enemy:e,id:e.id,life:R.burnDuration,tick:0});}if(s.explosion<=0){s.explosion=f.cooldown;visual(e);for(const n of enemies)if(n.active&&Math.hypot(n.x-e.x,n.y-e.y)<=f.radius&&world.segmentClear(e.x,e.y,n.x,n.y,2,'attack'))hit(n,f.damage);}}
