@@ -8,7 +8,7 @@ import { damageEnemy } from './hits.ts';
 import { applySkillHit } from './status.ts';
 export interface SkillEffects extends Effects { pickups?: Pool<Pickup> }
 const event = (p: Player, state: EquippedAttack, from: Vector, angle: number, reach: number): Strike => ({ ...from, angle, reach, life: 0.2, ownerId: p.id,
-  behavior: ABILITIES[state.id].behavior, visual: ABILITIES[state.id].visual, evolved: state.level === 6, arc: 0.8, splash: 0, impact: { x: p.x, y: p.y } });
+  abilityId:state.id, behavior: ABILITIES[state.id].behavior, visual: ABILITIES[state.id].visual, evolved: state.level === 6, arc: 0.8, splash: 0, impact: { x: p.x, y: p.y } });
 export function castAdvanced(player: Player, state: EquippedAttack, effects: SkillEffects, grid: SpatialGrid, world: CollisionWorld,
   onKill: (e: Enemy) => void, emit: (s: Strike) => void, random: () => number): boolean | undefined {
   const ability = ABILITIES[state.id], params = ability.levels[state.level - 1];
@@ -27,7 +27,7 @@ export function castAdvanced(player: Player, state: EquippedAttack, effects: Ski
   if (ability.behavior === 'decoy') {
     let x = player.x + Math.cos(player.facing) * 45, y = player.y + Math.sin(player.facing) * 45;
     if (!world.canOccupy(x, y, 10)) { x = player.x; y = player.y; }
-    return spawnZone(effects, player, params, 'decoy', x, y, state.level);
+    return spawnZone(effects, player, params, 'decoy', x, y, state.level,state.id);
   }
   if (ability.behavior === 'heal') {
     const food = effects.pickups?.acquire(); if (!food) return false;
@@ -50,7 +50,7 @@ export function castAdvanced(player: Player, state: EquippedAttack, effects: Ski
   world.moveCircle(destination, Math.cos(angle) * travel, Math.sin(angle) * travel, 14);
   if (ability.behavior === 'evade') {
     Object.assign(player, destination); player.hurtTimer = Math.max(player.hurtTimer, 0.25); player.facing = angle;
-    if (params.splash) spawnZone(effects, player, { ...params, area: params.splash, duration: 4 }, 'trap', from.x, from.y, state.level);
+    if (params.splash) spawnZone(effects, player, { ...params, area: params.splash, duration: 4 }, 'trap', from.x, from.y, state.level,state.id);
     const counter = nearestTarget(player, grid, world, player.stats.range);
     if (counter) { applySkillHit(player, counter, params); damageEnemy(player, counter, player.stats.damage * params.damage, params.knockback, player, world, onKill, random); }
   } else {

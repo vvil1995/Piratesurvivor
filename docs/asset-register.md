@@ -239,3 +239,12 @@ Se consultaron las referencias2/3/4 del usuario (arquitectura clara/arcos, entra
 ### Orientación de perfiles provisionales de enemigos
 
 No se crean ni modifican assets. Baratie y Arlong Park usan ahora reflexión completa del perfil existente cuando miran al oeste o sus diagonales. Syrup conserva sus dos variantes pintadas/preparadas. No hay deformación parcial de piernas ni nuevas direcciones dibujadas; se mantienen identidad, alpha y paleta originales.
+
+## Efectos de Zoro, Sanji, Nami y Usopp (2026-11-02)
+
+Dos fuentes originales generadas con ImageGen para este proyecto: `exec-07a58d1e-94f1-49e4-bad6-f1bf626836df.png` (familias de efectos) y `exec-787a6dcf-7440-4dbf-9bba-c45e52e742b2.png` (objetos). Conservadas en `/workspace/generated_images`. No se copian sprites de juegos externos ni se incorporan imágenes remotas. Mismos derechos de franquicia que el resto del fan game.
+
+- `effects/crew-vfx.png`: atlas512×768, 24 celdas transparentes128px. Espadas, puntadas, bastón, cuatro municiones distintas, cuatro estados de explosión y cuatro de humo. Extracción mediante cajas explícitas, alfa80, recorte de contenido y ajuste proporcional máximo116px nearest-neighbor. Cajas individuales de munición excluyen los fragmentos de la fila de explosiones y conservan la mecha completa. `crew-vfx.json` conserva cajas, fuente y SHA256.
+- `effects/{hammer,rope,decoy,loot,pepper}.png`: props128×128, contenido máximo120px proporcional nearest-neighbor, alfa96. `props-manifest.json` registra procedencia y hashes. Se conserva la comida existente, evitando duplicarla.
+- Animación por cuatro estados y combinación con dirección/recuperación de los eventos existentes. No son24 spritesheets independientes ni nuevos ciclos corporales de los personajes. Luffy conserva sus recursos y renderizado. Sin dependencias nuevas.
+- Inventario por técnica y alcance real: `docs/CREW-VFX.md`.

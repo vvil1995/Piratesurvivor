@@ -137,16 +137,16 @@ export function spawnProjectile(effects: Effects, x: number, y: number, targetX:
   const projectile = effects.projectiles.acquire(); if (!projectile) return false;
   const d = Math.max(1, Math.hypot(targetX - x, targetY - y));
   projectile.hit.clear();
-  Object.assign(projectile, { x, y, vx: (targetX - x) / d * speed, vy: (targetY - y) / d * speed,
+  Object.assign(projectile, { visualSerial:(projectile.visualSerial??0)+1,x, y, vx: (targetX - x) / d * speed, vy: (targetY - y) / d * speed,
     radius: slow ? 7 : 3, life: lifetime, damage, ownerId, slow, visual,hostile, reflected: false, remainingHits: hits, abilityId: details?.abilityId, level: details?.level ?? 1, bounces: details?.bounces ?? 0 });
   return true;
 }
 
-export function spawnZone(effects: Effects, player: Player, params: AttackLevel, kind: 'smoke' | 'decoy' | 'trap', x: number, y: number, level: number): boolean {
+export function spawnZone(effects: Effects, player: Player, params: AttackLevel, kind: 'smoke' | 'decoy' | 'trap', x: number, y: number, level: number, visual?:string): boolean {
   const area = effects.areas.acquire(); if (!area) return false;
   Object.assign(area, { x, y, ownerId: player.id, kind, radius: params.area ?? 40, shockRadius: params.splash,
     damage: player.stats.damage * params.damage, knockback: params.knockback, delay: 0, life: params.duration ?? 4,
-    triggered: false, evolved: level === 6, status: params.status, statusDuration: params.statusDuration, tickTimer: 0, hp: kind === 'decoy' ? 60 : undefined, visual: undefined });
+    triggered: false, evolved: level === 6, status: params.status, statusDuration: params.statusDuration, tickTimer: 0, hp: kind === 'decoy' ? 60 : undefined, visual });
   return true;
 }
 

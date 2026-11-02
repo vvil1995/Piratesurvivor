@@ -1,3 +1,4 @@
+import { CrewEffects } from './crew-effects.ts';
 import { enemyFlipX } from './enemy-facing.ts';
 import { ITEM_IMAGES } from '../../ui/item-art.ts';
 import { EnemyDeaths } from './enemy-motion.ts';
@@ -33,6 +34,7 @@ export interface BattleBridge {
 }
 export class BattleScene extends Phaser.Scene {
   private navigationSignal!: Phaser.GameObjects.Image;
+  private crewEffects!:CrewEffects;
   private bossRenderer!: BossRenderer;
   private summonedRenderers:BossRenderer[]=[];
   private bridge: BattleBridge;
@@ -61,7 +63,7 @@ export class BattleScene extends Phaser.Scene {
   private actorLoads = new Map<string, Promise<void>>();
   private previewWorld = new ProceduralWorld(4190);
   constructor(bridge: BattleBridge) { super('battle'); this.bridge = bridge; }
-  get diagnostics() { return { enemyFacings:this.enemies.filter(e=>e.visible).map(e=>({texture:e.texture.key,flipped:e.flipX})), enemyTextures: this.enemies.filter(e=>e.visible).map(e=>e.texture.key), bossTexture: this.bossRenderer?.texture, cameraZoom: this.cameras.main.zoom, cameraX: this.arenaCameraPosition?.x, cameraY: this.arenaCameraPosition?.y, legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
+  get diagnostics() { return { crewEffects:this.crewEffects?.diagnostics, enemyFacings:this.enemies.filter(e=>e.visible).map(e=>({texture:e.texture.key,flipped:e.flipX})), enemyTextures: this.enemies.filter(e=>e.visible).map(e=>e.texture.key), bossTexture: this.bossRenderer?.texture, cameraZoom: this.cameras.main.zoom, cameraX: this.arenaCameraPosition?.x, cameraY: this.arenaCameraPosition?.y, legSwing: this.captainRig?.swing ?? 0, footsteps: this.dust.filter(p => p.sprite.visible).length, actorScaleY: this.captain?.scaleY ?? 0.65, actorAngle: this.captain?.angle ?? 0, actorTexture: this.captain?.texture.key ?? '', actorDirection: this.captainAnimation.direction, actorFrame: this.captainAnimation.frame, inflating: this.balloonRig?.visible ?? false, renderedChunks: this.worldRenderer?.activeChunks ?? 0, textureSlots: this.worldRenderer?.allocatedChunks ?? 0 }; }
   async ensureActorArt(visual: string): Promise<void> {
     if (this.textures.exists(`${visual}-s-0`)) return;
     const known = this.actorLoads.get(visual); if (known) return known;
@@ -76,7 +78,7 @@ export class BattleScene extends Phaser.Scene {
     try { await promise; } catch (error) { this.actorLoads.delete(visual); throw error; }
   }
   preload(): void {
-    preloadIslandArt(this);
+    preloadIslandArt(this);CrewEffects.preload(this);
     for(const [id,url] of Object.entries(ITEM_IMAGES))this.load.image('item-source-'+id,url);
     this.load.image('source-atlas', atlasUrl);
     this.load.image('luffy-directions-source', luffyDirectionsUrl);
@@ -84,7 +86,7 @@ export class BattleScene extends Phaser.Scene {
   }
   create(): void {
     createTextures(this);
-    this.worldRenderer = new WorldRenderer(this);
+    this.worldRenderer = new WorldRenderer(this);this.crewEffects=new CrewEffects(this);
     for (let i = 0; i < 18; i++) this.chestSprites.push(this.add.image(0, 0, 'barrel').setOrigin(0.5, 0.8).setVisible(false));
     for (let i = 0; i < 12; i++) this.dust.push({ sprite: this.add.image(0, 0, 'foot-dust').setDepth(-999).setVisible(false), x: 0, y: 0, life: 0 });
     for (let i = 0; i < SHELLS_TOWN.pickupCap; i++) this.crystals.push(this.add.image(0, 0, 'xp').setVisible(false).setDepth(2));
@@ -209,7 +211,7 @@ export class BattleScene extends Phaser.Scene {
         sprite.setTexture(kind === 'food' ? 'food' : kind === 'berry' ? 'coin' : kind === 'fruit' ? 'devil-fruit' : kind === 'item' ? 'item-' + pickup.itemId : 'xp').setPosition(pickup.x - origin.x, pickup.y - origin.y).setDisplaySize((kind === 'xp' ? 14 : kind === 'food' ? 30 : 18) * factor, (kind === 'food' ? 27 : 18) * factor);
       }
     }
-    this.effects.clear();
+    this.effects.clear();this.crewEffects.begin(run,origin);
     for(const e of run?.enemies.items??[]){if(!e.active||!e.melee||!(e.meleeWindup!>0))continue;const x=e.x-origin.x,y=e.y-origin.y,a=e.meleeAngle??0;this.effects.fillStyle(0xe65971,.22);this.effects.beginPath();this.effects.moveTo(x,y);this.effects.arc(x,y,e.melee.reach,a-Math.PI/3,a+Math.PI/3);this.effects.closePath();this.effects.fillPath();}
     for (const e of run?.enemies.items ?? []) {
       if (!e.active || !e.ranged?.preparation || !(e.shotWindup! > 0)) continue;
@@ -246,6 +248,7 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const area of run.areas.items) if (area.active) {
         const x = area.x - origin.x, y = area.y - origin.y;
+        if(this.crewEffects.area(area,run,origin))continue;
         if (area.visual === 'bomu-explosion' || area.visual === 'item-explosion') {
           const alpha = Math.max(0, area.life / 0.3), radius = area.radius * (area.triggered ? Math.min(1, 0.4 + (0.3 - area.life) * 5) : 0.2);
           this.effects.fillStyle(0xe28a48, alpha * 0.35); this.effects.fillCircle(x, y, radius);
@@ -267,6 +270,7 @@ export class BattleScene extends Phaser.Scene {
       }
       for (const bullet of run.projectiles.items) if (bullet.active) {
         const x = bullet.x - origin.x, y = bullet.y - origin.y - 18;
+        if(this.crewEffects.projectile(bullet,origin))continue;
         if(bullet.visual==='water'){this.effects.lineStyle(6,0x145b88,.95);this.effects.lineBetween(x,y,x-bullet.vx*.065,y-bullet.vy*.065);this.effects.lineStyle(3,0x8be9ff,1);this.effects.lineBetween(x,y,x-bullet.vx*.065,y-bullet.vy*.065);this.effects.fillStyle(0xe4ffff);this.effects.fillCircle(x,y,4);continue;}
         if (bullet.hostile && bullet.slow){this.effects.lineStyle(3,0xa580ed,.95);this.effects.strokeCircle(x,y,9);this.effects.fillStyle(0xf7df8b);this.effects.fillCircle(x,y,5);this.effects.lineStyle(2,0xd7c6ff,.8);this.effects.lineBetween(x,y-8,x-bullet.vx*.06,y-12-bullet.vy*.06);continue;}
         if (bullet.hostile) {
@@ -282,8 +286,9 @@ export class BattleScene extends Phaser.Scene {
       if (player) for (const state of player.attacks) {
         const ability = ABILITIES[state.id], x = player.x - origin.x, y = player.y - origin.y - 22;
         if (ability.behavior === 'guard' && state.activeFor > 0 && !ability.levels[state.level - 1].invulnerable) {
+          if(ability.visual==='slash'){this.crewEffects.guard(x,y+22);continue;}
           this.effects.fillStyle(0x92dce1, 0.08);
-          this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); if (ability.visual === 'slash') { for (const offset of [-9, 0, 9]) this.effects.lineBetween(x - 24, y - 18 + offset, x + 24, y + 18 + offset); } else { for (const side of [-1, 1]) { this.effects.beginPath(); this.effects.arc(x, y + 3, 28, side < 0 ? Math.PI * 0.65 : -Math.PI * 0.35, side < 0 ? Math.PI * 1.35 : Math.PI * 0.35); this.effects.strokePath(); } }
+          this.effects.lineStyle(state.level === 6 ? 3 : 2, state.level === 6 ? 0xf3d477 : 0x92dce1, 0.85); { for (const side of [-1, 1]) { this.effects.beginPath(); this.effects.arc(x, y + 3, 28, side < 0 ? Math.PI * 0.65 : -Math.PI * 0.35, side < 0 ? Math.PI * 1.35 : Math.PI * 0.35); this.effects.strokePath(); } }
         }
         if (ability.buff && (combined(player, state.id) && activeMovements(player).includes(state.id) || state.activeFor > 0)) {
           const color = BUFF_LOOK[ability.buff.stat].tint;
@@ -299,6 +304,7 @@ export class BattleScene extends Phaser.Scene {
       const color = strike.evolved ? 0xf8d76c : strike.behavior === 'sweep' ? 0x9bd8d5 : 0xf1d1ab;
       const owner = run.players.get(strike.ownerId), attached = strike.visual?.startsWith('rubber-') && owner;
       if (drawElasticStrike(this.effects, strike, attached ? owner.x - origin.x : x, attached ? owner.y - origin.y : y, attached ? { direction: owner.id === player?.id ? pose.direction : movementDirection(Math.cos(owner.facing), Math.sin(owner.facing)), targetX: x + Math.cos(strike.angle) * strike.reach, targetY: y - 26 + Math.sin(strike.angle) * strike.reach, angle: this.captain.angle, scaleX: this.captain.scaleX, scaleY: this.captain.scaleY } : undefined)) continue;
+      if(this.crewEffects.strike(strike,x,y,origin))continue;
       if (drawWeaponSweep(this.effects, strike, x, y)) continue;
       if (strike.behavior === 'guard') {
         this.effects.lineStyle(3, 0x92c8ed, alpha); for (const side of [-1, 1]) { this.effects.lineBetween(x + side * 24, y - 36, x + side * 24, y - 12); this.effects.lineBetween(x + side * 24, y - 36, x + side * 16, y - 36); } continue;

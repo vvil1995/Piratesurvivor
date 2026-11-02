@@ -26,13 +26,14 @@ export interface Enemy extends Vector {
   targetId?: string; steeringTime?: number; steerX?: number; steerY?: number;
 }
 export interface Pickup extends Vector { active: boolean; value: number; ownerId?: string; kind?: 'xp' | 'food' | 'berry' | 'fruit' | 'item'; fruitId?: string; itemId?: string; life?: number; abilityId?: string; level?: number }
-export interface Strike extends Vector { angle: number; reach: number; life: number; ownerId: string; behavior: AttackBehavior; evolved: boolean; arc: number; splash: number; impact: Vector; targetId?: number; visual?: string }
+export interface Strike extends Vector { abilityId?:string; angle: number; reach: number; life: number; ownerId: string; behavior: AttackBehavior; evolved: boolean; arc: number; splash: number; impact: Vector; targetId?: number; visual?: string }
 export interface RunResult {
   challenge?: {characterId:string;damage:number;seconds:number;bosses:number;newRecords?:string[]};
   id: string; outcome: 'defeat' | 'victory'; seconds: number; kills: number; level: number; coins: number;
 }
 
 export interface Projectile extends Vector {
+  visualSerial?:number;
   visual?:'water';
   active: boolean; vx: number; vy: number; radius: number; life: number; damage: number;
   slow?: {multiplier:number;duration:number};

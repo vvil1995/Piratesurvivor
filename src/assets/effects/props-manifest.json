@@ -1,0 +1,51 @@
+{
+  "source": "exec-787a6dcf-7440-4dbf-9bba-c45e52e742b2.png",
+  "method": "Independent 512x512 source cells; alpha threshold96, cropped bounds, fit120 nearest, centered128. Existing food retained.",
+  "assets": {
+    "hammer": {
+      "sourceBox": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "sha256": "9c72232aaf1a45c7564e2f163eab2a88adab10d6a7ea65b849d1f776b2032eeb"
+    },
+    "rope": {
+      "sourceBox": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "sha256": "a11d821a7b70e027a3f0ac83d0355a06ad5d27f7b16b324cdbe7ce82acfae4d8"
+    },
+    "decoy": {
+      "sourceBox": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "sha256": "08a15ce955676a5c9d9ec92774665feebcf1e4c9dc720eface7e0ccd6bdf3aea"
+    },
+    "loot": {
+      "sourceBox": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "sha256": "9c033de87d2fdc4ffc51a3c24b3454cb33fa223c3da799ab927486ffbeb0cc2e"
+    },
+    "pepper": {
+      "sourceBox": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "sha256": "20c8f33a3a4ddc4e979adedf7352a27e0c81cd44d0628e2fd4f1b1799ea056ed"
+    }
+  }
+}

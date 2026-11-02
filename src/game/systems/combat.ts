@@ -52,7 +52,7 @@ export function attack(player: Player, grid: SpatialGrid, abilityId: string, onK
     for (let step = 6; step <= reach; step += 6) if (!world.canOccupy(player.x + ax * step, player.y + ay * step, 2)) { reach = Math.max(0, step - 6); break; }
   }
   return { x: player.x, y: player.y, angle, reach,
-    life: ability.visual === 'rubber-kick' ? 0.36 : ability.visual?.startsWith('rubber-') ? 0.24 : 0.18, ownerId: player.id, behavior: ability.behavior, evolved: level === 6, arc: params.arc, splash: params.splash, impact: { x: impactX, y: impactY }, targetId: target.id, visual: ability.visual ?? 'punch' };
+    abilityId:ability.id, life: ability.visual === 'rubber-kick' ? 0.36 : ability.visual?.startsWith('rubber-') ? 0.24 : 0.18, ownerId: player.id, behavior: ability.behavior, evolved: level === 6, arc: params.arc, splash: params.splash, impact: { x: impactX, y: impactY }, targetId: target.id, visual: ability.visual ?? 'punch' };
 }
 
 export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionWorld, dt: number,
@@ -79,7 +79,7 @@ export function tickAttacks(player: Player, grid: SpatialGrid, world: CollisionW
             enemy.launchTime = 0.3; enemy.launchX = ux * params.knockback / 0.3; enemy.launchY = uy * params.knockback / 0.3;
           } else world.moveCircle(enemy, dx / d * params.knockback, dy / d * params.knockback, enemy.radius);
         });
-        emit({ x: player.x, y: player.y, angle: 0, reach: radius, life: 0.25, ownerId: player.id, behavior: 'guard', evolved: state.level === 6, arc: Math.PI, splash: 0, impact: { x: player.x, y: player.y } });
+        emit({ abilityId:state.id,visual:ABILITIES[state.id].visual,x: player.x, y: player.y, angle: 0, reach: radius, life: 0.25, ownerId: player.id, behavior: 'guard', evolved: state.level === 6, arc: Math.PI, splash: 0, impact: { x: player.x, y: player.y } });
       }
       continue;
     }

@@ -1422,3 +1422,46 @@ test('enemigos mundos3–5: izquierda, derecha y diagonales sin cambiar sus dise
   }
  }
 });
+
+test('ataques del equipo:24 técnicas reales y evoluciones con assets propios',async({page},info)=>{
+ test.setTimeout(240000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ for(const hero of ['zoro','sanji','nami','usopp']){
+  await page.evaluate(async hero=>{await window.__OPS_QA__!.start(hero);},hero);
+  const ids=await page.evaluate(()=>window.__OPS_QA__!.getRun()!.character.abilities);
+  for(const id of ids)for(const level of [1,6]){
+   const seen=await page.evaluate(async({id,level})=>{
+    const load='/src/game/systems/loadout.ts',atk='/src/content/attacks.ts';const{newAttack}=await import(/* @vite-ignore */load),{ABILITIES}=await import(/* @vite-ignore */atk);
+    const q=window.__OPS_QA__!,r=q.getRun()!,p=r.player;const original=Object.getPrototypeOf(r).update;r.update=()=>{};r.enemies.clear();r.projectiles.clear();r.areas.clear();r.pickups.clear();r.strikes.length=0;r.status='playing';p.x=256;p.y=256;p.hp=p.stats.maxHp;p.hurtTimer=0;p.attacks=[{...newAttack(id),level}];p.abilitySlots=[[id],[],[],[]];p.selectedSlot=0;p.itemState=undefined;p.xp=0;p.xpNext=1e9;
+    const e=r.enemies.acquire()!;Object.assign(e,{active:true,id:777,x:256+(level===6?-1:1)*(ABILITIES[id].behavior==='projectile'?100:50),y:256,hp:1e6,maxHp:1e6,radius:13,speed:0,damage:0,xp:0,visual:'marine-sword',kind:undefined,ranged:undefined,melee:undefined,flash:0});
+    const visible=new Set<string>();const captureAt=id==='epaule'?14:id==='kayaku-boshi'||id==='smoke-shot'||id==='irritant-shot'||ABILITIES[id].behavior==='projectile'?6:3;for(let i=0;i<captureAt;i++){original.call(r,1/60,{x:0,y:0});q.draw(16.667);for(const key of q.metrics().crewEffects?.visible??[])visible.add(key);}
+    q.tick();return {visible:[...visible],food:r.pickups.items.some(p=>p.active&&p.kind==='food'),behavior:ABILITIES[id].behavior,pool:q.metrics().crewEffects?.allocated};
+   },{id,level});
+   expect(seen.pool).toBeLessThanOrEqual(160);if(seen.behavior!=='heal')expect(seen.visible.length,`${hero}/${id}/${level}`).toBeGreaterThan(0);
+   await page.screenshot({path:info.outputPath(`${hero}-${id}-lv${level}.png`)});
+   const timeline=await page.evaluate(steps=>{const q=window.__OPS_QA__!,r=q.getRun()!,frames=new Set<string>();for(let n=0;n<steps;n++){Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw(16.667);for(const key of q.metrics().crewEffects?.visible??[])frames.add(key);}return [...frames];},id==='mouton-shot'?26:20);
+   if(['kayaku-boshi','smoke-shot','irritant-shot','epaule','mouton-shot'].includes(id))await page.screenshot({path:info.outputPath(`${hero}-${id}-lv${level}-late.png`)});
+   await page.evaluate(()=>{const q=window.__OPS_QA__!,r=q.getRun()!;for(let n=0;n<22;n++){Object.getPrototypeOf(r).update.call(r,1/60,{x:0,y:0});q.draw(16.667);}});
+   if(seen.behavior==='heal')expect(seen.food).toBe(true);
+   if(seen.behavior!=='heal')expect(timeline.length+seen.visible.length).toBeGreaterThan(0);
+
+  }
+ }
+ expect(errors).toEqual([]);
+});
+
+test('efectos diferidos de Nami: explosión del señuelo y trampa evolucionada',async({page},info)=>{
+ await page.evaluate(()=>window.__OPS_QA__!.start('nami'));
+ for(const id of ['thief-decoy','smart-escape']){
+  const seen=await page.evaluate(async id=>{
+   const path='/src/game/systems/loadout.ts',{newAttack}=await import(/* @vite-ignore */path),q=window.__OPS_QA__!,r=q.getRun()!,p=r.player;
+   r.update=()=>{};r.status='playing';r.enemies.clear();r.areas.clear();r.projectiles.clear();r.strikes.length=0;p.x=256;p.y=256;p.hurtTimer=0;p.attacks=[{...newAttack(id),level:6}];p.abilitySlots=[[id],[],[],[]];p.selectedSlot=0;
+   const e=r.enemies.acquire()!;Object.assign(e,{active:true,id:777,x:306,y:256,hp:1e6,maxHp:1e6,radius:13,speed:0,damage:0,xp:0,visual:'marine-sword',kind:undefined,ranged:undefined,melee:undefined,flash:0});
+   const update=Object.getPrototypeOf(r).update;update.call(r,1/60,{x:0,y:0});q.draw(16.667);
+   const a=r.areas.items.find(a=>a.active);if(!a)throw Error('No se creó '+id);
+   if(id==='thief-decoy')a.hp=0;else{e.x=a.x;e.y=a.y;}
+   update.call(r,1/60,{x:0,y:0});q.draw(16.667);q.tick();return {triggered:a.triggered,visible:q.metrics().crewEffects?.visible??[],hp:e.hp};
+  },id);
+  expect(seen.triggered).toBe(true);expect(seen.hp).toBeLessThan(1e6);expect(seen.visible.some(k=>id==='thief-decoy'?/^crew-vfx:1[6-9]$/.test(k):k.startsWith('crew-rope:'))).toBe(true);
+  await page.screenshot({path:info.outputPath(`${id}-evolved-trigger.png`)});
+ }
+});
