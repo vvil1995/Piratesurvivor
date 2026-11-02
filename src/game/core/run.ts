@@ -40,7 +40,7 @@ import { SHELLS_TOWN, type WorldDefinition } from '../../content/worlds/shells-t
 import type { AbilityChoice, CharacterDefinition } from '../../content/types.ts';
 import { receivedDamage, regenerationRate, resolveStats } from '../systems/stats.ts';
 import { difficultyAt } from '../systems/difficulty.ts';
-import { tickStatus } from '../systems/status.ts';
+import { tickStatus,statusValue } from '../systems/status.ts';
 import { counterGuard, tickGuards, isInvulnerable } from '../systems/guards.ts';
 import { AREA_CAP, PROJECTILE_CAP, queueImpact, spawnProjectile, tickEffects } from '../systems/effects.ts';
 import { tickBuffs, updateBuffModifiers } from '../systems/buffs.ts';
@@ -559,18 +559,18 @@ export class Run {
         const ox = enemy.x - other.x, oy = enemy.y - other.y, dd = ox * ox + oy * oy;
         if (dd > 0 && dd < 24 * 24) { const d = Math.sqrt(dd), factor = (24 - d) / d * 0.5; sx += ox * factor; sy += oy * factor; }
       });
-      const frozen = (enemy.statuses?.root ?? 0) > 0 || (enemy.statuses?.stun ?? 0) > 0;
+      const frozen = (enemy.statuses?.root ?? 0) > 0 || statusValue(enemy,'stun') > 0;
       const lure = enemy.lureIndex !== undefined ? this.areas.items[enemy.lureIndex] : undefined;
       const aim = lure?.active && lure.kind === 'decoy' ? lure : target;
       const aimDistance = Math.hypot(aim.x - enemy.x, aim.y - enemy.y);
-      const firing = (enemy.statuses?.stun ?? 0) <= 0 && (enemy.statuses?.confuse ?? 0) <= 0 && enemy.ranged && aimDistance < enemy.ranged.range && this.world.segmentClear(enemy.x, enemy.y, aim.x, aim.y, 3, 'attack');
+      const firing = statusValue(enemy,'stun') <= 0 && statusValue(enemy,'confuse') <= 0 && enemy.ranged && aimDistance < enemy.ranged.range && this.world.segmentClear(enemy.x, enemy.y, aim.x, aim.y, 3, 'attack');
       const preferred = enemy.ranged?.preferredDistance ?? 110;
       const chase = (enemy.meleeWindup??0)>0 || (enemy.meleeHits??0)>0 ? 0 : !enemy.ranged?.preparation ? (firing ? nearest < 110 ? -1 : 0 : 1)
         : (enemy.shotWindup ?? 0) > 0 ? 0 : firing ? nearest < preferred-25 ? -1 : nearest > preferred+25 ? 1 : 0 : 1;
       if (enemy.visual === 'marine-sword') enemy.shotRecovery = Math.max(0, (enemy.shotRecovery ?? 0)-dt);
       let steerX = enemy.steerX ?? 0, steerY = enemy.steerY ?? 0;
-      if ((enemy.statuses?.confuse ?? 0) > 0) { const turn = Math.sin(this.time * 3 + enemy.id) * 1.5, c = Math.cos(turn), s = Math.sin(turn); [steerX, steerY] = [steerX * c - steerY * s, steerX * s + steerY * c]; }
-      const speed = enemy.speed * ((enemy.statuses?.slow ?? 0) > 0 ? 0.6 : 1);
+      if (statusValue(enemy,'confuse') > 0) { const turn = Math.sin(this.time * 3 + enemy.id) * 1.5, c = Math.cos(turn), s = Math.sin(turn); [steerX, steerY] = [steerX * c - steerY * s, steerX * s + steerY * c]; }
+      const speed = enemy.speed * (statusValue(enemy,'slow') > 0 ? 0.6 : 1);
       const launched = (enemy.launchTime ?? 0) > 0;
       if (launched) { (enemy.swimming?aquaticWorld(this.world):this.world).moveCircle(enemy, (enemy.launchX ?? 0) * dt, (enemy.launchY ?? 0) * dt, enemy.radius); enemy.launchTime = Math.max(0, enemy.launchTime! - dt); }
       else (enemy.swimming?aquaticWorld(this.world):this.world).moveCircle(enemy, frozen ? 0 : steerX * speed * dt * chase + sx * dt * 5, frozen ? 0 : steerY * speed * dt * chase + sy * dt * 5, enemy.radius);
@@ -584,7 +584,7 @@ export class Run {
         });
       }
       if(enemy.melee)tickEnemyMelee(enemy,target,enemy.swimming?aquaticWorld(this.world):this.world,dt,()=>counterGuard(target,enemy,this.grid,this.world,e=>this.dropXp(e,target.id),this.random));
-      if (!enemy.melee && !launched && !isInvulnerable(target) && (enemy.statuses?.stun ?? 0) <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
+      if (!enemy.melee && !launched && !isInvulnerable(target) && statusValue(enemy,'stun') <= 0 && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.radius + 14 && target.hurtTimer <= 0) {
         if (enemy.visual === 'marine-sword') enemy.shotRecovery = .3;
         if (!counterGuard(target, enemy, this.grid, this.world, e => this.dropXp(e, target.id), this.random)) { const before = target.hp; target.hp = Math.max(0, target.hp - receivedDamage(enemy.damage, target.stats.armor,target)); if (target.hp < before) { target.lastHit = 'CONTACTO'; target.damageNoticeFor = 1.2; } } target.hurtTimer = 0.65;
       }

@@ -1,3 +1,4 @@
+import {statusValue} from './status.ts';
 import type { Enemy, Player } from '../core/types.ts';
 import type { CollisionWorld } from '../world/world.ts';
 import { isInvulnerable } from './guards.ts';
@@ -5,7 +6,7 @@ import { receivedDamage } from './stats.ts';
 export function tickEnemyMelee(e:Enemy,p:Player,world:CollisionWorld,dt:number,counter?:()=>boolean):void{
  const a=e.melee;if(!a)return;
  e.meleeTimer=Math.max(0,(e.meleeTimer??0)-dt);e.shotRecovery=Math.max(0,(e.shotRecovery??0)-dt);
- if((e.statuses?.stun??0)>0||(e.statuses?.confuse??0)>0||(e.launchTime??0)>0){e.meleeWindup=0;e.meleeHits=0;return;}
+ if(statusValue(e,'stun')>0||statusValue(e,'confuse')>0||(e.launchTime??0)>0){e.meleeWindup=0;e.meleeHits=0;return;}
  if((e.meleeWindup??0)>0){e.meleeWindup=Math.max(0,e.meleeWindup!-dt);if(e.meleeWindup>0)return;e.meleeHits=a.hits;e.meleeGap=0;}
  else if(!(e.meleeHits!>0)){
   if(e.meleeTimer!>0||Math.hypot(p.x-e.x,p.y-e.y)>a.reach)return;

@@ -23,7 +23,7 @@ HUD: icono estable e interactivo, detalles en diálogo con pausa y aviso al adqu
 
 - `src/content/fruits.ts`: catálogo y parámetros.
 - `src/game/systems/fruit-effects.ts`: procs, estados, pulsos, limpieza.
-- `src/game/systems/{hits,stats,effects,enemy-melee}.ts`: integración de daño secundario y evasión.
+- `src/game/systems/{hits,stats,status,effects,enemy-melee}.ts`: integración de daño secundario y evasión.
 - `src/game/core/{run,types}.ts`: drops, recogida, sustitución y ciclo de partida.
 - `src/game/bosses/{pattern-encounter,buggy,krieg,arlong,roger}.ts`: pasan el jugador al cálculo común de daño para la evasión; mismos ataques/duración/daño base.
 - `src/game/scenes/{battle,fruit-renderer}.ts`: sprites, flotación y pool visual.
@@ -34,6 +34,8 @@ HUD: icono estable e interactivo, detalles en diálogo con pausa y aviso al adqu
 
 ## Verificación
 
-233pruebas de lógica aprobadas. Nuevas pruebas ejercitan las seis frutas con los cinco personajes, daño, estados, límites, evasión, sustitución, seis drops accesibles, viaje Morgan→Orange y muerte. Dos casos Chromium (escritorio/móvil horizontal emulado) ejercitan recogida/sustitución, cargan los seis sprites, ejecutan efectos y abren/cierran detalles. Capturas del suelo y seis poderes inspeccionadas. Compilación Pages y HTML autónomo aprobados; smoke de producción bajo `/Piratesurvivor/` sin404/erroresJS.
+234pruebas de lógica aprobadas. Nuevas pruebas ejercitan las seis frutas con los cinco personajes, daño, estados, límites, evasión, sustitución, seis drops accesibles, viaje Morgan→Orange y muerte. Dos casos Chromium (escritorio/móvil horizontal emulado) ejercitan recogida/sustitución, cargan los seis sprites, ejecutan efectos y abren/cierran detalles. Capturas del suelo y seis poderes inspeccionadas. Compilación Pages y HTML autónomo aprobados; smoke de producción bajo `/Piratesurvivor/` sin404/erroresJS.
 
 No se ha jugado una campaña completa con cada combinación de fruta/personaje, ni medido FPS en un teléfono físico o en la carga máxima de Roger. Las pruebas de simulación históricas de mundos/bosses siguen aprobadas, pero no sustituyen ese ensayo de balance. Los efectos visuales son provisionales; su mecánica sí está implementada.
+
+Los controles de fruta se almacenan separados de `statuses` de habilidades/objetos. El cálculo común toma el máximo; sustituir elimina solo la fuente de fruta. Una prueba específica verifica que Hie no borra controles independientes.

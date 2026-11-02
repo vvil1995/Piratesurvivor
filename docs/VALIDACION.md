@@ -601,4 +601,4 @@ Cierre de esta revisión:4/4 casos de navegador aprobados para el recorrido de24
 
 ## Frutas del Diablo ·2026-11-02
 
-233/233pruebas de lógica, TypeScript y build Pages/HTML autónomo aprobados. Dos pruebas Chromium aprobadas (1440×1000 y844×390 emulado): seis drops, primera recogida, sustituciones, poderes, iconos y consulta de detalles. Capturas reales inspeccionadas de las seis frutas en el suelo y de sus efectos. Smoke bajo `/Piratesurvivor/` aprobado sin404/JS y sin hookQA. Detalle y límites en `DEVIL-FRUITS.md`. No se han medido FPS físicos ni validado humanamente todo el recorrido hasta Roger con las30combinaciones posibles.
+233/234pruebas de lógica, TypeScript y build Pages/HTML autónomo aprobados. Dos pruebas Chromium aprobadas (1440×1000 y844×390 emulado): seis drops, primera recogida, sustituciones, poderes, iconos y consulta de detalles. Capturas reales inspeccionadas de las seis frutas en el suelo y de sus efectos. Smoke bajo `/Piratesurvivor/` aprobado sin404/JS y sin hookQA. Detalle y límites en `DEVIL-FRUITS.md`. No se han medido FPS físicos ni validado humanamente todo el recorrido hasta Roger con las30combinaciones posibles.

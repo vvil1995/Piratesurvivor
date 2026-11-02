@@ -19,7 +19,7 @@ export interface Enemy extends Vector {
   active: boolean; id: number; visual?: string; kind?: 'chest' | 'boss'; large?: boolean; openProgress?: number; hp: number; maxHp: number;
   speed: number; damage: number; xp: number; radius: number; flash: number;
   launchTime?: number; launchX?: number; launchY?: number;
-  statuses?: Partial<Record<StatusKind, number>>; stolen?: boolean; lureIndex?: number; decoyHitTimer?: number;
+  fruitControl?: {id:number;slow?:number;stun?:number;confuse?:number}; statuses?: Partial<Record<StatusKind, number>>; stolen?: boolean; lureIndex?: number; decoyHitTimer?: number;
   melee?: EnemyDefinition['melee']; meleeTimer?:number; meleeWindup?:number; meleeHits?:number; meleeGap?:number; meleeAngle?:number;
   ranged?: RangedEnemyAttack; shotTimer?: number;
   shotWindup?: number; shotAngle?: number; shotRecovery?: number;
