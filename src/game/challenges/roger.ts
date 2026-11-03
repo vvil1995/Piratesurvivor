@@ -1,3 +1,4 @@
+import {configureCampaignBoss} from '../bosses/campaign.ts';
 import { MORGAN } from '../../content/bosses/morgan.ts';
 import { ROGER_RULES as R,summonCount,hordeWorldCount } from '../../content/bosses/roger.ts';
 import { RogerEncounter } from '../bosses/roger.ts';
@@ -41,7 +42,7 @@ export class RogerChallenge {
   else if(type==='kuro')boss=new KuroEncounter();
   else if(type==='krieg')boss=new KriegEncounter({fire:fire(false),clear});
   else boss=new ArlongEncounter({fire:fire(true),clear});
-  boss.body.id=id;boss.body.hp=boss.body.maxHp=boss.profile.hp*R.bossHp;return boss;
+  boss.body.id=id;configureCampaignBoss(boss,R.bossHp);return boss;
  }
  private navigation(boss:PatternEncounter):FlowField{
   const key=`${boss.body.swimming?'water':'land'}:${boss.body.radius}`;

@@ -610,3 +610,9 @@ Sin cambios en el juego ni en parámetros. Dos scripts reproducibles ejecutados:
 ## Cadencia de secundarios ·2026-11-03
 
 238/238pruebas de lógica aprobadas. El caso nuevo de ejecución real comprueba disparos repetidos de Kayaku en12s y la cadencia conservada de Namari; se verifican los seis niveles de los veinte secundarios y los cuatro iniciales. Cuatro casos de navegador aprobados:24técnicas base/evolucionadas y regresión de Luffy, escritorio y móvil horizontal emulado. Captura de Collier hacia la izquierda revisada: pierna reducida y sin duplicado del combo. TypeScript y build Pages/portable aprobados. No se generan assets nuevos; el arte definitivo queda pendiente. No se han medido FPS físicos ni validado el equilibrio final con estos cooldowns. Tabla antes/después en `CREW-TEMPO.md`.
+
+## Continuidad y exigencia de campaña ·2026-11-03
+
+244/244pruebas de lógica, TypeScript y build Pages/portable aprobados. Reloj acumulado de exploración, presión8→70en cinco mundos, HP efectivo e invocados comunes, armadura proporcional, XP sin límite de nivel, presetsBeta y progreso de viaje comprobados. Spawn real con tres semillas en cada mundo4/5,6casos. Cien combates aislados con cinco personajes, entrenamiento0/90% y dos controladores; datos y límites en `CAMPAIGN-DIFFICULTY.md`. Seis casos de navegador aprobados para recorridos Baratie/Arlong/Roger en escritorio y móvil emulado. No son campañas humanas ni medidas de FPS físicos; no se afirma que haya quedado certificado un umbral humano exacto de entrenamiento/habilidad.
+
+Beta añade2casos de navegador aprobados (escritorio/móvil), total8seleccionados en este pase. El smoke final de producción bajo `/Piratesurvivor/` carga los cinco personajes y el entrenamiento sin404/JS ni hookQA.

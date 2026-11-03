@@ -15,6 +15,7 @@ export function prepareBeta(run:Run,settings:BetaSettings):void{
  if(!validLoadout(p))throw Error('Ranuras inválidas');
  p.level=settings.level;p.xp=0;p.xpNext=xpForLevel(p.level);updateBuffModifiers(p);p.hp=p.stats.maxHp;
  const target=settings.destination,index=BETA_DESTINATIONS.findIndex(d=>d[0]===target);
+ run.campaignSeconds=Math.floor(index/2)*300; // Match the pressure of a typical five-minute-per-island route.
  run.morganDefeated=index>=2;run.buggyDefeated=index>=4;run.kuroDefeated=index>=6;run.kriegDefeated=index>=8;run.arlongDefeated=index>=10;
  if(target==='morgan')run.beginMorgan();
  else if(target==='orange'||target==='buggy'){run.boardToOrangeTown();if(target==='buggy')run.beginBuggy();}

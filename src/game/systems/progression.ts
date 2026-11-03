@@ -1,10 +1,11 @@
+import {CAMPAIGN_RULES} from '../../content/campaign-balance.ts';
 import { UPGRADES } from '../../content/catalog.ts';
 import type { LevelChoice, UpgradeDefinition } from '../../content/types.ts';
 import type { Player } from '../core/types.ts';
 import { ABILITIES } from '../../content/attacks.ts';
 import { availableAbilities, canImproveAttack, improveAttack, hasFreeSlot } from './loadout.ts';
 import { refreshStats, regenerationLimit, resolveStats } from './stats.ts';
-export const xpForLevel = (level: number): number => Math.round(12 + level * 7 + level ** 1.35 * 2);
+export const xpForLevel = (level: number): number => Math.round(12 + level * 7 + level ** CAMPAIGN_RULES.xpExponent * 2);
 export function chooseUpgrades(taken: Record<string, number>, random: () => number, player?: Player): LevelChoice[] {
   const pool: LevelChoice[] = UPGRADES.filter(u => (taken[u.id] || 0) < u.max && (!player || canGainStat(player, u)))
     .map(u => player && u.stat === 'regeneration' && player.stats.regeneration >= regenerationLimit(player.stats.maxHp) - 1e-8

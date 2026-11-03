@@ -1,3 +1,4 @@
+import {CAMPAIGN_BOSS_HP} from '../src/content/campaign-balance.ts';
 import test from 'node:test';import assert from 'node:assert/strict';
 import { Run } from '../src/game/core/run.ts';
 import { RogerChallenge,SUMMON_TYPES } from '../src/game/challenges/roger.ts';
@@ -44,7 +45,7 @@ test('calendario exacto de tandas y mundos desbloqueados',()=>{
 test('cada tanda reserva plazas, no repite tipos y a8min invoca cinco originales',()=>{
  for(const t of [40,160,240,360,480,520]){
   const {f,p}=challenge();f.seconds=t;f.summon(p);assert.equal(f.living,summonCount(t));assert.equal(new Set(f.summons.map(s=>s.boss.profile.id)).size,f.living);
-  for(const s of f.summons){assert.ok(f.world.canOccupy(s.boss.body.x,s.boss.body.y,28));assert.ok(Math.hypot(s.boss.body.x-p.x,s.boss.body.y-p.y)>=380);assert.equal(s.boss.body.hp,s.boss.profile.hp*.6);}
+  for(const s of f.summons){assert.ok(f.world.canOccupy(s.boss.body.x,s.boss.body.y,28));assert.ok(Math.hypot(s.boss.body.x-p.x,s.boss.body.y-p.y)>=380);assert.equal(s.boss.body.hp,CAMPAIGN_BOSS_HP[s.boss.profile.id]*.6);}
   if(t>=480){assert.deepEqual(new Set(f.summons.map(s=>s.boss.profile.id)),new Set(SUMMON_TYPES));assert.ok(f.summons.some(s=>s.boss instanceof MorganEncounter));assert.ok(f.summons.some(s=>s.boss instanceof BuggyEncounter));assert.ok(f.summons.some(s=>s.boss instanceof KuroEncounter));assert.ok(f.summons.some(s=>s.boss instanceof KriegEncounter));assert.ok(f.summons.some(s=>s.boss instanceof ArlongEncounter));}
  }
 });

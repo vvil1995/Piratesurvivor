@@ -1,3 +1,4 @@
+import {CAMPAIGN_DIFFICULTY,CAMPAIGN_RULES} from '../campaign-balance.ts';
 import type { DifficultyDefinition } from '../types.ts';
 export interface WorldDefinition {
   id: string; name: string; subtitle: string; biome: 'naval-town' | 'rural-village' | 'pirate-fleet' | 'fishman-park';
@@ -15,8 +16,8 @@ export const SHELLS_TOWN: WorldDefinition = {
     at: minute * 60,
     weights: [{ id: 'marine', weight: (1-veteran)*.6 }, { id: 'marine-rifle', weight: (1-veteran)*.4 }, { id: 'marine-veteran', weight: veteran }],
   })),
-  difficulty: { maxMinutes: 20, hpPerMinute: 0.12, damagePerMinute: 0.055, speedPerMinute: 0.012,
+  difficulty: { ...CAMPAIGN_DIFFICULTY,
     spawnAcceleration: 0.18, minInterval: 0.22, batchEveryMinutes: 6, maxBatch: 3 },
-  xpMultiplier: 2, xpThreatScaling: 0.5,
+  xpMultiplier: 2, xpThreatScaling: CAMPAIGN_RULES.xpThreatScaling,
   spawnInterval: 0.95, enemyScale: 1, seedSalt: 27183,
 };

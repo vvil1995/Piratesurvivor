@@ -1,3 +1,5 @@
+import {configureCampaignBoss} from '../bosses/campaign.ts';
+import {CAMPAIGN_RULES} from '../../content/campaign-balance.ts';
 import {tickFruit,clearFruit} from '../systems/fruit-effects.ts';
 import {FRUIT_RULES,FRUIT_DROPS} from '../../content/fruits.ts';
 import { earlyBalance,densityTarget } from '../../content/early-balance.ts';
@@ -124,6 +126,7 @@ export class Run {
   lootNotice = ''; lootNoticeFor = 0;
   private fruitCooldown = 0;
   time = 0;
+  campaignSeconds=0; // Exploration simulation time; survives island travel, pauses with the game.
   private spawnTimer = 0;
   private enemyId = 0;
   private maintenance = 0;
@@ -173,7 +176,7 @@ export class Run {
     if (!['playing', 'paused', 'voyage'].includes(this.status) || this.zone !== 'shells-town' || this.morganDefeated) return false;
     this.route.consume(); this.clearBattlefield(); this.arenaReinforcementTimer = 6;
     this.world = new ArenaWorld(this.world.seed); this.zone = 'morgan-arena'; this.bossField = new FlowField(this.world, MORGAN.radius);
-    Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter();this.encounter.body.hp=this.encounter.body.maxHp*=earlyBalance('shells-town')!.bossHp; Object.assign(this.encounter.body, MORGAN_ARENA.bossSpawn);
+    Object.assign(this.player, MORGAN_ARENA.playerSpawn); this.encounter = new MorganEncounter();configureCampaignBoss(this.encounter); Object.assign(this.encounter.body, MORGAN_ARENA.bossSpawn);
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
   beginBuggy(): boolean {
@@ -184,14 +187,14 @@ export class Run {
       counter: origin => counterGuard(this.player, origin, this.grid, this.world, e => this.dropXp(e, this.player.id), this.random),
       absorb: (position, damage) => { const lure = this.areas.items.find(a => a.active && a.kind === 'decoy' && Math.hypot(a.x-position.x,a.y-position.y) < a.radius+6); if(!lure)return false; lure.hp=(lure.hp??0)-damage;return true; },
     });
-    encounter.body.hp=encounter.body.maxHp*=earlyBalance('orange-town')!.bossHp;this.encounter = encounter; Object.assign(this.encounter.body, BUGGY_ARENA.bossSpawn); this.world = new ArenaWorld(this.world.seed, BUGGY_ARENA, 'orange'); this.zone = 'buggy-arena';
+    configureCampaignBoss(encounter);this.encounter = encounter; Object.assign(this.encounter.body, BUGGY_ARENA.bossSpawn); this.world = new ArenaWorld(this.world.seed, BUGGY_ARENA, 'orange'); this.zone = 'buggy-arena';
     this.bossField = new FlowField(this.world, this.encounter.body.radius); Object.assign(this.player, BUGGY_ARENA.playerSpawn);
     this.status = 'playing'; this.voyage = undefined; this.fieldFor(this.player).update(this.player, 1); return true;
   }
   beginKuro():boolean{
     if(!['playing','paused','voyage'].includes(this.status)||this.zone!=='syrup-village'||!this.buggyDefeated||this.kuroDefeated)return false;
     this.kuroRoute.consume();this.clearBattlefield();this.syrupWorld=this.world;
-    this.world=new ArenaWorld(this.world.seed,KURO_ARENA,'syrup');this.zone='kuro-arena';this.encounter=new KuroEncounter();this.encounter.body.hp=this.encounter.body.maxHp*=earlyBalance('syrup-village')!.bossHp;
+    this.world=new ArenaWorld(this.world.seed,KURO_ARENA,'syrup');this.zone='kuro-arena';this.encounter=new KuroEncounter();configureCampaignBoss(this.encounter);
     Object.assign(this.encounter.body,KURO_ARENA.bossSpawn);Object.assign(this.player,KURO_ARENA.playerSpawn);
     this.bossField=new FlowField(this.world,KURO.radius);this.status='playing';this.voyage=undefined;this.fieldFor(this.player).update(this.player,1);return true;
   }
@@ -204,7 +207,7 @@ export class Run {
     this.kriegRoute.consume();this.clearBattlefield();this.lootNoticeFor=0;this.baratieWorld=this.world;
     this.world=new ArenaWorld(this.world.seed,KRIEG_ARENA,'baratie');this.zone='krieg-arena';
     this.encounter=new KriegEncounter({fire:(from,angle,damage)=>spawnProjectile(this,from.x,from.y,from.x+Math.cos(angle)*100,from.y+Math.sin(angle)*100,damage,KRIEG_RULES.bulletSpeed,'',true,1,undefined,KRIEG_RULES.bulletRange/KRIEG_RULES.bulletSpeed),clear:()=>this.projectiles.clear()});
-    Object.assign(this.encounter.body,KRIEG_ARENA.bossSpawn);Object.assign(this.player,KRIEG_ARENA.playerSpawn);
+    configureCampaignBoss(this.encounter);Object.assign(this.encounter.body,KRIEG_ARENA.bossSpawn);Object.assign(this.player,KRIEG_ARENA.playerSpawn);
     this.bossField=new FlowField(this.world,KRIEG.radius,true);this.status='playing';this.voyage=undefined;this.fieldFor(this.player).update(this.player,1);return true;
   }
   sailToBaratie():boolean{
@@ -216,7 +219,7 @@ export class Run {
     this.arlongRoute.consume();this.clearBattlefield();this.lootNoticeFor=0;this.arlongWorld=this.world;
     const world=new ArlongArenaWorld(this.world.seed);this.world=world;this.zone='arlong-arena';
     this.encounter=new ArlongEncounter({fire:(from,angle,damage)=>spawnProjectile(this,from.x,from.y,from.x+Math.cos(angle)*100,from.y+Math.sin(angle)*100,damage,ARLONG_RULES.waterSpeed,'',true,1,undefined,ARLONG_RULES.waterRange/ARLONG_RULES.waterSpeed,undefined,'water'),clear:()=>{for(const p of this.projectiles.items)if(p.hostile)p.active=false;},rage:()=>world.breakObstacles()});
-    Object.assign(this.encounter.body,ARLONG_ARENA.bossSpawn);Object.assign(this.player,ARLONG_ARENA.playerSpawn);
+    configureCampaignBoss(this.encounter);Object.assign(this.encounter.body,ARLONG_ARENA.bossSpawn);Object.assign(this.player,ARLONG_ARENA.playerSpawn);
     this.bossField=new FlowField(aquaticWorld(this.world),ARLONG.radius,true);this.status='playing';this.voyage=undefined;this.fieldFor(this.player).update(this.player,1);return true;
   }
   sailToArlong():boolean{
@@ -485,6 +488,7 @@ export class Run {
     if(this.zone==='arlong-park'&&!this.arlongDefeated&&this.arlongRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('arlong-boss');return;}
     if(this.zone==='baratie'&&!this.kriegDefeated&&this.kriegRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('krieg');return;}
     if(this.zone==='syrup-village'&&!this.kuroDefeated&&this.kuroRoute.tick(this.zoneTime,this.player,this.world,this.random,p=>this.fieldFor(this.player).reachable(p))){this.startVoyage('kuro');return;}
+    if(!this.inArena)this.campaignSeconds+=dt;
     const threatTime = this.zone === 'shells-town' ? this.time : this.zoneTime;
     this.spawnTimer -= dt;
     if (!this.inArena && this.spawnTimer <= 0) {
@@ -493,8 +497,8 @@ export class Run {
       const target=Math.ceil(this.densityPressure);
       const definition=balance?{...this.definition,enemyCap:target,enemyScale:this.definition.enemyScale*balance.hp,enemyDamageScale:balance.damage}:this.definition;
       const threat = difficultyAt(threatTime, this.definition.spawnInterval, this.definition.difficulty);
-      for (let i = 0; i < (balance?Math.min(2,Math.max(0,target-this.enemies.count)):threat.batch); i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player,this.world.theme==='arlong'), definition, this.random, ++this.enemyId, threatTime,this.world.theme==='arlong'?aquaticWorld(this.world):undefined);
-      this.spawnTimer = balance?.45:threat.interval;
+      for (let i = 0; i < (balance?Math.min(CAMPAIGN_RULES.spawnBatch,Math.max(0,target-this.enemies.count)):threat.batch); i++) spawnEnemy(this.enemies, living, this.view, this.world, this.fieldFor(this.player,this.world.theme==='arlong'), definition, this.random, ++this.enemyId, threatTime,this.world.theme==='arlong'?aquaticWorld(this.world):undefined,balance?this.campaignSeconds:threatTime);
+      this.spawnTimer = balance?balance.interval:threat.interval;
     }
     if(this.finalChallenge){
       this.finalChallenge.tick(dt,this.player);

@@ -8,7 +8,7 @@ import { FlowField } from '../src/game/navigation/flow-field.ts';
 
 test('presión progresiva, topes configurables y ninguna transición por reloj', () => {
   const at = (time: number) => difficultyAt(time, SHELLS_TOWN.spawnInterval, SHELLS_TOWN.difficulty);
-  const start = at(0), mid = at(300), late = at(600), capped = at(1200);
+  const start = at(0), mid = at(300), late = at(600), capped = at(SHELLS_TOWN.difficulty!.maxMinutes*60);
   assert.equal(start.hp, 1); assert.equal(start.batch, 1);
   assert.ok(mid.hp > start.hp && late.damage > mid.damage && late.speed > mid.speed);
   assert.ok(mid.interval < start.interval); assert.equal(late.batch, 2); assert.equal(at(720).batch, 3);
@@ -26,7 +26,7 @@ test('los enemigos tardíos nacen más fuertes sin depender de HP máximos del j
   }
   const early = born(0, 100), late = born(600, 100), tank = born(600, 10000);
   assert.ok(late.maxHp > early.maxHp && late.damage > early.damage && late.speed > early.speed);
-  assert.equal(early.xp, 10); assert.equal(late.xp, 16); assert.equal(tank.xp, late.xp);
+  assert.equal(early.xp, 10); assert.equal(late.xp, 12); assert.equal(tank.xp, late.xp);
   assert.equal(late.maxHp, tank.maxHp); assert.equal(late.damage, tank.damage);
 });
 

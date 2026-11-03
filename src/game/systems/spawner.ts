@@ -6,7 +6,7 @@ import type { Enemy, Player } from '../core/types.ts';
 import type { CollisionWorld,ProceduralWorld } from '../world/world.ts';
 import type { FlowField } from '../navigation/flow-field.ts';
 export interface View { width: number; height: number; centerX: number; centerY: number }
-export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: View, world: ProceduralWorld, field: FlowField, definition: WorldDefinition, random: () => number, id: number, seconds = 0, mobility?:CollisionWorld): void {
+export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: View, world: ProceduralWorld, field: FlowField, definition: WorldDefinition, random: () => number, id: number, seconds = 0, mobility?:CollisionWorld,difficultySeconds=seconds): void {
   if (pool.count >= definition.enemyCap || !actors.length) return;
   let x = 0, y = 0, found = false;
   for (let tries = 0; tries < 24; tries++) {
@@ -27,7 +27,7 @@ export function spawnEnemy(pool: Pool<Enemy>, actors: readonly Player[], view: V
   const type = chooseEnemyType(definition, seconds, random);
   const def = ENEMIES[type], scale = definition.enemyScale;
   if((definition.biome==='pirate-fleet'||mobility)&&!(mobility??world).canOccupy(x,y,def.radius)){enemy.active=false;return;}
-  const threat = difficultyAt(seconds, definition.spawnInterval, definition.difficulty);
+  const threat = difficultyAt(difficultySeconds, definition.spawnInterval, definition.difficulty);
   Object.assign(enemy, { x, y, id, visual: def.visual, kind: undefined, hp: def.hp * scale * threat.hp, maxHp: def.hp * scale * threat.hp,
     speed: def.speed * threat.speed, damage: def.damage * threat.damage * (definition.enemyDamageScale??1),
     xp: Math.max(1, Math.round(def.xp * (definition.xpMultiplier ?? 1) * (1 + (threat.hp - 1) * (definition.xpThreatScaling ?? 0)))), radius: def.radius, flash: 0,
