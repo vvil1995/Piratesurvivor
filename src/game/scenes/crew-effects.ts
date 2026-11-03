@@ -38,10 +38,10 @@ export class CrewEffects{
   if(s.abilityId==='rope-bind'){this.draw(0,0,s.impact.x-origin.x,s.impact.y-origin.y-18,Math.min(85,s.reach),0,Math.min(1,s.life/.04),'crew-rope');return true;}
   const row=s.visual==='slash'?0:s.visual==='kick'?1:s.visual==='staff'?2:-1;if(row<0)return false;
   const progress=Math.max(0,Math.min(.999,1-s.life/(s.behavior==='dash'||s.behavior==='evade'?.2:.18))),frame=Math.floor(progress*4);
-  const sweep=s.behavior==='sweep'||s.behavior==='alternating',a=(s.behavior==='evade'?Math.atan2(s.impact.y-origin.y-y,s.impact.x-origin.x-x):s.angle)+(sweep?(progress-.5)*s.arc*2:0),size=Math.max(40,Math.min(row===1?130:180,s.reach*1.25)),offset=row===1?Math.min(36,s.reach*.3):s.reach*.45;
+  const sweep=s.behavior==='sweep'||s.behavior==='alternating',a=(s.behavior==='evade'?Math.atan2(s.impact.y-origin.y-y,s.impact.x-origin.x-x):s.angle)+(sweep?(progress-.5)*s.arc*2:0),size=Math.max(40,Math.min(row===1?60:180,s.reach*1.25)),offset=row===1?Math.min(18,s.reach*.2):s.reach*.45;
   if(s.abilityId==='double-sword'){for(const side of [-1,1])this.draw(0,2,x+Math.cos(a)*s.reach*.45,y-20+Math.sin(a)*s.reach*.45+side*5,size,a+side*.1,Math.min(1,s.life/.045));return true;}
   this.draw(row,frame,x+Math.cos(a)*offset,y-20+Math.sin(a)*offset,size,a,Math.min(1,s.life/.045),'crew-vfx',row===1&&!sweep&&Math.cos(a)<0);
-  if(s.behavior==='focus')this.draw(row,(frame+1)%4,s.impact.x-origin.x,s.impact.y-origin.y-20,Math.min(85,size*.65),a+.6,.65,'crew-vfx',row===1&&Math.cos(a+.6)<0);
+  if(s.behavior==='focus'&&row!==1)this.draw(row,(frame+1)%4,s.impact.x-origin.x,s.impact.y-origin.y-20,Math.min(85,size*.65),a+.6,.65,'crew-vfx');
   if(s.abilityId==='quick-theft')this.draw(0,0,s.impact.x-origin.x,s.impact.y-origin.y-26,30,0,1,'crew-loot');
   if(s.abilityId==='smart-escape')this.draw(5,frame,s.x-origin.x,s.y-origin.y-15,45,0,.5);
   return true;
@@ -60,8 +60,8 @@ export class CrewEffects{
   if(a.kind==='trap'){this.draw(0,0,x,y,Math.max(35,a.radius*1.6),0,.8,'crew-rope');return true;}
   if(a.kind==='smoke'){this.draw(5,[0,1,2,1][Math.floor(this.clock/150)%4],x,y-12,a.radius*2,0,Math.min(.65,a.life));return true;}
   if(a.kind==='impact'&&owner.characterId==='usopp'&&a.triggered){this.draw(4,Math.floor((.3-a.life)/.3*4),x,y-12,a.radius*2,0,Math.min(1,a.life/.05));return true;}
-  if(owner.characterId==='sanji'&&a.kind==='impact'&&a.triggered&&a.visual!=='kick'){this.draw(1,2,x,y-20,Math.max(60,a.radius*1.7),Math.PI/2,Math.min(1,a.life/.05));this.draw(4,Math.floor((.3-a.life)/.3*4),x,y,a.radius,0,.5);return true;}
-  if(a.visual==='kick'){this.draw(1,a.triggered?2:0,x,y-(a.triggered?20:45),Math.max(52,a.radius*1.8),Math.PI/2, a.triggered?1:.45);return a.triggered;}
+  if(owner.characterId==='sanji'&&a.kind==='impact'&&a.triggered&&a.visual!=='kick'){this.draw(1,2,x,y-20,60,Math.PI/2,Math.min(1,a.life/.05));this.draw(4,Math.floor((.3-a.life)/.3*4),x,y,a.radius,0,.5);return true;}
+  if(a.visual==='kick'){this.draw(1,a.triggered?2:0,x,y-(a.triggered?20:45),60,Math.PI/2, a.triggered?1:.45);return a.triggered;}
   return false;
  }
  guard(x:number,y:number){this.draw(0,0,x,y-22,58,Math.PI/2,.65);}

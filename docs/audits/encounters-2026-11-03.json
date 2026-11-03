@@ -1,0 +1,1146 @@
+{
+  "sourceRevision": "e106de786b23a213c8ae5c18959ec48b9eae6a09",
+  "method": "30s max, fixed seed9001; four linked level6 skills selected by stationary single-target bench; level35 cosmetic, no upgrade cards/passives/buffs/items/fruits. Maximum training is a separate arm; foods can be collected. Orbit controller uses innate range, no telegraph reading; this is NOT a human difficulty/TTK benchmark. All real Run/encounter/AI/navigation/damage systems. Roger window ends before first40s summon.",
+  "rows": [
+    {
+      "hero": "luffy",
+      "boss": "morgan",
+      "trained": false,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 6300,
+      "seconds": 23.2,
+      "outcome": "boss defeated",
+      "playerHp": 100,
+      "minHp": 100,
+      "bossDamage": 6300,
+      "bossPercentLeft": 0,
+      "normalKills": 1
+    },
+    {
+      "hero": "luffy",
+      "boss": "morgan",
+      "trained": true,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 6300,
+      "seconds": 11.2,
+      "outcome": "boss defeated",
+      "playerHp": 180,
+      "minHp": 180,
+      "bossDamage": 6300,
+      "bossPercentLeft": 0,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "buggy",
+      "trained": false,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 48,
+      "minHp": 46,
+      "bossDamage": 8767,
+      "bossPercentLeft": 48,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "buggy",
+      "trained": true,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 180,
+      "minHp": 180,
+      "bossDamage": 16778,
+      "bossPercentLeft": 1,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "kuro",
+      "trained": false,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 25500,
+      "seconds": 9.4,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 2921,
+      "bossPercentLeft": 89,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "kuro",
+      "trained": true,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 25500,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 104,
+      "minHp": 104,
+      "bossDamage": 16364,
+      "bossPercentLeft": 36,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "krieg",
+      "trained": false,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 11475,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 76,
+      "minHp": 76,
+      "bossDamage": 8124,
+      "bossPercentLeft": 29,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "krieg",
+      "trained": true,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 11475,
+      "seconds": 21.1,
+      "outcome": "boss defeated",
+      "playerHp": 136,
+      "minHp": 136,
+      "bossDamage": 11475,
+      "bossPercentLeft": 0,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "arlong-boss",
+      "trained": false,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 12393,
+      "seconds": 25.4,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 6593,
+      "bossPercentLeft": 47,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "arlong-boss",
+      "trained": true,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 12393,
+      "seconds": 24.7,
+      "outcome": "boss defeated",
+      "playerHp": 117,
+      "minHp": 117,
+      "bossDamage": 12393,
+      "bossPercentLeft": 0,
+      "normalKills": 0
+    },
+    {
+      "hero": "luffy",
+      "boss": "roger",
+      "trained": false,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 58,
+      "minHp": 52,
+      "bossDamage": 8944,
+      "bossPercentLeft": null,
+      "normalKills": 11
+    },
+    {
+      "hero": "luffy",
+      "boss": "roger",
+      "trained": true,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 173,
+      "minHp": 172,
+      "bossDamage": 18755,
+      "bossPercentLeft": null,
+      "normalKills": 14
+    },
+    {
+      "hero": "zoro",
+      "boss": "morgan",
+      "trained": false,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 6300,
+      "seconds": 29.2,
+      "outcome": "boss defeated",
+      "playerHp": 110,
+      "minHp": 110,
+      "bossDamage": 6300,
+      "bossPercentLeft": 0,
+      "normalKills": 2
+    },
+    {
+      "hero": "zoro",
+      "boss": "morgan",
+      "trained": true,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 6300,
+      "seconds": 13.7,
+      "outcome": "boss defeated",
+      "playerHp": 170,
+      "minHp": 166,
+      "bossDamage": 6300,
+      "bossPercentLeft": 0,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "buggy",
+      "trained": false,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 110,
+      "minHp": 110,
+      "bossDamage": 6803,
+      "bossPercentLeft": 60,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "buggy",
+      "trained": true,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 156,
+      "minHp": 153,
+      "bossDamage": 14239,
+      "bossPercentLeft": 16,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "kuro",
+      "trained": false,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 25500,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 46,
+      "minHp": 45,
+      "bossDamage": 6247,
+      "bossPercentLeft": 76,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "kuro",
+      "trained": true,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 25500,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 63,
+      "minHp": 61,
+      "bossDamage": 12923,
+      "bossPercentLeft": 49,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "krieg",
+      "trained": false,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 11475,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 98,
+      "minHp": 98,
+      "bossDamage": 6045,
+      "bossPercentLeft": 47,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "krieg",
+      "trained": true,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 11475,
+      "seconds": 27.1,
+      "outcome": "boss defeated",
+      "playerHp": 118,
+      "minHp": 118,
+      "bossDamage": 11475,
+      "bossPercentLeft": 0,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "arlong-boss",
+      "trained": false,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 12393,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 31,
+      "minHp": 29,
+      "bossDamage": 6149,
+      "bossPercentLeft": 50,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "arlong-boss",
+      "trained": true,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 12393,
+      "seconds": 27.6,
+      "outcome": "boss defeated",
+      "playerHp": 123,
+      "minHp": 122,
+      "bossDamage": 12393,
+      "bossPercentLeft": 0,
+      "normalKills": 0
+    },
+    {
+      "hero": "zoro",
+      "boss": "roger",
+      "trained": false,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 81,
+      "minHp": 81,
+      "bossDamage": 6640,
+      "bossPercentLeft": null,
+      "normalKills": 7
+    },
+    {
+      "hero": "zoro",
+      "boss": "roger",
+      "trained": true,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 182,
+      "minHp": 182,
+      "bossDamage": 14431,
+      "bossPercentLeft": null,
+      "normalKills": 10
+    },
+    {
+      "hero": "nami",
+      "boss": "morgan",
+      "trained": false,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 6300,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 90,
+      "minHp": 90,
+      "bossDamage": 3901,
+      "bossPercentLeft": 38,
+      "normalKills": 5
+    },
+    {
+      "hero": "nami",
+      "boss": "morgan",
+      "trained": true,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 6300,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 84,
+      "minHp": 83,
+      "bossDamage": 6150,
+      "bossPercentLeft": 2,
+      "normalKills": 4
+    },
+    {
+      "hero": "nami",
+      "boss": "buggy",
+      "trained": false,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 90,
+      "minHp": 90,
+      "bossDamage": 4288,
+      "bossPercentLeft": 75,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "buggy",
+      "trained": true,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 150,
+      "minHp": 146,
+      "bossDamage": 8425,
+      "bossPercentLeft": 50,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "kuro",
+      "trained": false,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 25500,
+      "seconds": 7.6,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 1124,
+      "bossPercentLeft": 96,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "kuro",
+      "trained": true,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 25500,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 108,
+      "minHp": 108,
+      "bossDamage": 8497,
+      "bossPercentLeft": 67,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "krieg",
+      "trained": false,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 11475,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 90,
+      "minHp": 90,
+      "bossDamage": 3792,
+      "bossPercentLeft": 67,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "krieg",
+      "trained": true,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 11475,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 151,
+      "minHp": 150,
+      "bossDamage": 8313,
+      "bossPercentLeft": 28,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "arlong-boss",
+      "trained": false,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 12393,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 90,
+      "minHp": 90,
+      "bossDamage": 4607,
+      "bossPercentLeft": 63,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "arlong-boss",
+      "trained": true,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 12393,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 110,
+      "minHp": 103,
+      "bossDamage": 7993,
+      "bossPercentLeft": 36,
+      "normalKills": 0
+    },
+    {
+      "hero": "nami",
+      "boss": "roger",
+      "trained": false,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 26,
+      "minHp": 26,
+      "bossDamage": 4135,
+      "bossPercentLeft": null,
+      "normalKills": 8
+    },
+    {
+      "hero": "nami",
+      "boss": "roger",
+      "trained": true,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 164,
+      "minHp": 162,
+      "bossDamage": 9026,
+      "bossPercentLeft": null,
+      "normalKills": 8
+    },
+    {
+      "hero": "sanji",
+      "boss": "morgan",
+      "trained": false,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 6300,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 105,
+      "minHp": 105,
+      "bossDamage": 5086,
+      "bossPercentLeft": 19,
+      "normalKills": 2
+    },
+    {
+      "hero": "sanji",
+      "boss": "morgan",
+      "trained": true,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 6300,
+      "seconds": 15.9,
+      "outcome": "boss defeated",
+      "playerHp": 185,
+      "minHp": 185,
+      "bossDamage": 6300,
+      "bossPercentLeft": 0,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "buggy",
+      "trained": false,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 105,
+      "minHp": 105,
+      "bossDamage": 5715,
+      "bossPercentLeft": 66,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "buggy",
+      "trained": true,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 185,
+      "minHp": 185,
+      "bossDamage": 11974,
+      "bossPercentLeft": 30,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "kuro",
+      "trained": false,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 25500,
+      "seconds": 9.6,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 2124,
+      "bossPercentLeft": 92,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "kuro",
+      "trained": true,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 25500,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 139,
+      "minHp": 136,
+      "bossDamage": 11139,
+      "bossPercentLeft": 56,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "krieg",
+      "trained": false,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 11475,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 105,
+      "minHp": 105,
+      "bossDamage": 5012,
+      "bossPercentLeft": 56,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "krieg",
+      "trained": true,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 11475,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 97,
+      "minHp": 96,
+      "bossDamage": 11012,
+      "bossPercentLeft": 4,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "arlong-boss",
+      "trained": false,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 12393,
+      "seconds": 22.5,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 4526,
+      "bossPercentLeft": 63,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "arlong-boss",
+      "trained": true,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 12393,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 120,
+      "minHp": 117,
+      "bossDamage": 9697,
+      "bossPercentLeft": 22,
+      "normalKills": 0
+    },
+    {
+      "hero": "sanji",
+      "boss": "roger",
+      "trained": false,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 66,
+      "minHp": 57,
+      "bossDamage": 5790,
+      "bossPercentLeft": null,
+      "normalKills": 10
+    },
+    {
+      "hero": "sanji",
+      "boss": "roger",
+      "trained": true,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "maxHp": 1,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 178,
+      "minHp": 177,
+      "bossDamage": 11863,
+      "bossPercentLeft": null,
+      "normalKills": 9
+    },
+    {
+      "hero": "usopp",
+      "boss": "morgan",
+      "trained": false,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 6300,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 85,
+      "minHp": 85,
+      "bossDamage": 2438,
+      "bossPercentLeft": 61,
+      "normalKills": 3
+    },
+    {
+      "hero": "usopp",
+      "boss": "morgan",
+      "trained": true,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 6300,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 165,
+      "minHp": 165,
+      "bossDamage": 4883,
+      "bossPercentLeft": 22,
+      "normalKills": 5
+    },
+    {
+      "hero": "usopp",
+      "boss": "buggy",
+      "trained": false,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 85,
+      "minHp": 85,
+      "bossDamage": 2142,
+      "bossPercentLeft": 87,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "buggy",
+      "trained": true,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 17000,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 165,
+      "minHp": 165,
+      "bossDamage": 4663,
+      "bossPercentLeft": 73,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "kuro",
+      "trained": false,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 25500,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 85,
+      "minHp": 85,
+      "bossDamage": 2127,
+      "bossPercentLeft": 92,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "kuro",
+      "trained": true,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 25500,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 144,
+      "minHp": 135,
+      "bossDamage": 824,
+      "bossPercentLeft": 97,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "krieg",
+      "trained": false,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 11475,
+      "seconds": 9.6,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 478,
+      "bossPercentLeft": 96,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "krieg",
+      "trained": true,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 11475,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 91,
+      "minHp": 89,
+      "bossDamage": 3583,
+      "bossPercentLeft": 69,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "arlong-boss",
+      "trained": false,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 12393,
+      "seconds": 3.1,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 279,
+      "bossPercentLeft": 98,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "arlong-boss",
+      "trained": true,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 12393,
+      "seconds": 30,
+      "outcome": "30s limit",
+      "playerHp": 69,
+      "minHp": 66,
+      "bossDamage": 4687,
+      "bossPercentLeft": 62,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "roger",
+      "trained": false,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 1,
+      "seconds": 6.2,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 566,
+      "bossPercentLeft": null,
+      "normalKills": 0
+    },
+    {
+      "hero": "usopp",
+      "boss": "roger",
+      "trained": true,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "maxHp": 1,
+      "seconds": 23.1,
+      "outcome": "player defeated",
+      "playerHp": 0,
+      "minHp": 0,
+      "bossDamage": 3897,
+      "bossPercentLeft": null,
+      "normalKills": 6
+    }
+  ]
+}

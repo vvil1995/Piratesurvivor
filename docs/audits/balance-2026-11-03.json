@@ -1,0 +1,1425 @@
+{
+  "sourceRevision": "e106de786b23a213c8ae5c18959ec48b9eae6a09",
+  "generated": "2026-11-03T01:18:29.278Z",
+  "method": {
+    "duration": 30,
+    "seed": 412,
+    "dt": 0.016666666666666666,
+    "notes": "Single target at60px; pack8 is a non-overlapping4x2 grid at x60/92/124/156,y±18, repositioned every tick; no incoming damage, terrain, fruits, items, temporary upgrades or buffs. Four linked skills is a late-game ceiling, not an initial loadout. Damage includes real projectiles, splash and bursts. Utility/healing not scored. One RNG seed, not confidence intervals."
+  },
+  "skills": [
+    {
+      "hero": "luffy",
+      "id": "elastic-punch",
+      "rank": 1,
+      "single": 52,
+      "pack8": 52
+    },
+    {
+      "hero": "luffy",
+      "id": "elastic-punch",
+      "rank": 3,
+      "single": 75.6,
+      "pack8": 75.6
+    },
+    {
+      "hero": "luffy",
+      "id": "elastic-punch",
+      "rank": 6,
+      "single": 125.4,
+      "pack8": 627
+    },
+    {
+      "hero": "luffy",
+      "id": "gatling",
+      "rank": 1,
+      "single": 14.35,
+      "pack8": 71.76
+    },
+    {
+      "hero": "luffy",
+      "id": "gatling",
+      "rank": 3,
+      "single": 25.5,
+      "pack8": 127.51
+    },
+    {
+      "hero": "luffy",
+      "id": "gatling",
+      "rank": 6,
+      "single": 71.04,
+      "pack8": 568.34
+    },
+    {
+      "hero": "luffy",
+      "id": "bazooka",
+      "rank": 1,
+      "single": 27.36,
+      "pack8": 109.44
+    },
+    {
+      "hero": "luffy",
+      "id": "bazooka",
+      "rank": 3,
+      "single": 36.29,
+      "pack8": 217.73
+    },
+    {
+      "hero": "luffy",
+      "id": "bazooka",
+      "rank": 6,
+      "single": 52.27,
+      "pack8": 313.63
+    },
+    {
+      "hero": "luffy",
+      "id": "whip",
+      "rank": 1,
+      "single": 19.04,
+      "pack8": 114.24
+    },
+    {
+      "hero": "luffy",
+      "id": "whip",
+      "rank": 3,
+      "single": 24.85,
+      "pack8": 149.08
+    },
+    {
+      "hero": "luffy",
+      "id": "whip",
+      "rank": 6,
+      "single": 35.9,
+      "pack8": 287.23
+    },
+    {
+      "hero": "luffy",
+      "id": "balloon",
+      "rank": 1,
+      "single": 2,
+      "pack8": 12
+    },
+    {
+      "hero": "luffy",
+      "id": "balloon",
+      "rank": 3,
+      "single": 3.02,
+      "pack8": 18.14
+    },
+    {
+      "hero": "luffy",
+      "id": "balloon",
+      "rank": 6,
+      "single": 3.96,
+      "pack8": 23.76
+    },
+    {
+      "hero": "luffy",
+      "id": "axe",
+      "rank": 1,
+      "single": 17.6,
+      "pack8": 70.4
+    },
+    {
+      "hero": "luffy",
+      "id": "axe",
+      "rank": 3,
+      "single": 24.19,
+      "pack8": 96.77
+    },
+    {
+      "hero": "luffy",
+      "id": "axe",
+      "rank": 6,
+      "single": 31.68,
+      "pack8": 224.93
+    },
+    {
+      "hero": "zoro",
+      "id": "oni-giri",
+      "rank": 1,
+      "single": 37.7,
+      "pack8": 37.7
+    },
+    {
+      "hero": "zoro",
+      "id": "oni-giri",
+      "rank": 3,
+      "single": 54.81,
+      "pack8": 54.81
+    },
+    {
+      "hero": "zoro",
+      "id": "oni-giri",
+      "rank": 6,
+      "single": 88.52,
+      "pack8": 88.52
+    },
+    {
+      "hero": "zoro",
+      "id": "tora-gari",
+      "rank": 1,
+      "single": 13.92,
+      "pack8": 87
+    },
+    {
+      "hero": "zoro",
+      "id": "tora-gari",
+      "rank": 3,
+      "single": 17.54,
+      "pack8": 109.62
+    },
+    {
+      "hero": "zoro",
+      "id": "tora-gari",
+      "rank": 6,
+      "single": 25.84,
+      "pack8": 261.84
+    },
+    {
+      "hero": "zoro",
+      "id": "sanzen-sekai",
+      "rank": 1,
+      "single": 12.18,
+      "pack8": 12.18
+    },
+    {
+      "hero": "zoro",
+      "id": "sanzen-sekai",
+      "rank": 3,
+      "single": 20.46,
+      "pack8": 20.46
+    },
+    {
+      "hero": "zoro",
+      "id": "sanzen-sekai",
+      "rank": 6,
+      "single": 34.51,
+      "pack8": 34.51
+    },
+    {
+      "hero": "zoro",
+      "id": "double-sword",
+      "rank": 1,
+      "single": 18.56,
+      "pack8": 83.52
+    },
+    {
+      "hero": "zoro",
+      "id": "double-sword",
+      "rank": 3,
+      "single": 24.36,
+      "pack8": 112.06
+    },
+    {
+      "hero": "zoro",
+      "id": "double-sword",
+      "rank": 6,
+      "single": 68.9,
+      "pack8": 560.16
+    },
+    {
+      "hero": "zoro",
+      "id": "sword-guard",
+      "rank": 1,
+      "single": 0,
+      "pack8": 0
+    },
+    {
+      "hero": "zoro",
+      "id": "sword-guard",
+      "rank": 3,
+      "single": 0,
+      "pack8": 0
+    },
+    {
+      "hero": "zoro",
+      "id": "sword-guard",
+      "rank": 6,
+      "single": 0,
+      "pack8": 0
+    },
+    {
+      "hero": "zoro",
+      "id": "santoryu-sweep",
+      "rank": 1,
+      "single": 10.15,
+      "pack8": 42.12
+    },
+    {
+      "hero": "zoro",
+      "id": "santoryu-sweep",
+      "rank": 3,
+      "single": 12.79,
+      "pack8": 53.07
+    },
+    {
+      "hero": "zoro",
+      "id": "santoryu-sweep",
+      "rank": 6,
+      "single": 18.42,
+      "pack8": 155.75
+    },
+    {
+      "hero": "nami",
+      "id": "staff-hit",
+      "rank": 1,
+      "single": 24.93,
+      "pack8": 24.93
+    },
+    {
+      "hero": "nami",
+      "id": "staff-hit",
+      "rank": 3,
+      "single": 35.11,
+      "pack8": 35.11
+    },
+    {
+      "hero": "nami",
+      "id": "staff-hit",
+      "rank": 6,
+      "single": 118.58,
+      "pack8": 118.58
+    },
+    {
+      "hero": "nami",
+      "id": "staff-spin",
+      "rank": 1,
+      "single": 4.8,
+      "pack8": 29.33
+    },
+    {
+      "hero": "nami",
+      "id": "staff-spin",
+      "rank": 3,
+      "single": 6.05,
+      "pack8": 36.96
+    },
+    {
+      "hero": "nami",
+      "id": "staff-spin",
+      "rank": 6,
+      "single": 8.8,
+      "pack8": 71.72
+    },
+    {
+      "hero": "nami",
+      "id": "rope-bind",
+      "rank": 1,
+      "single": 1.6,
+      "pack8": 1.6
+    },
+    {
+      "hero": "nami",
+      "id": "rope-bind",
+      "rank": 3,
+      "single": 2.27,
+      "pack8": 2.27
+    },
+    {
+      "hero": "nami",
+      "id": "rope-bind",
+      "rank": 6,
+      "single": 2.97,
+      "pack8": 8.91
+    },
+    {
+      "hero": "nami",
+      "id": "quick-theft",
+      "rank": 1,
+      "single": 5.13,
+      "pack8": 5.13
+    },
+    {
+      "hero": "nami",
+      "id": "quick-theft",
+      "rank": 3,
+      "single": 7.06,
+      "pack8": 7.06
+    },
+    {
+      "hero": "nami",
+      "id": "quick-theft",
+      "rank": 6,
+      "single": 10.01,
+      "pack8": 30.03
+    },
+    {
+      "hero": "nami",
+      "id": "thief-decoy",
+      "rank": 1,
+      "single": 0,
+      "pack8": 0
+    },
+    {
+      "hero": "nami",
+      "id": "thief-decoy",
+      "rank": 3,
+      "single": 0,
+      "pack8": 0
+    },
+    {
+      "hero": "nami",
+      "id": "thief-decoy",
+      "rank": 6,
+      "single": 4.33,
+      "pack8": 26
+    },
+    {
+      "hero": "nami",
+      "id": "smart-escape",
+      "rank": 1,
+      "single": 3.67,
+      "pack8": 3.67
+    },
+    {
+      "hero": "nami",
+      "id": "smart-escape",
+      "rank": 3,
+      "single": 4.62,
+      "pack8": 4.62
+    },
+    {
+      "hero": "nami",
+      "id": "smart-escape",
+      "rank": 6,
+      "single": 12.1,
+      "pack8": 6.05
+    },
+    {
+      "hero": "usopp",
+      "id": "namari-boshi",
+      "rank": 1,
+      "single": 27.6,
+      "pack8": 27.6
+    },
+    {
+      "hero": "usopp",
+      "id": "namari-boshi",
+      "rank": 3,
+      "single": 38.81,
+      "pack8": 38.81
+    },
+    {
+      "hero": "usopp",
+      "id": "namari-boshi",
+      "rank": 6,
+      "single": 65.34,
+      "pack8": 132.66
+    },
+    {
+      "hero": "usopp",
+      "id": "kayaku-boshi",
+      "rank": 1,
+      "single": 4,
+      "pack8": 12.8
+    },
+    {
+      "hero": "usopp",
+      "id": "kayaku-boshi",
+      "rank": 3,
+      "single": 6.05,
+      "pack8": 19.25
+    },
+    {
+      "hero": "usopp",
+      "id": "kayaku-boshi",
+      "rank": 6,
+      "single": 7.92,
+      "pack8": 36.3
+    },
+    {
+      "hero": "usopp",
+      "id": "smoke-shot",
+      "rank": 1,
+      "single": 0.6,
+      "pack8": 0.6
+    },
+    {
+      "hero": "usopp",
+      "id": "smoke-shot",
+      "rank": 3,
+      "single": 0.88,
+      "pack8": 0.88
+    },
+    {
+      "hero": "usopp",
+      "id": "smoke-shot",
+      "rank": 6,
+      "single": 1.15,
+      "pack8": 1.15
+    },
+    {
+      "hero": "usopp",
+      "id": "irritant-shot",
+      "rank": 1,
+      "single": 2.13,
+      "pack8": 2.13
+    },
+    {
+      "hero": "usopp",
+      "id": "irritant-shot",
+      "rank": 3,
+      "single": 2.69,
+      "pack8": 2.69
+    },
+    {
+      "hero": "usopp",
+      "id": "irritant-shot",
+      "rank": 6,
+      "single": 3.96,
+      "pack8": 18.35
+    },
+    {
+      "hero": "usopp",
+      "id": "multi-shot",
+      "rank": 1,
+      "single": 3.6,
+      "pack8": 7.4
+    },
+    {
+      "hero": "usopp",
+      "id": "multi-shot",
+      "rank": 3,
+      "single": 4.54,
+      "pack8": 9.32
+    },
+    {
+      "hero": "usopp",
+      "id": "multi-shot",
+      "rank": 6,
+      "single": 20.13,
+      "pack8": 82.83
+    },
+    {
+      "hero": "usopp",
+      "id": "usopp-hammer",
+      "rank": 1,
+      "single": 7.47,
+      "pack8": 45.87
+    },
+    {
+      "hero": "usopp",
+      "id": "usopp-hammer",
+      "rank": 3,
+      "single": 10.75,
+      "pack8": 89.38
+    },
+    {
+      "hero": "usopp",
+      "id": "usopp-hammer",
+      "rank": 6,
+      "single": 14.08,
+      "pack8": 117.04
+    },
+    {
+      "hero": "sanji",
+      "id": "collier",
+      "rank": 1,
+      "single": 32.08,
+      "pack8": 32.08
+    },
+    {
+      "hero": "sanji",
+      "id": "collier",
+      "rank": 3,
+      "single": 45.15,
+      "pack8": 45.15
+    },
+    {
+      "hero": "sanji",
+      "id": "collier",
+      "rank": 6,
+      "single": 74.94,
+      "pack8": 596.06
+    },
+    {
+      "hero": "sanji",
+      "id": "epaule",
+      "rank": 1,
+      "single": 12,
+      "pack8": 48.75
+    },
+    {
+      "hero": "sanji",
+      "id": "epaule",
+      "rank": 3,
+      "single": 15.12,
+      "pack8": 61.42
+    },
+    {
+      "hero": "sanji",
+      "id": "epaule",
+      "rank": 6,
+      "single": 22.28,
+      "pack8": 142.07
+    },
+    {
+      "hero": "sanji",
+      "id": "cotelette",
+      "rank": 1,
+      "single": 15.25,
+      "pack8": 15.25
+    },
+    {
+      "hero": "sanji",
+      "id": "cotelette",
+      "rank": 3,
+      "single": 21.11,
+      "pack8": 21.11
+    },
+    {
+      "hero": "sanji",
+      "id": "cotelette",
+      "rank": 6,
+      "single": 61.46,
+      "pack8": 61.46
+    },
+    {
+      "hero": "sanji",
+      "id": "selle",
+      "rank": 1,
+      "single": 8.75,
+      "pack8": 54.25
+    },
+    {
+      "hero": "sanji",
+      "id": "selle",
+      "rank": 3,
+      "single": 12.13,
+      "pack8": 99.78
+    },
+    {
+      "hero": "sanji",
+      "id": "selle",
+      "rank": 6,
+      "single": 17.33,
+      "pack8": 142.93
+    },
+    {
+      "hero": "sanji",
+      "id": "mouton-shot",
+      "rank": 1,
+      "single": 12,
+      "pack8": 12
+    },
+    {
+      "hero": "sanji",
+      "id": "mouton-shot",
+      "rank": 3,
+      "single": 15.12,
+      "pack8": 15.12
+    },
+    {
+      "hero": "sanji",
+      "id": "mouton-shot",
+      "rank": 6,
+      "single": 27.91,
+      "pack8": 55.68
+    },
+    {
+      "hero": "sanji",
+      "id": "combat-cooking",
+      "rank": 1,
+      "single": 0,
+      "pack8": 0
+    },
+    {
+      "hero": "sanji",
+      "id": "combat-cooking",
+      "rank": 3,
+      "single": 0,
+      "pack8": 0
+    },
+    {
+      "hero": "sanji",
+      "id": "combat-cooking",
+      "rank": 6,
+      "single": 0,
+      "pack8": 0
+    }
+  ],
+  "combos": [
+    {
+      "hero": "luffy",
+      "rank": 1,
+      "targets": 1,
+      "ids": [
+        "elastic-punch",
+        "bazooka",
+        "whip",
+        "axe"
+      ],
+      "dps": 116,
+      "maxTrainingDps": 249.65
+    },
+    {
+      "hero": "luffy",
+      "rank": 1,
+      "targets": 8,
+      "ids": [
+        "whip",
+        "bazooka",
+        "gatling",
+        "axe"
+      ],
+      "dps": 365.1,
+      "maxTrainingDps": 767.21
+    },
+    {
+      "hero": "luffy",
+      "rank": 3,
+      "targets": 1,
+      "ids": [
+        "elastic-punch",
+        "bazooka",
+        "gatling",
+        "whip"
+      ],
+      "dps": 162.24,
+      "maxTrainingDps": 342.89
+    },
+    {
+      "hero": "luffy",
+      "rank": 3,
+      "targets": 8,
+      "ids": [
+        "bazooka",
+        "whip",
+        "gatling",
+        "axe"
+      ],
+      "dps": 586.6,
+      "maxTrainingDps": 1218.4
+    },
+    {
+      "hero": "luffy",
+      "rank": 6,
+      "targets": 1,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "dps": 284.62,
+      "maxTrainingDps": 596.04
+    },
+    {
+      "hero": "luffy",
+      "rank": 6,
+      "targets": 8,
+      "ids": [
+        "elastic-punch",
+        "gatling",
+        "bazooka",
+        "whip"
+      ],
+      "dps": 1788.52,
+      "maxTrainingDps": 3711.25
+    },
+    {
+      "hero": "zoro",
+      "rank": 1,
+      "targets": 1,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "tora-gari",
+        "sanzen-sekai"
+      ],
+      "dps": 84.34,
+      "maxTrainingDps": 168.83
+    },
+    {
+      "hero": "zoro",
+      "rank": 1,
+      "targets": 8,
+      "ids": [
+        "tora-gari",
+        "double-sword",
+        "santoryu-sweep",
+        "oni-giri"
+      ],
+      "dps": 256.92,
+      "maxTrainingDps": 511.93
+    },
+    {
+      "hero": "zoro",
+      "rank": 3,
+      "targets": 1,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "dps": 119.12,
+      "maxTrainingDps": 245.12
+    },
+    {
+      "hero": "zoro",
+      "rank": 3,
+      "targets": 8,
+      "ids": [
+        "double-sword",
+        "tora-gari",
+        "oni-giri",
+        "santoryu-sweep"
+      ],
+      "dps": 341.04,
+      "maxTrainingDps": 703.57
+    },
+    {
+      "hero": "zoro",
+      "rank": 6,
+      "targets": 1,
+      "ids": [
+        "oni-giri",
+        "double-sword",
+        "sanzen-sekai",
+        "tora-gari"
+      ],
+      "dps": 224.28,
+      "maxTrainingDps": 454.39
+    },
+    {
+      "hero": "zoro",
+      "rank": 6,
+      "targets": 8,
+      "ids": [
+        "double-sword",
+        "tora-gari",
+        "santoryu-sweep",
+        "oni-giri"
+      ],
+      "dps": 1211.45,
+      "maxTrainingDps": 2544.84
+    },
+    {
+      "hero": "nami",
+      "rank": 1,
+      "targets": 1,
+      "ids": [
+        "staff-hit",
+        "quick-theft",
+        "staff-spin",
+        "smart-escape"
+      ],
+      "dps": 39.63,
+      "maxTrainingDps": 81.25
+    },
+    {
+      "hero": "nami",
+      "rank": 1,
+      "targets": 8,
+      "ids": [
+        "staff-spin",
+        "staff-hit",
+        "quick-theft",
+        "smart-escape"
+      ],
+      "dps": 63.7,
+      "maxTrainingDps": 135.33
+    },
+    {
+      "hero": "nami",
+      "rank": 3,
+      "targets": 1,
+      "ids": [
+        "staff-hit",
+        "quick-theft",
+        "staff-spin",
+        "smart-escape"
+      ],
+      "dps": 54.22,
+      "maxTrainingDps": 112.37
+    },
+    {
+      "hero": "nami",
+      "rank": 3,
+      "targets": 8,
+      "ids": [
+        "staff-spin",
+        "staff-hit",
+        "quick-theft",
+        "smart-escape"
+      ],
+      "dps": 84.63,
+      "maxTrainingDps": 179.87
+    },
+    {
+      "hero": "nami",
+      "rank": 6,
+      "targets": 1,
+      "ids": [
+        "staff-hit",
+        "smart-escape",
+        "quick-theft",
+        "staff-spin"
+      ],
+      "dps": 149.33,
+      "maxTrainingDps": 320.09
+    },
+    {
+      "hero": "nami",
+      "rank": 6,
+      "targets": 8,
+      "ids": [
+        "staff-hit",
+        "staff-spin",
+        "quick-theft",
+        "thief-decoy"
+      ],
+      "dps": 246.98,
+      "maxTrainingDps": 511.53
+    },
+    {
+      "hero": "usopp",
+      "rank": 1,
+      "targets": 1,
+      "ids": [
+        "namari-boshi",
+        "usopp-hammer",
+        "kayaku-boshi",
+        "multi-shot"
+      ],
+      "dps": 43.67,
+      "maxTrainingDps": 88.95
+    },
+    {
+      "hero": "usopp",
+      "rank": 1,
+      "targets": 8,
+      "ids": [
+        "usopp-hammer",
+        "namari-boshi",
+        "kayaku-boshi",
+        "multi-shot"
+      ],
+      "dps": 95.57,
+      "maxTrainingDps": 197.08
+    },
+    {
+      "hero": "usopp",
+      "rank": 3,
+      "targets": 1,
+      "ids": [
+        "namari-boshi",
+        "usopp-hammer",
+        "kayaku-boshi",
+        "multi-shot"
+      ],
+      "dps": 62.08,
+      "maxTrainingDps": 123.95
+    },
+    {
+      "hero": "usopp",
+      "rank": 3,
+      "targets": 8,
+      "ids": [
+        "usopp-hammer",
+        "namari-boshi",
+        "kayaku-boshi",
+        "multi-shot"
+      ],
+      "dps": 158.79,
+      "maxTrainingDps": 314.79
+    },
+    {
+      "hero": "usopp",
+      "rank": 6,
+      "targets": 1,
+      "ids": [
+        "namari-boshi",
+        "multi-shot",
+        "usopp-hammer",
+        "kayaku-boshi"
+      ],
+      "dps": 109.45,
+      "maxTrainingDps": 225.3
+    },
+    {
+      "hero": "usopp",
+      "rank": 6,
+      "targets": 8,
+      "ids": [
+        "namari-boshi",
+        "usopp-hammer",
+        "multi-shot",
+        "kayaku-boshi"
+      ],
+      "dps": 367.53,
+      "maxTrainingDps": 751.3
+    },
+    {
+      "hero": "sanji",
+      "rank": 1,
+      "targets": 1,
+      "ids": [
+        "collier",
+        "cotelette",
+        "epaule",
+        "mouton-shot"
+      ],
+      "dps": 72.83,
+      "maxTrainingDps": 150.27
+    },
+    {
+      "hero": "sanji",
+      "rank": 1,
+      "targets": 8,
+      "ids": [
+        "selle",
+        "epaule",
+        "collier",
+        "cotelette"
+      ],
+      "dps": 151.9,
+      "maxTrainingDps": 321.45
+    },
+    {
+      "hero": "sanji",
+      "rank": 3,
+      "targets": 1,
+      "ids": [
+        "collier",
+        "cotelette",
+        "epaule",
+        "mouton-shot"
+      ],
+      "dps": 97.65,
+      "maxTrainingDps": 201.98
+    },
+    {
+      "hero": "sanji",
+      "rank": 3,
+      "targets": 8,
+      "ids": [
+        "selle",
+        "epaule",
+        "collier",
+        "cotelette"
+      ],
+      "dps": 229.48,
+      "maxTrainingDps": 479.29
+    },
+    {
+      "hero": "sanji",
+      "rank": 6,
+      "targets": 1,
+      "ids": [
+        "collier",
+        "cotelette",
+        "mouton-shot",
+        "epaule"
+      ],
+      "dps": 188.67,
+      "maxTrainingDps": 386.97
+    },
+    {
+      "hero": "sanji",
+      "rank": 6,
+      "targets": 8,
+      "ids": [
+        "collier",
+        "selle",
+        "epaule",
+        "cotelette"
+      ],
+      "dps": 937.77,
+      "maxTrainingDps": 1992.89
+    }
+  ],
+  "worlds": [
+    {
+      "world": "shells-town",
+      "cap": 150,
+      "xpMultiplier": 2,
+      "samples": [
+        {
+          "seconds": 0,
+          "basicHp": 32,
+          "basicDamage": 10,
+          "basicSpeed": 66,
+          "basicXp": 10,
+          "target": 8,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 60,
+          "basicHp": 35.8,
+          "basicDamage": 10.5,
+          "basicSpeed": 67,
+          "basicXp": 11,
+          "target": 11,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 180,
+          "basicHp": 43.5,
+          "basicDamage": 11.7,
+          "basicSpeed": 68,
+          "basicXp": 12,
+          "target": 17,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 300,
+          "basicHp": 51.2,
+          "basicDamage": 12.8,
+          "basicSpeed": 70,
+          "basicXp": 13,
+          "target": 22,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 600,
+          "basicHp": 70.4,
+          "basicDamage": 15.5,
+          "basicSpeed": 74,
+          "basicXp": 16,
+          "target": 22,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 900,
+          "basicHp": 89.6,
+          "basicDamage": 18.3,
+          "basicSpeed": 78,
+          "basicXp": 19,
+          "target": 22,
+          "interval": 0.45,
+          "batch": 2
+        }
+      ]
+    },
+    {
+      "world": "orange-town",
+      "cap": 150,
+      "xpMultiplier": 2.8,
+      "samples": [
+        {
+          "seconds": 0,
+          "basicHp": 87.8,
+          "basicDamage": 20.4,
+          "basicSpeed": 78,
+          "basicXp": 28,
+          "target": 20,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 60,
+          "basicHp": 98.3,
+          "basicDamage": 21.5,
+          "basicSpeed": 79,
+          "basicXp": 30,
+          "target": 23,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 180,
+          "basicHp": 119.3,
+          "basicDamage": 23.8,
+          "basicSpeed": 81,
+          "basicXp": 33,
+          "target": 29,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 300,
+          "basicHp": 140.4,
+          "basicDamage": 26,
+          "basicSpeed": 83,
+          "basicXp": 36,
+          "target": 35,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 600,
+          "basicHp": 193.1,
+          "basicDamage": 31.6,
+          "basicSpeed": 87,
+          "basicXp": 45,
+          "target": 35,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 900,
+          "basicHp": 245.7,
+          "basicDamage": 37.2,
+          "basicSpeed": 92,
+          "basicXp": 53,
+          "target": 35,
+          "interval": 0.45,
+          "batch": 2
+        }
+      ]
+    },
+    {
+      "world": "syrup-village",
+      "cap": 120,
+      "xpMultiplier": 3.5,
+      "samples": [
+        {
+          "seconds": 0,
+          "basicHp": 153,
+          "basicDamage": 28,
+          "basicSpeed": 88,
+          "basicXp": 49,
+          "target": 32,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 60,
+          "basicHp": 171.4,
+          "basicDamage": 29.5,
+          "basicSpeed": 89,
+          "basicXp": 52,
+          "target": 36,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 180,
+          "basicHp": 208.1,
+          "basicDamage": 32.6,
+          "basicSpeed": 91,
+          "basicXp": 58,
+          "target": 42,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 300,
+          "basicHp": 244.8,
+          "basicDamage": 35.7,
+          "basicSpeed": 93,
+          "basicXp": 64,
+          "target": 48,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 600,
+          "basicHp": 336.6,
+          "basicDamage": 43.4,
+          "basicSpeed": 99,
+          "basicXp": 78,
+          "target": 48,
+          "interval": 0.45,
+          "batch": 2
+        },
+        {
+          "seconds": 900,
+          "basicHp": 373.3,
+          "basicDamage": 46.5,
+          "basicSpeed": 101,
+          "basicXp": 84,
+          "target": 48,
+          "interval": 0.45,
+          "batch": 2
+        }
+      ]
+    },
+    {
+      "world": "baratie",
+      "cap": 110,
+      "xpMultiplier": 4.1,
+      "samples": [
+        {
+          "seconds": 0,
+          "basicHp": 105,
+          "basicDamage": 23,
+          "basicSpeed": 91,
+          "basicXp": 74,
+          "target": null,
+          "interval": 1,
+          "batch": 1
+        },
+        {
+          "seconds": 60,
+          "basicHp": 117.6,
+          "basicDamage": 24.3,
+          "basicSpeed": 92,
+          "basicXp": 78,
+          "target": null,
+          "interval": 0.8928571428571428,
+          "batch": 1
+        },
+        {
+          "seconds": 180,
+          "basicHp": 142.8,
+          "basicDamage": 26.8,
+          "basicSpeed": 94,
+          "basicXp": 87,
+          "target": null,
+          "interval": 0.7352941176470589,
+          "batch": 1
+        },
+        {
+          "seconds": 300,
+          "basicHp": 168,
+          "basicDamage": 29.3,
+          "basicSpeed": 96,
+          "basicXp": 96,
+          "target": null,
+          "interval": 0.625,
+          "batch": 1
+        },
+        {
+          "seconds": 600,
+          "basicHp": 231,
+          "basicDamage": 35.7,
+          "basicSpeed": 102,
+          "basicXp": 118,
+          "target": null,
+          "interval": 0.45454545454545453,
+          "batch": 2
+        },
+        {
+          "seconds": 900,
+          "basicHp": 256.2,
+          "basicDamage": 38.2,
+          "basicSpeed": 104,
+          "basicXp": 127,
+          "target": null,
+          "interval": 0.4098360655737705,
+          "batch": 2
+        }
+      ]
+    },
+    {
+      "world": "arlong-park",
+      "cap": 105,
+      "xpMultiplier": 4.8,
+      "samples": [
+        {
+          "seconds": 0,
+          "basicHp": 135,
+          "basicDamage": 27,
+          "basicSpeed": 92,
+          "basicXp": 106,
+          "target": null,
+          "interval": 1,
+          "batch": 1
+        },
+        {
+          "seconds": 60,
+          "basicHp": 151.2,
+          "basicDamage": 28.5,
+          "basicSpeed": 93,
+          "basicXp": 112,
+          "target": null,
+          "interval": 0.8928571428571428,
+          "batch": 1
+        },
+        {
+          "seconds": 180,
+          "basicHp": 183.6,
+          "basicDamage": 31.5,
+          "basicSpeed": 95,
+          "basicXp": 125,
+          "target": null,
+          "interval": 0.7352941176470589,
+          "batch": 1
+        },
+        {
+          "seconds": 300,
+          "basicHp": 216,
+          "basicDamage": 34.4,
+          "basicSpeed": 98,
+          "basicXp": 137,
+          "target": null,
+          "interval": 0.625,
+          "batch": 1
+        },
+        {
+          "seconds": 600,
+          "basicHp": 297,
+          "basicDamage": 41.9,
+          "basicSpeed": 103,
+          "basicXp": 169,
+          "target": null,
+          "interval": 0.45454545454545453,
+          "batch": 2
+        },
+        {
+          "seconds": 900,
+          "basicHp": 329.4,
+          "basicDamage": 44.8,
+          "basicSpeed": 105,
+          "basicXp": 182,
+          "target": null,
+          "interval": 0.4098360655737705,
+          "batch": 2
+        }
+      ]
+    }
+  ],
+  "xp": [
+    {
+      "level": 1,
+      "next": 21,
+      "totalToReach": 0
+    },
+    {
+      "level": 20,
+      "next": 266,
+      "totalToReach": 2473
+    },
+    {
+      "level": 40,
+      "next": 583,
+      "totalToReach": 10734
+    },
+    {
+      "level": 60,
+      "next": 935,
+      "totalToReach": 25687
+    },
+    {
+      "level": 80,
+      "next": 1314,
+      "totalToReach": 47943
+    },
+    {
+      "level": 100,
+      "next": 1714,
+      "totalToReach": 77989
+    }
+  ],
+  "farInitial": [
+    {
+      "hero": "luffy",
+      "dps180": 0
+    },
+    {
+      "hero": "zoro",
+      "dps180": 0
+    },
+    {
+      "hero": "nami",
+      "dps180": 0
+    },
+    {
+      "hero": "usopp",
+      "dps180": 26.8
+    },
+    {
+      "hero": "sanji",
+      "dps180": 0
+    }
+  ]
+}

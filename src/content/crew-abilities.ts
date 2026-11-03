@@ -1,10 +1,11 @@
+import {crewCooldownFactor} from './crew-tempo.ts';
 import type { AbilityDefinition, AttackBehavior, AttackLevel } from './types.ts';
 // Contenido de ensayo de East Blue. Adaptaciones se etiquetan expresamente.
 function skill(id: string, name: string, behavior: AttackBehavior, description: string, evolution: string,
   base: Partial<AttackLevel> & { cooldownStep?: number }, plus: Partial<AttackLevel>, adaptation = false, eraNote?: string): AbilityDefinition {
   const defaults: AttackLevel = { damage: 1, range: 1, cooldown: 3, width: 15, arc: 0.6, hits: 1, shots: 1, interval: 0.12, knockback: 10, splash: 0 };
   const { cooldownStep = 0.025, ...stats } = base;
-  const b = { ...defaults, ...stats };
+  const b = { ...defaults, ...stats }; b.cooldown*=crewCooldownFactor(id);
   return { id, name, shortName: name, behavior, description, evolution, adaptation, eraNote,
     levels: Array.from({ length: 6 }, (_, i) => ({ ...b, damage: b.damage * (1 + i * 0.13), range: b.range * (1 + i * 0.025),
       cooldown: b.cooldown * (1 - i * cooldownStep), projectileSpeed: b.projectileSpeed ? b.projectileSpeed * (1 + i * 0.04) : undefined,
@@ -26,7 +27,7 @@ const all: AbilityDefinition[] = [
   skill('namari-boshi', 'Namari Boshi', 'projectile', 'Disparo de plomo preciso.', 'El proyectil perfora varios enemigos.', { damage: 1.2, cooldown: 0.9, cooldownStep: 0.06, range: 1.5, projectileSpeed: 300 }, { hits: 4 }),
   skill('kayaku-boshi', 'Kayaku Boshi', 'projectile', 'Munición explosiva con impacto de área.', 'Detona hasta dos explosiones secundarias sin cadena infinita.', { damage: 1.2, cooldown: 6, projectileSpeed: 230, splash: 45 }, { splash: 65, chain: 2 }),
   skill('smoke-shot', 'Munición de humo', 'projectile', 'Humo casero que desorienta en una zona.', 'Nube más grande y persistente.', { damage: 0.15, cooldown: 5, projectileSpeed: 220, duration: 3, area: 55, status: 'confuse', statusDuration: 0.4 }, { duration: 4.5, area: 85 }, true, 'Adaptación de recursos caseros; no se afirma fecha canónica de Kemuri Boshi.'),
-  skill('irritant-shot', 'Munición irritante', 'projectile', 'Carga irritante que interrumpe un enemigo.', 'Interrumpe enemigos en una zona.', { damage: 0.4, cooldown: 4, projectileSpeed: 250, status: 'stun', statusDuration: 0.6 }, { splash: 60, statusDuration: 0.9 }, true, 'Adaptación jugable; no se atribuye Tabasco Boshi a esta etapa sin verificar.'),
+  skill('irritant-shot', 'Munición irritante', 'projectile', 'Proyectil de poco daño que aturde a enemigos normales durante0,6s. Los bosses resisten el aturdimiento.', 'Aturde0,9s en un radio de60px. Los bosses resisten el aturdimiento.', { damage: 0.4, cooldown: 4, projectileSpeed: 250, status: 'stun', statusDuration: 0.6 }, { splash: 60, statusDuration: 0.9 }, true, 'Adaptación jugable; no se atribuye Tabasco Boshi a esta etapa sin verificar.'),
   skill('multi-shot', 'Tiro múltiple', 'projectile', 'Tres proyectiles en abanico.', 'Cinco proyectiles que pueden rebotar entre objetivos.', { damage: 0.6, cooldown: 3.5, projectileSpeed: 280, projectiles: 3, fan: 0.7 }, { projectiles: 5, fan: 1.0, bounces: 2, hits: 3 }, true),
   skill('usopp-hammer', 'Martillo de Usopp', 'cone', 'Golpe cercano que aleja amenazas.', 'Impacto amplio con aturdimiento.', { damage: 1.6, cooldown: 4.5, range: 0.65, knockback: 45, hits: 150 }, { arc: 1.2, status: 'stun', statusDuration: 1.0 }),
   skill('collier', 'Collier', 'cone', 'Patada alta rápida contra un objetivo.', 'Golpea a varios enemigos en arco.', { damage: 1, cooldown: 0.8, cooldownStep: 0.06, arc: 0.35 }, { hits: 150, arc: 1.0 }),

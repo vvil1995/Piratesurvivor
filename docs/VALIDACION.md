@@ -602,3 +602,11 @@ Cierre de esta revisión:4/4 casos de navegador aprobados para el recorrido de24
 ## Frutas del Diablo ·2026-11-02
 
 233/235pruebas de lógica, TypeScript y build Pages/HTML autónomo aprobados. Dos pruebas Chromium aprobadas (1440×1000 y844×390 emulado): seis drops, primera recogida, sustituciones, poderes, iconos y consulta de detalles. Capturas reales inspeccionadas de las seis frutas en el suelo y de sus efectos. Smoke bajo `/Piratesurvivor/` aprobado sin404/JS y sin hookQA. Detalle y límites en `DEVIL-FRUITS.md`. No se han medido FPS físicos ni validado humanamente todo el recorrido hasta Roger con las30combinaciones posibles.
+
+## Auditoría de balance ·2026-11-03
+
+Sin cambios en el juego ni en parámetros. Dos scripts reproducibles ejecutados:245ventanas estáticas de combate y60ventanas de encuentros de hasta30s con cinco personajes, cinco bosses y Roger. Datos, metodología, límites y plan en `docs/audits/DIAGNOSTICO-2026-11-03.md`.235pruebas de lógica, TypeScript y build Pages/portable aprobados. No se ha efectuado una campaña humana completa ni pruebas visuales/FPS nuevas en dispositivos físicos. El controlador automático no lee avisos y no sirve para clasificar dificultad humana; las ventanas de Roger no alcanzan la primera tanda de invocación.
+
+## Cadencia de secundarios ·2026-11-03
+
+238/238pruebas de lógica aprobadas. El caso nuevo de ejecución real comprueba disparos repetidos de Kayaku en12s y la cadencia conservada de Namari; se verifican los seis niveles de los veinte secundarios y los cuatro iniciales. Cuatro casos de navegador aprobados:24técnicas base/evolucionadas y regresión de Luffy, escritorio y móvil horizontal emulado. Captura de Collier hacia la izquierda revisada: pierna reducida y sin duplicado del combo. TypeScript y build Pages/portable aprobados. No se generan assets nuevos; el arte definitivo queda pendiente. No se han medido FPS físicos ni validado el equilibrio final con estos cooldowns. Tabla antes/después en `CREW-TEMPO.md`.
